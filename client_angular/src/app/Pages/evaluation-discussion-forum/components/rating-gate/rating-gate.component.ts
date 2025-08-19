@@ -10,6 +10,7 @@ import { map, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { RatingSliderComponent } from '../rating-slider/rating-slider.component';
 import { DiscussionThreadComponent } from '../discussion-thread/discussion-thread.component';
 import { EvaluationDiscussionService } from '../../../../Services/evaluation/evaluation-discussion.service';
+import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
 import { CategoryRatingStatus, EvaluationCategoryDTO, EvaluationSubmissionDTO, AnonymousEvaluationUserDTO, EvaluationDiscussionDTO } from '@DTOs/index';
 import { BaseComponent } from '../../../../shared/base.component';
 
@@ -375,9 +376,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   @Output() accessGranted = new EventEmitter<{categoryId: number}>();
 
-  // Component state
-  private readonly ratingStatusSubject = new BehaviorSubject<CategoryRatingStatus | null>(null);
-  private readonly loadingSubject = new BehaviorSubject<boolean>(false);
+  // Component state - only keeping error subject for local error handling
   private readonly errorSubject = new BehaviorSubject<string | null>(null);
 
   /**
@@ -387,23 +386,30 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
 
   constructor(
     private readonly evaluationService: EvaluationDiscussionService,
+    private readonly stateService: EvaluationStateService,
   ) {
     super();
 
-    // Combine all state observables into a single view model
+    // Use centralized rating status instead of local API calls
     this.viewModel$ = combineLatest([
-      this.ratingStatusSubject.asObservable(),
-      this.loadingSubject.asObservable(),
+      this.stateService.activeCategory$,
+      this.stateService.categoryRatingStatus$,
+      this.stateService.ratingStatusLoading$,
       this.errorSubject.asObservable(),
     ]).pipe(
-      map(([ratingStatus, isLoading, error]) => ({
-        hasRated: ratingStatus?.hasRated || false,
-        isLoading,
-        error,
-        ratingStatus,
-        canAccessDiscussion: ratingStatus?.canAccessDiscussion || false,
-        requiresRating: ratingStatus?.isRequired || true,
-      })),
+      map(([activeCategory, categoryStatusMap, isLoading, error]) => {
+        // Get rating status for current category from centralized state
+        const ratingStatus = this.currentCategory ? categoryStatusMap.get(this.currentCategory.id) : null;
+        
+        return {
+          hasRated: ratingStatus?.hasRated || false,
+          isLoading,
+          error,
+          ratingStatus,
+          canAccessDiscussion: ratingStatus?.canAccessDiscussion || false,
+          requiresRating: ratingStatus?.isRequired !== false, // Default to true if not specified
+        };
+      }),
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     );
@@ -413,7 +419,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    * Handles input property changes
    * 
    * @description Called whenever any input property changes.
-   * Specifically handles currentCategory changes to reload rating status.
+   * Now uses centralized rating status, so no need to reload on category changes.
    * 
    * @param {SimpleChanges} changes - Object containing all input changes
    */
@@ -423,14 +429,14 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       const previousCategory = changes['currentCategory'].previousValue;
       const currentCategory = changes['currentCategory'].currentValue;
       
-      console.log('🔄 Rating gate category changed:', {
+      console.log('🔄 Rating gate category changed (using centralized state):', {
         previous: previousCategory?.id,
         current: currentCategory?.id,
         categoryName: currentCategory?.displayName
       });
       
-      // Reload rating status for the new category
-      this.loadRatingStatus();
+      // No need to reload - viewModel$ will automatically update from centralized state
+      // The rating status is now cached and persists across category switches
     }
     
     // Handle submissionId changes (though this should be rare)
@@ -440,114 +446,51 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
         current: changes['submissionId'].currentValue
       });
       
-      // Reload rating status for the new submission
-      this.loadRatingStatus();
+      // Ensure rating status is loaded for new submission (centralized)
+      if (this.submissionId) {
+        this.stateService.loadCategoryRatingStatus(this.submissionId);
+      }
     }
   }
 
   /**
    * Component initialization
    * 
-   * @description Loads the initial rating status for the current category
+   * @description Now uses centralized rating status - no need for individual loading
    */
   ngOnInit(): void {
-    this.loadRatingStatus();
+    // Rating status is now loaded centrally by the state service
+    // The viewModel$ will automatically reflect the current status
+    console.log('🎯 Rating gate initialized - using centralized rating status');
   }
 
   /**
-   * Loads the rating status for the current category
+   * REMOVED: loadRatingStatus() and loadDetailedRatingStatus()
    * 
-   * @description Checks if the user has already rated the current category
-   * and updates the component state accordingly
-   */
-  private loadRatingStatus(): void {
-    if (!this.submissionId || !this.currentCategory?.id) {
-      this.errorSubject.next('Fehlende Submission ID oder Kategorie');
-      return;
-    }
-
-    this.loadingSubject.next(true);
-    this.errorSubject.next(null);
-
-    this.evaluationService.hasUserRatedCategory(this.submissionId, this.currentCategory.id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (result) => {
-          const ratingStatus: CategoryRatingStatus = {
-            categoryId: this.currentCategory.id,
-            categoryName: this.currentCategory.name,
-            displayName: this.currentCategory.displayName,
-            hasRated: result.hasRated,
-            rating: null, // Will be loaded if needed
-            ratedAt: null,
-            lastUpdatedAt: null,
-            canAccessDiscussion: result.hasRated,
-            isRequired: true,
-          };
-
-          this.ratingStatusSubject.next(ratingStatus);
-          this.loadingSubject.next(false);
-
-          // If user has rated, load the detailed rating information
-          if (result.hasRated) {
-            this.loadDetailedRatingStatus();
-          }
-        },
-        error: (error) => {
-          console.error('Failed to load rating status:', error);
-          this.errorSubject.next('Fehler beim Laden des Bewertungsstatus');
-          this.loadingSubject.next(false);
-        }
-      });
-  }
-
-  /**
-   * Loads detailed rating status including the actual rating value
+   * @description These methods are no longer needed because the component now
+   * uses the centralized rating status from EvaluationStateService. The rating
+   * status is loaded once and cached, persisting across category switches.
    * 
-   * @description This method is called when we know the user has rated
-   * the category and we need to get the detailed information
+   * The viewModel$ observable automatically updates when the centralized
+   * rating status changes, eliminating the need for component-specific loading.
    */
-  private loadDetailedRatingStatus(): void {
-    this.evaluationService.getUserRatingStatus(this.submissionId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (statuses) => {
-          const currentStatus = statuses.find(s => s.categoryId === this.currentCategory.id);
-          if (currentStatus) {
-            this.ratingStatusSubject.next(currentStatus);
-          }
-        },
-        error: (error) => {
-          console.error('Failed to load detailed rating status:', error);
-          // Don't show error here as basic status is already loaded
-        }
-      });
-  }
 
   /**
    * Handles rating submission
    * 
    * @description Called when the user submits a rating through the rating slider.
-   * Updates the local state and emits the ratingSubmitted event.
+   * Now forwards to parent component which handles centralized state updates.
    * 
    * @param {any} ratingEvent - The rating event from the rating slider
    */
   onRatingSubmitted(ratingEvent: any): void {
-    // Update local state to show that user has now rated
-    const currentStatus = this.ratingStatusSubject.value;
-    if (currentStatus) {
-      const updatedStatus: CategoryRatingStatus = {
-        ...currentStatus,
-        hasRated: true,
-        rating: ratingEvent.rating,
-        canAccessDiscussion: true,
-        ratedAt: new Date(),
-        lastUpdatedAt: new Date(),
-      };
-      this.ratingStatusSubject.next(updatedStatus);
-    }
+    console.log('📊 Rating submitted in rating gate:', {
+      categoryId: this.currentCategory.id,
+      rating: ratingEvent.rating || ratingEvent.score
+    });
 
-    // Emit the rating submitted event
+    // Emit the rating submitted event to parent component
+    // The parent will handle the centralized state update
     this.ratingSubmitted.emit({
       categoryId: this.currentCategory.id,
       score: ratingEvent.rating || ratingEvent.score
@@ -557,6 +500,9 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     this.accessGranted.emit({
       categoryId: this.currentCategory.id
     });
+
+    // Note: Local state update is no longer needed since we use centralized state
+    // The viewModel$ will automatically update when the state service is updated
   }
 
   /**
@@ -595,9 +541,13 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   /**
    * Handles retry button click
    * 
-   * @description Reloads the rating status when the user clicks retry
+   * @description Refreshes the rating status from centralized state service
    */
   onRetry(): void {
-    this.loadRatingStatus();
+    if (this.submissionId) {
+      console.log('🔄 Retrying rating status load from centralized service');
+      this.stateService.refreshRatingStatus(this.submissionId);
+      this.errorSubject.next(null); // Clear local error state
+    }
   }
 }
