@@ -16,8 +16,8 @@ import {
   EvaluationSubmissionDTO,
   EvaluationStatus,
   EvaluationPhase,
-} from '../../../../shared/dtos/index';
-import { globalRole } from '../../../../shared/dtos/roles.enum';
+} from '@DTOs/index';
+import { globalRole } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
 
@@ -649,33 +649,37 @@ export class EvaluationRatingService {
       createdAt: rating.createdAt,
       updatedAt: rating.updatedAt,
       // Map partial submission data to full DTO structure with required defaults
-      submission: rating.submission ? {
-        id: rating.submission.id,
-        title: rating.submission.title,
-        authorId: rating.submission.author.id,
-        pdfFileId: 0, // Default value - not available in this context
-        sessionId: 0, // Default value - not available in this context
-        status: EvaluationStatus.SUBMITTED, // Default status
-        phase: EvaluationPhase.DISCUSSION, // Default phase
-        submittedAt: new Date(), // Default date
-        createdAt: new Date(), // Default date
-        updatedAt: new Date(), // Default date
-        author: {
-          id: rating.submission.author.id,
-          firstname: rating.submission.author.firstname,
-          lastname: rating.submission.author.lastname,
-          email: '', // Default value - not available in this context
-          globalRole: globalRole.STUDENT, // Default role
-        }
-      } : null,
+      submission: rating.submission
+        ? {
+            id: rating.submission.id,
+            title: rating.submission.title,
+            authorId: rating.submission.author.id,
+            pdfFileId: 0, // Default value - not available in this context
+            sessionId: 0, // Default value - not available in this context
+            status: EvaluationStatus.SUBMITTED, // Default status
+            phase: EvaluationPhase.DISCUSSION, // Default phase
+            submittedAt: new Date(), // Default date
+            createdAt: new Date(), // Default date
+            updatedAt: new Date(), // Default date
+            author: {
+              id: rating.submission.author.id,
+              firstname: rating.submission.author.firstname,
+              lastname: rating.submission.author.lastname,
+              email: '', // Default value - not available in this context
+              globalRole: globalRole.STUDENT, // Default role
+            },
+          }
+        : null,
       // Map partial user data to full DTO structure with required defaults
-      user: rating.user ? {
-        id: rating.user.id,
-        firstname: rating.user.firstname,
-        lastname: rating.user.lastname,
-        email: '', // Default value - not available in this context
-        globalRole: globalRole.STUDENT, // Default role
-      } : null,
+      user: rating.user
+        ? {
+            id: rating.user.id,
+            firstname: rating.user.firstname,
+            lastname: rating.user.lastname,
+            email: '', // Default value - not available in this context
+            globalRole: globalRole.STUDENT, // Default role
+          }
+        : null,
       category: rating.category
         ? {
             id: rating.category.id,

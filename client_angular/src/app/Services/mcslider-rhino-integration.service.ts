@@ -19,10 +19,10 @@ import {
   take,
   filter,
   map,
-  finalize
+  finalize,
 } from 'rxjs/operators';
 import { RhinoFocusService } from './rhino-focus.service';
-import { RhinoFocusRequestDTO, RhinoFocusResponseDTO } from '../../../../shared/dtos/rhino-window.dto';
+import { RhinoFocusRequestDTO, RhinoFocusResponseDTO } from '@DTOs/index';
 import { environment } from 'src/environments/environment';
 
 /**
@@ -33,7 +33,7 @@ enum LogLevel {
   INFO = 1,
   WARN = 2,
   ERROR = 3,
-  NONE = 4
+  NONE = 4,
 }
 
 /**
@@ -82,22 +82,22 @@ const DEFAULT_CONFIG: McSliderRhinoConfig = {
   silentMode: environment.production,
   logging: {
     enabled: !environment.production,
-    level: environment.production ? LogLevel.WARN : LogLevel.DEBUG
+    level: environment.production ? LogLevel.WARN : LogLevel.DEBUG,
   },
   rateLimiting: {
     enabled: true,
     minIntervalMs: 1000,
-    maxAttemptsPerMinute: 5
+    maxAttemptsPerMinute: 5,
   },
   retry: {
     enabled: true,
     maxAttempts: 3,
-    delayMs: 1000
+    delayMs: 1000,
   },
   caching: {
     enabled: true,
-    availabilityCacheMs: 30000
-  }
+    availabilityCacheMs: 30000,
+  },
 };
 
 /**
@@ -177,13 +177,16 @@ export class McSliderRhinoIntegrationService {
       [RhinoIntegrationEvent.ALL_QUESTIONS_COMPLETED]: 0,
       [RhinoIntegrationEvent.COMPONENT_CLOSED]: 0,
       [RhinoIntegrationEvent.RETRY_QUESTION]: 0,
-      [RhinoIntegrationEvent.MANUAL_SWITCH]: 0
-    }
+      [RhinoIntegrationEvent.MANUAL_SWITCH]: 0,
+    },
   };
 
   constructor(private readonly rhinoFocusService: RhinoFocusService) {
     this.initializeService();
-    this.log(LogLevel.INFO, 'McSliderRhinoIntegrationService initialized with optimized architecture');
+    this.log(
+      LogLevel.INFO,
+      'McSliderRhinoIntegrationService initialized with optimized architecture',
+    );
   }
 
   /**
@@ -204,18 +207,18 @@ export class McSliderRhinoIntegrationService {
       filter(() => this.config.rateLimiting.enabled),
       debounceTime(this.config.rateLimiting.minIntervalMs / 2),
       throttleTime(this.config.rateLimiting.minIntervalMs),
-      tap(() => this.log(LogLevel.DEBUG, 'Processing normal request'))
+      tap(() => this.log(LogLevel.DEBUG, 'Processing normal request')),
     );
 
     // Priority Requests (manuelle Switches) ohne Rate Limiting
     const priorityRequests$ = this.priorityRequests$.pipe(
-      tap(() => this.log(LogLevel.DEBUG, 'Processing priority request'))
+      tap(() => this.log(LogLevel.DEBUG, 'Processing priority request')),
     );
 
     // Merge beide Streams mit Priorität für manuelle Requests
     this.rateLimitedFocus$ = merge(priorityRequests$, normalRequests$).pipe(
       switchMap(request => this.processFocusRequest(request)),
-      shareReplay({ bufferSize: 1, refCount: true })
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
   }
 
@@ -225,10 +228,12 @@ export class McSliderRhinoIntegrationService {
   private initializeAvailabilityCache(): void {
     if (this.config.caching.enabled) {
       // Cache-Refresh alle 30 Sekunden
-      timer(0, this.config.caching.availabilityCacheMs).pipe(
-        switchMap(() => this.checkRhinoAvailability()),
-        tap(available => this.availabilitySubject$.next(available))
-      ).subscribe();
+      timer(0, this.config.caching.availabilityCacheMs)
+        .pipe(
+          switchMap(() => this.checkRhinoAvailability()),
+          tap(available => this.availabilitySubject$.next(available)),
+        )
+        .subscribe();
     }
   }
 
@@ -252,7 +257,9 @@ export class McSliderRhinoIntegrationService {
 
     return of(null).pipe(
       delay(request.delayMs),
-      tap(() => this.log(LogLevel.DEBUG, `Processing focus request: ${request.reason}`, request.context)),
+      tap(() =>
+        this.log(LogLevel.DEBUG, `Processing focus request: ${request.reason}`, request.context),
+      ),
       switchMap(() => this.rhinoFocusService.focusFirstAvailableWindow()),
 
       // Optimierte Retry-Logic mit exponential backoff
@@ -266,8 +273,8 @@ export class McSliderRhinoIntegrationService {
             const delayMs = this.config.retry.delayMs * Math.pow(2, index);
             return timer(delayMs);
           }),
-          take(this.config.retry.maxAttempts)
-        )
+          take(this.config.retry.maxAttempts),
+        ),
       ),
 
       // Success/Error Handling mit Metrics
@@ -278,19 +285,19 @@ export class McSliderRhinoIntegrationService {
         if (result.success) {
           this.log(LogLevel.INFO, `Successfully focused Rhino ${request.reason}`, {
             responseTime,
-            context: request.context
+            context: request.context,
           });
           this.logSuccessfulIntegration(request.context, result);
         } else {
           this.log(LogLevel.WARN, `Failed to focus Rhino ${request.reason}: ${result.message}`, {
             responseTime,
-            context: request.context
+            context: request.context,
           });
           this.logFailedIntegration(request.context, result);
         }
       }),
 
-      catchError(error => this.handleFocusError(request.context, error, request.reason))
+      catchError(error => this.handleFocusError(request.context, error, request.reason)),
     );
   }
 
@@ -353,7 +360,7 @@ export class McSliderRhinoIntegrationService {
   private handleFocusError(
     context: RhinoIntegrationContext,
     error: any,
-    reason: string
+    reason: string,
   ): Observable<RhinoFocusResponseDTO> {
     this.metrics.failedRequests++;
 
@@ -366,7 +373,7 @@ export class McSliderRhinoIntegrationService {
     this.log(LogLevel.ERROR, `Rhino focus error ${reason}`, {
       error: error.message,
       context,
-      stack: error.stack
+      stack: error.stack,
     });
 
     this.logFailedIntegration(context, errorResponse);
@@ -377,9 +384,9 @@ export class McSliderRhinoIntegrationService {
    * Prüft Rhino-Verfügbarkeit
    */
   private checkRhinoAvailability(): Observable<boolean> {
-    return this.rhinoFocusService.isRhinoAvailable ?
-      of(this.rhinoFocusService.isRhinoAvailable()) :
-      of(true);
+    return this.rhinoFocusService.isRhinoAvailable
+      ? of(this.rhinoFocusService.isRhinoAvailable())
+      : of(true);
   }
 
   /**
@@ -389,13 +396,13 @@ export class McSliderRhinoIntegrationService {
     context: RhinoIntegrationContext,
     delayMs: number,
     reason: string,
-    priority: number = 1
+    priority: number = 1,
   ): Observable<RhinoFocusResponseDTO> {
     const request: FocusRequest = {
       context,
       delayMs,
       reason,
-      priority
+      priority,
     };
 
     // Rate Limiting prüfen (außer bei hoher Priorität)
@@ -464,7 +471,11 @@ export class McSliderRhinoIntegrationService {
       return of(this.createDisabledResponse());
     }
 
-    return this.requestFocus(fullContext, this.config.delayAfterSubmissionMs, 'nach Fragen-Einreichung');
+    return this.requestFocus(
+      fullContext,
+      this.config.delayAfterSubmissionMs,
+      'nach Fragen-Einreichung',
+    );
   }
 
   /**
@@ -483,7 +494,11 @@ export class McSliderRhinoIntegrationService {
       return of(this.createDisabledResponse());
     }
 
-    return this.requestFocus(fullContext, this.config.delayAfterCompletionMs, 'nach Quiz-Abschluss');
+    return this.requestFocus(
+      fullContext,
+      this.config.delayAfterCompletionMs,
+      'nach Quiz-Abschluss',
+    );
   }
 
   /**

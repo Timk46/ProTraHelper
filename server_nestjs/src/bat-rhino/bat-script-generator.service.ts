@@ -9,8 +9,7 @@ import {
   BatExecutionResult,
   RhinoPathValidationResult,
   SetupPackageInfo,
-} from '../../../shared/dtos/bat-rhino.dto';
-import { BatScriptConfig } from '../../../shared/dtos/bat-rhino.dto';
+} from '@DTOs/index';
 
 /**
  * BatScriptGeneratorService

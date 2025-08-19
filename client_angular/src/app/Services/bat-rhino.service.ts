@@ -9,7 +9,7 @@ import {
   BatRhinoResponse,
   RhinoPathDetectionResponse,
   BatRhinoSetupStatus,
-} from '../../../../shared/dtos/bat-rhino.dto';
+} from '@DTOs/index';
 
 /**
  * BatRhinoService
