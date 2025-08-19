@@ -15,6 +15,8 @@ services:
         WEBSOCKET_URL: ${WEBSOCKET_URL} # Add this line
     networks:
       - nginx-network
+    ports:
+      - "80:80"
     restart: always
 
 #NestJS
@@ -29,6 +31,9 @@ services:
     networks:
       - nginx-network
     restart: always
+    ports:
+      - "3000:3000"
+      - "3100:3100"
     volumes:
     - ./files:/usr/src/files
 

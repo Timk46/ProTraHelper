@@ -37,6 +37,7 @@ export class AuthInterceptor implements HttpInterceptor {
     if (
       request.url.includes('localhost:3001') ||
       request.url.includes('127.0.0.1:3001') ||
+      // TODO SUPER UNSICHER !
       request.headers.has('Skip-Auth-Interceptor')
     ) {
       console.log('AuthInterceptor: Skipping Helper-App request:', request.url);
@@ -50,7 +51,7 @@ export class AuthInterceptor implements HttpInterceptor {
     if (deviceId) {
       request = request.clone({
         setHeaders: {
-          'Device-ID': deviceId,
+          'device-id': deviceId,  // Use lowercase to match browser CORS behavior
         },
       });
     }
