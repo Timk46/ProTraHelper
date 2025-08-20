@@ -64,6 +64,15 @@
       >
         <mat-icon>admin_panel_settings</mat-icon> Admin
       </button>
+
+      <button
+        mat-button
+        *ngIf="userRole === 'ADMIN' || userRole === 'LECTURER'"
+        routerLink="/lecturer"
+        style="font-size: 15px; font-weight: bolder"
+      >
+        <mat-icon>school</mat-icon> Dozent
+      </button>
     </div>
   </mat-toolbar>
 
