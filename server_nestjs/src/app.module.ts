@@ -78,6 +78,7 @@ import { LanggraphFeedbackModule } from './tutor-kai/langgraph-feedback/langgrap
 import { UserGroupService } from './lecturers-view/user-group/user-group.service';
 import { UserGroupController } from './lecturers-view/user-group/user-group.controller';
 import { EvaluationDiscussionModule } from './evaluation-discussion/evaluation-discussion.module';
+import { GroupReviewSessionModule } from './lecturers-view/group-review-session/group-review-session.module';
 
 
 @Module({
@@ -128,7 +129,8 @@ import { EvaluationDiscussionModule } from './evaluation-discussion/evaluation-d
     RhinoIntegrationModule,
 
     // Evaluation System
-    EvaluationDiscussionModule
+    EvaluationDiscussionModule,
+    GroupReviewSessionModule
   ],
   controllers: [
     AppController,

@@ -1,0 +1,83 @@
+<div class="container">
+  <div class="header-section">
+    <h2>Group Review Sessions erstellen</h2>
+    <p class="description">
+      Wählen Sie die "Group Review Gates" aus, für die Peer-Review-Sessions erstellt werden sollen.
+    </p>
+  </div>
+
+  <mat-card class="action-card">
+    <mat-card-content class="action-bar">
+      <mat-form-field appearance="outline" class="session-title-field">
+        <mat-label>Titel für neue Sessions</mat-label>
+        <input matInput [(ngModel)]="sessionTitle" placeholder="z.B. Peer-Review KW 42" required>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Review-Deadline</mat-label>
+        <input matInput [matDatepicker]="picker" [(ngModel)]="reviewDeadline">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="createSessions()" [disabled]="selection.isEmpty() || !sessionTitle.trim() || isLoading">
+        <mat-icon>add_task</mat-icon>
+        Sessions erstellen
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="table-container mat-elevation-z8">
+    <div *ngIf="isLoading" class="loading-shade">
+      <mat-spinner></mat-spinner>
+    </div>
+
+    <table mat-table [dataSource]="dataSource">
+      <!-- Checkbox Column -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        [checked]="selection.isSelected(row)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- Gate Name Column -->
+      <ng-container matColumnDef="gateName">
+        <th mat-header-cell *matHeaderCellDef> Gate-Aufgabe </th>
+        <td mat-cell *matCellDef="let element"> {{element.gateName}} </td>
+      </ng-container>
+
+      <!-- Concept Name Column -->
+      <ng-container matColumnDef="conceptName">
+        <th mat-header-cell *matHeaderCellDef> Zugehöriges Konzept </th>
+        <td mat-cell *matCellDef="let element"> {{element.conceptName}} </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef> Abgabestatus </th>
+        <td mat-cell *matCellDef="let element">
+          <div class="status-cell">
+            <span>{{element.submittedStudents}} / {{element.totalStudents}} abgegeben</span>
+            <mat-progress-bar mode="determinate" [value]="(element.submittedStudents / element.totalStudents) * 100"></mat-progress-bar>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selection.toggle(row)"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="4">Keine Gates gefunden oder alle bereits verarbeitet.</td>
+      </tr>
+    </table>
+  </div>
+</div>
