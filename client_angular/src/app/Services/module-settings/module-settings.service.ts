@@ -27,6 +27,9 @@ export class ModuleSettingsService {
    * Updates settings for a specific module and key
    */
   updateSetting<T>(moduleId: number, key: string, value: T): Observable<void> {
+    console.log('moduleId in updatesetting', moduleId);
+    console.log('key in updatesetting', key);
+    console.log('value in updatesetting', value);
     return this.http.post<void>(`${this.apiUrl}/module-settings/${moduleId}/${key}`, {
       value: JSON.stringify(value),
     });

@@ -1,7 +1,7 @@
 import { ModuleDTO } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -12,6 +12,12 @@ export class ModuleDataService {
 
   // get modules
   getUserModules(): Observable<ModuleDTO[]> {
-    return this.http.get<ModuleDTO[]>(environment.server + '/modules');
+    return this.http.get<ModuleDTO[]>(environment.server + '/UserModules/all');
+  }
+
+  // Currently getting the first module in the database
+  // TODO: Implement when multiple modules are supported
+  getCurrentModule(): Observable<ModuleDTO> {
+    return this.getUserModules().pipe(map(modules => modules[0]));
   }
 }

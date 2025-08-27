@@ -101,6 +101,6 @@ export class NavigationPreferenceService {
 
   constructor(private readonly moduleSettings: ModuleSettingsService) {
     // Load enabled navigation types for module ID 1 (default module)
-    this.loadEnabledNavigationTypes(1).subscribe();
+    //this.loadEnabledNavigationTypes(1).subscribe();
   }
 }

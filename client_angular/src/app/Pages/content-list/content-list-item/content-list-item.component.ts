@@ -79,7 +79,6 @@ export class ContentListItemComponent implements OnInit {
     this.isGradingContent =
       this.contentElementData.type === contentElementType.QUESTION &&
       gradingContent.includes(this.contentElementData.question?.type as questionType);
-    console.log('My visibility:', this.contentElementData.isVisible);
   }
 
   /**

@@ -88,7 +88,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
             .fetchContentsForConcept(this.activeConceptNode.databaseId)
             .subscribe(contentsForConcept => {
               this.contentsForActiveConceptNode = contentsForConcept;
-              console.log('contentsForActiveConceptNode', this.contentsForActiveConceptNode);
+              //console.log('contentsForActiveConceptNode', this.contentsForActiveConceptNode);
             });
         }
       },

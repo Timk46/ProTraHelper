@@ -7,6 +7,7 @@ import {
 } from 'src/app/Services/navigation/navigation-preference.service';
 import { NavigationPreferenceSettingsComponent } from '../navigation-preference-settings/navigation-preference-settings.component';
 import { UserService } from 'src/app/Services/auth/user.service';
+import { ModuleDataService } from '../../../Services/module/module-data.service';
 
 @Component({
   selector: 'app-navigation-preference-toggle',
@@ -22,6 +23,7 @@ export class NavigationPreferenceToggleComponent implements OnInit {
     private readonly navigationPreferenceService: NavigationPreferenceService,
     private readonly router: Router,
     private readonly userService: UserService,
+    private readonly moduleDataService: ModuleDataService,
   ) {}
 
   ngOnInit(): void {
@@ -113,16 +115,17 @@ export class NavigationPreferenceToggleComponent implements OnInit {
    * Opens the settings dialog for navigation preferences
    */
   openSettings(): void {
-    const dialogRef = this.dialog.open(NavigationPreferenceSettingsComponent, {
-      width: '400px',
-      data: { moduleId: 3 }, // TODO: Get the current module ID
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Refresh available navigation types
-        this.navigationPreferenceService.loadEnabledNavigationTypes(1).subscribe();
-      }
+    this.moduleDataService.getCurrentModule().subscribe(module => {
+      const dialogRef = this.dialog.open(NavigationPreferenceSettingsComponent, {
+        width: '400px',
+        data: { moduleId: module.id },
+      });
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          // Refresh available navigation types
+          this.navigationPreferenceService.loadEnabledNavigationTypes(module.id).subscribe();
+        }
+      });
     });
   }
 }

@@ -24,7 +24,7 @@
   </div>
 
   <!-- Mitte: Navigation Toggle Button (Mobile/Graph) -->
-  <div class="center-content">
+  <div *ngIf="userIsLoggedIn" class="center-content">
     <app-navigation-preference-toggle
       *ngIf="showNavToggle"
       class="nav-toggle"
