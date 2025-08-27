@@ -79,6 +79,7 @@ export class GraphService {
         databaseId: node.id,
         name: node.name,
         description: node.description,
+        descriptionHTML: node.descriptionHTML || undefined,
 
         // if no user concept exists, set expanded to false
         expanded: false,

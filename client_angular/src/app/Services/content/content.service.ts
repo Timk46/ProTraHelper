@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { ContentsForConceptDTO, ContentElementStatusDTO } from '@DTOs/index';
+import { ContentsForConceptDTO, ContentElementStatusDTO, ConceptNodeEditDTO } from '@DTOs/index';
 import { ConceptNodeDTO } from '@DTOs/index';
 import { Observable } from 'rxjs';
 import { catchError, tap, Subject } from 'rxjs';
@@ -41,6 +41,10 @@ export class ContentService {
 
   getConcepts(): Observable<ConceptNode[]> {
     return this.http.get<ConceptNode[]>(environment.server + `/content/conceptsFull`);
+  }
+
+  updateConcept(conceptId: number, concept: ConceptNodeEditDTO): Observable<boolean> {
+    return this.http.put<boolean>(environment.server + `/content/concepts/${conceptId}`, concept);
   }
 
   /**

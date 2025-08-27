@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { EditorModule } from '@tinymce/tinymce-angular';
+import { TinymceModule } from '../../tinymce/tinymce.module';
+import { TinymceComponent } from '../../tinymce/tinymce.component';
 
 export interface EditOverviewDialogData {
   name: string;
@@ -23,46 +25,46 @@ export interface EditOverviewDialogData {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    EditorModule
+    EditorModule,
+    TinymceModule,
   ],
   templateUrl: './edit-overview-dialog.component.html',
   styleUrl: './edit-overview-dialog.component.scss',
 })
-export class EditOverviewDialogComponent implements OnInit {
+export class EditOverviewDialogComponent implements AfterViewInit {
+  @ViewChild('desceditor') editor!: TinymceComponent;
+
   name: string;
   description: string;
   descriptionHTML: string;
 
   // TinyMCE configuration
-  tinymceConfig = {
-    height: 300,
-    menubar: false,
-    plugins: [
-      'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-      'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-      'insertdatetime', 'media', 'table', 'help', 'wordcount'
-    ],
+  editorConfig = {
+    readonly: false,
+    plugins: 'autoresize lists table link image code codesample',
     toolbar:
-      'undo redo | blocks | bold italic forecolor | alignleft aligncenter ' +
-      'alignright alignjustify | bullist numlist outdent indent | ' +
-      'removeformat | help',
-    content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+    min_height: 300,
+    max_height: 600,
+    resize: false,
   };
 
   constructor(
     public dialogRef: MatDialogRef<EditOverviewDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: EditOverviewDialogData
+    @Inject(MAT_DIALOG_DATA) public data: EditOverviewDialogData,
   ) {
     this.name = data.name;
     this.description = data.description;
     this.descriptionHTML = data.descriptionHTML || '';
   }
 
-  ngOnInit(): void {
-    // If there's no HTML content but there's plain text, use the plain text as initial HTML
-    if (!this.descriptionHTML && this.description) {
-      this.descriptionHTML = `<p>${this.description}</p>`;
-    }
+  /*  ngOnInit(): void {
+    this.editor.setContent('hallo');
+  } */
+
+  ngAfterViewInit(): void {
+    console.log('descriptionHTML:', this.descriptionHTML);
+    this.editor.setContent(this.descriptionHTML || this.description || '');
   }
 
   onCancel(): void {
@@ -72,8 +74,8 @@ export class EditOverviewDialogComponent implements OnInit {
   onSave(): void {
     const result = {
       name: this.name,
-      description: this.description,
-      descriptionHTML: this.descriptionHTML
+      description: this.editor.getRawContent(),
+      descriptionHTML: this.editor.getContent(),
     };
     this.dialogRef.close(result);
   }

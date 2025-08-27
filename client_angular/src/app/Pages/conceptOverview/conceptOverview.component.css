@@ -10,12 +10,7 @@
   justify-content: space-between;
 }
 
-.button-group {
-  /* Optional: zusätzliche Stildefinitionen für die Button-Gruppe */
-}
-
 .button-group button.active {
-
   background-color: #3b4252;
   color: white;
 }
@@ -35,7 +30,7 @@
   height: 20h;
   margin: 16px;
   /* margin-left: 32px; */
-  padding:16px;
+  padding: 16px;
 
   contain: content;
   overflow-y: hidden;
@@ -50,11 +45,11 @@
   border-radius: 10px;
   flex-direction: column;
   justify-content: center;
-/*   background-color: #C0E0FC; */
+  /*   background-color: #C0E0FC; */
   background-color: #eceff4;
 }
 
-@media screen and (orientation: portrait){
+@media screen and (orientation: portrait) {
   .tab-content-container {
     padding: 0px;
     padding-top: 10px;
@@ -62,7 +57,7 @@
   }
 }
 
-@media screen and (orientation: landscape){
+@media screen and (orientation: landscape) {
   .tab-content-container {
     padding: 10px;
   }
@@ -76,7 +71,6 @@
     flex-direction: row;
     align-items: center;
   }
-
 }
 
 .dynamic-content {
@@ -94,4 +88,42 @@
   margin: 1rem;
   text-align: center;
   min-height: 200px;
+}
+
+/* Styles for concept descriptions */
+.concept-description-html {
+  margin: 16px 0;
+  line-height: 1.5;
+}
+
+.concept-description-html h1,
+.concept-description-html h2,
+.concept-description-html h3,
+.concept-description-html h4,
+.concept-description-html h5,
+.concept-description-html h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.concept-description-html p {
+  margin: 0.8em 0;
+}
+
+.concept-description-html ul,
+.concept-description-html ol {
+  margin: 0.8em 0;
+  padding-left: 2em;
+}
+
+.concept-description-html blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 4px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+.concept-description-text {
+  margin: 16px 0;
+  line-height: 1.5;
 }

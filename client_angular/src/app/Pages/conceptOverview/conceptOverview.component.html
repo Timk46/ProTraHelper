@@ -50,14 +50,15 @@
   </div>
 
   <!-- Display HTML description if available, otherwise plain text description -->
-  <div 
-    *ngIf="activeConceptNode.descriptionHTML && activeConceptNode.descriptionHTML.trim() !== ''" 
-    [innerHTML]="activeConceptNode.descriptionHTML" 
-    class="concept-description-html">
-  </div>
-  <p 
-    *ngIf="!activeConceptNode.descriptionHTML || activeConceptNode.descriptionHTML.trim() === ''" 
-    class="concept-description-text">
+  <div
+    *ngIf="activeConceptNode.descriptionHTML && activeConceptNode.descriptionHTML.trim() !== ''"
+    [innerHTML]="activeConceptNode.descriptionHTML"
+    class="concept-description-html"
+  ></div>
+  <p
+    *ngIf="!activeConceptNode.descriptionHTML || activeConceptNode.descriptionHTML.trim() === ''"
+    class="concept-description-text"
+  >
     {{ activeConceptNode.description }}
   </p>
 

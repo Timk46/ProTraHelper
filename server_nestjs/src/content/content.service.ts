@@ -2,7 +2,13 @@
 // content.service.ts
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ContentsForConceptDTO, ContentElementDTO, ContentDTO } from '@Interfaces/index';
+import {
+  ContentsForConceptDTO,
+  ContentElementDTO,
+  ContentDTO,
+  ConceptNodeDTO,
+  ConceptNodeEditDTO,
+} from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
 import { ConceptNode } from '@prisma/client';
@@ -663,6 +669,15 @@ export class ContentService {
         },
       },
     });
+  }
+
+  async updateConcept(conceptId: number, concept: ConceptNodeEditDTO): Promise<boolean> {
+    const { id: cId, ...data } = concept;
+    const updated = await this.prisma.conceptNode.update({
+      where: { id: conceptId },
+      data,
+    });
+    return !!updated;
   }
 
   /**

@@ -21,3 +21,10 @@ export interface ConceptNode {
   descriptionHTML?: string;
   conceptGraphId: number | null;
 }
+
+export interface ConceptNodeEditDTO {
+  id?: number;
+  name?: string;
+  description?: string;
+  descriptionHTML?: string;
+}

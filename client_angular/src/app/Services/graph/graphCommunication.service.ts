@@ -1,4 +1,4 @@
-import { ConceptNodeDTO } from '@DTOs/conceptNode.dto';
+import { ConceptNodeDTO } from '@DTOs/index';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 export class GraphCommunicationService {

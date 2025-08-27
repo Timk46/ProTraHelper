@@ -5,6 +5,7 @@ import { filter, map } from 'rxjs';
 import { GraphCommunicationService } from 'src/app/Services/graph/graphCommunication.service';
 import {
   ConceptNodeDTO,
+  ConceptNodeEditDTO,
   ContentsForConceptDTO,
   LinkableContentNodeDTO,
   QuestionDTO,
@@ -22,7 +23,10 @@ import { NavigationEnd } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { EditOverviewDialogComponent, EditOverviewDialogData } from './edit-overview-dialog/edit-overview-dialog.component';
+import {
+  EditOverviewDialogComponent,
+  EditOverviewDialogData,
+} from './edit-overview-dialog/edit-overview-dialog.component';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -213,9 +217,9 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
       const dialogData: EditOverviewDialogData = {
         name: this.activeConceptNode.name,
         description: this.activeConceptNode.description || '',
-        descriptionHTML: this.activeConceptNode.descriptionHTML || ''
+        descriptionHTML: this.activeConceptNode.descriptionHTML || '',
       };
-      
+
       const dialogRef = this.dialog.open(EditOverviewDialogComponent, {
         width: '600px',
         data: dialogData,
@@ -226,13 +230,28 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
           this.activeConceptNode.name = result.name;
           this.activeConceptNode.description = result.description;
           this.activeConceptNode.descriptionHTML = result.descriptionHTML;
-          
+
           // Here you would typically call a service to save the changes to the backend
           // this.conceptService.updateConcept(this.activeConceptNode).subscribe(...)
-          
-          this.snackBar.open('Konzept-Übersicht wurde aktualisiert', 'Schließen', {
-            duration: 3000,
-          });
+          const updateData: ConceptNodeEditDTO = {
+            name: this.activeConceptNode.name,
+            description: this.activeConceptNode.description,
+            descriptionHTML: this.activeConceptNode.descriptionHTML,
+          };
+
+          this.contentService
+            .updateConcept(this.activeConceptNode.databaseId, updateData)
+            .subscribe(success => {
+              if (success) {
+                this.snackBar.open('Konzept-Übersicht wurde aktualisiert', 'Schließen', {
+                  duration: 3000,
+                });
+              } else {
+                this.snackBar.open('Fehler beim Aktualisieren der Konzept-Übersicht', 'Schließen', {
+                  duration: 3000,
+                });
+              }
+            });
         }
       });
     }

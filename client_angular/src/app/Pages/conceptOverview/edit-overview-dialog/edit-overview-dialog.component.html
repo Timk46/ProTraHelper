@@ -5,23 +5,13 @@
     <!-- Name field -->
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Name</mat-label>
-      <input matInput [(ngModel)]="name" placeholder="Konzept-Name eingeben">
-    </mat-form-field>
-
-    <!-- Plain text description field -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Beschreibung (Text)</mat-label>
-      <textarea matInput [(ngModel)]="description" rows="3" placeholder="Einfache Textbeschreibung"></textarea>
+      <input matInput [(ngModel)]="name" placeholder="Konzept-Name eingeben" />
     </mat-form-field>
 
     <!-- Rich text HTML description field -->
     <div class="html-editor-container">
       <label class="editor-label">Beschreibung (HTML)</label>
-      <editor
-        [init]="tinymceConfig"
-        [(ngModel)]="descriptionHTML"
-        [initialValue]="descriptionHTML">
-      </editor>
+      <app-tinymce #desceditor [config]="editorConfig"></app-tinymce>
     </div>
   </div>
 </mat-dialog-content>

@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Param, Req, UseGuards, Body, Patch, Put } from '@nestjs/common';
 import { ContentService } from './content.service';
-import { ContentsForConceptDTO } from '@Interfaces/index';
+import { ConceptNodeEditDTO, ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { ConceptNode } from '@prisma/client';
@@ -163,6 +163,16 @@ export class ContentController {
   @Get('/conceptsFull')
   async getConcepts(): Promise<ConceptNode[]> {
     return this.contentService.getConcepts();
+  }
+
+  @roles('ADMIN', 'LECTURER')
+  @Put('/concepts/:conceptId')
+  async updateConcept(
+    @Param('conceptId') conceptId: number,
+    @Body() body: ConceptNodeEditDTO,
+  ): Promise<boolean> {
+    console.log('Updating concept with ID:', conceptId, 'and body:', body);
+    return this.contentService.updateConcept(Number(conceptId), body);
   }
 
   /**
