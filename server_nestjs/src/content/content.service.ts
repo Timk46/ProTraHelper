@@ -9,7 +9,10 @@ import { ConceptNode } from '@prisma/client';
 
 @Injectable()
 export class ContentService {
-  constructor(private readonly prisma: PrismaService, private readonly userConceptService: UserConceptService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userConceptService: UserConceptService,
+  ) {}
 
   /**
    * Retrieves contents associated with a specific concept node for a given user (eg. "Funktionale Programmierung mit Python" or "Objektorientierte Programmierung mit Java").
@@ -37,6 +40,7 @@ export class ContentService {
   async getContentsByConceptNode(
     conceptNodeId: number,
     userId: number,
+    hasPrivileges: boolean = false,
   ): Promise<ContentsForConceptDTO> {
     // Step 1: Fetch concept node with all related data in a single query
     // We use Prisma's findUnique method to get a specific concept node
@@ -156,9 +160,9 @@ export class ContentService {
       description: contentNode.description,
       position: contentNode.position,
       level: contentNode.trains[0]?.awards,
-      contentElements: contentNode.ContentView.map(
-        this.transformContentElement(userStatus, questionProgressMap),
-      ),
+      contentElements: contentNode.ContentView.filter(
+        contentView => contentView.isVisible !== false || hasPrivileges, // include only visible content views or all if with privileges
+      ).map(this.transformContentElement(userStatus, questionProgressMap)),
       contentPrerequisiteIds: contentNode.prerequisites.map((p: any) => p.prerequisiteId),
       contentSuccessorIds: contentNode.successors.map((s: any) => s.successorId),
       requiresConceptIds: contentNode.requires.map((r: any) => r.conceptNodeId),
@@ -217,6 +221,7 @@ export class ContentService {
     return (contentView: any): ContentElementDTO => ({
       id: contentView.contentElement.id,
       type: contentView.contentElement.type,
+      contentViewId: contentView.id,
       positionInSpecificContentView: contentView.position,
       title: contentView.contentElement.title,
       text: contentView.contentElement.text,
@@ -234,6 +239,7 @@ export class ContentService {
             ),
           }
         : null,
+      isVisible: contentView.isVisible !== undefined ? contentView.isVisible : true,
     });
   }
 
@@ -333,6 +339,26 @@ export class ContentService {
    */
   private calculateQuestionProgress(question: any, bestScore: number): number {
     return (bestScore / (question.score || 1)) * 100;
+  }
+
+  /**
+   * Updates the visibility status of a content view by its ID.
+   *
+   * @param contentViewId - The unique identifier of the content view to update.
+   * @param isVisible - A boolean indicating whether the content view should be visible.
+   * @returns A promise that resolves to `true` if the update was successful, or `false` if an error occurred.
+   */
+  async setContentViewVisibility(contentViewId: number, isVisible: boolean): Promise<boolean> {
+    try {
+      await this.prisma.contentView.update({
+        where: { id: contentViewId },
+        data: { isVisible: isVisible },
+      });
+      return true;
+    } catch (error) {
+      console.error(`Failed to update content view visibility: ${error}`);
+      return false;
+    }
   }
 
   /**
@@ -461,7 +487,7 @@ export class ContentService {
         id: true,
       },
     });
-    return conceptNodes.map(concept => concept.id );
+    return conceptNodes.map(concept => concept.id);
   }
 
   /**
@@ -622,7 +648,7 @@ export class ContentService {
         name: true,
       },
     });
-    const allConcepts = concepts.map(concept => concept.name );
+    const allConcepts = concepts.map(concept => concept.name);
     Array.from(new Set(allConcepts)).find(concept => concept === 'root')
       ? allConcepts.splice(allConcepts.indexOf('root'), 1)
       : null;

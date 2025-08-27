@@ -32,6 +32,7 @@ export class ContentListItemComponent implements OnInit {
   @Input() contentElementData: ContentElementDTO = {
     id: -1,
     type: contentElementType.TEXT,
+    contentViewId: -1,
     positionInSpecificContentView: -1,
     question: {
       id: -1,
@@ -41,6 +42,7 @@ export class ContentListItemComponent implements OnInit {
       name: '',
       description: '',
     },
+    isVisible: true,
   };
 
   @Input() contentNodeId!: number; // ContentNodeId für Positionsänderung
@@ -77,6 +79,7 @@ export class ContentListItemComponent implements OnInit {
     this.isGradingContent =
       this.contentElementData.type === contentElementType.QUESTION &&
       gradingContent.includes(this.contentElementData.question?.type as questionType);
+    console.log('My visibility:', this.contentElementData.isVisible);
   }
 
   /**
@@ -261,6 +264,23 @@ export class ContentListItemComponent implements OnInit {
               console.log('Aufgabe wurde zum ersten Mal erfolgreich gelöst.');
               this.progressService.answerSubmitted();
             }
+          }
+        });
+    }
+  }
+
+  onTaskVisibilityToggle() {
+    if (this.editModeActive && this.contentElementData.contentViewId) {
+      console.log('Toggling content view visibility');
+      this.contentLinkerService
+        .updateContentViewVisibility(
+          this.contentElementData.contentViewId,
+          !this.contentElementData.isVisible,
+        )
+        .subscribe(success => {
+          if (success) {
+            console.log('Content view visibility updated');
+            this.contentElementData.isVisible = !this.contentElementData.isVisible;
           }
         });
     }

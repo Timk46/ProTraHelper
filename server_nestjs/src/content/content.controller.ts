@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Param, Req, UseGuards, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Req, UseGuards, Body, Patch, Put } from '@nestjs/common';
 import { ContentService } from './content.service';
 import { ContentsForConceptDTO } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
@@ -28,7 +28,25 @@ export class ContentController {
     @Param('conceptNodeId') conceptNodeId: number,
     @Req() req,
   ): Promise<ContentsForConceptDTO> {
-    return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id);
+    const hasPrivileges =
+      req.user.globalRole.includes('ADMIN') || req.user.globalRole.includes('LECTURER');
+    return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id, hasPrivileges);
+  }
+
+  /**
+   * Sets the visibility of a specific content view.
+   *
+   * @param body - An object containing the `contentViewId` of the content view to update and a boolean `isVisible` indicating the desired visibility state.
+   * @returns A promise that resolves to a boolean indicating whether the operation was successful.
+   */
+  @roles('ADMIN')
+  @Put('/updateVisibility/:contentViewId')
+  async setContentViewVisibility(
+    @Param('contentViewId') contentViewId: number,
+    @Body('isVisible') isVisible: boolean,
+  ): Promise<boolean> {
+    console.log(`Setting visibility of content view ${contentViewId} to ${isVisible}`);
+    return this.contentService.setContentViewVisibility(+contentViewId, !!isVisible);
   }
 
   /**

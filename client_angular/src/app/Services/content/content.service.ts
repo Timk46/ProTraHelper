@@ -6,7 +6,7 @@ import { ConceptNodeDTO } from '@DTOs/index';
 import { Observable } from 'rxjs';
 import { catchError, tap, Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { ConceptNode } from '@DTOs/conceptNode.dto';
+import { ConceptNode } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',

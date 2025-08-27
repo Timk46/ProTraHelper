@@ -72,6 +72,13 @@ export class ContentLinkerService {
     );
   }
 
+  updateContentViewVisibility(contentViewId: number, isVisible: boolean): Observable<boolean> {
+    return this.http.put<boolean>(
+      `${environment.server}/content/updateVisibility/${contentViewId}`,
+      { isVisible },
+    );
+  }
+
   /**
    * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
    */

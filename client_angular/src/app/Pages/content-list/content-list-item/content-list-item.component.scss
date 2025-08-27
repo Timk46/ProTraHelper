@@ -39,9 +39,15 @@
   border: 2px solid green;
 }
 
+.not-visible {
+  opacity: 0.5;
+  border: 2px dashed gray;
+}
+
 .list-item:hover {
   transform: translateY(-5px);
   cursor: pointer;
+  opacity: 1;
 
   .edit-overlay {
     opacity: 1;
