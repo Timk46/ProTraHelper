@@ -8,13 +8,16 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO } from '@DTOs/question.dto';
-import { QuestionDTO, McQuestionOptionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import {
+  MCOptionViewDTO,
+  McQuestionDTO,
+  UserAnswerDataDTO,
+  userAnswerFeedbackDTO,
+  TaskViewData,
+} from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TaskViewData } from '@DTOs/index';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { firstValueFrom, Subject } from 'rxjs';
@@ -160,10 +163,12 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
           .getMCOptions((mcQuestionData as McQuestionDTO).id)
           .pipe(takeUntil(this.destroy$))
           .subscribe(optionsData => {
-            questionState.options = (optionsData as MCOptionViewDTO[]).map((option: MCOptionViewDTO) => ({
-              ...option,
-              isCorrect: undefined,
-            }));
+            questionState.options = (optionsData as MCOptionViewDTO[]).map(
+              (option: MCOptionViewDTO) => ({
+                ...option,
+                isCorrect: undefined,
+              }),
+            );
 
             // Shuffle options if enabled
             if (questionState.mcQuestion.shuffleOptions) {
@@ -305,7 +310,9 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
 
         // Automatic Rhino integration removed - users can manually focus Rhino using the button
-        console.log('Question submitted successfully. Use the Rhino button to manually focus if needed.');
+        console.log(
+          'Question submitted successfully. Use the Rhino button to manually focus if needed.',
+        );
       });
   }
 
@@ -406,7 +413,9 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     // Automatic Rhino integration removed - users can manually focus Rhino using the button
-    console.log('All questions completed successfully. Use the Rhino button to manually focus if needed.');
+    console.log(
+      'All questions completed successfully. Use the Rhino button to manually focus if needed.',
+    );
   }
 
   /**
@@ -511,7 +520,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         userId: 'mcslider-user',
         focusMethod: 'unified' as const,
         bringToFront: true,
-        restoreIfMinimized: true
+        restoreIfMinimized: true,
       };
 
       const result = await firstValueFrom(this.rhinoFocusService.ensureRhinoActive(request));
@@ -520,7 +529,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         // Provide different messages based on what action was taken
         let message = '';
         let icon = '';
-        
+
         switch (result.action) {
           case 'focused':
             message = 'Rhino erfolgreich fokussiert';
@@ -542,68 +551,55 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         console.log(`${icon} ${message}`, result);
         this.snackBar.open(`${icon} ${message}`, 'OK', {
           duration: 3000,
-          panelClass: 'success-snackbar'
+          panelClass: 'success-snackbar',
         });
 
         // Show additional info if there are warnings
         if (result.warnings && result.warnings.length > 0) {
           setTimeout(() => {
-            this.snackBar.open(
-              `Hinweise: ${result.warnings!.join(', ')}`,
-              'OK',
-              {
-                duration: 3000,
-                panelClass: 'warning-snackbar'
-              }
-            );
+            this.snackBar.open(`Hinweise: ${result.warnings!.join(', ')}`, 'OK', {
+              duration: 3000,
+              panelClass: 'warning-snackbar',
+            });
           }, 3500);
         }
-
       } else {
         console.warn('⚠️ Rhino activation failed:', result?.message || 'Unknown error');
-        
+
         let userMessage = '';
         switch (result?.action) {
           case 'failed':
             userMessage = result.message || 'Rhino konnte nicht aktiviert werden';
             break;
           default:
-            userMessage = 'Rhino konnte nicht aktiviert werden. Prüfen Sie ob Rhino installiert ist.';
+            userMessage =
+              'Rhino konnte nicht aktiviert werden. Prüfen Sie ob Rhino installiert ist.';
         }
 
-        this.snackBar.open(
-          `❌ ${userMessage}`,
-          'Details',
-          {
+        this.snackBar
+          .open(`❌ ${userMessage}`, 'Details', {
             duration: 5000,
-            panelClass: 'error-snackbar'
-          }
-        ).onAction().subscribe(() => {
-          // Show detailed error information
-          console.log('Detailed error info:', result);
-          if (result?.warnings && result.warnings.length > 0) {
-            this.snackBar.open(
-              `Details: ${result.warnings.join('; ')}`,
-              'OK',
-              {
+            panelClass: 'error-snackbar',
+          })
+          .onAction()
+          .subscribe(() => {
+            // Show detailed error information
+            console.log('Detailed error info:', result);
+            if (result?.warnings && result.warnings.length > 0) {
+              this.snackBar.open(`Details: ${result.warnings.join('; ')}`, 'OK', {
                 duration: 8000,
-                panelClass: 'warning-snackbar'
-              }
-            );
-          }
-        });
+                panelClass: 'warning-snackbar',
+              });
+            }
+          });
       }
     } catch (error) {
       console.error('❌ Rhino activation error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-      this.snackBar.open(
-        `❌ Fehler bei der Rhino-Aktivierung: ${errorMessage}`,
-        'OK',
-        {
-          duration: 5000,
-          panelClass: 'error-snackbar'
-        }
-      );
+      this.snackBar.open(`❌ Fehler bei der Rhino-Aktivierung: ${errorMessage}`, 'OK', {
+        duration: 5000,
+        panelClass: 'error-snackbar',
+      });
     } finally {
       this.isRhinoSwitching = false;
       this.cdr.detectChanges();
