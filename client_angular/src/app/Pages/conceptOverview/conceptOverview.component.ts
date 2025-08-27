@@ -22,6 +22,7 @@ import { NavigationEnd } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { GraphDataService } from 'src/app/Services/graph/graph-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { EditOverviewDialogComponent, EditOverviewDialogData } from './edit-overview-dialog/edit-overview-dialog.component';
 
 @Component({
   selector: 'app-conceptOverview',
@@ -48,6 +49,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     name: 'dummys',
     level: 0,
     description: 'dummy',
+    descriptionHTML: '<p>dummy</p>',
     expanded: false,
     parentIds: [],
     childIds: [],
@@ -199,6 +201,38 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
                   contentsForConcept => (this.contentsForActiveConceptNode = contentsForConcept),
                 );
             });
+        }
+      });
+    }
+  }
+
+  onEditOverview() {
+    console.log('onEditOverview called');
+    if (this.isAdmin) {
+      console.log('User is admin, opening dialog to edit overview');
+      const dialogData: EditOverviewDialogData = {
+        name: this.activeConceptNode.name,
+        description: this.activeConceptNode.description || '',
+        descriptionHTML: this.activeConceptNode.descriptionHTML || ''
+      };
+      
+      const dialogRef = this.dialog.open(EditOverviewDialogComponent, {
+        width: '600px',
+        data: dialogData,
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.activeConceptNode.name = result.name;
+          this.activeConceptNode.description = result.description;
+          this.activeConceptNode.descriptionHTML = result.descriptionHTML;
+          
+          // Here you would typically call a service to save the changes to the backend
+          // this.conceptService.updateConcept(this.activeConceptNode).subscribe(...)
+          
+          this.snackBar.open('Konzept-Übersicht wurde aktualisiert', 'Schließen', {
+            duration: 3000,
+          });
         }
       });
     }

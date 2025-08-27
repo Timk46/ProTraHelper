@@ -49,11 +49,26 @@
     </div>
   </div>
 
-  <p>{{ activeConceptNode.description }}</p>
+  <!-- Display HTML description if available, otherwise plain text description -->
+  <div 
+    *ngIf="activeConceptNode.descriptionHTML && activeConceptNode.descriptionHTML.trim() !== ''" 
+    [innerHTML]="activeConceptNode.descriptionHTML" 
+    class="concept-description-html">
+  </div>
+  <p 
+    *ngIf="!activeConceptNode.descriptionHTML || activeConceptNode.descriptionHTML.trim() === ''" 
+    class="concept-description-text">
+    {{ activeConceptNode.description }}
+  </p>
 
-  <button *ngIf="editModeActive" mat-raised-button color="primary" (click)="onCreateContentNode()">
-    ContentNode hinzufügen
-  </button>
+  <div *ngIf="editModeActive" style="display: flex; flex-direction: row; gap: 8px">
+    <button mat-mini-fab color="primary" (click)="onCreateContentNode()">
+      <mat-icon>add</mat-icon>
+    </button>
+    <button mat-mini-fab color="primary" (click)="onEditOverview()">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
 
   <!-- <div [ngStyle]="{'display': activeTab === 'content' ? 'block' : 'none'}" class="tab-content-container">
     <app-contentBoard class="tab-content" [contentsForActiveConceptNode]="contentsForActiveConceptNode"
