@@ -171,7 +171,6 @@ export class ContentController {
     @Param('conceptId') conceptId: number,
     @Body() body: ConceptNodeEditDTO,
   ): Promise<boolean> {
-    console.log('Updating concept with ID:', conceptId, 'and body:', body);
     return this.contentService.updateConcept(Number(conceptId), body);
   }
 

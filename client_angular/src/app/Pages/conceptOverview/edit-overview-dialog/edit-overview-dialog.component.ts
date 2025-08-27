@@ -63,7 +63,6 @@ export class EditOverviewDialogComponent implements AfterViewInit {
   } */
 
   ngAfterViewInit(): void {
-    console.log('descriptionHTML:', this.descriptionHTML);
     this.editor.setContent(this.descriptionHTML || this.description || '');
   }
 
