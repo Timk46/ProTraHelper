@@ -27,6 +27,7 @@
             <mat-option [value]="questionTypes.CODEGAME">Programmierspiel</mat-option>
             <mat-option [value]="questionTypes.UPLOAD">Upload-Aufgabe</mat-option>
             <mat-option [value]="questionTypes.GROUP_REVIEW_GATE">Bewertungs-Übersicht</mat-option>
+            <mat-option [value]="questionTypes.COLLECTION">Aufgabensammlung</mat-option>
           </mat-select>
           <mat-error *ngIf="creationForm.get('questionType')!.hasError('required')"
             >Fragentyp ist erforderlich</mat-error

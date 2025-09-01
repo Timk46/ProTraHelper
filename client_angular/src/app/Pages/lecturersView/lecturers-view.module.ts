@@ -45,6 +45,7 @@ import { LecturersViewRoutingModule } from './lecturers-view-routing.module';
 import { GradingService } from './services/grading.service';
 import { SubjectManagementService } from './services/subject-management.service';
 import { EditGroupReviewGateComponent } from './edit-group-review-gate/edit-group-review-gate.component';
+import { EditCollectionComponent } from './edit-collection/edit-collection.component';
 
 @NgModule({
   declarations: [
@@ -66,7 +67,8 @@ import { EditGroupReviewGateComponent } from './edit-group-review-gate/edit-grou
     EditCodeGameComponent,
     CodeGameAddElementModalComponent,
     CodeGamePlayfieldEditorComponent,
-    EditGroupReviewGateComponent
+    EditGroupReviewGateComponent,
+    EditCollectionComponent,
   ],
   imports: [
     CommonModule,
@@ -94,7 +96,7 @@ import { EditGroupReviewGateComponent } from './edit-group-review-gate/edit-grou
     DragDropModule,
     TinymceModule,
     LecturersViewRoutingModule,
-    MaterialModule
+    MaterialModule,
   ],
   exports: [
     CreateContentNodeDialogComponent,
@@ -104,11 +106,8 @@ import { EditGroupReviewGateComponent } from './edit-group-review-gate/edit-grou
     EditFillinComponent,
     EditCodingComponent,
     EditGraphComponent,
-
+    EditCollectionComponent,
   ],
-  providers: [
-    GradingService,
-    SubjectManagementService,
-  ]
+  providers: [GradingService, SubjectManagementService],
 })
 export class LecturersViewModule {}

@@ -1,7 +1,12 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Param, Req, UseGuards, Body, Patch, Put } from '@nestjs/common';
 import { ContentService } from './content.service';
-import { ConceptNodeEditDTO, ContentsForConceptDTO } from '@Interfaces/index';
+import {
+  ConceptNodeEditDTO,
+  ContentsForConceptDTO,
+  ContentViewDTO,
+  ContentViewInformationDTO,
+} from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { ConceptNode } from '@prisma/client';
@@ -31,6 +36,20 @@ export class ContentController {
     const hasPrivileges =
       req.user.globalRole.includes('ADMIN') || req.user.globalRole.includes('LECTURER');
     return this.contentService.getContentsByConceptNode(conceptNodeId, req.user.id, hasPrivileges);
+  }
+
+  /**
+   * Retrieves the list of content views associated with the specified content node.
+   *
+   * @param contentNodeId - The unique identifier of the content node.
+   * @returns A promise that resolves to an array of ContentViewDTO objects representing the views of the content.
+   */
+  @roles('ADMIN', 'LECTURER')
+  @Get('/views/:contentNodeId')
+  async getContentViews(
+    @Param('contentNodeId') contentNodeId: number,
+  ): Promise<ContentViewInformationDTO[]> {
+    return this.contentService.getContentViews(Number(contentNodeId));
   }
 
   /**

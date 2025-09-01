@@ -6,8 +6,9 @@ import {
   ContentsForConceptDTO,
   ContentElementDTO,
   ContentDTO,
-  ConceptNodeDTO,
   ConceptNodeEditDTO,
+  ContentViewInformationDTO,
+  contentElementType,
 } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
@@ -345,6 +346,32 @@ export class ContentService {
    */
   private calculateQuestionProgress(question: any, bestScore: number): number {
     return (bestScore / (question.score || 1)) * 100;
+  }
+
+  async getContentViews(contentNodeId: number): Promise<ContentViewInformationDTO[]> {
+    const contentViews = await this.prisma.contentView.findMany({
+      where: { contentNodeId: contentNodeId },
+      include: {
+        contentElement: {
+          include: {
+            question: true,
+            file: true,
+          },
+        },
+        contentNode: true,
+      },
+    });
+
+    return contentViews.map(cv => ({
+      contentNodeId: cv.contentNode.id,
+      contentElement: {
+        id: cv.contentElement.id,
+        type: cv.contentElement.type as contentElementType,
+        title: cv.contentElement.title,
+      },
+      position: cv.position,
+      isVisible: cv.isVisible,
+    }));
   }
 
   /**

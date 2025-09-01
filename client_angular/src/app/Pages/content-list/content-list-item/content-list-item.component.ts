@@ -111,6 +111,8 @@ export class ContentListItemComponent implements OnInit {
         return 'Upload-Aufgabe';
       case questionType.GROUP_REVIEW_GATE:
         return 'Abgabenbewertung';
+      case questionType.COLLECTION:
+        return 'Aufgabensammlung';
       default:
         return 'Aufgabe';
     }
@@ -146,6 +148,8 @@ export class ContentListItemComponent implements OnInit {
         return 'cloud_upload';
       case questionType.GROUP_REVIEW_GATE:
         return 'group_work';
+      case questionType.COLLECTION:
+        return 'collection';
       default:
         return 'help';
     }
@@ -351,6 +355,9 @@ export class ContentListItemComponent implements OnInit {
         break;
       case questionType.GROUP_REVIEW_GATE:
         this.router.navigate(['/editgroupreviewgate/', question.id]);
+        break;
+      case questionType.COLLECTION:
+        this.router.navigate(['/editcollection/', question.id, this.contentNodeId]);
         break;
     }
   }

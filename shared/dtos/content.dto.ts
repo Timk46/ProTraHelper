@@ -2,6 +2,7 @@ import { contentElementType } from "./contentElementType.enum";
 import { QuestionDTO } from "./question.dto";
 import { FileDto } from "./file.dto";
 import { userAnswerFeedbackDTO } from "./userAnswer.dto";
+import { detailedQuestionDTO } from "./detailedQuestion.dto";
 
 export interface ContentDTO {
   contentNodeId: number;
@@ -31,6 +32,18 @@ export interface ContentViewDTO {
   contentNode: ContentDTO;
   contentElement: ContentElementDTO;
   position: number;
+  isVisible?: boolean;
+}
+
+export interface ContentViewInformationDTO {
+  contentNodeId: number;
+  contentElement: {
+    id: number;
+    type: contentElementType;
+    title: string;
+  };
+  position: number;
+  isVisible?: boolean;
 }
 
 export interface ContentElementDTO {

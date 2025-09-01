@@ -1,6 +1,10 @@
-import {CodingQuestionInternal, questionType, CodeGameQuestionDto} from './question.dto';
-import { GraphConfigurationDTO, GraphStructureDTO } from './graphTask.dto';
-import { editorDataDTO, taskSettingsDTO } from './umlearnDtos/dtos';
+import {
+  CodingQuestionInternal,
+  questionType,
+  CodeGameQuestionDto,
+} from "./question.dto";
+import { GraphConfigurationDTO, GraphStructureDTO } from "./graphTask.dto";
+import { editorDataDTO, taskSettingsDTO } from "./umlearnDtos/dtos";
 
 export interface detailedQuestionDTO {
   id: number;
@@ -29,6 +33,7 @@ export interface detailedQuestionDTO {
   uploadQuestion?: detailedUploadQuestionDTO;
   groupReviewGate?: detailedGroupReviewGateDTO;
   groupReviewStatuses?: GroupReviewStatusDTO[];
+  questionCollection?: detailedQuestionCollectionDTO;
 }
 
 export interface detailedFreetextQuestionDTO {
@@ -141,4 +146,21 @@ export interface GroupReviewStatusDTO {
   submissionIdentifier: string;
   reviewPhase: string;
   userStatus: string;
+}
+
+export interface detailedQuestionCollectionDTO {
+  id?: number;
+  questionId: number;
+  links: detailedQuestionCollectionLinkDTO[];
+  textHTML?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface detailedQuestionCollectionLinkDTO {
+  id?: number;
+  questionCollectionId?: number;
+  linkedContentElementId: number;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

@@ -36,6 +36,7 @@ import { EditCodeGameComponent } from './Pages/lecturersView/edit-code-game/edit
 import { EvaluationDiscussionForumComponent } from './Pages/evaluation-discussion-forum/evaluation-discussion-forum/evaluation-discussion-forum.component';
 import { evaluationAccessGuard } from './Pages/evaluation-discussion-forum/guards/evaluation-access.guard';
 import { EditGroupReviewGateComponent } from './Pages/lecturersView/edit-group-review-gate/edit-group-review-gate.component';
+import { EditCollectionComponent } from './Pages/lecturersView/edit-collection/edit-collection.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -159,7 +160,12 @@ const routes: Routes = [
         canActivate: [LoggedInGuard, AdminGuard],
       },
       {
-        path: 'editgraph/:questionId',
+        path: 'editcollection/:questionId',
+        component: EditCollectionComponent,
+        canActivate: [LoggedInGuard, AdminGuard],
+      },
+      {
+        path: 'editgraph/:questionId/:contentNodeId',
         component: EditGraphComponent,
         canActivate: [LoggedInGuard, AdminGuard],
       },
@@ -229,6 +235,11 @@ const routes: Routes = [
   {
     path: 'editgroupreviewgate/:questionId',
     component: EditGroupReviewGateComponent,
+    canActivate: [LoggedInGuard, AdminGuard],
+  },
+  {
+    path: 'editcollection/:questionId/:contentNodeId',
+    component: EditCollectionComponent,
     canActivate: [LoggedInGuard, AdminGuard],
   },
 

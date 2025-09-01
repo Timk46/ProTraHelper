@@ -153,6 +153,7 @@ export enum questionType {
   CODEGAME = "CodeGameQuestion",
   UPLOAD = "UploadQuestion",
   GROUP_REVIEW_GATE = "GroupReviewGate",
+  COLLECTION = "QuestionCollection",
 }
 
 export const gradingContent: readonly questionType[] = [questionType.UPLOAD];
@@ -266,8 +267,10 @@ export interface CodeGameScaffoldDto {
 }
 
 export interface QuestionCollectionDto {
+  id?: number;
   questionId: number;
-  containedQuestionIds: number[];
+  linkedContentElementIds: number[];
+  textHTML?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

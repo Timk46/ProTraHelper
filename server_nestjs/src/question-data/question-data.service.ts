@@ -22,6 +22,7 @@ import { QuestionDataCodeGameService } from '@/question-data/question-data-code-
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
 import { ProductionFilesService } from '@/files/production-files.service';
 import { QuestionDataGroupReviewGateService } from './question-data-groupreviewgate/question-data-groupreviewgate.service';
+import { QuestionDataCollectionService } from './question-data-collection/question-data-collection.service';
 
 @Injectable()
 export class QuestionDataService {
@@ -38,7 +39,8 @@ export class QuestionDataService {
     private readonly qdUml: QuestionDataUmlService,
     private readonly qdCodeGame: QuestionDataCodeGameService,
     private readonly qdUpload: QuestionDataUploadService,
-    private qdGroupReviewGate: QuestionDataGroupReviewGateService,
+    private readonly qdGroupReviewGate: QuestionDataGroupReviewGateService,
+    private readonly qdQuestionCollection: QuestionDataCollectionService,
     private readonly productionFilesService: ProductionFilesService,
   ) {}
 
@@ -198,13 +200,12 @@ export class QuestionDataService {
           },
         });
         break;
-      case questionType.GROUP_REVIEW_GATE:
-        specificQuestionData = await this.prisma.groupReviewGate.findFirst({
+      case questionType.COLLECTION:
+        specificQuestionData = await this.prisma.questionCollection.findFirst({
           where: {
             questionId: Number(questionId),
           },
         });
-        break;
     }
 
     console.log('specificQuestionData: ', specificQuestionData);
@@ -228,6 +229,8 @@ export class QuestionDataService {
       uploadQuestion: questionTypeStr === questionType.UPLOAD ? specificQuestionData : undefined,
       groupReviewGate:
         questionTypeStr === questionType.GROUP_REVIEW_GATE ? specificQuestionData : undefined,
+      questionCollection:
+        questionTypeStr === questionType.COLLECTION ? specificQuestionData : undefined,
     };
 
     if (questionTypeStr === questionType.GROUP_REVIEW_GATE) {
@@ -499,6 +502,16 @@ export class QuestionDataService {
           );
         }
         break;
+      case questionType.COLLECTION:
+        if (createNewVersion || !currentQuestion.questionCollection) {
+          await this.qdQuestionCollection.createCollection(
+            question.questionCollection,
+            updatedQuestion.id,
+          );
+        } else {
+          await this.qdQuestionCollection.updateCollection(question.questionCollection);
+        }
+        break;
     }
 
     return await this.getDetailedQuestion(
@@ -535,7 +548,8 @@ export class QuestionDataService {
         newQuestion.umlQuestion ||
         newQuestion.codeGameQuestion ||
         newQuestion.uploadQuestion ||
-        newQuestion.groupReviewGate)
+        newQuestion.groupReviewGate ||
+        newQuestion.questionCollection)
     ) {
       return true;
     }

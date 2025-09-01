@@ -1,19 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { QuestionCollectionDto } from '@DTOs/index';
+import { detailedQuestionCollectionDTO, QuestionCollectionDto } from '@DTOs/index';
+import { connect } from 'node:http2';
 
 @Injectable()
 export class QuestionDataCollectionService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createCollection(collection: QuestionCollectionDto): Promise<boolean> {
+  async createCollection(
+    collection: detailedQuestionCollectionDTO,
+    questionId: number,
+  ): Promise<boolean> {
     try {
-      await this.prisma.questionCollection.createMany({
-        data: collection.containedQuestionIds.map(id => ({
-          questionId: collection.questionId,
-          containedQuestionId: id,
+      const newCollection = await this.prisma.questionCollection.create({
+        data: {
+          question: { connect: { id: questionId } },
+          textHTML: collection.textHTML,
+        },
+      });
+
+      await this.prisma.questionCollectionLink.createMany({
+        data: collection.links.map(link => ({
+          questionCollectionId: newCollection.id,
+          linkedContentElementId: link.linkedContentElementId,
         })),
       });
+
       return true;
     } catch (error) {
       console.error('Error creating collection:', error);
@@ -22,29 +34,48 @@ export class QuestionDataCollectionService {
   }
 
   async getCollection(questionId: number): Promise<QuestionCollectionDto> {
-    const collections = await this.prisma.questionCollection.findMany({
+    const collection = await this.prisma.questionCollection.findUnique({
       where: {
         questionId,
+      },
+      include: {
+        links: true,
       },
     });
 
     return {
       questionId,
-      containedQuestionIds: collections.map(c => c.containedQuestionId),
+      linkedContentElementIds: collection?.links.map(c => c.linkedContentElementId) || [],
     };
   }
 
-  async updateCollection(collection: QuestionCollectionDto): Promise<boolean> {
+  async updateCollection(collection: detailedQuestionCollectionDTO): Promise<boolean> {
     try {
-      await this.prisma.questionCollection.deleteMany({
+      const existingCollection = await this.prisma.questionCollection.findUnique({
         where: {
-          questionId: collection.questionId,
+          id: collection.id,
         },
       });
-      await this.prisma.questionCollection.createMany({
-        data: collection.containedQuestionIds.map(id => ({
-          questionId: collection.questionId,
-          containedQuestionId: id,
+
+      await this.prisma.questionCollection.update({
+        where: {
+          id: collection.id,
+        },
+        data: {
+          textHTML: collection.textHTML,
+        },
+      });
+
+      await this.prisma.questionCollectionLink.deleteMany({
+        where: {
+          questionCollectionId: collection.id,
+        },
+      });
+
+      await this.prisma.questionCollectionLink.createMany({
+        data: collection.links.map(link => ({
+          questionCollectionId: collection.id,
+          linkedContentElementId: link.linkedContentElementId,
         })),
       });
       return true;
@@ -54,11 +85,11 @@ export class QuestionDataCollectionService {
     }
   }
 
-  async deleteCollection(questionId: number): Promise<boolean> {
+  async deleteCollection(questionCollectionId: number): Promise<boolean> {
     try {
       await this.prisma.questionCollection.deleteMany({
         where: {
-          questionId,
+          id: questionCollectionId,
         },
       });
       return true;
