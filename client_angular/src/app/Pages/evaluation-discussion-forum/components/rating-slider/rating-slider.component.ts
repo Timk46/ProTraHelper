@@ -103,7 +103,11 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
 
   ngAfterViewInit(): void {
     // Ensure the slider is properly initialized after view is ready
-    this.cdr.detectChanges();
+    setTimeout(() => {
+      // Delay to prevent race conditions during initialization
+      this.initializeRating();
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   // =============================================================================
@@ -123,9 +127,17 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
       this.currentValue = Math.floor((this.minValue + this.maxValue) / 2);
     }
 
-    this.ratingForm.get('rating')?.setValue(this.currentValue);
+    // Use setValue with explicit options for better control
+    this.ratingForm.get('rating')?.setValue(this.currentValue, { 
+      emitEvent: false,
+      onlySelf: true 
+    });
+    
     this.isModified = false;
     this.hasUserInteracted = false; // Reset user interaction flag
+    
+    // Force change detection after initialization
+    this.cdr.markForCheck();
   }
 
   /**
@@ -176,7 +188,21 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     const target = event.target as HTMLInputElement;
     const value = Number(target.value);
     this.hasUserInteracted = true; // Mark that user has manually interacted
-    this.ratingForm.get('rating')?.setValue(value);
+    
+    // Update current value immediately to prevent UI lag
+    this.currentValue = value;
+    
+    // Use setValue instead of patchValue for more consistent updates
+    this.ratingForm.get('rating')?.setValue(value, { emitEvent: false });
+    
+    // Manually trigger change detection
+    this.cdr.markForCheck();
+    
+    // Emit the change event manually
+    this.ratingChanged.emit({
+      categoryId: this.categoryId,
+      score: value
+    });
   }
 
   onSubmitRating(): void {

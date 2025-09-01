@@ -11,7 +11,7 @@ export async function seedMCSlider() {
 
     // Get existing user (use first available user)
     const testUser = await prisma.user.findFirst({
-      where: { globalRole: 'STUDENT', email: 'hund@proband.de' },
+      where: { globalRole: 'ADMIN', email: 'admin@admin.de' },
     });
 
     if (!testUser) {

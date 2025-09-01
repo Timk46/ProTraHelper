@@ -6,10 +6,10 @@
 
 import { Controller, Post, Get, Body, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { RhinoUnifiedService } from './rhino-unified.service';
-import { 
-  EnsureRhinoActiveRequestDTO, 
+import {
+  EnsureRhinoActiveRequestDTO,
   EnsureRhinoActiveResponseDTO,
-  RhinoAvailabilityStatusDTO 
+  RhinoAvailabilityStatusDTO,
 } from '@DTOs/rhino-unified.dto';
 
 @Controller('api/rhinounified')
@@ -21,37 +21,40 @@ export class RhinoUnifiedController {
   /**
    * Ensures Rhino is active - main endpoint for Rhino management
    * Intelligently focuses existing window or launches new instance
-   * 
+   *
    * POST /api/rhinounified/ensure-active
    */
   @Post('ensure-active')
   async ensureRhinoActive(
-    @Body() request: EnsureRhinoActiveRequestDTO = {}
+    @Body() request: EnsureRhinoActiveRequestDTO = {},
   ): Promise<EnsureRhinoActiveResponseDTO> {
     try {
       this.logger.log('🎯 Ensure Rhino active request received:', {
         hasGrasshopperFile: !!request.grasshopperFilePath,
         focusMethod: request.focusMethod || 'unified',
-        userId: request.userId || 'anonymous'
+        userId: request.userId || 'anonymous',
       });
 
       const result = await this.rhinoUnifiedService.ensureRhinoActive(request);
 
-      this.logger.log(`${result.success ? '✅' : '❌'} Ensure Rhino active result: ${result.action}`, {
-        success: result.success,
-        action: result.action,
-        performanceMs: result.performanceMs,
-        hasWarnings: !!result.warnings?.length
-      });
+      this.logger.log(
+        `${result.success ? '✅' : '❌'} Ensure Rhino active result: ${result.action}`,
+        {
+          success: result.success,
+          action: result.action,
+          performanceMs: result.performanceMs,
+          hasWarnings: !!result.warnings.length,
+        },
+      );
 
       return result;
     } catch (error) {
       this.logger.error('❌ Ensure Rhino active failed:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
         `Failed to ensure Rhino is active: ${errorMessage}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -59,7 +62,7 @@ export class RhinoUnifiedController {
   /**
    * Checks Rhino availability status
    * Provides information about Rhino installation and current state
-   * 
+   *
    * GET /api/rhinounified/availability
    */
   @Get('availability')
@@ -73,17 +76,17 @@ export class RhinoUnifiedController {
         isRunning: status.isRunning,
         isInstalled: status.isInstalled,
         windowCount: status.windowCount,
-        recommendedAction: status.recommendedAction
+        recommendedAction: status.recommendedAction,
       });
 
       return status;
     } catch (error) {
       this.logger.error('❌ Rhino availability check failed:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
         `Failed to check Rhino availability: ${errorMessage}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -91,7 +94,7 @@ export class RhinoUnifiedController {
   /**
    * Gets comprehensive system status for debugging
    * Provides detailed information about all Rhino-related components
-   * 
+   *
    * GET /api/rhinounified/system-status
    */
   @Get('system-status')
@@ -105,11 +108,11 @@ export class RhinoUnifiedController {
       return status;
     } catch (error) {
       this.logger.error('❌ System status check failed:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
         `Failed to get system status: ${errorMessage}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -117,19 +120,21 @@ export class RhinoUnifiedController {
   /**
    * Quick Rhino focus endpoint (for backwards compatibility)
    * Attempts to focus existing Rhino window without launching
-   * 
+   *
    * POST /api/rhinounified/focus-only
    */
   @Post('focus-only')
   async focusOnly(
-    @Body() request: { focusMethod?: 'native' | 'powershell' | 'unified' } = {}
+    @Body() request: { focusMethod?: 'native' | 'powershell' | 'unified' } = {},
   ): Promise<EnsureRhinoActiveResponseDTO> {
     try {
-      this.logger.log('🎯 Focus-only request received:', { focusMethod: request.focusMethod || 'unified' });
+      this.logger.log('🎯 Focus-only request received:', {
+        focusMethod: request.focusMethod || 'unified',
+      });
 
       // Check if Rhino is running first
       const availability = await this.rhinoUnifiedService.checkRhinoAvailability();
-      
+
       if (!availability.isRunning || availability.windowCount === 0) {
         return {
           success: false,
@@ -137,7 +142,7 @@ export class RhinoUnifiedController {
           action: 'failed',
           timestamp: new Date().toISOString(),
           performanceMs: 0,
-          warnings: ['Rhino not running - cannot focus']
+          warnings: ['Rhino not running - cannot focus'],
         };
       }
 
@@ -145,7 +150,7 @@ export class RhinoUnifiedController {
       const focusRequest: EnsureRhinoActiveRequestDTO = {
         focusMethod: request.focusMethod || 'unified',
         bringToFront: true,
-        restoreIfMinimized: true
+        restoreIfMinimized: true,
       };
 
       const result = await this.rhinoUnifiedService.ensureRhinoActive(focusRequest);
@@ -154,11 +159,11 @@ export class RhinoUnifiedController {
       return result;
     } catch (error) {
       this.logger.error('❌ Focus-only failed:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
         `Failed to focus Rhino: ${errorMessage}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -166,21 +171,21 @@ export class RhinoUnifiedController {
   /**
    * Quick Rhino launch endpoint
    * Always launches new Rhino instance with optional Grasshopper file
-   * 
+   *
    * POST /api/rhinounified/launch-only
    */
   @Post('launch-only')
   async launchOnly(
-    @Body() request: { grasshopperFilePath?: string; userId?: string } = {}
+    @Body() request: { grasshopperFilePath?: string; userId?: string } = {},
   ): Promise<EnsureRhinoActiveResponseDTO> {
     try {
-      this.logger.log('🚀 Launch-only request received:', { 
+      this.logger.log('🚀 Launch-only request received:', {
         hasFile: !!request.grasshopperFilePath,
-        userId: request.userId || 'anonymous'
+        userId: request.userId || 'anonymous',
       });
 
       const availability = await this.rhinoUnifiedService.checkRhinoAvailability();
-      
+
       if (!availability.isInstalled) {
         return {
           success: false,
@@ -188,7 +193,7 @@ export class RhinoUnifiedController {
           action: 'failed',
           timestamp: new Date().toISOString(),
           performanceMs: 0,
-          warnings: ['Rhino installation not found']
+          warnings: ['Rhino installation not found'],
         };
       }
 
@@ -196,7 +201,7 @@ export class RhinoUnifiedController {
         grasshopperFilePath: request.grasshopperFilePath,
         userId: request.userId || 'web-user',
         showViewport: true,
-        batchMode: true
+        batchMode: true,
       };
 
       // For launch-only, we would need to modify the service to force launch
@@ -207,25 +212,25 @@ export class RhinoUnifiedController {
       return result;
     } catch (error) {
       this.logger.error('❌ Launch-only failed:', error);
-      
+
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
         `Failed to launch Rhino: ${errorMessage}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
   /**
    * Health check endpoint
-   * 
+   *
    * GET /api/rhinounified/health
    */
   @Get('health')
   async healthCheck(): Promise<{ status: string; timestamp: string; services: any }> {
     try {
       const availability = await this.rhinoUnifiedService.checkRhinoAvailability();
-      
+
       return {
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -234,19 +239,19 @@ export class RhinoUnifiedController {
           rhinoInstalled: availability.isInstalled,
           rhinoRunning: availability.isRunning,
           nativeFocusAvailable: availability.nativeFocusAvailable,
-          powershellFocusAvailable: availability.powershellFocusAvailable
-        }
+          powershellFocusAvailable: availability.powershellFocusAvailable,
+        },
       };
     } catch (error) {
       this.logger.warn('⚠️ Health check encountered issues:', error);
-      
+
       return {
         status: 'degraded',
         timestamp: new Date().toISOString(),
         services: {
           unified: true,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        }
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
       };
     }
   }

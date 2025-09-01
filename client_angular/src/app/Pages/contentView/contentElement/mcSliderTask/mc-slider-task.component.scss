@@ -25,14 +25,16 @@ $nord-aurora-5: #b48ead; // Purple
   background: linear-gradient(135deg, $nord-snow-storm-3 0%, $nord-snow-storm-2 100%);
   font-family: 'Roboto', sans-serif;
   position: relative;
+  overflow: visible; // Fixed: Ensure content is not cut off
 
   &--responsive {
-    padding: 8px;
+    padding: 20px;
     width: 100%;
     height: 100%;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
+    overflow: visible; // Fixed: Ensure content is not cut off
   }
 }
 
@@ -76,16 +78,31 @@ $nord-aurora-5: #b48ead; // Purple
 // Close button
 .close-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 16px;
+  right: 16px;
   z-index: 1000;
 
   button {
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid $nord-snow-storm-1;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid $nord-snow-storm-1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 29px; // Reduced by 20% from 36px
+    height: 29px; // Reduced by 20% from 36px
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // Scale icon slightly to match smaller button
+    mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+    }
 
     &:hover {
       background-color: white;
+      box-shadow: 0 1px 4px rgba(216, 222, 233, 0.3), inset 0 1px 2px rgba(0, 0, 0, 0.1);
+      transform: translateY(1px) scale(0.98); // Push-in effect
     }
   }
 }
@@ -93,21 +110,33 @@ $nord-aurora-5: #b48ead; // Purple
 // Rhino Switch Button
 .rhino-switch-button {
   position: absolute;
-  top: 10px;
-  right: 50px; // Neben Close-Button
+  top: 16px;
+  right: 82px; // Move 50% further left (55px + 27px = 82px)
   z-index: 1000;
 
   button {
-    background-color: rgba(255, 255, 255, 0.9);
-    border: 1px solid $nord-frost-3;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 2px solid $nord-frost-3;
     transition: all 0.3s ease;
-    width: 36px;
-    height: 36px;
+    width: 18px; // 20% smaller than 23px (23px * 0.8 = ~18px)
+    height: 18px; // 20% smaller than 23px
+    box-shadow: 0 2px 8px rgba(129, 161, 193, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1); // Enhanced glow
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    // Scale icon to match smaller button
+    mat-icon {
+      font-size: 11px !important; // Proportionally smaller icon (14px * 0.8 = ~11px)
+      width: 11px !important;
+      height: 11px !important;
+    }
 
     &:hover:not(:disabled) {
-      background-color: $nord-frost-3;
-      color: white;
-      transform: scale(1.05);
+      background-color: rgba(255, 255, 255, 1);
+      border-color: $nord-frost-2;
+      box-shadow: 0 4px 12px rgba(129, 161, 193, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px) scale(1.05);
     }
 
     &:disabled {
@@ -184,22 +213,24 @@ $nord-aurora-5: #b48ead; // Purple
   flex-shrink: 0;
   background-color: rgba(255, 255, 255, 0.95);
   border-top: 1px solid $nord-snow-storm-1;
-  padding: 6px 8px 4px 8px;
-  margin: 0 -8px -8px -8px;
+  padding: 12px 20px;
+  margin: 0; // Fixed: Remove negative margins to prevent cutoff
   backdrop-filter: blur(4px);
 }
 
 .footer-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: center;
+  gap: 24px;
+  position: relative;
 }
 
 // Progress header
 .progress-header {
   text-align: center;
   margin-bottom: 12px;
+  padding: 0 16px;
 }
 
 .progress-title {
@@ -215,8 +246,9 @@ $nord-aurora-5: #b48ead; // Purple
   align-items: center;
   font-size: 13px;
   color: $nord-polar-night-3;
-  margin-top: 4px;
-  padding-right: 40px; // Space for close button
+  margin-top: 70px; // Moved down by button distance (4px + 66px = 70px)
+  margin-left: 66px; // Moved left by button distance
+  padding: 0 97px 0 4px; // More space for further left button (70px + 27px = 97px)
 }
 
 .progress-text {
@@ -422,8 +454,8 @@ $nord-aurora-5: #b48ead; // Purple
 
 
 .nav-arrow {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 2px solid $nord-frost-3;
   background-color: white;
@@ -432,11 +464,26 @@ $nord-aurora-5: #b48ead; // Purple
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  animation: pulse-glow-subtle 3s infinite;
+  box-shadow: 0 2px 8px rgba(136, 192, 208, 0.2);
+
+  // Absolute positioning for left/right arrows
+  &--previous {
+    position: absolute;
+    left: 40px;
+  }
+
+  &--next {
+    position: absolute;
+    right: 40px;
+  }
 
   &:hover:not(:disabled) {
     background-color: $nord-frost-3;
     color: white;
-    transform: scale(1.05);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(136, 192, 208, 0.4);
+    animation: none; // Stop pulsing on hover
   }
 
   &:disabled {
@@ -445,9 +492,9 @@ $nord-aurora-5: #b48ead; // Purple
   }
 
   mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -456,25 +503,28 @@ $nord-aurora-5: #b48ead; // Purple
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin: 0;
   flex: 1;
-  min-height: 32px; // Ensure consistent height
+  min-height: 40px;
+  padding: 0 120px; // Space for absolute arrows
 }
 
 .mc-button {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
   justify-content: center;
+  min-width: 150px;
+  animation: pulse-glow 2s infinite;
 
   &:disabled {
     opacity: 0.5;
@@ -482,22 +532,30 @@ $nord-aurora-5: #b48ead; // Purple
   }
 
   &--primary {
-    background-color: $nord-frost-3;
+    background-color: #5e81ac;
     color: white;
+    box-shadow: 0 4px 12px rgba(94, 129, 172, 0.3);
 
     &:hover:not(:disabled) {
-      background-color: $nord-frost-4;
-      transform: translateY(-1px);
+      background-color: #4c6983;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(94, 129, 172, 0.4);
+      animation: none; // Stop pulsing on hover
     }
   }
 
   &--success {
-    background-color: $nord-aurora-4;
+    background-color: #8fa678;  // Dunkleres Grün für besseren Kontrast
     color: white;
+    box-shadow: 0 4px 12px rgba(163, 190, 140, 0.3);
+    font-weight: 700;  // Fett für bessere Sichtbarkeit
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);  // Subtiler Textschatten
 
     &:hover:not(:disabled) {
-      background-color: darken($nord-aurora-4, 10%);
-      transform: translateY(-1px);
+      background-color: #7a8f63;  // Noch dunkler beim Hover
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(163, 190, 140, 0.4);
+      animation: none; // Stop pulsing on hover
     }
   }
 
@@ -785,7 +843,7 @@ $nord-aurora-5: #b48ead; // Purple
 // Responsive design
 @media (max-width: 768px) {
   .mc-slider-task--responsive {
-    padding: 12px;
+    padding: 16px;
   }
 
   .question-content {
@@ -800,6 +858,9 @@ $nord-aurora-5: #b48ead; // Purple
     flex-direction: column;
     gap: 2px;
     text-align: center;
+    margin-top: 65px; // Adjusted for tablet (66px - 1px = 65px)
+    margin-left: 59px; // Adjusted for tablet (66px - 7px = 59px)
+    padding: 0 82px 0 4px; // Adjusted for tablet (55px + 27px = 82px)
   }
 
   .progress-dots {
@@ -820,11 +881,13 @@ $nord-aurora-5: #b48ead; // Purple
     flex-direction: column;
     align-items: center;
     gap: 8px;
+    padding: 0 80px; // Space for arrows on tablet
   }
 
   .mc-button {
-    min-width: 160px;
-    padding: 8px 16px;
+    min-width: 140px;
+    padding: 10px 20px;
+    font-size: 14px;
   }
 
   .results-grid {
@@ -842,12 +905,30 @@ $nord-aurora-5: #b48ead; // Purple
   .nav-arrow {
     width: 32px;
     height: 32px;
+
+    &--previous {
+      left: 20px;
+    }
+
+    &--next {
+      right: 20px;
+    }
+  }
+
+  .close-button {
+    top: 12px;
+    right: 12px;
+  }
+
+  .rhino-switch-button {
+    top: 12px;
+    right: 75px; // Move 50% further left (50px + 25px = 75px)
   }
 }
 
 @media (max-width: 480px) {
   .mc-slider-task--responsive {
-    padding: 8px;
+    padding: 12px;
   }
 
   .question-content {
@@ -856,6 +937,12 @@ $nord-aurora-5: #b48ead; // Purple
 
   .progress-title {
     font-size: 16px;
+  }
+
+  .progress-info {
+    margin-top: 60px; // Adjusted for mobile (66px - 6px = 60px)
+    margin-left: 53px; // Adjusted for mobile (66px - 13px = 53px)
+    padding: 0 95px 0 4px; // Adjusted for mobile with further left button (55px + 40px = 95px)
   }
 
   .progress-dots {
@@ -872,9 +959,37 @@ $nord-aurora-5: #b48ead; // Purple
     font-size: 15px;
   }
 
+  .content-section__footer {
+    padding: 0 60px; // Minimal padding on mobile
+  }
+
+  .mc-button {
+    min-width: 130px;
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
   .nav-arrow {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
+
+    &--previous {
+      left: 12px;
+    }
+
+    &--next {
+      right: 12px;
+    }
+  }
+
+  .close-button {
+    top: 12px;
+    right: 12px;
+  }
+
+  .rhino-switch-button {
+    top: 12px;
+    right: 69px; // Move 50% further left (46px + 23px = 69px)
   }
 
   .final-feedback {
@@ -891,5 +1006,68 @@ $nord-aurora-5: #b48ead; // Purple
 
   .item-text {
     font-size: 13px;
+  }
+}
+
+// Success snackbar styling
+::ng-deep .success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+  font-weight: 500 !important;
+  
+  .mat-mdc-button.mat-mdc-snack-bar-action {
+    color: white !important;
+  }
+}
+
+// Perfect feedback styling (100%)
+.feedback-section--perfect {
+  background-color: #e8f5e8;
+  border-left: 4px solid #2e7d32;
+
+  .feedback-section__header-icon--perfect {
+    color: #2e7d32;
+  }
+}
+
+.feedback-section__header-icon--perfect {
+  color: #2e7d32;
+}
+
+// Button pulsing glow animation
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(94, 129, 172, 0.3),
+                0 0 20px rgba(94, 129, 172, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(94, 129, 172, 0.5),
+                0 0 30px rgba(94, 129, 172, 0.4);
+  }
+}
+
+// Success button variant glow (grüner Glow)
+.mc-button--success {
+  animation: pulse-glow-success 2s infinite;
+}
+
+@keyframes pulse-glow-success {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(163, 190, 140, 0.3),
+                0 0 20px rgba(163, 190, 140, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(163, 190, 140, 0.5),
+                0 0 30px rgba(163, 190, 140, 0.4);
+  }
+}
+
+// Subtle navigation arrow glow animation
+@keyframes pulse-glow-subtle {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(136, 192, 208, 0.2);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(136, 192, 208, 0.35);
   }
 }

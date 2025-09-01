@@ -420,9 +420,66 @@ $warning-color: #e67e22;
 
 .dev-phase-toggle {
   position: fixed !important;
-  bottom: 20px;
-  right: 20px;
+  bottom: 32px; // Mehr Abstand vom Rand
+  right: 32px;  // Mehr Abstand vom Rand
   z-index: 1000;
+  
+  // Button-Größe noch weiter vergrößern für optimale Erkennbarkeit
+  width: 110px !important;
+  height: 110px !important;
+  min-width: 110px !important;
+  min-height: 110px !important;
+  border-radius: 50% !important;
+  
+  // Perfekte Icon-Zentrierung
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  
+  // Premium Schatten-Effekt
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  // Hover-Effekt
+  &:hover {
+    transform: translateY(-2px) scale(1.05) !important;
+    box-shadow: 0 12px 32px rgba(255, 87, 34, 0.5), 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  &:active {
+    transform: translateY(-1px) scale(1.02) !important;
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.4), 0 3px 10px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  // Icon massiv vergrößert für kristallklare Erkennbarkeit
+  mat-icon,
+  .mat-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    
+    // Icon auf 55% der Button-Größe (60px bei 110px Button)
+    font-size: 60px !important;
+    width: 60px !important;
+    height: 60px !important;
+    text-align: center !important;
+  }
+  
+  // Material Button Wrapper Override
+  .mat-button-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
 }
 
 // =============================================================================

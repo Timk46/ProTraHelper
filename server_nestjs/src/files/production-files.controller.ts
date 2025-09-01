@@ -98,17 +98,19 @@ export class ProductionFilesController {
     }
     const isPdf = mimeType === 'application/pdf';
 
-
-
     response.set({
       'Content-Type': mimeType,
-      'Content-Disposition': isPdf ? `inline; filename="${file.name}"` : `attachment; filename="${file.name}"`,
+      'Content-Disposition': isPdf
+        ? `inline; filename="${file.name}"`
+        : `attachment; filename="${file.name}"`,
       'X-Filename': file.name,
     });
 
     // Logge erfolgreichen Download-Vorgang mit Nutzer und Dateiname
     // eslint-disable-next-line no-console
-    console.log(`[Download] User ${userId} downloaded file '${file.name}' (${file.uniqueIdentifier})`);
+    console.log(
+      `[Download] User ${userId} downloaded file '${file.name}' (${file.uniqueIdentifier})`,
+    );
     return this.productionFilesService.downloadProductionFile(uniqueIdentifier);
   }
 

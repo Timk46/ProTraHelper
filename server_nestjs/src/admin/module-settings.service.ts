@@ -6,7 +6,7 @@ export class ModuleSettingsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getSetting(moduleId: number, key: string) {
-    return this.prisma.moduleSetting.findUnique({
+    const setting = await this.prisma.moduleSetting.findUnique({
       where: {
         moduleId_key: {
           moduleId,
@@ -14,6 +14,41 @@ export class ModuleSettingsService {
         },
       },
     });
+
+    // If setting doesn't exist, create it with default value
+    if (!setting) {
+      const defaultValue = this.getDefaultValue(key);
+      if (defaultValue !== null) {
+        console.log(
+          `📝 Creating missing ModuleSetting: moduleId=${moduleId}, key=${key}, defaultValue=${defaultValue}`,
+        );
+        return this.prisma.moduleSetting.create({
+          data: {
+            moduleId,
+            key,
+            value: defaultValue,
+            updatedBy: 1, // Use admin user ID as default
+          },
+        });
+      }
+    }
+
+    return setting;
+  }
+
+  /**
+   * Returns default values for module settings
+   */
+  private getDefaultValue(key: string): string | null {
+    const defaults: Record<string, string> = {
+      enabled_navigators: '["default"]',
+      theme: 'light',
+      language: 'de',
+      max_upload_size: '10485760', // 10MB in bytes
+      session_timeout: '3600', // 1 hour in seconds
+    };
+
+    return defaults[key] || null;
   }
 
   async updateSetting(moduleId: number, key: string, value: string, userId: number) {

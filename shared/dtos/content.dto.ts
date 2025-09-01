@@ -55,6 +55,7 @@ export interface taskViewDTO {
     type: string;
     level: number;
     progress: number;
+    score?: number;
     feedback?: userAnswerFeedbackDTO[];
 
     //for lecturers view

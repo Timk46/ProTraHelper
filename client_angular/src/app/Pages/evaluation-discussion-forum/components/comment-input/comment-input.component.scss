@@ -5,17 +5,14 @@
 .comment-input-card {
   position: relative;
   background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  transition: border-color 0.2s ease;
   overflow: visible;
-  max-width: 600px;
-  margin: 0 auto;
   
   &.focused {
-    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
-    border: 1px solid #1976d2;
-    transform: translateY(-1px);
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
   }
   
   &.disabled {
@@ -30,7 +27,7 @@
 // =============================================================================
 
 .comment-input-content {
-  padding: 20px 24px 16px 24px;
+  padding: 16px 12px 4px 12px;
   
   .comment-form {
     width: 100%;
@@ -40,14 +37,15 @@
       margin-bottom: 0;
       
       .comment-textarea {
-        font-size: 14px;
-        line-height: 1.6;
+        font-size: 12px;
+        line-height: 1.4;
         resize: none;
-        min-height: 60px;
+        min-height: 32px;
         
         &::placeholder {
           color: #999;
           font-style: italic;
+          font-size: 0.75em; // 50% smaller than textarea font-size
         }
         
         &:focus {
@@ -93,66 +91,69 @@
 // =============================================================================
 
 .comment-actions {
-  padding: 8px 24px 16px 24px;
-  background-color: #fafafa;
-  border-top: 1px solid #f0f0f0;
+  padding: 4px 12px 8px 12px;
+  background-color: #fff;
   
   .action-buttons {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
+    min-height: 32px;
+    padding: 2px 0;
     
-    .keyboard-hint {
+    .submit-button {
       display: flex;
       align-items: center;
       gap: 6px;
-      color: #666;
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      position: relative;
       font-size: 12px;
-      opacity: 0.8;
       
-      .hint-icon {
+      .button-spinner {
+        margin-right: 2px;
+      }
+      
+      .submit-icon {
         font-size: 16px;
         width: 16px;
         height: 16px;
       }
       
-      .hint-text {
-        font-weight: 500;
-      }
-    }
-    
-    .submit-button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      
-      .button-spinner {
-        margin-right: 4px;
-      }
-      
-      .submit-icon {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-      }
-      
       .button-text {
-        font-size: 13px;
+        font-size: 12px;
       }
       
       &:hover:not([disabled]) {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+        box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
       }
       
       &[disabled] {
         opacity: 0.5;
-        transform: none;
-        box-shadow: none;
+      }
+    }
+    
+    // Cancel button styling for reply mode
+    .cancel-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-weight: 500;
+      margin-right: 8px;
+      transition: all 0.2s ease;
+      
+      .cancel-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+      
+      .button-text {
+        font-size: 12px;
       }
     }
   }
@@ -194,42 +195,10 @@
         }
       }
       
-      .status-text {
-        font-weight: 500;
-        color: #555;
-      }
-      
-      &.normal .status-icon {
-        color: #666;
-      }
-      
-      &.caution .status-icon {
-        color: #ff9800;
-      }
-      
-      &.warning .status-icon {
-        color: #f44336;
-      }
-      
-      &.over-limit .status-icon {
-        color: #d32f2f;
-      }
     }
   }
   
-  .input-tips {
-    margin-top: 8px;
-    padding: 8px 12px;
-    background-color: rgba(25, 118, 210, 0.05);
-    border-radius: 8px;
-    border-left: 3px solid #1976d2;
-    
-    .tip-text {
-      font-size: 12px;
-      color: #1976d2;
-      font-weight: 500;
-    }
-  }
+  // Input tips removed for compact design
 }
 
 // =============================================================================
@@ -296,7 +265,7 @@
     padding: 16px 20px 12px 20px;
     
     .comment-form .comment-field .comment-textarea {
-      font-size: 13px;
+      font-size: 12px;
       min-height: 50px;
     }
   }

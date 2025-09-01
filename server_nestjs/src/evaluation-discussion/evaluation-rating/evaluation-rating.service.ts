@@ -176,8 +176,9 @@ export class EvaluationRatingService {
     // Send notification to submission author
     await this.notificationService.notifyEvaluationRating(ratingDto.submissionId, userId);
 
-    // Invalidate cache for this submission
+    // Invalidate cache for this submission (both old and new patterns)
     this.cacheService.invalidateByPattern(`ratings:${ratingDto.submissionId}:.*`);
+    this.cacheService.invalidateByPattern(`rating-status-batch:${ratingDto.submissionId}:.*`);
 
     return this.mapToDTO(rating);
   }
@@ -365,7 +366,14 @@ export class EvaluationRatingService {
     ); // 5 minutes cache
   }
 
-  async getUserRatings(submissionId: string, userId: number) {
+  /**
+   * Retrieves all ratings for a given submission and user.
+   *
+   * @param {string} submissionId - The ID of the submission.
+   * @param {number} userId - The ID of the user.
+   * @returns {Promise<EvaluationRatingDTO[]>} - Array of EvaluationRatingDTO objects.
+   */
+  async getUserRatings(submissionId: string, userId: number): Promise<EvaluationRatingDTO[]> {
     const ratings = await this.prisma.evaluationRating.findMany({
       where: {
         submissionId,
@@ -379,15 +387,29 @@ export class EvaluationRatingService {
       },
     });
 
-    return ratings.map(rating => ({
-      categoryId: rating.categoryId,
-      categoryName: rating.category.name,
-      displayName: rating.category.displayName,
-      score: rating.rating,
-      comment: rating.comment,
-      createdAt: rating.createdAt,
-      updatedAt: rating.updatedAt,
-    }));
+    // Map the results to the EvaluationRatingDTO structure
+    return ratings.map(
+      (rating): EvaluationRatingDTO => ({
+        id: rating.id.toString(),
+        submissionId: rating.submissionId,
+        userId: rating.userId,
+        categoryId: rating.categoryId,
+        score: rating.rating, // Assuming 'rating.rating' is the score (0-10)
+        createdAt: rating.createdAt,
+        updatedAt: rating.updatedAt,
+        // Relations
+        category: {
+          id: rating.category.id,
+          name: rating.category.name,
+          displayName: rating.category.displayName,
+          description: rating.category.description,
+          icon: rating.category.icon,
+          ...(rating.category.color && { color: rating.category.color }),
+          order: rating.category.order,
+        },
+        // submission and user can be included if available, otherwise omitted
+      }),
+    );
   }
 
   /**
@@ -437,13 +459,43 @@ export class EvaluationRatingService {
    * @memberof EvaluationRatingService
    */
   async getUserRatingStatus(submissionId: string, userId: number): Promise<CategoryRatingStatus[]> {
+    const cacheKey = this.utilsService.generateCacheKey(
+      'rating-status-batch',
+      submissionId,
+      userId.toString(),
+    );
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        return this.getUserRatingStatusBatch(submissionId, userId);
+      },
+      60000,
+    ); // 1 minute cache for fast updates but good performance
+  }
+
+  /**
+   * Internal batch method for getting rating status with optimized single query
+   *
+   * @description Uses a single JOIN query to fetch all necessary data atomically,
+   * preventing race conditions between submission and rating queries.
+   *
+   * @param {string} submissionId - The submission ID to check
+   * @param {number} userId - The user ID to check
+   * @returns {Promise<CategoryRatingStatus[]>} Promise containing rating status for all categories
+   * @memberof EvaluationRatingService
+   */
+  private async getUserRatingStatusBatch(
+    submissionId: string,
+    userId: number,
+  ): Promise<CategoryRatingStatus[]> {
     // Handle demo submissions that may not exist in the database
     if (this.isDemoSubmission(submissionId)) {
       return this.getDemoRatingStatus(submissionId, userId);
     }
 
-    // Get all available categories for this submission's session
-    const submission = await this.prisma.evaluationSubmission.findUnique({
+    // OPTIMIZED: Single JOIN query to fetch submission, categories, and user ratings atomically
+    const submissionWithRatings = await this.prisma.evaluationSubmission.findUnique({
       where: { id: submissionId },
       include: {
         session: {
@@ -453,42 +505,41 @@ export class EvaluationRatingService {
             },
           },
         },
+        ratings: {
+          where: { userId },
+          select: {
+            categoryId: true,
+            rating: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
     });
 
-    if (!submission) {
+    if (!submissionWithRatings) {
       throw new NotFoundException(`Submission with ID ${submissionId} not found`);
     }
 
-    // Get user's ratings for this submission
-    const userRatings = await this.prisma.evaluationRating.findMany({
-      where: {
-        submissionId,
-        userId,
-      },
-      select: {
-        categoryId: true,
-        rating: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    // Create a map for O(1) lookup performance
+    const ratingsMap = new Map(
+      submissionWithRatings.ratings.map(rating => [rating.categoryId, rating]),
+    );
 
-    // Create a map for quick lookup
-    const ratingsMap = new Map(userRatings.map(rating => [rating.categoryId, rating]));
-
-    // Build status for each category
-    return submission.session.categories.map(category => {
+    // Build status for each category with atomic data consistency
+    return submissionWithRatings.session.categories.map(category => {
       const categoryRating = ratingsMap.get(category.id);
+      const hasRated = ratingsMap.has(category.id);
+
       return {
         categoryId: category.id,
         categoryName: category.name,
         displayName: category.displayName,
-        hasRated: ratingsMap.has(category.id),
-        rating: categoryRating?.rating || null,
-        ratedAt: categoryRating?.createdAt || null,
-        lastUpdatedAt: categoryRating?.updatedAt || null,
-        canAccessDiscussion: ratingsMap.has(category.id), // User can access discussion if they've rated
+        hasRated,
+        rating: categoryRating?.rating ?? null,
+        ratedAt: categoryRating?.createdAt ?? null,
+        lastUpdatedAt: categoryRating?.updatedAt ?? new Date(), // Always provide lastUpdatedAt for cache validation
+        canAccessDiscussion: hasRated, // User can access discussion if they've rated
         isRequired: true, // All categories require rating for discussion access
       };
     });
@@ -614,9 +665,9 @@ export class EvaluationRatingService {
         categoryName: category.name,
         displayName: category.displayName,
         hasRated: ratingsMap.has(category.id), // Check if rating exists in DB
-        rating: storedRating?.rating || null,
-        ratedAt: storedRating?.createdAt || null,
-        lastUpdatedAt: storedRating?.updatedAt || null,
+        rating: storedRating?.rating ?? null,
+        ratedAt: storedRating?.createdAt ?? null,
+        lastUpdatedAt: storedRating?.updatedAt ?? new Date(), // Always provide lastUpdatedAt for cache validation
         canAccessDiscussion: ratingsMap.has(category.id), // Can access if rated
         isRequired: true, // All categories require rating
       };

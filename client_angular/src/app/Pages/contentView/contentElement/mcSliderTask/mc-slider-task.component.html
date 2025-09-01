@@ -62,8 +62,8 @@
           class="progress-dot"
           [class.progress-dot--current]="i === currentQuestionIndex"
           [class.progress-dot--answered]="state.selectedOptions.length > 0 || state.isSubmitted"
-          [class.progress-dot--correct]="state.isCorrect === true"
-          [class.progress-dot--incorrect]="state.isCorrect === false"
+          [class.progress-dot--correct]="state.isSubmitted && getQuestionScoreRatio(i) >= 0.6"
+          [class.progress-dot--incorrect]="state.isSubmitted && getQuestionScoreRatio(i) < 0.6"
           (click)="goToQuestion(i)"
           [attr.aria-selected]="i === currentQuestionIndex"
           [attr.aria-label]="'Zu Frage ' + (i + 1) + ' gehen'"
@@ -84,7 +84,7 @@
         <div class="content-section__header">
           <h3 class="content-section__header-title">
             <span
-              [innerHTML]="getCurrentQuestionState()?.questionData.text"
+              [innerHTML]="getCurrentQuestionState()?.questionData!.text"
               aria-live="polite"
             ></span>
           </h3>
@@ -97,7 +97,7 @@
             {{
               getCurrentQuestionState()?.mcQuestion?.isSC ? 'Einfachauswahl' : 'Mehrfachauswahl'
             }}
-            - Maximale Punktzahl: {{ getCurrentQuestionState()?.questionData.score || 0 }}
+            - Maximale Punktzahl: {{ getCurrentQuestionState()?.questionData!.score || 0 }}
           </span>
         </div>
 
@@ -235,55 +235,40 @@
         <section
           *ngIf="getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.feedback"
           class="feedback-section"
-          [class.feedback-section--success]="getCurrentQuestionState()?.isCorrect === true"
-          [class.feedback-section--partial]="
-            getCurrentQuestionState()?.isCorrect === false &&
-            (getCurrentQuestionState()?.feedback?.score || 0) > 0
-          "
-          [class.feedback-section--error]="(getCurrentQuestionState()?.feedback?.score || 0) === 0"
+          [class.feedback-section--perfect]="getFeedbackStatus() === 'perfect'"
+          [class.feedback-section--success]="getFeedbackStatus() === 'correct'"
+          [class.feedback-section--partial]="getFeedbackStatus() === 'partial'"
+          [class.feedback-section--error]="getFeedbackStatus() === 'wrong'"
           aria-live="polite"
         >
           <div class="feedback-section__header feedback-section__header--compact">
             <div
               class="feedback-section__header-icon"
-              [class.feedback-section__header-icon--success]="
-                getCurrentQuestionState()?.isCorrect === true
-              "
-              [class.feedback-section__header-icon--partial]="
-                getCurrentQuestionState()?.isCorrect === false &&
-                (getCurrentQuestionState()?.feedback?.score || 0) > 0
-              "
-              [class.feedback-section__header-icon--error]="
-                (getCurrentQuestionState()?.feedback?.score || 0) === 0
-              "
+              [class.feedback-section__header-icon--perfect]="getFeedbackStatus() === 'perfect'"
+              [class.feedback-section__header-icon--success]="getFeedbackStatus() === 'correct'"
+              [class.feedback-section__header-icon--partial]="getFeedbackStatus() === 'partial'"
+              [class.feedback-section__header-icon--error]="getFeedbackStatus() === 'wrong'"
             >
-              <mat-icon *ngIf="getCurrentQuestionState()?.isCorrect === true" aria-hidden="true"
+              <!-- Perfect score (100%) -->
+              <mat-icon *ngIf="getFeedbackStatus() === 'perfect'" aria-hidden="true"
                 >sentiment_very_satisfied</mat-icon
               >
-              <mat-icon
-                *ngIf="
-                  getCurrentQuestionState()?.isCorrect === false &&
-                  (getCurrentQuestionState()?.feedback?.score || 0) > 0
-                "
-                aria-hidden="true"
+              <!-- Correct (75-99%) -->
+              <mat-icon *ngIf="getFeedbackStatus() === 'correct'" aria-hidden="true"
+                >check_circle</mat-icon
+              >
+              <!-- Partial (60-74%) -->
+              <mat-icon *ngIf="getFeedbackStatus() === 'partial'" aria-hidden="true"
                 >sentiment_satisfied</mat-icon
               >
-              <mat-icon
-                *ngIf="(getCurrentQuestionState()?.feedback?.score || 0) === 0"
-                aria-hidden="true"
+              <!-- Wrong (<60%) -->
+              <mat-icon *ngIf="getFeedbackStatus() === 'wrong'" aria-hidden="true"
                 >sentiment_dissatisfied</mat-icon
               >
             </div>
-            <h4 class="feedback-section__header-title">
-              <span *ngIf="getCurrentQuestionState()?.isCorrect === true">Richtig!</span>
-              <span
-                *ngIf="
-                  getCurrentQuestionState()?.isCorrect === false &&
-                  (getCurrentQuestionState()?.feedback?.score || 0) > 0
-                "
-                >Teilweise richtig!</span
-              >
-              <span *ngIf="(getCurrentQuestionState()?.feedback?.score || 0) === 0">Falsch!</span>
+            <!-- Frontend-Header entfernt - Backend-Feedback (unten) ist die einzige Text-Quelle -->
+            <h4 class="feedback-section__header-title" style="display: none;">
+              <!-- Redundanter Header ausgeblendet - Backend generiert bereits vollständiges Feedback -->
             </h4>
           </div>
 
@@ -302,17 +287,17 @@
                   (getCurrentQuestionState()?.feedback?.score || 0) === 0
                 "
                 [style.width.%]="
-                  (getCurrentQuestionState()?.questionData.score || 0) > 0
+                  (getCurrentQuestionState()?.questionData!.score || 0) > 0
                     ? ((getCurrentQuestionState()?.feedback?.score || 0) /
-                        (getCurrentQuestionState()?.questionData.score || 1)) *
+                        (getCurrentQuestionState()?.questionData!.score || 1)) *
                       100
                     : 0
                 "
               ></div>
             </div>
-            <div class="feedback-section__score-text">
-              Punktzahl: {{ getCurrentQuestionState()?.feedback?.score || 0 }} von
-              {{ getCurrentQuestionState()?.questionData.score || 0 }} Punkten
+            <!-- Punktzahl-Anzeige ausgeblendet - Backend-feedbackText enthält bereits Punktzahlen -->
+            <div class="feedback-section__score-text" style="display: none;">
+              <!-- Separate Punktzahl-Anzeige temporär ausgeblendet -->
             </div>
           </div>
 
@@ -367,6 +352,19 @@
           >
             <mat-icon aria-hidden="true">refresh</mat-icon>
             Erneut versuchen
+          </button>
+
+          <!-- Continue after correct answer -->
+          <button
+            *ngIf="
+              getCurrentQuestionState()?.isSubmitted && getCurrentQuestionState()?.isCorrect === true
+            "
+            class="mc-button mc-button--success"
+            (click)="nextQuestion()"
+            aria-label="Zur nächsten Frage"
+          >
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            Weiter
           </button>
 
           <!-- Submit all questions -->

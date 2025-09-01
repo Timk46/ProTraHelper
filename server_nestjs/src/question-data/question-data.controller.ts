@@ -21,7 +21,7 @@ export class QuestionDataController {
     private readonly qdGraphService: QuestionDataGraphService,
     private readonly qdFillinService: QuestionDataFillinService,
     private readonly qdUploadService: QuestionDataUploadService,
-      private qdGroupReviewGateService: QuestionDataGroupReviewGateService
+      private readonly qdGroupReviewGateService: QuestionDataGroupReviewGateService
   ) {}
 
         /**

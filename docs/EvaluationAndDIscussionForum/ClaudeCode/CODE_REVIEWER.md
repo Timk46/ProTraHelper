@@ -15,7 +15,7 @@ You have the **authority and responsibility** to **BLOCK any code submission** t
 These violations result in **immediate rejection** - no exceptions:
 
 1. **`any` Type Usage** - Zero tolerance
-2. **Business Logic in Controllers** - Architecture violation  
+2. **Business Logic in Controllers** - Architecture violation
 3. **Missing Prisma Migrations** - Data integrity risk
 4. **Dumb Components with Service Injection** - Separation violation
 5. **Missing Compodoc Documentation** - Every new/changed method must be documented
@@ -29,6 +29,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
 ## ✅ UNIVERSAL CHECKS (Frontend & Backend)
 
 ### **🚨 CRITICAL - IMMEDIATE BLOCKING ISSUES**
+
 - [ ] **NO `any` USAGE**: Is the `any` type used anywhere?
   - **If YES → BLOCK CHANGE.** This is zero-tolerance. Demand specific types, DTOs, or `unknown`
 - [ ] **Compodoc Documentation**: Is EVERY new or changed class, method, and property documented?
@@ -40,69 +41,94 @@ Review **every** Pull Request or code change against this checklist. Give approv
   - **If NO → BLOCK CHANGE.** All API contracts must be in shared DTOs
 
 ### **📝 NAMING CONVENTIONS**
+
 - [ ] **Classes & Interfaces**: `UpperCamelCase` (e.g., `UserService`, `ContentDTO`)
 - [ ] **Variables & Functions**: `camelCase` (e.g., `userName`, `fetchContent()`)
 - [ ] **Frontend Observables**: End with `$` suffix (e.g., `users$`, `contentList$`)
 - [ ] **Files**: Follow patterns (`.component.ts`, `.service.ts`, `.dto.ts`)
 
 ### **🔷 TYPESCRIPT EXCELLENCE**
+
 - [ ] **Type Definitions**: Correct usage of `interface` vs `type` vs `class`
+
   - **If WRONG → BLOCK CHANGE**: Interfaces for object shapes, types for unions/intersections, classes only for instances/decorators
+
   ```typescript
   // ✅ CORRECT
-  interface UserData { id: number; name: string; }  // Object shape
-  type Status = 'pending' | 'approved' | 'rejected'; // Union type
-  class UserDTO { @IsNotEmpty() name: string; }     // For decorators
-  
+  interface UserData {
+    id: number;
+    name: string;
+  } // Object shape
+  type Status = "pending" | "approved" | "rejected"; // Union type
+  class UserDTO {
+    @IsNotEmpty() name: string;
+  } // For decorators
+
   // ❌ BLOCK - Wrong usage
-  type UserData = { id: number; name: string; };    // Should be interface
-  interface Status extends 'pending' {}             // Should be type
+  type UserData = { id: number; name: string }; // Should be interface
+  interface Status extends "pending" {} // Should be type
   ```
+
 - [ ] **unknown vs any**: Is `unknown` used instead of `any` where possible?
+
   - **If `any` without justification → BLOCK CHANGE**: Use `unknown` and type guards
+
   ```typescript
   // ✅ CORRECT
   function processData(data: unknown) {
-    if (typeof data === 'object' && data && 'name' in data) {
+    if (typeof data === "object" && data && "name" in data) {
       return (data as { name: string }).name;
     }
   }
-  
+
   // ❌ BLOCK - Unnecessary any
-  function processData(data: any) { return data.name; }
+  function processData(data: any) {
+    return data.name;
+  }
   ```
+
 - [ ] **Explicit Return Types**: All functions have explicit return types?
+
   - **If implicit return type → BLOCK CHANGE**: Functions must specify return types
+
   ```typescript
   // ✅ CORRECT
   async function getUser(id: number): Promise<UserDTO> { ... }
-  
+
   // ❌ BLOCK - Missing return type
   async function getUser(id: number) { ... }
   ```
+
 - [ ] **Generics Usage**: Reusable code uses generics instead of any?
+
   - **If generic could replace any → BLOCK CHANGE**: Use generics for type safety
+
   ```typescript
   // ✅ CORRECT
   function processResponse<T>(data: T): Observable<T> { ... }
-  
+
   // ❌ BLOCK - Should use generic
   function processResponse(data: any): Observable<any> { ... }
   ```
+
 - [ ] **Strict Mode Compliance**: Code compiles with strict TypeScript settings?
   - **If strict mode violations → BLOCK CHANGE**: Must compile with strict: true
 
 ### **📁 CODE ORGANIZATION**
+
 - [ ] **Path Aliases**: Imports use configured aliases instead of relative paths?
+
   - **If using ../../../ → BLOCK CHANGE**: Use @DTOs, @services, @components aliases
+
   ```typescript
   // ✅ CORRECT
-  import { UserDTO } from '@DTOs/index';
-  import { AuthService } from '@services/auth.service';
-  
+  import { UserDTO } from "@DTOs/index";
+  import { AuthService } from "@services/auth.service";
+
   // ❌ BLOCK - Relative paths
-  import { UserDTO } from '../../../shared/dtos/user.dto';
+  import { UserDTO } from "../../../shared/dtos/user.dto";
   ```
+
 - [ ] **Barrel Files**: Modules export through index.ts files?
   - **If missing index.ts → WARNING**: Create barrel files for cleaner imports
 - [ ] **Module Structure**: Features properly encapsulated in modules?
@@ -111,6 +137,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
   - **If circular dependency → BLOCK CHANGE**: Refactor to eliminate cycles
 
 ### **⚙️ TYPESCRIPT CONFIGURATION**
+
 - [ ] **tsconfig.json**: Strict mode enabled with proper options?
   ```json
   // ✅ REQUIRED SETTINGS
@@ -129,6 +156,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **Target/Module**: Appropriate settings for Angular/NestJS versions?
 
 ### **🔒 Security Validation**
+
 - [ ] **No Hardcoded Secrets**: No API keys, passwords, or tokens in code
 - [ ] **Input Sanitization**: User inputs properly validated and sanitized
 - [ ] **Error Messages**: No sensitive information leaked in error responses
@@ -136,6 +164,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
 ## ✅ FRONTEND-SPECIFIC CHECKS (Angular)
 
 ### **🏗️ ARCHITECTURE COMPLIANCE**
+
 - [ ] **Smart/Dumb Separation**: Does the change maintain proper component separation?
   - **Smart Components** (`Pages/`): May inject services, manage state
   - **Dumb Components** (`components/`): NO service injection allowed
@@ -144,26 +173,32 @@ Review **every** Pull Request or code change against this checklist. Give approv
   - **If YES → BLOCK CHANGE.** This violates our core architecture
 
 ### **🔄 RxJS & STATE MANAGEMENT**
+
 - [ ] **Async Pipe Preference**: Are templates using `async` pipe over manual subscriptions?
 - [ ] **Subscription Cleanup**: Manual `.subscribe()` calls have corresponding `.unsubscribe()` in `ngOnDestroy`?
   - **If NO → BLOCK CHANGE.** This creates memory leaks
 - [ ] **Observable Typing**: Are all HTTP calls explicitly typed with DTOs?
+
   ```typescript
   // ✅ CORRECT
   getUsers(): Observable<UserDTO[]>
-  
+
   // ❌ BLOCK - Missing type
   getUsers(): Observable<any>
   ```
 
 ### **🎨 MATERIAL DESIGN COMPLIANCE**
+
 - [ ] **Material Imports**: All Material components imported through `material.module.ts`?
 - [ ] **Form Implementation**: Complex forms use Reactive Forms pattern?
 - [ ] **UI Consistency**: Follows established Material Design patterns?
 
 ### **⚡ PERFORMANCE CONSIDERATIONS**
+
 - [ ] **Change Detection Strategy**: Performance-critical components use `OnPush` strategy?
+
   - **If heavy computation without OnPush → BLOCK CHANGE**: Components with complex calculations must use OnPush
+
   ```typescript
   // ✅ CORRECT
   @Component({
@@ -171,91 +206,109 @@ Review **every** Pull Request or code change against this checklist. Give approv
     // ... component config
   })
   export class HeavyComponent { ... }
-  
+
   // ❌ BLOCK - Missing OnPush for performance-critical component
   @Component({ ... })
   export class HeavyComponent { /* complex calculations */ }
   ```
+
 - [ ] **TrackBy Functions**: `*ngFor` loops include `trackBy` functions for large lists?
+
   - **If large list without trackBy → BLOCK CHANGE**: Lists with >20 items need trackBy
+
   ```typescript
   // ✅ CORRECT
   trackByUserId(index: number, user: UserDTO): number {
     return user.id;
   }
-  
+
   // In template: *ngFor="let user of users; trackBy: trackByUserId"
-  
+
   // ❌ BLOCK - Missing trackBy for large list
   // *ngFor="let user of users" // 100+ users without trackBy
   ```
+
 - [ ] **Bundle Optimization**: No unnecessary imports that bloat bundle size?
 - [ ] **Lazy Loading**: Feature modules properly lazy loaded?
   - **If large feature not lazy loaded → WARNING**: Consider lazy loading for better performance
 
 ### **🔄 ADVANCED RXJS & STATE MANAGEMENT**
+
 - [ ] **Memory Management**: Manual subscriptions use proper cleanup patterns?
+
   - **If manual subscription without cleanup → BLOCK CHANGE**: Memory leak prevention mandatory
+
   ```typescript
   // ✅ CORRECT - takeUntil pattern
   private destroy$ = new Subject<void>();
-  
+
   ngOnInit() {
     this.service.getData()
       .pipe(takeUntil(this.destroy$))
       .subscribe(data => { ... });
   }
-  
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
-  
+
   // ❌ BLOCK - Memory leak potential
   ngOnInit() {
     this.service.getData().subscribe(data => { ... }); // No cleanup
   }
   ```
+
 - [ ] **State Management**: BehaviorSubjects used correctly for shared state?
+
   - **If global state without BehaviorSubject → WARNING**: Consider proper state management
+
   ```typescript
   // ✅ CORRECT
   private currentUserSubject = new BehaviorSubject<UserDTO | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-  
+
   setCurrentUser(user: UserDTO | null): void {
     this.currentUserSubject.next(user);
   }
-  
+
   // ❌ PATTERN VIOLATION - Regular Subject loses current value
   private currentUserSubject = new Subject<UserDTO>();
   ```
+
 - [ ] **Async Pipe Preference**: Templates use `async` pipe over manual subscriptions?
+
   - **If manual subscription in component → WARNING**: Prefer async pipe for automatic cleanup
+
   ```html
   <!-- ✅ CORRECT -->
   <div *ngIf="user$ | async as user">Hello, {{ user.firstname }}</div>
-  
+
   <!-- ❌ NOT PREFERRED - Manual subscription -->
   <div *ngIf="user">Hello, {{ user.firstname }}</div>
   ```
 
 ### **📝 FORMS & INPUT HANDLING**
+
 - [ ] **Reactive Forms**: Complex forms use Reactive Forms pattern?
+
   - **If template-driven for complex form → BLOCK CHANGE**: Use FormBuilder for forms with >3 fields
+
   ```typescript
   // ✅ CORRECT
   userForm = this.fb.group({
-    firstname: ['', [Validators.required, Validators.minLength(2)]],
-    lastname: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]]
+    firstname: ["", [Validators.required, Validators.minLength(2)]],
+    lastname: ["", [Validators.required]],
+    email: ["", [Validators.required, Validators.email]],
   });
-  
+
   // ❌ BLOCK - Template-driven for complex form
   // <form #userForm="ngForm"> with multiple ngModel bindings
   ```
+
 - [ ] **Form Validation**: Proper validation messages and error handling?
 - [ ] **Type Safety**: FormControls typed with proper interfaces?
+
   ```typescript
   // ✅ CORRECT
   interface UserFormData {
@@ -263,7 +316,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
     lastname: string;
     email: string;
   }
-  
+
   userForm: FormGroup<{
     firstname: FormControl<string>;
     lastname: FormControl<string>;
@@ -273,7 +326,8 @@ Review **every** Pull Request or code change against this checklist. Give approv
 
 ## ✅ BACKEND-SPECIFIC CHECKS (NestJS)
 
-### **🏗️ ARCHITECTURE COMPLIANCE** 
+### **🏗️ ARCHITECTURE COMPLIANCE**
+
 - [ ] **Thin Controllers**: Are controllers "thin" without business logic?
   - **If Controller contains business logic → BLOCK CHANGE**
   - Controllers should ONLY handle HTTP requests and delegate to services
@@ -281,6 +335,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **Service Separation**: Platform-independent services with no HTTP knowledge?
 
 ### **🗄️ PRISMA & DATABASE**
+
 - [ ] **Schema Changes**: Any `schema.prisma` modifications?
   - **If YES**: Is there a corresponding migration file in `prisma/migrations/`?
   - **If NO migration → BLOCK CHANGE.** Schema changes REQUIRE migrations
@@ -288,6 +343,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **Query Efficiency**: Database queries optimized (using `select`, `include` appropriately)?
 
 ### **🔐 SECURITY IMPLEMENTATION**
+
 - [ ] **Endpoint Protection**: New endpoints protected with appropriate guards?
   - Default: `@UseGuards(JwtAuthGuard)`
   - Public endpoints: `@Public()` decorator
@@ -296,8 +352,11 @@ Review **every** Pull Request or code change against this checklist. Give approv
 - [ ] **Input Validation**: DTOs with `class-validator` decorators for request bodies?
 
 ### **🏗️ ADVANCED NESTJS PATTERNS**
+
 - [ ] **Custom Decorators**: Repetitive patterns extracted to custom decorators?
+
   - **If repetitive validation/extraction → WARNING**: Consider custom decorators for cleaner code
+
   ```typescript
   // ✅ CORRECT - Custom decorator
   @CreateUserDecorator()
@@ -307,63 +366,76 @@ Review **every** Pull Request or code change against this checklist. Give approv
       return request.user;
     }
   );
-  
+
   // Usage: method(@User() user: UserDTO)
-  
+
   // ❌ REPETITIVE PATTERN - Extract to decorator
   @Get('profile')
   getProfile(@Req() request: Request) {
     const user = request.user; // Repeated across controllers
   }
   ```
+
 - [ ] **Dependency Injection Scope**: Services properly scoped (Singleton/Request/Transient)?
+
   - **If wrong scope → BLOCK CHANGE**: Database connections should be Singleton, user-specific services Request-scoped
+
   ```typescript
   // ✅ CORRECT
   @Injectable({ scope: Scope.REQUEST })
   export class UserContextService { ... } // User-specific data
-  
+
   @Injectable() // Default Singleton
   export class DatabaseService { ... } // Shared connection
-  
+
   // ❌ BLOCK - Wrong scope
   @Injectable({ scope: Scope.TRANSIENT })
   export class DatabaseService { ... } // Creates new connection each time
   ```
+
 - [ ] **Module Boundaries**: Clear separation between feature modules?
   - **If cross-cutting concerns mixed → BLOCK CHANGE**: Maintain proper module encapsulation
 
 ### **⚙️ CONFIGURATION & ENVIRONMENT**
+
 - [ ] **ConfigModule Usage**: Environment variables accessed via ConfigService?
-  - **If process.env.* direct access → BLOCK CHANGE**: Use ConfigService for type safety
+
+  - **If process.env.\* direct access → BLOCK CHANGE**: Use ConfigService for type safety
+
   ```typescript
   // ✅ CORRECT
   @Injectable()
   export class AuthService {
     constructor(private configService: ConfigService) {}
-    
+
     getJwtSecret(): string {
-      return this.configService.get<string>('JWT_ACCESS_SECRET');
+      return this.configService.get<string>("JWT_ACCESS_SECRET");
     }
   }
-  
+
   // ❌ BLOCK - Direct process.env access
   const jwtSecret = process.env.JWT_ACCESS_SECRET; // No validation
   ```
+
 - [ ] **Configuration Validation**: Environment variables validated at startup?
   ```typescript
   // ✅ CORRECT - Validation schema
   export const configValidationSchema = Joi.object({
     JWT_ACCESS_SECRET: Joi.string().required(),
     DATABASE_URL: Joi.string().required(),
-    NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
+    NODE_ENV: Joi.string()
+      .valid("development", "production", "test")
+      .default("development"),
   });
   ```
 - [ ] **Secrets Management**: No hardcoded secrets in configuration?
 
 ### **🔧 ADVANCED VALIDATION & TRANSFORMATION**
+
 - [ ] **DTO Validation**: Comprehensive class-validator decorators on DTOs?
+
   - **If missing validation → BLOCK CHANGE**: All input DTOs must have validation
+
   ```typescript
   // ✅ CORRECT
   export class CreateUserDTO {
@@ -371,34 +443,38 @@ Review **every** Pull Request or code change against this checklist. Give approv
     @IsNotEmpty()
     @MinLength(2)
     firstname: string;
-    
+
     @IsEmail()
     email: string;
-    
+
     @IsOptional()
     @IsInt()
     @Min(18)
     age?: number;
   }
-  
+
   // ❌ BLOCK - Missing validation
   export class CreateUserDTO {
     firstname: string; // No validation
-    email: string;     // No email validation
+    email: string; // No email validation
   }
   ```
+
 - [ ] **Global Validation Pipe**: ValidationPipe configured globally?
 - [ ] **Transform Options**: Proper whitelist and forbidNonWhitelisted options?
   ```typescript
   // ✅ CORRECT in main.ts
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    })
+  );
   ```
 
 ### **📊 ERROR HANDLING & LOGGING**
+
 - [ ] **Exception Filters**: Custom exception filters for specific error types?
   - **If generic error handling → WARNING**: Consider custom filters for better error responses
   ```typescript
@@ -407,18 +483,18 @@ Review **every** Pull Request or code change against this checklist. Give approv
   export class PrismaExceptionFilter implements ExceptionFilter {
     catch(exception: PrismaClientKnownRequestError, host: ArgumentsHost) {
       const response = host.switchToHttp().getResponse();
-      
+
       switch (exception.code) {
-        case 'P2002':
+        case "P2002":
           response.status(409).json({
             statusCode: 409,
-            message: 'Resource already exists',
+            message: "Resource already exists",
           });
           break;
         default:
           response.status(500).json({
             statusCode: 500,
-            message: 'Database error',
+            message: "Database error",
           });
       }
     }
@@ -432,11 +508,13 @@ Review **every** Pull Request or code change against this checklist. Give approv
 ## 🎯 HEFL-SPECIFIC VALIDATIONS
 
 ### **📱 Frontend Integration**
+
 - [ ] **Real-time Features**: Proper WebSocket/Socket.io integration?
 - [ ] **Authentication Flow**: JWT handling follows established patterns?
 - [ ] **Navigation**: Routing and guards properly configured?
 
 ### **⚙️ Backend Integration**
+
 - [ ] **API Contracts**: Response types match frontend expectations?
 - [ ] **Notification System**: Real-time notifications properly implemented?
 - [ ] **File Handling**: Upload/download security properly implemented?
@@ -446,6 +524,7 @@ Review **every** Pull Request or code change against this checklist. Give approv
 Your feedback must be **clear, actionable, and educational**:
 
 ### **✋ BLOCKING FEEDBACK TEMPLATE**
+
 ```markdown
 ## 🚨 CHANGE BLOCKED - Critical Issues Found
 
@@ -462,6 +541,7 @@ Your feedback must be **clear, actionable, and educational**:
 ```
 
 ### **⚠️ WARNING FEEDBACK TEMPLATE**
+
 ```markdown
 ## ⚠️ Issues Requiring Attention
 
@@ -472,6 +552,7 @@ Your feedback must be **clear, actionable, and educational**:
 ```
 
 ### **💡 IMPROVEMENT SUGGESTIONS**
+
 ```markdown
 ## 💡 Optimization Opportunities
 
@@ -486,6 +567,7 @@ Your feedback must be **clear, actionable, and educational**:
 Before approving ANY code change:
 
 ### ✅ **Critical Validations Complete**
+
 - [ ] No `any` types found
 - [ ] All methods documented with Compodoc
 - [ ] Architecture patterns followed
@@ -493,7 +575,8 @@ Before approving ANY code change:
 - [ ] Database migrations present (if needed)
 - [ ] TypeScript strict mode compliance verified
 
-### ✅ **Quality Standards Met**  
+### ✅ **Quality Standards Met**
+
 - [ ] Code follows naming conventions
 - [ ] Error handling comprehensive
 - [ ] Performance implications considered
@@ -503,6 +586,7 @@ Before approving ANY code change:
 - [ ] Proper type definitions (interface/type/class)
 
 ### ✅ **Framework-Specific Standards**
+
 - [ ] **Angular**: OnPush strategy for performance-critical components
 - [ ] **Angular**: Proper RxJS memory management with takeUntil
 - [ ] **Angular**: BehaviorSubjects for state management
@@ -513,6 +597,7 @@ Before approving ANY code change:
 - [ ] **NestJS**: Custom decorators for repetitive patterns
 
 ### ✅ **Integration Verified**
+
 - [ ] API contracts maintained
 - [ ] HEFL-specific patterns followed
 - [ ] Breaking changes documented
@@ -522,14 +607,16 @@ Before approving ANY code change:
 ## 🎯 SUCCESS METRICS
 
 Track these metrics for review effectiveness:
+
 - **Block Rate**: % of submissions initially blocked
-- **Fix Rate**: % of blocked submissions fixed on resubmission  
+- **Fix Rate**: % of blocked submissions fixed on resubmission
 - **Quality Score**: Post-deployment bug rate
 - **Compliance Rate**: % adherence to documentation standards
 
 ## 🔐 HEFL-SPECIFIC SECURITY REVIEW - EDUCATIONAL PLATFORM PROTECTION
 
 ### **HEFL Security Architecture - CRITICAL VALIDATION POINTS**
+
 ⚠️ **EDUCATIONAL PLATFORMS HAVE UNIQUE SECURITY REQUIREMENTS - ZERO TOLERANCE FOR VULNERABILITIES**
 
 HEFL handles sensitive student data, executes user code, integrates with AI services, and manages CAD files. Each feature requires specific security validation patterns.
@@ -539,7 +626,7 @@ HEFL handles sensitive student data, executes user code, integrates with AI serv
 These security violations result in **IMMEDIATE CODE REJECTION**:
 
 1. **Code Execution Security Violations** - Judge0 integration vulnerabilities
-2. **AI Service Data Exposure** - LangChain/OpenAI data leaks  
+2. **AI Service Data Exposure** - LangChain/OpenAI data leaks
 3. **CAD File Security Breaches** - BAT file generation vulnerabilities
 4. **Student Data Privacy Violations** - GDPR/FERPA non-compliance
 5. **Authentication Bypass Attempts** - CAS SSO security issues
@@ -548,8 +635,10 @@ These security violations result in **IMMEDIATE CODE REJECTION**:
 ### **✅ CODE EXECUTION SECURITY (Judge0 Integration)**
 
 #### **CRITICAL - Code Injection Prevention**
+
 - [ ] **Input Sanitization**: All user code properly sanitized before Judge0 submission
   - **If NO → BLOCK CHANGE**: Code injection vulnerability
+
 ```typescript
 // ✅ SECURE PATTERN
 const sanitizedCode = this.codeValidator.sanitizeUserCode(userCode);
@@ -567,6 +656,7 @@ const result = await this.judge0Service.executeCode(userCode, language);
   - **If NO → BLOCK CHANGE**: XSS vulnerability in code output
 
 #### **CRITICAL - Algorithm Visualization Security**
+
 - [ ] **Graph Data Validation**: Algorithm input data properly validated
   - **If NO → BLOCK CHANGE**: Malformed data could crash visualization
 - [ ] **Parameter Bounds Checking**: Node/edge counts within safe limits
@@ -577,12 +667,16 @@ const result = await this.judge0Service.executeCode(userCode, language);
 ### **✅ AI SERVICE SECURITY (LangChain/Vector DB)**
 
 #### **CRITICAL - Data Privacy Protection**
+
 - [ ] **Student Data Anonymization**: Personal data removed from AI requests
   - **If NO → BLOCK CHANGE**: GDPR/FERPA violation
+
 ```typescript
-// ✅ SECURE PATTERN  
+// ✅ SECURE PATTERN
 const anonymizedQuery = this.dataAnonymizer.removePersonalInfo(studentQuery);
-const aiResponse = await this.langChainService.generateResponse(anonymizedQuery);
+const aiResponse = await this.langChainService.generateResponse(
+  anonymizedQuery
+);
 
 // ❌ PRIVACY VIOLATION
 const aiResponse = await this.langChainService.generateResponse(studentQuery);
@@ -596,8 +690,9 @@ const aiResponse = await this.langChainService.generateResponse(studentQuery);
   - **If NO → BLOCK CHANGE**: Malicious AI content injection
 
 #### **CRITICAL - Rate Limiting & Abuse Prevention**
+
 - [ ] **AI Request Rate Limiting**: Per-user limits on AI service calls
-  - **If NO → BLOCK CHANGE**: Service abuse vulnerability  
+  - **If NO → BLOCK CHANGE**: Service abuse vulnerability
 - [ ] **Token Usage Monitoring**: OpenAI token consumption tracked and limited
   - **If NO → BLOCK CHANGE**: Unlimited API cost exposure
 - [ ] **Prompt Injection Defense**: User inputs sanitized against prompt injection
@@ -606,13 +701,15 @@ const aiResponse = await this.langChainService.generateResponse(studentQuery);
 ### **✅ CAD INTEGRATION SECURITY (BAT-Rhino Files)**
 
 #### **CRITICAL - File System Security**
+
 - [ ] **Path Traversal Prevention**: All file paths validated against directory traversal
   - **If NO → BLOCK CHANGE**: File system breach vulnerability
+
 ```typescript
 // ✅ SECURE PATTERN
 const sanitizedPath = path.join(SAFE_BASE_DIR, path.basename(userFileName));
 if (!sanitizedPath.startsWith(SAFE_BASE_DIR)) {
-  throw new SecurityException('Path traversal detected');
+  throw new SecurityException("Path traversal detected");
 }
 
 // ❌ SECURITY VIOLATION
@@ -627,6 +724,7 @@ const filePath = path.join(baseDir, userFileName); // No validation
   - **If NO → BLOCK CHANGE**: File system pollution/disclosure
 
 #### **CRITICAL - CAD Access Control**
+
 - [ ] **User Permission Validation**: CAD access properly authorized per user
   - **If NO → BLOCK CHANGE**: Unauthorized file access
 - [ ] **Content Access Control**: Users can only access their permitted CAD files
@@ -637,6 +735,7 @@ const filePath = path.join(baseDir, userFileName); // No validation
 ### **✅ STUDENT DATA PROTECTION (GDPR/FERPA Compliance)**
 
 #### **CRITICAL - Personal Data Handling**
+
 - [ ] **Data Minimization**: Only necessary student data collected/processed
   - **If NO → BLOCK CHANGE**: Privacy regulation violation
 - [ ] **Consent Management**: Student consent properly tracked and honored
@@ -647,6 +746,7 @@ const filePath = path.join(baseDir, userFileName); // No validation
   - **If NO → BLOCK CHANGE**: International privacy law violation
 
 #### **CRITICAL - Academic Record Security**
+
 - [ ] **Grade Data Protection**: Student grades encrypted and access-controlled
   - **If NO → BLOCK CHANGE**: Academic record breach
 - [ ] **Submission Integrity**: Student submissions protected from tampering
@@ -657,6 +757,7 @@ const filePath = path.join(baseDir, userFileName); // No validation
 ### **✅ AUTHENTICATION & AUTHORIZATION (CAS SSO)**
 
 #### **CRITICAL - University SSO Integration**
+
 - [ ] **CAS Token Validation**: University SSO tokens properly validated
   - **If NO → BLOCK CHANGE**: Authentication bypass vulnerability
 - [ ] **Session Management**: User sessions properly secured and expired
@@ -669,6 +770,7 @@ const filePath = path.join(baseDir, userFileName); // No validation
 ### **🔍 HEFL SECURITY REVIEW PROCESS**
 
 #### **Step 1: Automated Security Scanning**
+
 ```markdown
 ## 🚨 AUTOMATED SECURITY CHECKS
 
@@ -678,34 +780,38 @@ const filePath = path.join(baseDir, userFileName); // No validation
 - [ ] **Dependency Check**: Known vulnerability scan in npm/pip packages
 - [ ] **Secret Scanning**: API keys, passwords, tokens detection
 - [ ] **Docker Security**: Container image vulnerability assessment
-- [ ] **OWASP ZAP**: Web application security testing
 ```
 
 #### **Step 2: HEFL-Specific Manual Review**
+
 ```markdown
 ## 🔐 MANUAL SECURITY VALIDATION
 
 **Focus Areas by Component:**
 
 ### Judge0 Code Execution
+
 - [ ] Input validation comprehensive
-- [ ] Resource limits properly configured  
+- [ ] Resource limits properly configured
 - [ ] Output sanitization implemented
 - [ ] Error handling doesn't leak system info
 
 ### AI/LangChain Integration
+
 - [ ] Student data anonymized in AI requests
 - [ ] API keys secured and rotated
 - [ ] Vector database access controlled
 - [ ] Rate limiting prevents abuse
 
 ### CAD/BAT File Generation
+
 - [ ] File path validation prevents traversal
 - [ ] BAT content sanitized and safe
 - [ ] User permissions validated
 - [ ] Temporary files cleaned up
 
 ### Student Data Handling
+
 - [ ] GDPR/FERPA compliance verified
 - [ ] Data minimization principle followed
 - [ ] Proper consent mechanisms
@@ -713,13 +819,14 @@ const filePath = path.join(baseDir, userFileName); // No validation
 ```
 
 #### **Step 3: Security Test Verification**
+
 ```markdown
 ## 🧪 SECURITY TESTING REQUIREMENTS
 
 **Required Tests for HEFL Features:**
 
 - [ ] **Penetration Testing**: Code execution sandboxing
-- [ ] **Injection Testing**: SQL, NoSQL, Code, Prompt injection attempts  
+- [ ] **Injection Testing**: SQL, NoSQL, Code, Prompt injection attempts
 - [ ] **Authentication Testing**: SSO bypass attempts, session hijacking
 - [ ] **Authorization Testing**: Cross-user data access attempts
 - [ ] **File Upload Testing**: Malicious file upload attempts
@@ -729,19 +836,21 @@ const filePath = path.join(baseDir, userFileName); // No validation
 ### **🚨 SECURITY INCIDENT RESPONSE**
 
 #### **Immediate Actions for Security Violations**
+
 ```markdown
 ## 🚨 SECURITY VIOLATION DETECTED
 
 **IMMEDIATE RESPONSE PROTOCOL:**
 
 1. **BLOCK DEPLOYMENT**: Prevent vulnerable code from reaching production
-2. **SECURITY TEAM ALERT**: Notify security team immediately  
+2. **SECURITY TEAM ALERT**: Notify security team immediately
 3. **IMPACT ASSESSMENT**: Evaluate potential data/system exposure
 4. **REMEDIATION PLAN**: Create specific fix requirements
 5. **TESTING REQUIREMENT**: Mandate security testing before re-approval
 6. **INCIDENT DOCUMENTATION**: Record violation for security training
 
 **ESCALATION TRIGGERS:**
+
 - Student data exposure potential
 - Code execution vulnerabilities
 - Authentication bypass attempts
@@ -752,6 +861,7 @@ const filePath = path.join(baseDir, userFileName); // No validation
 ### **📋 HEFL SECURITY APPROVAL CHECKLIST**
 
 #### ✅ **MANDATORY SECURITY VALIDATIONS**
+
 - [ ] **No Student PII Exposure**: Personal data properly protected
 - [ ] **Code Execution Secured**: Judge0 integration safely sandboxed
 - [ ] **AI Services Protected**: LangChain/OpenAI properly secured

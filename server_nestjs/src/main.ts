@@ -6,23 +6,23 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   // Super permissive CORS - allow everything
   app.enableCors();
-  
+
   // Additional manual CORS headers to ensure compatibility
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD');
     res.header('Access-Control-Allow-Headers', '*');
     res.header('Access-Control-Expose-Headers', 'X-Filename, X-App-Version');
-    
+
     // Handle preflight OPTIONS requests
     if (req.method === 'OPTIONS') {
       res.sendStatus(200);
       return;
     }
-    
+
     next();
   });
   app.use(bodyParser.json({ limit: '50mb' }));

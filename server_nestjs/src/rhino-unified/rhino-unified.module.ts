@@ -12,7 +12,7 @@ import { BatRhinoModule } from '../bat-rhino/bat-rhino.module';
 @Module({
   imports: [
     RhinoDirectModule, // For window management and focusing
-    BatRhinoModule,    // For launching and script generation
+    BatRhinoModule, // For launching and script generation
   ],
   controllers: [RhinoUnifiedController],
   providers: [RhinoUnifiedService],

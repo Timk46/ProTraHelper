@@ -1,19 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, timer, throwError, of } from 'rxjs';
-import { 
-  map, 
-  tap, 
-  switchMap, 
-  retry, 
-  retryWhen, 
-  delay, 
-  take, 
+import {
+  map,
+  tap,
+  switchMap,
+  retry,
+  retryWhen,
+  delay,
+  take,
   mergeMap,
   catchError,
   debounceTime,
   throttleTime,
-  distinctUntilChanged
+  distinctUntilChanged,
 } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 // Import all evaluation DTOs
@@ -34,18 +34,20 @@ import {
   HasRatedResponse,
   PhaseSwitchRequestDTO,
   PhaseSwitchResponseDTO,
-  UserVoteResponseDTO
+  UserVoteResponseDTO,
+  VoteLimitStatusDTO,
+  VoteLimitResponseDTO,
 } from '@DTOs/index';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EvaluationDiscussionService {
   private readonly apiUrls = {
     submissions: `${environment.server}/evaluation-submissions`,
     comments: `${environment.server}/evaluation-comments`,
     ratings: `${environment.server}/evaluation-ratings`,
-    sessions: `${environment.server}/evaluation-sessions`
+    sessions: `${environment.server}/evaluation-sessions`,
   };
 
   // State subjects for real-time updates
@@ -54,7 +56,7 @@ export class EvaluationDiscussionService {
 
   // Performance optimization subjects
   private pendingRequests = new Map<string, Observable<any>>();
-  
+
   // Configuration for retry logic
   private readonly MAX_RETRY_ATTEMPTS = 3;
   private readonly RETRY_DELAYS = [1000, 2000, 5000]; // Exponential backoff
@@ -81,12 +83,12 @@ export class EvaluationDiscussionService {
       maxAttempts?: number;
       shouldRetry?: (error: HttpErrorResponse) => boolean;
       requestKey?: string;
-    } = {}
+    } = {},
   ): Observable<T> {
-    const { 
-      maxAttempts = this.MAX_RETRY_ATTEMPTS, 
+    const {
+      maxAttempts = this.MAX_RETRY_ATTEMPTS,
       shouldRetry = this.defaultShouldRetry,
-      requestKey
+      requestKey,
     } = options;
 
     // Deduplication: Return existing request if already pending
@@ -96,7 +98,7 @@ export class EvaluationDiscussionService {
     }
 
     const requestWithRetry = request.pipe(
-      retryWhen(errors => 
+      retryWhen(errors =>
         errors.pipe(
           mergeMap((error: HttpErrorResponse, attempt) => {
             const shouldRetryError = shouldRetry(error);
@@ -105,7 +107,7 @@ export class EvaluationDiscussionService {
             console.log(`🔄 Request attempt ${attempt + 1}/${maxAttempts}:`, {
               status: error.status,
               shouldRetry: shouldRetryError,
-              isLastAttempt
+              isLastAttempt,
             });
 
             if (!shouldRetryError || isLastAttempt) {
@@ -115,8 +117,8 @@ export class EvaluationDiscussionService {
             const delayTime = this.RETRY_DELAYS[attempt] || 5000;
             console.log(`⏰ Retrying in ${delayTime}ms...`);
             return timer(delayTime);
-          })
-        )
+          }),
+        ),
       ),
       tap(() => {
         // Clean up pending request on success
@@ -130,7 +132,7 @@ export class EvaluationDiscussionService {
           this.pendingRequests.delete(requestKey);
         }
         return throwError(() => error);
-      })
+      }),
     );
 
     // Cache pending request
@@ -148,10 +150,12 @@ export class EvaluationDiscussionService {
    */
   private defaultShouldRetry(error: HttpErrorResponse): boolean {
     // Retry on network errors or 5xx server errors
-    return !error.status || // Network error
-           error.status === 0 || // Network error
-           (error.status >= 500 && error.status < 600) || // Server errors
-           error.status === 429; // Rate limiting
+    return (
+      !error.status || // Network error
+      error.status === 0 || // Network error
+      (error.status >= 500 && error.status < 600) || // Server errors
+      error.status === 429
+    ); // Rate limiting
   }
 
   /**
@@ -162,11 +166,9 @@ export class EvaluationDiscussionService {
    */
   private withDebounce<T>(
     requestFactory: () => Observable<T>,
-    debounceTime: number = this.DEBOUNCE_TIME
+    debounceTime: number = this.DEBOUNCE_TIME,
   ): Observable<T> {
-    return timer(debounceTime).pipe(
-      switchMap(() => requestFactory())
-    );
+    return timer(debounceTime).pipe(switchMap(() => requestFactory()));
   }
 
   /**
@@ -174,22 +176,26 @@ export class EvaluationDiscussionService {
    * @param votes - Array of vote operations
    * @returns Observable with batch voting results
    */
-  batchVoteComments(votes: Array<{ commentId: string; voteType: VoteType }>): Observable<VoteResultDTO[]> {
+  batchVoteComments(
+    votes: Array<{ commentId: string; voteType: VoteType }>,
+  ): Observable<VoteResultDTO[]> {
     console.log('🗳️ Batch voting on comments:', votes.length, 'votes');
-    
-    const batchRequest = this.http.post<VoteResultDTO[]>(`${this.apiUrls.comments}/batch-vote`, { votes });
-    
+
+    const batchRequest = this.http.post<VoteResultDTO[]>(`${this.apiUrls.comments}/batch-vote`, {
+      votes,
+    });
+
     return this.withRetry(batchRequest, {
       requestKey: `batch-vote-${votes.map(v => v.commentId).join('-')}`,
-      shouldRetry: (error) => {
+      shouldRetry: error => {
         // Don't retry on validation errors (4xx)
         return error.status >= 500 || !error.status;
-      }
+      },
     }).pipe(
       throttleTime(this.THROTTLE_TIME, undefined, { leading: true, trailing: true }),
       tap(results => {
         console.log('✅ Batch vote completed:', results.length, 'results');
-      })
+      }),
     );
   }
 
@@ -198,16 +204,18 @@ export class EvaluationDiscussionService {
   // =============================================================================
 
   getSubmission(submissionId: string): Observable<EvaluationSubmissionDTO> {
-    const request = this.http.get<EvaluationSubmissionDTO>(`${this.apiUrls.submissions}/${submissionId}`);
-    
+    const request = this.http.get<EvaluationSubmissionDTO>(
+      `${this.apiUrls.submissions}/${submissionId}`,
+    );
+
     return this.withRetry(request, {
       requestKey: `submission-${submissionId}`,
-      maxAttempts: 3
+      maxAttempts: 3,
     }).pipe(
       distinctUntilChanged(),
       tap(submission => {
         console.log('✅ Submission loaded with retry support:', submission.id);
-      })
+      }),
     );
   }
 
@@ -220,54 +228,56 @@ export class EvaluationDiscussionService {
       throw new Error('SessionId required for categories endpoint');
     }
 
-    const request = this.http.get<EvaluationCategoryDTO[]>(`${this.apiUrls.sessions}/${sessionId}/categories`);
-    
+    const request = this.http.get<EvaluationCategoryDTO[]>(
+      `${this.apiUrls.sessions}/${sessionId}/categories`,
+    );
+
     return this.withRetry(request, {
       requestKey: `categories-${sessionId}`,
-      maxAttempts: 2
+      maxAttempts: 2,
     }).pipe(
-      distinctUntilChanged((prev, curr) => 
-        JSON.stringify(prev) === JSON.stringify(curr)
-      ),
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
       tap(categories => {
         console.log('✅ Categories loaded with retry support:', categories.length);
-      })
+      }),
     );
   }
 
   getDiscussionsByCategory(
     submissionId: string,
-    categoryId: string
+    categoryId: string,
   ): Observable<EvaluationDiscussionDTO[]> {
     console.log('🔍 getDiscussionsByCategory service call', submissionId, categoryId);
     // Phase 2.1: Transform EvaluationCommentDTO[] response to EvaluationDiscussionDTO[]
-    return this.http.get<EvaluationCommentDTO[]>(
-      `${this.apiUrls.comments}?submissionId=${submissionId}&categoryId=${categoryId}`
-    ).pipe(
-      map(comments => {
-        // Backend returns comments directly, but frontend expects discussion containers
-        console.log('🔄 Transforming', comments.length, 'comments to discussion format');
+    return this.http
+      .get<
+        EvaluationCommentDTO[]
+      >(`${this.apiUrls.comments}?submissionId=${submissionId}&categoryId=${categoryId}`)
+      .pipe(
+        map(comments => {
+          // Backend returns comments directly, but frontend expects discussion containers
+          console.log('🔄 Transforming', comments.length, 'comments to discussion format');
 
-        if (comments.length === 0) {
-          return [];
-        }
+          if (comments.length === 0) {
+            return [];
+          }
 
-        // Create a single discussion container for this category
-        const discussion: EvaluationDiscussionDTO = {
-          id: `discussion-${submissionId}-${categoryId}`,
-          submissionId,
-          categoryId: parseInt(categoryId),
-          comments: comments,
-          createdAt: new Date(),
-          totalComments: comments.length,
-          availableComments: 3, // System default
-          usedComments: comments.length
-        };
+          // Create a single discussion container for this category
+          const discussion: EvaluationDiscussionDTO = {
+            id: `discussion-${submissionId}-${categoryId}`,
+            submissionId,
+            categoryId: parseInt(categoryId),
+            comments: comments,
+            createdAt: new Date(),
+            totalComments: comments.length,
+            availableComments: 3, // System default
+            usedComments: comments.length,
+          };
 
-        console.log('✅ Discussion created with', discussion.totalComments, 'comments');
-        return [discussion];
-      })
-    );
+          console.log('✅ Discussion created with', discussion.totalComments, 'comments');
+          return [discussion];
+        }),
+      );
   }
 
   createComment(comment: CreateEvaluationCommentDTO): Observable<EvaluationCommentDTO> {
@@ -276,7 +286,7 @@ export class EvaluationDiscussionService {
       tap(newComment => {
         // Update local state for real-time updates
         this.commentsSubject.next([...this.commentsSubject.value, newComment]);
-      })
+      }),
     );
   }
 
@@ -285,24 +295,26 @@ export class EvaluationDiscussionService {
    * Corrected parameter name to match backend expectation
    */
   voteComment(commentId: string, voteType: VoteType): Observable<VoteResultDTO> {
-    const request = this.http.post<VoteResultDTO>(`${this.apiUrls.comments}/${commentId}/vote`, { voteType });
-    
+    const request = this.http.post<VoteResultDTO>(`${this.apiUrls.comments}/${commentId}/vote`, {
+      voteType,
+    });
+
     return this.withRetry(request, {
       requestKey: `vote-${commentId}-${voteType}-${Date.now()}`, // Include timestamp to prevent caching votes
       maxAttempts: 2,
-      shouldRetry: (error) => {
+      shouldRetry: error => {
         // Don't retry client errors (4xx) except 429
         return error.status >= 500 || error.status === 429 || !error.status;
-      }
+      },
     }).pipe(
       throttleTime(500, undefined, { leading: true, trailing: false }), // Prevent spam voting
       tap(result => {
         console.log('✅ Vote completed with retry support:', {
           commentId,
           voteType,
-          result: result.userVote
+          result: result.userVote,
         });
-      })
+      }),
     );
   }
 
@@ -312,10 +324,9 @@ export class EvaluationDiscussionService {
    * @returns Observable<VoteType | null> - The user's vote or null
    */
   getUserVoteForComment(commentId: string): Observable<VoteType | null> {
-    return this.http.get<UserVoteResponseDTO>(`${this.apiUrls.comments}/${commentId}/user-vote`)
-      .pipe(
-        map(response => response.voteType)
-      );
+    return this.http
+      .get<UserVoteResponseDTO>(`${this.apiUrls.comments}/${commentId}/user-vote`)
+      .pipe(map(response => response.voteType));
   }
 
   /**
@@ -323,7 +334,9 @@ export class EvaluationDiscussionService {
    * Includes per-category limits and usage tracking
    */
   getCommentStats(submissionId: string): Observable<CommentStatsDTO> {
-    return this.http.get<CommentStatsDTO>(`${this.apiUrls.submissions}/${submissionId}/comment-stats`);
+    return this.http.get<CommentStatsDTO>(
+      `${this.apiUrls.submissions}/${submissionId}/comment-stats`,
+    );
   }
 
   // =============================================================================
@@ -335,7 +348,9 @@ export class EvaluationDiscussionService {
    * Corrected to match backend implementation (GET instead of POST)
    */
   getOrCreateAnonymousUser(submissionId: string): Observable<AnonymousEvaluationUserDTO> {
-    return this.http.get<AnonymousEvaluationUserDTO>(`${this.apiUrls.submissions}/${submissionId}/anonymous-user`);
+    return this.http.get<AnonymousEvaluationUserDTO>(
+      `${this.apiUrls.submissions}/${submissionId}/anonymous-user`,
+    );
   }
 
   // =============================================================================
@@ -349,10 +364,15 @@ export class EvaluationDiscussionService {
         const currentRatings = this.ratingsSubject.value;
         // Remove existing rating for this user/category
         const filteredRatings = currentRatings.filter(
-          r => !(r.userId === newRating.userId && r.categoryId === newRating.categoryId && r.submissionId === newRating.submissionId)
+          r =>
+            !(
+              r.userId === newRating.userId &&
+              r.categoryId === newRating.categoryId &&
+              r.submissionId === newRating.submissionId
+            ),
         );
         this.ratingsSubject.next([...filteredRatings, newRating]);
-      })
+      }),
     );
   }
 
@@ -361,63 +381,74 @@ export class EvaluationDiscussionService {
    * Corrected URL path to match backend implementation
    */
   getRatingStats(submissionId: string, categoryId: string): Observable<RatingStatsDTO> {
-    return this.http.get<RatingStatsDTO>(`${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/stats`);
+    return this.http.get<RatingStatsDTO>(
+      `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/stats`,
+    );
   }
 
   /**
    * Checks if the current user has rated a specific category
-   * 
+   *
    * @description This method is used to determine if the user has access
    * to the discussion area for a specific category. Users must rate a category
    * before they can access its discussion.
-   * 
+   *
    * @param {string} submissionId - The submission ID to check
    * @param {number} categoryId - The category ID to check
    * @returns {Observable<{hasRated: boolean}>} Observable indicating if user has rated the category
    * @memberof EvaluationDiscussionService
    */
   hasUserRatedCategory(submissionId: string, categoryId: number): Observable<HasRatedResponse> {
-    return this.http.get<HasRatedResponse>(
-      `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`
-    ).pipe(
-      retry(2),
-      catchError(this.handleError<HasRatedResponse>('hasUserRatedCategory'))
-    );
+    return this.http
+      .get<HasRatedResponse>(
+        `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`,
+      )
+      .pipe(retry(2), catchError(this.handleError<HasRatedResponse>('hasUserRatedCategory')));
   }
 
   /**
    * Gets the rating status for all categories for the current user and submission
-   * 
+   *
    * @description This method returns the complete rating status overview,
    * indicating which categories the user has rated and which discussions they can access.
    * This is essential for the rating gate functionality.
-   * 
+   *
    * @param {string} submissionId - The submission ID to check
    * @returns {Observable<CategoryRatingStatus[]>} Observable containing rating status for all categories
    * @memberof EvaluationDiscussionService
    */
-  getUserRatingStatus(submissionId: string): Observable<CategoryRatingStatus[]> {
-    return this.http.get<CategoryRatingStatus[]>(
-      `${this.apiUrls.ratings}/submission/${submissionId}/user/status`
-    ).pipe(
-      retry(2),
-      catchError(this.handleError<CategoryRatingStatus[]>('getUserRatingStatus'))
-    );
+  getUserRatingStatus(submissionId: string, userId: number): Observable<CategoryRatingStatus[]> {
+    const endpoint = `${this.apiUrls.ratings}/submission/${submissionId}/user/${userId}/status`;
+    
+    // DEBUG: API call verification
+    console.log('🐛 DEBUG API Call:', {
+      method: 'getUserRatingStatus',
+      endpoint,
+      submissionId,
+      userId,
+      userIdType: typeof userId,
+      isNaN: isNaN(userId),
+      timestamp: new Date().toISOString()
+    });
+
+    return this.http
+      .get<CategoryRatingStatus[]>(endpoint)
+      .pipe(retry(2), catchError(this.handleError<CategoryRatingStatus[]>('getUserRatingStatus')));
   }
 
   /**
    * Gets the current user's rating for a specific category
-   * 
+   *
    * @description This method retrieves the user's existing rating for a category,
    * useful for pre-populating rating sliders and showing rating history.
-   * 
+   *
    * @param {string} submissionId - The submission ID
    * @param {number} categoryId - The category ID
    * @returns {Observable<number | null>} Observable containing the user's rating or null if not rated
    * @memberof EvaluationDiscussionService
    */
-  getUserCategoryRating(submissionId: string, categoryId: number): Observable<number | null> {
-    return this.getUserRatingStatus(submissionId).pipe(
+  getUserCategoryRating(submissionId: string, categoryId: number, userId: number): Observable<number | null> {
+    return this.getUserRatingStatus(submissionId, userId).pipe(
       map(statuses => {
         const categoryStatus = statuses.find(s => s.categoryId === categoryId);
         return categoryStatus?.rating || null;
@@ -425,7 +456,7 @@ export class EvaluationDiscussionService {
       catchError(error => {
         console.error('Failed to get user category rating:', error);
         return of(null);
-      })
+      }),
     );
   }
 
@@ -442,10 +473,13 @@ export class EvaluationDiscussionService {
     return this.getSubmission(request.submissionId).pipe(
       switchMap(submission => {
         // Now call phase switch with the sessionId
-        return this.http.post<PhaseSwitchResponseDTO>(`${this.apiUrls.sessions}/${submission.sessionId}/switch-phase`, {
-          phase: request.targetPhase
-        });
-      })
+        return this.http.post<PhaseSwitchResponseDTO>(
+          `${this.apiUrls.sessions}/${submission.sessionId}/switch-phase`,
+          {
+            phase: request.targetPhase,
+          },
+        );
+      }),
     );
   }
 
@@ -456,7 +490,7 @@ export class EvaluationDiscussionService {
   switchPhaseBySubmission(request: PhaseSwitchRequestDTO): Observable<any> {
     return this.http.post(`${this.apiUrls.submissions}/${request.submissionId}/switch-phase`, {
       targetPhase: request.targetPhase,
-      reason: request.reason
+      reason: request.reason,
     });
   }
 
@@ -470,8 +504,60 @@ export class EvaluationDiscussionService {
       map(comments => ({
         type: 'comment-added',
         submissionId,
-        comments: comments.filter(c => c.submissionId === submissionId)
-      }))
+        comments: comments.filter(c => c.submissionId === submissionId),
+      })),
+    );
+  }
+
+  // =============================================================================
+  // VOTE LIMIT TRACKING METHODS
+  // =============================================================================
+
+  /**
+   * Gets the vote limit status for a user in a specific submission and category
+   * 
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @returns Observable containing vote limit status
+   */
+  getVoteLimitStatus(submissionId: string, categoryId: string): Observable<VoteLimitStatusDTO> {
+    const url = `${this.apiUrls.comments}/vote-limit/${submissionId}/${categoryId}`;
+    
+    return this.http.get<VoteLimitStatusDTO>(url).pipe(
+      retry(2),
+      catchError(this.handleError<VoteLimitStatusDTO>('getVoteLimitStatus'))
+    );
+  }
+
+  /**
+   * Votes on a comment with vote limit checking
+   * 
+   * @param commentId - The comment ID to vote on
+   * @param voteType - The vote type ('UP', 'DOWN', or null)
+   * @returns Observable containing vote result and updated limit status
+   */
+  voteCommentWithLimits(commentId: string, voteType: 'UP' | 'DOWN' | null): Observable<VoteLimitResponseDTO> {
+    const url = `${this.apiUrls.comments}/${commentId}/vote`;
+    const body = { voteType };
+    
+    return this.http.post<VoteLimitResponseDTO>(url, body).pipe(
+      retry(2),
+      catchError(this.handleError<VoteLimitResponseDTO>('voteCommentWithLimits'))
+    );
+  }
+
+  /**
+   * Gets the current vote statistics for a comment
+   * 
+   * @param commentId - The comment ID
+   * @returns Observable containing vote result
+   */
+  getCommentVotes(commentId: string): Observable<VoteResultDTO> {
+    const url = `${this.apiUrls.comments}/${commentId}/votes`;
+    
+    return this.http.get<VoteResultDTO>(url).pipe(
+      retry(2),
+      catchError(this.handleError<VoteResultDTO>('getCommentVotes'))
     );
   }
 
@@ -481,10 +567,10 @@ export class EvaluationDiscussionService {
 
   /**
    * Generic error handler for HTTP operations
-   * 
+   *
    * @description Returns an error handler function that logs the operation
    * and returns a safe fallback value
-   * 
+   *
    * @param {string} operation - Name of the operation that failed
    * @returns {Function} Error handler function
    * @memberof EvaluationDiscussionService
@@ -492,7 +578,7 @@ export class EvaluationDiscussionService {
   private handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed:`, error);
-      
+
       // Let the app keep running by returning a safe fallback
       return throwError(() => new Error(`${operation} failed: ${error.message || error}`));
     };

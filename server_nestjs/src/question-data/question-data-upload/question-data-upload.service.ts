@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { detailedUploadQuestionDTO, uploadQuestionDTO, UserUploadAnswerListItemDTO } from '@DTOs/index';
+import {
+  detailedUploadQuestionDTO,
+  uploadQuestionDTO,
+  UserUploadAnswerListItemDTO,
+} from '@DTOs/index';
 
 @Injectable()
 export class QuestionDataUploadService {
@@ -47,7 +51,7 @@ export class QuestionDataUploadService {
    */
   async getAllUploadQuestions(): Promise<uploadQuestionDTO[]> {
     const uploadQuestions = await this.prisma.uploadQuestion.findMany();
-    return uploadQuestions.map((uq) => ({
+    return uploadQuestions.map(uq => ({
       questionId: uq.questionId,
       title: uq.title,
       text: uq.text,
@@ -135,9 +139,10 @@ export class QuestionDataUploadService {
    *          each containing user, file, question, and concept details.
    */
   async getAllUserUploadAnswers(questionId: number): Promise<UserUploadAnswerListItemDTO[]> {
-    const whereClause = Number(questionId) !== -1
-      ? { questionId: Number(questionId), UserUploadAnswer: { some: {} } }
-      : { UserUploadAnswer: { some: {} } };
+    const whereClause =
+      Number(questionId) !== -1
+        ? { questionId: Number(questionId), UserUploadAnswer: { some: {} } }
+        : { UserUploadAnswer: { some: {} } };
     const userUploadAnswers = await this.prisma.userAnswer.findMany({
       where: whereClause,
       include: {
@@ -145,7 +150,7 @@ export class QuestionDataUploadService {
           select: {
             id: true,
             email: true,
-          }
+          },
         },
         UserUploadAnswer: {
           select: {
@@ -154,9 +159,9 @@ export class QuestionDataUploadService {
                 uniqueIdentifier: true,
                 name: true,
                 updatedAt: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         question: {
           select: {
@@ -166,14 +171,14 @@ export class QuestionDataUploadService {
               select: {
                 id: true,
                 name: true,
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return userUploadAnswers.map(answer => ({
@@ -185,7 +190,7 @@ export class QuestionDataUploadService {
       userMail: answer.user.email,
       fileUniqueIdentifier: answer.UserUploadAnswer[0]?.file.uniqueIdentifier,
       fileName: answer.UserUploadAnswer[0]?.file.name,
-      uploadDate: answer.UserUploadAnswer[0]?.file.updatedAt
+      uploadDate: answer.UserUploadAnswer[0]?.file.updatedAt,
     }));
   }
 }

@@ -85,13 +85,19 @@
           <div class="panel-header">
             <h3>Diskussion: {{ vm.activeCategoryInfo?.displayName }}</h3>
             <div class="points-info" *ngIf="vm.isDiscussionPhase">
-              <div class="point-counter plus">
-                <span>+</span>
-                <span>{{ vm.availableUpvotes }}/3 verfügbar</span>
-              </div>
-              <div class="point-counter minus">
-                <span>-</span>
-                <span>{{ vm.availableDownvotes }}/3 verfügbar</span>
+              <div class="vote-limit-display-header">
+                <div class="vote-counter">
+                  <span class="vote-icon">🗳️</span>
+                  <span class="vote-text">{{ vm.availableUpvotes }}/{{ vm.totalVotes }} verfügbar</span>
+                </div>
+                <div class="vote-status" [class.no-votes]="vm.availableUpvotes === 0">
+                  <span *ngIf="vm.availableUpvotes > 0; else noVotesLeft">
+                    Sie können noch {{ vm.availableUpvotes }} Kommentare bewerten
+                  </span>
+                  <ng-template #noVotesLeft>
+                    <span class="warning">Alle Bewertungen vergeben</span>
+                  </ng-template>
+                </div>
               </div>
             </div>
           </div>
@@ -136,7 +142,7 @@
               </app-rating-gate>
 
               <!-- Message Input Area (only shown when discussion is accessible) -->
-              <div class="action-area" *ngIf="vm.canComment && (hasRatedCurrentCategory$ | async)">
+              <div class="action-area" *ngIf="vm.canComment && (hasCommentedCurrentCategory$ | async)">
                 <div class="message-input">
                   <input
                     type="text"

@@ -326,7 +326,6 @@ export class ContentService {
 ```bash
 # Backend Development
 cd server_nestjs
-npm run start:dev          # Start with watch mode
 npm run lint              # Run linter
 npm test                  # Run unit tests
 

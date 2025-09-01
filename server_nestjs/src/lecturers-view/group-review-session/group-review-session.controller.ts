@@ -2,7 +2,11 @@ import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 import { JwtAuthGuard } from '@/auth/common/guards/jwt-auth.guard';
 import { GroupReviewSessionService } from './group-review-session.service';
-import { CreateGroupReviewSessionsDTO, GroupReviewGateStatusDTO, CreateGroupReviewSessionsResultDTO } from '@DTOs/index';
+import {
+  CreateGroupReviewSessionsDTO,
+  GroupReviewGateStatusDTO,
+  CreateGroupReviewSessionsResultDTO,
+} from '@DTOs/index';
 import { GetUser } from '@/auth/common/decorators/get-user.decorator';
 import { User } from '@prisma/client';
 

@@ -8,6 +8,8 @@ import type {
   UpdateEvaluationCommentDTO,
   EvaluationCommentDTO,
   VoteType,
+  VoteLimitStatusDTO,
+  VoteLimitResponseDTO,
 } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
@@ -23,78 +25,6 @@ import type { Prisma } from '@prisma/client';
 interface VoteDetails {
   userVotes: { [userId: string]: VoteType };
 }
-
-/**
- * Definiert einen stark typisierten Kommentar, wie er von Prisma mit Relationen zurückgegeben wird.
- * Dies vermeidet die Verwendung von `any` und erhöht die Typsicherheit.
- */
-type PrismaCommentWithDetails = Prisma.EvaluationCommentGetPayload<{
-  include: {
-    user: {
-      select: {
-        id: true;
-        firstname: true;
-        lastname: true;
-      };
-    };
-    category: {
-      select: {
-        id: true;
-        name: true;
-        displayName: true;
-        description: true;
-        icon: true;
-        color: true;
-        order: true;
-      };
-    };
-    replies: {
-      include: {
-        user: {
-          select: {
-            id: true;
-            firstname: true;
-            lastname: true;
-          };
-        };
-        category: {
-          select: {
-            id: true;
-            name: true;
-            displayName: true;
-            description: true;
-            icon: true;
-            color: true;
-            order: true;
-          };
-        };
-        replies: {
-          include: {
-            user: {
-              select: {
-                id: true;
-                firstname: true;
-                lastname: true;
-              };
-            };
-            category: {
-              select: {
-                id: true;
-                name: true;
-                displayName: true;
-                description: true;
-                icon: true;
-                color: true;
-                order: true;
-              };
-            };
-            replies: true; // Include nested replies (recursive)
-          };
-        };
-      };
-    };
-  };
-}>;
 
 @Injectable()
 export class EvaluationCommentService {
@@ -1144,5 +1074,179 @@ export class EvaluationCommentService {
     }
 
     return depth;
+  }
+
+  // =============================================================================
+  // VOTE LIMIT TRACKING METHODS
+  // =============================================================================
+
+  /**
+   * Gets the vote limit status for a user in a specific submission and category
+   * 
+   * @param userId - The user ID
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @returns Promise containing vote limit status
+   */
+  async getVoteLimitStatus(
+    userId: number,
+    submissionId: string,
+    categoryId: string
+  ): Promise<VoteLimitStatusDTO> {
+    const cacheKey = this.utilsService.generateCacheKey(
+      'vote-limit-status',
+      submissionId,
+      categoryId,
+      userId.toString()
+    );
+
+    return this.cacheService.getOrSet(
+      cacheKey,
+      async () => {
+        // Get total number of comments in this category for this submission
+        const totalComments = await this.prisma.evaluationComment.count({
+          where: {
+            submissionId,
+            categoryId: Number(categoryId),
+            parentId: null, // Only count top-level comments for voting
+          }
+        });
+
+        // Get comments that the user has already voted on
+        const commentsWithVotes = await this.prisma.evaluationComment.findMany({
+          where: {
+            submissionId,
+            categoryId: Number(categoryId),
+            parentId: null,
+          },
+          select: {
+            id: true,
+            voteDetails: true,
+          }
+        });
+
+        // Count how many comments the user has voted on
+        const votedCommentIds: number[] = [];
+        commentsWithVotes.forEach(comment => {
+          const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+          const userVotes = voteDetails.userVotes || {};
+          
+          if (userVotes[userId.toString()]) {
+            votedCommentIds.push(Number(comment.id));
+          }
+        });
+
+        const remainingVotes = Math.max(0, totalComments - votedCommentIds.length);
+        const canVote = remainingVotes > 0;
+        const displayText = `${remainingVotes}/${totalComments}`;
+
+        return {
+          maxVotes: totalComments,
+          remainingVotes,
+          votedCommentIds,
+          canVote,
+          displayText,
+        };
+      },
+      60000 // 1 minute cache
+    );
+  }
+
+  /**
+   * Updates vote limit status after a vote action
+   * 
+   * @param userId - The user ID
+   * @param submissionId - The submission ID  
+   * @param categoryId - The category ID
+   * @param commentId - The comment ID that was voted on
+   * @param isAdding - Whether vote was added (true) or removed (false)
+   * @returns Promise containing updated vote limit status
+   */
+  async updateVoteLimitStatus(
+    userId: number,
+    submissionId: string,
+    categoryId: string,
+    commentId: string,
+    isAdding: boolean
+  ): Promise<VoteLimitStatusDTO> {
+    // Invalidate cache first
+    const cacheKey = this.utilsService.generateCacheKey(
+      'vote-limit-status',
+      submissionId,
+      categoryId,
+      userId.toString()
+    );
+    this.cacheService.delete(cacheKey);
+
+    // Get fresh status
+    return this.getVoteLimitStatus(userId, submissionId, categoryId);
+  }
+
+  /**
+   * Enhanced vote method that includes limit validation
+   * 
+   * @param commentId - The comment ID to vote on
+   * @param voteType - The type of vote ('UP', 'DOWN', or null to remove)
+   * @param userId - The user ID
+   * @returns Promise containing vote result and updated limit status
+   */
+  async voteWithLimitCheck(
+    commentId: string,
+    voteType: 'UP' | 'DOWN' | null,
+    userId: number
+  ): Promise<VoteLimitResponseDTO> {
+    // Get comment to find submission and category
+    const comment = await this.prisma.evaluationComment.findUnique({
+      where: { id: commentId },
+      select: {
+        submissionId: true,
+        categoryId: true,
+        voteDetails: true,
+      }
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${commentId} not found`);
+    }
+
+    // Get current vote limit status
+    const currentStatus = await this.getVoteLimitStatus(
+      userId,
+      comment.submissionId,
+      comment.categoryId.toString()
+    );
+
+    // Check if user is trying to add a new vote but has no remaining votes
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+    const userVotes = voteDetails.userVotes || {};
+    const previousVote = userVotes[userId.toString()];
+    const isNewVote = !previousVote && voteType !== null;
+
+    if (isNewVote && !currentStatus.canVote) {
+      return {
+        success: false,
+        voteLimitStatus: currentStatus,
+        message: 'Vote limit reached. Cannot add more votes.',
+      };
+    }
+
+    // Proceed with the vote
+    await this.vote(commentId, voteType, userId);
+
+    // Update vote limit status
+    const isAddingVote = !previousVote && voteType !== null;
+    const updatedStatus = await this.updateVoteLimitStatus(
+      userId,
+      comment.submissionId,
+      comment.categoryId.toString(),
+      commentId,
+      isAddingVote
+    );
+
+    return {
+      success: true,
+      voteLimitStatus: updatedStatus,
+      message: 'Vote successfully processed.',
+    };
   }
 }

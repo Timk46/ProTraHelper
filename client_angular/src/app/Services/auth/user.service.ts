@@ -342,6 +342,14 @@ export class UserService {
     return decodedToken.id;
   }
 
+  /**
+   * Checks if the current user is an architecture student
+   * @returns { boolean } True if the user has the ARCHSTUDENT role
+   */
+  isArchitectureStudent(): boolean {
+    return this.getRole() === globalRole.ARCHSTUDENT;
+  }
+
   enableEditMode(): void {
     if (this.getRole() === globalRole.ADMIN) {
       (this.hasEditModeActive$ as BehaviorSubject<boolean>).next(true);

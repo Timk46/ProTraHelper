@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Delete,Param, Body, Req, UseGuards, ParseIntPipe, HttpCode, HttpStatus} from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  Req,
+  UseGuards,
+  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { UserGroupService } from './user-group.service';
 import { CreateUserGroupDto } from './dto/userGroup.dto';
@@ -47,7 +59,7 @@ export class UserGroupController {
   @Post('membership')
   @roles('LECTURER', 'ADMIN')
   async createUserGroupMembership(
-    @Body() createMembershipDto: CreateUserGroupMembershipDto
+    @Body() createMembershipDto: CreateUserGroupMembershipDto,
   ): Promise<UserGroupMembership> {
     return this.userGroupService.createUserGroupMembership(createMembershipDto);
   }
@@ -55,7 +67,7 @@ export class UserGroupController {
   @Get(':groupId/memberships')
   @roles('LECTURER', 'ADMIN')
   async getUserGroupMemberships(
-    @Param('groupId', ParseIntPipe) groupId: number
+    @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<UserGroupMembership[]> {
     return this.userGroupService.getUserGroupMemberships(groupId);
   }
@@ -72,7 +84,7 @@ export class UserGroupController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteUserGroupMembership(
     @Param('userId', ParseIntPipe) userId: number,
-    @Param('groupId', ParseIntPipe) groupId: number
+    @Param('groupId', ParseIntPipe) groupId: number,
   ): Promise<void> {
     return this.userGroupService.deleteUserGroupMembership(userId, groupId);
   }

@@ -390,6 +390,15 @@ export class CommentInputComponent implements OnInit, OnDestroy, OnChanges {
     }
     return this.isSubmitting ? 'Senden...' : this.submitButtonText;
   }
+
+  /**
+   * Gets the keyboard hint tooltip text
+   */
+  getKeyboardHintTooltip(): string {
+    return this.isReplyMode 
+      ? 'Strg+Enter zum Antworten, Escape zum Abbrechen'
+      : 'Strg+Enter zum Senden';
+  }
   
   /**
    * Gets the cancel button tooltip

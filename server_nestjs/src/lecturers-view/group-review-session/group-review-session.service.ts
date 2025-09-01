@@ -1,6 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CreateGroupReviewSessionsDTO, GroupReviewGateStatusDTO, CreateGroupReviewSessionsResultDTO } from '@DTOs/index';
+import {
+  CreateGroupReviewSessionsDTO,
+  GroupReviewGateStatusDTO,
+  CreateGroupReviewSessionsResultDTO,
+} from '@DTOs/index';
 import { GlobalRole, EvaluationPhase, EvaluationStatus } from '@prisma/client';
 
 @Injectable()
@@ -28,7 +32,7 @@ export class GroupReviewSessionService {
     });
 
     const statuses: GroupReviewGateStatusDTO[] = await Promise.all(
-      gates.map(async (gate) => {
+      gates.map(async gate => {
         const linkedQuestion = await this.prisma.question.findUnique({
           where: { id: gate.linkedQuestionId },
         });
@@ -46,9 +50,9 @@ export class GroupReviewSessionService {
           gateId: gate.questionId,
           gateName: gate.question.name,
           linkedQuestionId: gate.linkedQuestionId,
-          linkedQuestionName: linkedQuestion?.name || 'Unknown Upload Question',
-          conceptId: gate.question.conceptNode?.id || 0,
-          conceptName: gate.question.conceptNode?.name || 'No Concept',
+          linkedQuestionName: linkedQuestion.name || 'Unknown Upload Question',
+          conceptId: gate.question.conceptNode.id || 0,
+          conceptName: gate.question.conceptNode.name || 'No Concept',
           totalStudents: totalStudents,
           submittedStudents: submittedStudents,
         };
@@ -72,7 +76,7 @@ export class GroupReviewSessionService {
 
     for (const gateId of dto.gateIds) {
       try {
-        await this.prisma.$transaction(async (tx) => {
+        await this.prisma.$transaction(async tx => {
           const gate = await tx.groupReviewGate.findUnique({
             where: { questionId: gateId },
             include: { question: true },
