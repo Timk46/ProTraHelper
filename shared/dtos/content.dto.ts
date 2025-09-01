@@ -41,6 +41,9 @@ export interface ContentViewInformationDTO {
     id: number;
     type: contentElementType;
     title: string;
+    question: {
+      type: string;
+    };
   };
   position: number;
   isVisible?: boolean;

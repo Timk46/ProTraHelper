@@ -1,5 +1,5 @@
 <div class="content mat-elevation-z8">
-  <h1 style="display: flex; justify-content: center">Freitextaufgabe bearbeiten</h1>
+  <h1 style="display: flex; justify-content: center">Aufgabensammlung bearbeiten</h1>
 
   <div class="horizontal-align-container">
     <div class="text-container" style="width: 30%">
@@ -74,6 +74,69 @@
         <div style="width: 100%">
           <h2>Aufgabentext</h2>
           <app-tinymce #introduction [config]="editorConfig"></app-tinymce>
+        </div>
+      </div>
+
+      <div class="link-management-container">
+        <h2>Zugeordnete Fragen verwalten</h2>
+        <p>
+          Hier können Fragen der Sammlung zugeordnet werden. Zur Auswahl stehen die Fragen aus dem
+          selben Abschnitt wie die aktuelle Sammlung.
+        </p>
+        <div class="link-management-content">
+          <!-- Available Questions List -->
+          <mat-card class="question-list-card">
+            <mat-card-header>
+              <mat-card-title>Verfügbare Fragen</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="question-list">
+              <mat-list>
+                <mat-list-item *ngFor="let question of availableQuestions">
+                  <div matListItemTitle>
+                    <div>{{ question.contentElement.title }}</div>
+                    <div class="question-type-label">
+                      {{ question.contentElement.question.type }}
+                    </div>
+                  </div>
+                  <div matListItemMeta>
+                    <button mat-icon-button (click)="addQuestionToCollection(question)">
+                      <mat-icon>chevron_right</mat-icon>
+                    </button>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+              <p *ngIf="availableQuestions.length === 0" class="empty-list-message">
+                Keine weiteren Fragen verfügbar.
+              </p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Selected Questions List -->
+          <mat-card class="question-list-card">
+            <mat-card-header>
+              <mat-card-title>Fragen in dieser Sammlung</mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="question-list">
+              <mat-list>
+                <mat-list-item *ngFor="let question of selectedQuestions">
+                  <div matListItemMeta>
+                    <button mat-icon-button (click)="removeQuestionFromCollection(question)">
+                      <mat-icon>chevron_left</mat-icon>
+                    </button>
+                  </div>
+                  <div matListItemTitle>
+                    <div>{{ question.contentElement.title }}</div>
+                    <div class="question-type-label">
+                      {{ question.contentElement.question.type }}
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+              <p *ngIf="selectedQuestions.length === 0" class="empty-list-message">
+                Keine Fragen ausgewählt.
+              </p>
+            </mat-card-content>
+          </mat-card>
         </div>
       </div>
     </div>

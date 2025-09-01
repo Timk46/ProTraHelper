@@ -3,6 +3,7 @@ import { TinymceComponent } from '../../tinymce/tinymce.component';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   ContentElementDTO,
+  contentElementType,
   ContentViewDTO,
   ContentViewInformationDTO,
   detailedQuestionCollectionLinkDTO,
@@ -44,6 +45,10 @@ export class EditCollectionComponent {
   contentViews: ContentViewInformationDTO[] = [];
   collectionLinks: detailedQuestionCollectionLinkDTO[] = [];
 
+  // For Link Management UI
+  availableQuestions: ContentViewInformationDTO[] = [];
+  selectedQuestions: ContentViewInformationDTO[] = [];
+
   constructor(
     private readonly fb: FormBuilder,
     private readonly questionDataService: QuestionDataService,
@@ -75,14 +80,14 @@ export class EditCollectionComponent {
     this.route.params.subscribe(params => {
       const questionId = parseInt(params['questionId']);
       this.contentNodeId = parseInt(params['contentNodeId']);
-
       this.questionDataService
         .getDetailedQuestionData(questionId, this.thisQuestionType)
         .subscribe(data => {
+          console.log('Detailed Question Data:', data);
           if (data.type === questionType.COLLECTION) {
             this.detailedQuestionData = data;
-            console.log(this.detailedQuestionData);
             this.setContent();
+            this.initializeLinkManagement(); // Attempt initialization
           } else {
             this.snackBar.open(
               'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Sammlung!',
@@ -93,8 +98,9 @@ export class EditCollectionComponent {
           }
         });
       this.contentService.getContentViews(this.contentNodeId).subscribe(elements => {
+        console.log('Content Views:', elements);
         this.contentViews = elements;
-        console.log('Ma boy content views for', this.contentNodeId, ':', this.contentViews);
+        this.initializeLinkManagement(); // Attempt initialization
       });
     });
   }
@@ -114,6 +120,51 @@ export class EditCollectionComponent {
         this.collectionLinks = this.detailedQuestionData.questionCollection.links || [];
       }
     }
+  }
+
+  private initializeLinkManagement() {
+    // Proceed only if both data sources are available
+    if (this.contentViews.length > 0 && this.detailedQuestionData) {
+      const allQuestions = this.contentViews.filter(
+        cv =>
+          cv.contentElement.type === contentElementType.QUESTION &&
+          cv.contentElement.question.type !== questionType.COLLECTION,
+      );
+      const linkedElementIds = new Set(
+        this.collectionLinks.map(link => link.linkedContentElementId),
+      );
+
+      this.selectedQuestions = allQuestions.filter(q => linkedElementIds.has(q.contentElement.id));
+      this.availableQuestions = allQuestions.filter(
+        q => !linkedElementIds.has(q.contentElement.id),
+      );
+    }
+  }
+
+  addQuestionToCollection(question: ContentViewInformationDTO) {
+    // Add to selected list
+    this.selectedQuestions.push(question);
+    // Remove from available list
+    this.availableQuestions = this.availableQuestions.filter(
+      q => q.contentElement.id !== question.contentElement.id,
+    );
+    // Add to collectionLinks DTO
+    this.collectionLinks.push({
+      linkedContentElementId: question.contentElement.id,
+    });
+  }
+
+  removeQuestionFromCollection(question: ContentViewInformationDTO) {
+    // Add to available list
+    this.availableQuestions.push(question);
+    // Remove from selected list
+    this.selectedQuestions = this.selectedQuestions.filter(
+      q => q.contentElement.id !== question.contentElement.id,
+    );
+    // Remove from collectionLinks DTO
+    this.collectionLinks = this.collectionLinks.filter(
+      link => link.linkedContentElementId !== question.contentElement.id,
+    );
   }
 
   protected onOverwrite() {
@@ -204,7 +255,7 @@ export class EditCollectionComponent {
           id: this.detailedQuestionData.questionCollection?.id || undefined,
           questionId: this.detailedQuestionData.id,
           textHTML: this.introductionField.getContent(),
-          links: this.detailedQuestionData.questionCollection?.links || [],
+          links: this.collectionLinks,
         },
       };
       return newData;

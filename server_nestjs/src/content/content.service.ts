@@ -9,6 +9,7 @@ import {
   ConceptNodeEditDTO,
   ContentViewInformationDTO,
   contentElementType,
+  questionType,
 } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
@@ -368,6 +369,9 @@ export class ContentService {
         id: cv.contentElement.id,
         type: cv.contentElement.type as contentElementType,
         title: cv.contentElement.title,
+        question: cv.contentElement.question
+          ? { type: cv.contentElement.question.type as questionType }
+          : null,
       },
       position: cv.position,
       isVisible: cv.isVisible,

@@ -205,7 +205,11 @@ export class QuestionDataService {
           where: {
             questionId: Number(questionId),
           },
+          include: {
+            links: true,
+          },
         });
+        break;
     }
 
     console.log('specificQuestionData: ', specificQuestionData);

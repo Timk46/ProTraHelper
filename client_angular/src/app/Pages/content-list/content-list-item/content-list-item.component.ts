@@ -149,7 +149,7 @@ export class ContentListItemComponent implements OnInit {
       case questionType.GROUP_REVIEW_GATE:
         return 'group_work';
       case questionType.COLLECTION:
-        return 'collection';
+        return 'dynamic_feed';
       default:
         return 'help';
     }
