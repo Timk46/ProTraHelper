@@ -4,6 +4,7 @@ import {
   ContentElementDTO,
   ContentsForConceptDTO,
   LinkableContentElementDTO,
+  questionType,
 } from '@DTOs/index';
 import { contentElementType } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
@@ -161,12 +162,24 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   /**
    * Filters and returns the content elements of type QUESTION from the given content.
+   * Groups MCSlider questions into a single panel to avoid multiple panels for the same quiz.
    *
    * @param {ContentDTO} content - The content object containing content elements.
    * @returns {ContentElement[]} An array of content elements that are of type QUESTION.
    */
   getQuestions(content: ContentDTO): ContentElementDTO[] {
-    return content.contentElements.filter(element => element.type === contentElementType.QUESTION);
+    const questions = content.contentElements.filter(element => element.type === contentElementType.QUESTION);
+    
+    // Gruppiere MCSlider-Fragen: Nur die erste MCSlider-Frage anzeigen
+    const mcSliderQuestions = questions.filter(q => q.question?.type === questionType.MCSLIDER);
+    const otherQuestions = questions.filter(q => q.question?.type !== questionType.MCSLIDER);
+    
+    if (mcSliderQuestions.length > 0) {
+      // Nur die erste MCSlider-Frage behalten, sie repräsentiert alle
+      return [...otherQuestions, mcSliderQuestions[0]];
+    }
+    
+    return questions;
   }
 
   /**

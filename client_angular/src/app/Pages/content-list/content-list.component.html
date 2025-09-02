@@ -120,7 +120,7 @@
           *ngFor="let task of getQuestions(content)"
           [contentElementData]="task"
           [contentNodeId]="content.contentNodeId"
-          [allContentElements]="getQuestions(content)"
+          [allContentElements]="content.contentElements"
           (scoreUpdated)="onScoreUpdated(content, $event)"
           (fetchContentsForConcept)="fetchContentsForConcept.emit()"
           (contentElementDeleted)="onContentElementDeleted(content.contentNodeId, $event)"

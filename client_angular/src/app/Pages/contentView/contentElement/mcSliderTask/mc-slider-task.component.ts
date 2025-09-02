@@ -129,6 +129,13 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Sort questions by ID to ensure correct order (first question first)
+    this.questions.sort((a, b) => (a.id || 0) - (b.id || 0));
+    
+    console.log('[MC-Slider] Questions loaded in order:', this.questions.map(q => `ID: ${q.id}, Name: ${q.name}`));
+    
+    // Ensure we start with the first question
+    this.currentQuestionIndex = 0;
     this.loadQuestionAtIndex(0);
   }
 
@@ -137,7 +144,10 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    */
   private loadQuestionAtIndex(index: number): void {
     if (index >= this.questions.length) {
+      // All questions loaded - ensure we start with the first question
+      this.currentQuestionIndex = 0;
       this.componentState = McSliderTaskState.QUESTIONS;
+      console.log(`[MC-Slider] All ${this.questions.length} questions loaded. Starting with question index: ${this.currentQuestionIndex}`);
       this.cdr.detectChanges();
       return;
     }

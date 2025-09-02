@@ -286,13 +286,7 @@
                 [class.feedback-section__score-progress-bar--error]="
                   (getCurrentQuestionState()?.feedback?.score || 0) === 0
                 "
-                [style.width.%]="
-                  (getCurrentQuestionState()?.questionData!.score || 0) > 0
-                    ? ((getCurrentQuestionState()?.feedback?.score || 0) /
-                        (getCurrentQuestionState()?.questionData!.score || 1)) *
-                      100
-                    : 0
-                "
+                [style.width.%]="getCurrentScoreRatio() * 100"
               ></div>
             </div>
             <!-- Punktzahl-Anzeige ausgeblendet - Backend-feedbackText enthält bereits Punktzahlen -->

@@ -361,6 +361,7 @@ async getUserWithPermissions(userId: number, role: UserRole): Promise<UserDTO> {
 - **Deep analysis**: `think`, `think hard`, `think harder`, `ultrathink` for complexity levels
 - **Step by Step Todo List**: always make a stept by stept todo list when implementing or planning and adhere to it strictly.
 - **Documented plan**: Formal blueprint with objectives, steps, files, risks
+- **Follow-up Questions**: Always ask follow-up questions after the planning phase for potentially unanswered aspects
 - **Checkpoint**: Human review before implementation
 
 ### Phase 3: Implementation
