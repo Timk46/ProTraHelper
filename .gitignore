@@ -5,6 +5,7 @@ files/OFP
 files/AUD
 files/Tragkonstruktion
 files/production_uploads
+.VSCodeCounter
 # Logs
 logs
 *.log
