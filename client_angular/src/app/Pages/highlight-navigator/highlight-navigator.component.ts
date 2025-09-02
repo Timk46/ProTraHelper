@@ -271,12 +271,6 @@ export class HighlightNavigatorComponent implements OnInit, OnDestroy {
       event.stopPropagation();
     }
 
-    // Don't navigate if in edit mode and the user clicked on the edit/delete buttons
-    if (this.isEditMode && this.hoveredTileId === concept.id) {
-      console.log('Not navigating because in edit mode and hovering over the concept');
-      return;
-    }
-
     // Don't navigate if the concept is locked
     if (!concept.isUnlocked) {
       console.log('Not navigating because the concept is locked');
