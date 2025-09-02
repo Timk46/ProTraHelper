@@ -2,11 +2,12 @@ import { DialogRef } from '@angular/cdk/dialog';
 import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../../Services/question/question-data.service';
+import { QuestionCollectionDto } from '@DTOs/index';
 
 interface TaskViewData {
-  contentNodeId?: number;
+  contentNodeId: number;
   contentElementId: number;
-  id: number;
+  id: number; //the question id
   name: string;
   type: string;
   progress: number;
@@ -24,6 +25,8 @@ export class TaskCollectionComponent {
   @Input() taskViewData!: TaskViewData;
   @Output() submitClicked = new EventEmitter<any>();
 
+  questionCollection: QuestionCollectionDto | undefined;
+
   constructor(
     public dialogRef: DialogRef,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -37,5 +40,27 @@ export class TaskCollectionComponent {
 
   ngOnInit() {
     // Initialization logic here
+    this.questionService
+      .getTaskCollectionData(this.taskViewData.id, this.taskViewData.contentNodeId)
+      .subscribe(data => {
+        // Handle the retrieved task collection data
+        console.log('TaskView Data:', this.taskViewData);
+        console.log('Task Collection Data:', data);
+        this.questionCollection = data;
+        this.handleData();
+      });
+  }
+
+  private handleData() {
+    if (this.questionCollection) {
+      // Filter out invisible elements and sort by position
+      this.questionCollection = {
+        ...this.questionCollection,
+        linkedContentElements: this.questionCollection.linkedContentElements.sort(
+          (a, b) => (a.position || 0) - (b.position || 0),
+        ),
+      };
+      console.log('Sorted:', this.questionCollection.linkedContentElements);
+    }
   }
 }

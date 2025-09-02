@@ -269,8 +269,17 @@ export interface CodeGameScaffoldDto {
 export interface QuestionCollectionDto {
   id?: number;
   questionId: number;
-  linkedContentElementIds: number[];
+  linkedContentElements: LinkedCollectionContentElementDto[];
   textHTML?: string;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface LinkedCollectionContentElementDto {
+  id: number;
+  questionId?: number;
+  markedAsDone?: boolean;
+  userProgress?: number;
+  position?: number;
+  isVisible?: boolean;
 }

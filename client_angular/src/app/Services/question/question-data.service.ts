@@ -13,7 +13,8 @@ import {
   GraphQuestionDTO,
   uploadQuestionDTO,
   UserUploadAnswerListItemDTO,
-  GroupReviewStatusDTO
+  GroupReviewStatusDTO,
+  QuestionCollectionDto,
 } from '@DTOs/index';
 import { questionType } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
@@ -78,8 +79,10 @@ export class QuestionDataService {
    * @param {number} userId - The ID of the user, defaults to -1 for current user.
    * @returns {Observable<UserAnswerDataDTO>} An Observable that emits the UserAnswerDataDTO.
    */
-  getNewestUserAnswer(questionId: number, userId: number = -1) : Observable<UserAnswerDataDTO> {
-    return this.http.get<UserAnswerDataDTO>(environment.server + `/question-data/newestUserAnswer/${questionId}/${userId}`);
+  getNewestUserAnswer(questionId: number, userId: number = -1): Observable<UserAnswerDataDTO> {
+    return this.http.get<UserAnswerDataDTO>(
+      environment.server + `/question-data/newestUserAnswer/${questionId}/${userId}`,
+    );
   }
 
   /**
@@ -88,8 +91,13 @@ export class QuestionDataService {
    * @param {questionType} [questionType] - The type of the question (optional).
    * @returns {Observable<UserAnswerDataDTO[]>} An Observable that emits an array of UserAnswerDataDTO.
    */
-  getAllUserUploadAnswers(questionId: number, questionType?: questionType) : Observable<UserUploadAnswerListItemDTO[]> {
-    return this.http.get<UserUploadAnswerListItemDTO[]>(environment.server + `/question-data/allUserUploadAnswers/${questionId}`);
+  getAllUserUploadAnswers(
+    questionId: number,
+    questionType?: questionType,
+  ): Observable<UserUploadAnswerListItemDTO[]> {
+    return this.http.get<UserUploadAnswerListItemDTO[]>(
+      environment.server + `/question-data/allUserUploadAnswers/${questionId}`,
+    );
   }
 
   /**
@@ -152,16 +160,31 @@ export class QuestionDataService {
    * @param {number} questionVersionId - The version ID of the question.
    * @returns {Observable<uploadQuestionDTO>} An Observable that emits the uploadQuestionDTO.
    */
-  getUploadQuestion(questionVersionId: number) : Observable<uploadQuestionDTO> {
-    return this.http.get<uploadQuestionDTO>(environment.server + `/question-data/uploadQuestion/${questionVersionId}`);
+  getUploadQuestion(questionVersionId: number): Observable<uploadQuestionDTO> {
+    return this.http.get<uploadQuestionDTO>(
+      environment.server + `/question-data/uploadQuestion/${questionVersionId}`,
+    );
   }
 
-  getAllUploadQuestions() : Observable<uploadQuestionDTO[]> {
-    return this.http.get<uploadQuestionDTO[]>(environment.server + `/question-data/uploadQuestion/all`);
+  getAllUploadQuestions(): Observable<uploadQuestionDTO[]> {
+    return this.http.get<uploadQuestionDTO[]>(
+      environment.server + `/question-data/uploadQuestion/all`,
+    );
   }
 
-  getGroupReviewStatuses(questionId: number) : Observable<GroupReviewStatusDTO[]> {
-    return this.http.get<GroupReviewStatusDTO[]>(environment.server + `/question-data/groupReviewStatuses/${questionId}`);
+  getGroupReviewStatuses(questionId: number): Observable<GroupReviewStatusDTO[]> {
+    return this.http.get<GroupReviewStatusDTO[]>(
+      environment.server + `/question-data/groupReviewStatuses/${questionId}`,
+    );
+  }
+
+  getTaskCollectionData(
+    questionId: number,
+    contentNodeId: number,
+  ): Observable<QuestionCollectionDto> {
+    return this.http.get<QuestionCollectionDto>(
+      environment.server + `/question-data/questionCollection/${questionId}/${contentNodeId}`,
+    );
   }
 
   /**
@@ -358,7 +381,11 @@ export class QuestionDataService {
   openDialog(
     taskType: string,
     config: MatDialogConfig,
-  ): MatDialogRef<McTaskComponent | McSliderTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent> | undefined {
+  ):
+    | MatDialogRef<
+        McTaskComponent | McSliderTaskComponent | FreeTextTaskComponent | FillinTaskNewComponent
+      >
+    | undefined {
     switch (taskType) {
       case questionType.SINGLECHOICE:
       case questionType.MULTIPLECHOICE:

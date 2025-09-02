@@ -1,7 +1,24 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Param, Body, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { QuestionDataService } from './question-data.service';
-import { detailedQuestionDTO, freeTextQuestionDTO, QuestionDTO, UserAnswerDataDTO, FillinQuestionDTO, GraphQuestionDTO, userAnswerFeedbackDTO, MCOptionDTO, McQuestionDTO, MCOptionViewDTO, UserMCOptionSelectedDTO, uploadQuestionDTO, questionType, UserUploadAnswerListItemDTO, GroupReviewStatusDTO } from '@DTOs/index';
+import {
+  detailedQuestionDTO,
+  freeTextQuestionDTO,
+  QuestionDTO,
+  UserAnswerDataDTO,
+  FillinQuestionDTO,
+  GraphQuestionDTO,
+  userAnswerFeedbackDTO,
+  MCOptionDTO,
+  McQuestionDTO,
+  MCOptionViewDTO,
+  UserMCOptionSelectedDTO,
+  uploadQuestionDTO,
+  questionType,
+  UserUploadAnswerListItemDTO,
+  GroupReviewStatusDTO,
+  QuestionCollectionDto,
+} from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
@@ -9,7 +26,7 @@ import { QuestionDataFillinService } from './question-data-fillin/question-data-
 import { QuestionDataGraphService } from './question-data-graph/question-data-graph.service';
 import { QuestionDataUploadService } from './question-data-upload/question-data-upload.service';
 import { QuestionDataGroupReviewGateService } from './question-data-groupreviewgate/question-data-groupreviewgate.service';
-
+import { QuestionDataCollectionService } from './question-data-collection/question-data-collection.service';
 
 @UseGuards(RolesGuard)
 @Controller('question-data')
@@ -21,30 +38,38 @@ export class QuestionDataController {
     private readonly qdGraphService: QuestionDataGraphService,
     private readonly qdFillinService: QuestionDataFillinService,
     private readonly qdUploadService: QuestionDataUploadService,
-      private qdGroupReviewGateService: QuestionDataGroupReviewGateService
+    private readonly qdCollectionService: QuestionDataCollectionService,
+    private qdGroupReviewGateService: QuestionDataGroupReviewGateService,
   ) {}
 
-        /**
-         * @description Retrieves a question by its ID.
-         * @param {number} questionId - The ID of the question.
-         * @returns {Promise<QuestionDTO>} The question data.
-         */
-        @roles('ANY')
-        @Get(':questionId')
-        async getQuestion(@Param('questionId', ParseIntPipe) questionId: number) {
-            return this.questionDataService.getQuestion(questionId);
-        }
+  /**
+   * @description Retrieves a question by its ID.
+   * @param {number} questionId - The ID of the question.
+   * @returns {Promise<QuestionDTO>} The question data.
+   */
+  @roles('ANY')
+  @Get(':questionId')
+  async getQuestion(@Param('questionId', ParseIntPipe) questionId: number) {
+    return this.questionDataService.getQuestion(questionId);
+  }
 
-        /**
-         * @description Retrieves detailed information about a question based on its ID and type.
-         * @param {detailedQuestionDTO} data - An object containing the questionId and questionType.
-         * @returns {Promise<detailedQuestionDTO>} A promise that resolves to detailedQuestionDTO.
-         */
-        @roles('ADMIN')
-        @Post('detailed')
-        async getDetailedQuestion(@Body() data: { questionId: number, questionType: string }, @Req() req: any): Promise<detailedQuestionDTO> {
-          return this.questionDataService.getDetailedQuestion(data.questionId, data.questionType, req.user.id);
-        }
+  /**
+   * @description Retrieves detailed information about a question based on its ID and type.
+   * @param {detailedQuestionDTO} data - An object containing the questionId and questionType.
+   * @returns {Promise<detailedQuestionDTO>} A promise that resolves to detailedQuestionDTO.
+   */
+  @roles('ADMIN')
+  @Post('detailed')
+  async getDetailedQuestion(
+    @Body() data: { questionId: number; questionType: string },
+    @Req() req: any,
+  ): Promise<detailedQuestionDTO> {
+    return this.questionDataService.getDetailedQuestion(
+      data.questionId,
+      data.questionType,
+      req.user.id,
+    );
+  }
 
   /**
    * @description Retrieves the multiple choice question based on the question version ID.
@@ -92,85 +117,115 @@ export class QuestionDataController {
     return this.qdGraphService.getGraphQuestion(questionId);
   }
 
-        /**
-         * @description Retrieves the fill-in question based on fill-in question ID.
-         * @param {number} fillinQuestionId - The ID of the fill-in question.
-         * @returns {Promise<FillinQuestionDTO>} A promise that resolves to FillinQuestionDTO.
-         */
-        @roles('ANY')
-        @Get('fillinQuestion/:fillinQuestionId')
-        async getFillinQuestion(@Param('fillinQuestionId') fillinQuestionId: number): Promise<FillinQuestionDTO> {
-            return this.qdFillinService.getFillinQuestion(fillinQuestionId);
-        }
+  /**
+   * @description Retrieves the fill-in question based on fill-in question ID.
+   * @param {number} fillinQuestionId - The ID of the fill-in question.
+   * @returns {Promise<FillinQuestionDTO>} A promise that resolves to FillinQuestionDTO.
+   */
+  @roles('ANY')
+  @Get('fillinQuestion/:fillinQuestionId')
+  async getFillinQuestion(
+    @Param('fillinQuestionId') fillinQuestionId: number,
+  ): Promise<FillinQuestionDTO> {
+    return this.qdFillinService.getFillinQuestion(fillinQuestionId);
+  }
 
-        /**
-         * @description Retrieves all upload questions.
-         * @returns {Promise<uploadQuestionDTO[]>} A promise that resolves to an array of uploadQuestionDTO.
-         */
-        @roles('ADMIN', 'TEACHER')
-        @Get('uploadQuestion/all')
-        async getAllUploadQuestions(): Promise<uploadQuestionDTO[]> {
-            return this.qdUploadService.getAllUploadQuestions();
-        }
+  /**
+   * @description Retrieves all upload questions.
+   * @returns {Promise<uploadQuestionDTO[]>} A promise that resolves to an array of uploadQuestionDTO.
+   */
+  @roles('ADMIN', 'TEACHER')
+  @Get('uploadQuestion/all')
+  async getAllUploadQuestions(): Promise<uploadQuestionDTO[]> {
+    return this.qdUploadService.getAllUploadQuestions();
+  }
 
-        /**
-         * Retrieves an upload question by its unique identifier.
-        *
-        * @param uploadQuestionId - The unique identifier of the upload question to retrieve.
-        * @returns A promise that resolves to the corresponding `uploadQuestionDTO`.
-        */
-        @roles('ANY')
-        @Get('uploadQuestion/:uploadQuestionId')
-        async getUploadQuestion(@Param('uploadQuestionId') uploadQuestionId: number): Promise<uploadQuestionDTO> {
-          return this.qdUploadService.getUploadQuestion(uploadQuestionId);
-        }
+  /**
+   * Retrieves an upload question by its unique identifier.
+   *
+   * @param uploadQuestionId - The unique identifier of the upload question to retrieve.
+   * @returns A promise that resolves to the corresponding `uploadQuestionDTO`.
+   */
+  @roles('ANY')
+  @Get('uploadQuestion/:uploadQuestionId')
+  async getUploadQuestion(
+    @Param('uploadQuestionId') uploadQuestionId: number,
+  ): Promise<uploadQuestionDTO> {
+    return this.qdUploadService.getUploadQuestion(uploadQuestionId);
+  }
 
-        /**
-         * Retrieves the review statuses for a specific question group for the current user.
-        *
-        * @param questionId - The ID of the question to get review statuses for.
-        * @param req - The request object containing the authenticated user information.
-        * @returns A promise that resolves to an array of group review status DTOs.
-        */
-        @roles('ANY')
-        @Get('groupReviewStatuses/:questionId')
-        async getGroupReviewStatuses(@Param('questionId', ParseIntPipe) questionId: number, @Req() req: any): Promise<GroupReviewStatusDTO[]> {
-          const userId = req.user.id;
-          return this.qdGroupReviewGateService.getStatuses(questionId, userId);
-        }
+  /**
+   * Retrieves the review statuses for a specific question group for the current user.
+   *
+   * @param questionId - The ID of the question to get review statuses for.
+   * @param req - The request object containing the authenticated user information.
+   * @returns A promise that resolves to an array of group review status DTOs.
+   */
+  @roles('ANY')
+  @Get('groupReviewStatuses/:questionId')
+  async getGroupReviewStatuses(
+    @Param('questionId', ParseIntPipe) questionId: number,
+    @Req() req: any,
+  ): Promise<GroupReviewStatusDTO[]> {
+    const userId = req.user.id;
+    return this.qdGroupReviewGateService.getStatuses(questionId, userId);
+  }
 
-        /**
-         * @description Retrieves the newest user answer for a given question and user.
-         * @param {number} questionId - The ID of the question.
-         * @param {number} userId - The ID of the user.
-         * @param {any} req - The request object, containing user information.
-         * @returns {Promise<UserAnswerDTO>} The newest user answer.
-         * @throws Error if questionId or userId is invalid.
-         */
-        @roles('ADMIN', 'TEACHER')
-        @Get('/newestUserAnswer/:questionId/:userId')
-        async getNewestUserAnswer(@Param('questionId') questionId: number, @Param('userId') userId: number, @Req() req: any): Promise<UserAnswerDataDTO> {
-            if (isNaN(questionId) || isNaN(userId)) {
-                throw new Error('Invalid questionId or userId');
-            }
-            if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER'){
-                return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
-            } else {
-                return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
-            }
-        }
+  /**
+   * Retrieves a related question collection for a given question and content node.
+   *
+   * @param questionId - The ID of the question to find related collections for.
+   * @param contentNodeId - The ID of the content node associated with the question. Crucial for positioning.
+   * @param req - The request object containing user information.
+   * @returns A promise that resolves to a {@link QuestionCollectionDto} containing the related question collection.
+   */
+  @roles('ANY')
+  @Get('questionCollection/:questionId/:contentNodeId')
+  async getRelatedQuestionCollection(
+    @Param('questionId', ParseIntPipe) questionId: number,
+    @Param('contentNodeId', ParseIntPipe) contentNodeId: number,
+    @Req() req: any,
+  ): Promise<QuestionCollectionDto> {
+    const userId = req.user.id;
+    return this.qdCollectionService.getRelatedCollection(questionId, contentNodeId, userId);
+  }
 
-        @roles('ADMIN', 'TEACHER')
-        @Get('/allUserUploadAnswers/:questionId?')
-        async getAllUserUploadAnswers(
-            @Param('questionId', ParseIntPipe) questionId: number,
-            @Req() req: any
-        ): Promise<UserUploadAnswerListItemDTO[]> {
-          console.log('Fetching all user upload answers for questionId:', questionId);
-          const temp = await this.qdUploadService.getAllUserUploadAnswers(questionId);
-          console.log('User Upload Answers:', temp);
-          return temp;
-        }
+  /**
+   * @description Retrieves the newest user answer for a given question and user.
+   * @param {number} questionId - The ID of the question.
+   * @param {number} userId - The ID of the user.
+   * @param {any} req - The request object, containing user information.
+   * @returns {Promise<UserAnswerDTO>} The newest user answer.
+   * @throws Error if questionId or userId is invalid.
+   */
+  @roles('ADMIN', 'TEACHER')
+  @Get('/newestUserAnswer/:questionId/:userId')
+  async getNewestUserAnswer(
+    @Param('questionId') questionId: number,
+    @Param('userId') userId: number,
+    @Req() req: any,
+  ): Promise<UserAnswerDataDTO> {
+    if (isNaN(questionId) || isNaN(userId)) {
+      throw new Error('Invalid questionId or userId');
+    }
+    if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER') {
+      return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
+    } else {
+      return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
+    }
+  }
+
+  @roles('ADMIN', 'TEACHER')
+  @Get('/allUserUploadAnswers/:questionId?')
+  async getAllUserUploadAnswers(
+    @Param('questionId', ParseIntPipe) questionId: number,
+    @Req() req: any,
+  ): Promise<UserUploadAnswerListItemDTO[]> {
+    console.log('Fetching all user upload answers for questionId:', questionId);
+    const temp = await this.qdUploadService.getAllUserUploadAnswers(questionId);
+    console.log('User Upload Answers:', temp);
+    return temp;
+  }
 
   /**
    * @description Creates a new user answer.

@@ -256,6 +256,7 @@ export class ContentListItemComponent implements OnInit {
       //Provide the data over inputs instead of dialog data to allow embedding
       dialogRef.componentInstance.taskViewData = {
         contentElementId: this.contentElementData.id,
+        contentNodeId: this.contentNodeId,
         name: this.contentElementData.title || 'Namenlose Aufgabe',
         ...question,
       };
