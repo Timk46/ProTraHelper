@@ -1,48 +1,66 @@
 <div class="collection-wrapper" *ngIf="questionCollection">
-  <div class="collection-header">
-    <h2>{{ questionCollection.id }}</h2>
-    <p class="progress-text" *ngIf="sortedTasks.length > 0">
-      Aufgabe {{ currentIndex + 1 }} von {{ sortedTasks.length }}
-    </p>
-  </div>
-
-  <div class="task-host-container">
-    <!-- This is where the dynamic task component will be injected -->
-    <ng-template #taskHost></ng-template>
-
-    <!-- Placeholder for unsupported task types -->
-    <div *ngIf="!componentRef" class="unsupported-task">
-      <mat-icon>warning</mat-icon>
-      <p>Dieser Aufgabentyp wird in einer Sammlung noch nicht unterstützt.</p>
+  <!-- Start Page View -->
+  <div class="start-page-container" *ngIf="showStartPage; else taskView">
+    <div class="start-page-header">
+      <h2>{{ questionCollection.title }}</h2>
+    </div>
+    <div class="start-page-content" [innerHTML]="questionCollection.textHTML"></div>
+    <div class="start-page-footer">
+      <button mat-flat-button color="primary" (click)="startTasks()">Los geht's!</button>
     </div>
   </div>
 
-  <div class="collection-footer" *ngIf="sortedTasks.length > 0">
-    <button
-      mat-stroked-button
-      color="primary"
-      (click)="goToPreviousTask()"
-      [disabled]="currentIndex <= 0"
-    >
-      <mat-icon>navigate_before</mat-icon>
-      Zurück
-    </button>
+  <!-- Task Sequence View -->
+  <ng-template #taskView>
+    <div class="task-view-container">
+      <div class="collection-header">
+        <h2>{{ questionCollection.title }}</h2>
+        <p class="progress-text" *ngIf="sortedTasks.length > 0">
+          Aufgabe {{ currentIndex + 1 }} von {{ sortedTasks.length }}
+        </p>
+      </div>
 
-    <mat-progress-bar
-      mode="determinate"
-      [value]="((currentIndex + (isCurrentTaskCompleted ? 1 : 0)) / sortedTasks.length) * 100"
-    ></mat-progress-bar>
+      <div class="task-host-container">
+        <!-- This is where the dynamic task component will be injected -->
+        <ng-template #taskHost></ng-template>
 
-    <button
-      mat-flat-button
-      color="primary"
-      (click)="goToNextTask()"
-      [disabled]="!isCurrentTaskCompleted"
-      [matTooltip]="isCurrentTaskCompleted ? '' : 'Bitte schließe die aktuelle Aufgabe zuerst ab.'"
-    >
-      <span *ngIf="currentIndex < sortedTasks.length - 1">Weiter</span>
-      <span *ngIf="currentIndex >= sortedTasks.length - 1">Abschließen</span>
-      <mat-icon>navigate_next</mat-icon>
-    </button>
-  </div>
+        <!-- Placeholder for unsupported task types -->
+        <div *ngIf="!componentRef && sortedTasks.length > 0" class="unsupported-task">
+          <mat-icon>warning</mat-icon>
+          <p>Dieser Aufgabentyp wird in einer Sammlung noch nicht unterstützt.</p>
+        </div>
+      </div>
+
+      <div class="collection-footer" *ngIf="sortedTasks.length > 0">
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="goToPreviousTask()"
+          [disabled]="currentIndex <= 0"
+        >
+          <mat-icon>navigate_before</mat-icon>
+          Zurück
+        </button>
+
+        <mat-progress-bar
+          mode="determinate"
+          [value]="(currentIndex / sortedTasks.length) * 100"
+        ></mat-progress-bar>
+
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="goToNextTask()"
+          [disabled]="!isCurrentTaskCompleted"
+          [matTooltip]="
+            isCurrentTaskCompleted ? '' : 'Bitte schließe die aktuelle Aufgabe zuerst ab.'
+          "
+        >
+          <span *ngIf="currentIndex < sortedTasks.length - 1">Weiter</span>
+          <span *ngIf="currentIndex >= sortedTasks.length - 1">Abschließen</span>
+          <mat-icon>navigate_next</mat-icon>
+        </button>
+      </div>
+    </div>
+  </ng-template>
 </div>

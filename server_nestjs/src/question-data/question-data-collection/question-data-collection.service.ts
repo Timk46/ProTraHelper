@@ -52,6 +52,7 @@ export class QuestionDataCollectionService {
         question: {
           select: {
             text: true,
+            name: true,
           },
         },
       },
@@ -133,6 +134,7 @@ export class QuestionDataCollectionService {
 
     return {
       questionId,
+      title: collection.question.name,
       textHTML: collection.textHTML || collection.question.text || '',
       linkedContentElements: processedElements,
     };

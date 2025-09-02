@@ -9,7 +9,6 @@ import {
   ViewContainerRef,
   ComponentRef,
   OnDestroy,
-  OnInit,
   AfterViewInit,
 } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -19,7 +18,6 @@ import {
   QuestionCollectionDto,
   questionType,
 } from '@DTOs/index';
-import { takeUntil } from 'rxjs';
 
 // Import all possible task components
 import { McTaskComponent } from '../mcTask/mcTask.component';
@@ -27,7 +25,6 @@ import { FreeTextTaskComponent } from '../free-text-task/free-text-task.componen
 import { FillinTaskNewComponent } from '../fill-in-task-new/fill-in-task-new.component';
 import { UploadTaskComponent } from '../upload-task/upload-task.component';
 import { GroupReviewGateDialogComponent } from '../group-review-gate-dialog/group-review-gate-dialog.component';
-import { McSliderTaskComponent } from '../mcSliderTask/mc-slider-task.component';
 
 // This is the simplified data structure that the child components expect as an input.
 interface TaskViewData {
@@ -66,7 +63,7 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
   sortedTasks: LinkedCollectionContentElementDto[] = [];
   currentIndex = 0;
   isCurrentTaskCompleted = false;
-  private viewInitialized = false;
+  showStartPage = false;
 
   // update this if new question types are added
   private componentMap: { [key: string]: any } = {
@@ -92,7 +89,6 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
     this.questionService
       .getTaskCollectionData(this.taskViewData.id, this.taskViewData.contentNodeId)
       .subscribe(data => {
-        console.log('Fetched task collection data:', data);
         this.setupCollection(data);
       });
   }
@@ -117,9 +113,17 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
 
     if (this.currentIndex < 0) this.currentIndex = 0;
 
-    setTimeout(() => {
-      this.loadTaskComponent();
-    }, 0);
+    if (this.questionCollection.textHTML) {
+      this.showStartPage = true;
+    } else {
+      // No start page, begin tasks immediately
+      setTimeout(() => this.loadTaskComponent(), 0);
+    }
+  }
+
+  startTasks() {
+    this.showStartPage = false;
+    setTimeout(() => this.loadTaskComponent(), 0);
   }
 
   private loadTaskComponent() {
@@ -168,15 +172,12 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
     this.componentRef.instance.taskViewData = taskViewDataForComponent;
     this.isCurrentTaskCompleted = taskViewDataForComponent.progress === 100;
 
-    this.componentRef.instance.submitClicked
-      //.pipe(takeUntil(this.componentRef.instance.submitClicked))
-      .subscribe(score => {
-        this.handleTaskSubmission(score);
-      });
+    this.componentRef.instance.submitClicked.subscribe(score => {
+      this.handleTaskSubmission(score);
+    });
   }
 
   private handleTaskSubmission(score: number) {
-    console.log('Task submitted with score:', score);
     const currentTask = this.sortedTasks[this.currentIndex];
     if (currentTask.userProgress) {
       if (score > currentTask.userProgress) {

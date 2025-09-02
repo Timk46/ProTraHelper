@@ -270,6 +270,7 @@ export interface QuestionCollectionDto {
   id?: number;
   questionId: number;
   linkedContentElements: LinkedCollectionContentElementDto[];
+  title?: string;
   textHTML?: string;
   createdAt?: Date;
   updatedAt?: Date;

@@ -68,3 +68,44 @@
     min-width: 120px; // Give buttons some space
   }
 }
+
+// Start Page Styles
+.start-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: center;
+}
+
+.start-page-header h2 {
+  margin: 0;
+  font-size: 1.8em;
+}
+
+.start-page-content {
+  flex-grow: 1;
+  text-align: left;
+  padding: 0 20px;
+  // Basic styling for content coming from innerHTML
+  line-height: 1.6;
+
+  h1, h2, h3 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  ul, ol {
+    padding-left: 20px;
+  }
+}
+
+.start-page-footer {
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: center;
+}
