@@ -22,6 +22,7 @@ import { QuestionDataService } from 'src/app/Services/question/question-data.ser
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UploadTaskComponent } from '../../contentView/contentElement/upload-task/upload-task.component';
 import { GroupReviewGateDialogComponent } from '../../contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
+import { TaskCollectionComponent } from '../../contentView/contentElement/task-collection/task-collection.component';
 
 @Component({
   selector: 'app-content-list-item',
@@ -190,6 +191,7 @@ export class ContentListItemComponent implements OnInit {
           | UploadTaskComponent
           | GroupReviewGateDialogComponent
           | McSliderTaskComponent
+          | TaskCollectionComponent
         >
       | undefined;
 
@@ -245,6 +247,8 @@ export class ContentListItemComponent implements OnInit {
           width: '70vw',
         });
         break;
+      case questionType.COLLECTION:
+        dialogRef = this.dialog.open(TaskCollectionComponent, dialogConfig);
     }
 
     // Handle dialog submission if a dialog was opened
