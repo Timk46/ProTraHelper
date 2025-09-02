@@ -1,11 +1,11 @@
-import { Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, OnInit, Output } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { detailedQuestionDTO, GroupReviewStatusDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 
 interface TaskViewData {
-  contentNodeId: number;
+  contentNodeId?: number;
   contentElementId: number;
   id: number;
   name: string;
@@ -21,8 +21,8 @@ interface TaskViewData {
 })
 export class GroupReviewGateDialogComponent implements OnInit {
   @Output() submitClicked = new EventEmitter<any>();
+  @Input() taskViewData!: TaskViewData;
 
-  taskViewData: TaskViewData;
   statuses: GroupReviewStatusDTO[] = [];
   displayedColumns: string[] = ['submissionIdentifier', 'reviewPhase', 'userStatus', 'action'];
 
@@ -32,8 +32,9 @@ export class GroupReviewGateDialogComponent implements OnInit {
     public dialogRef: MatDialogRef<GroupReviewGateDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    this.taskViewData = data.taskViewData;
-    console.log('Dialog data:', this.taskViewData);
+    if (data && data.taskViewData) {
+      this.taskViewData = data.taskViewData;
+    }
   }
 
   ngOnInit(): void {

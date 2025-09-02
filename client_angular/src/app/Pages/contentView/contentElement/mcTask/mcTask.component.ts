@@ -8,13 +8,18 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
-import { McQuestionOptionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import {
+  MCOptionViewDTO,
+  McQuestionDTO,
+  QuestionDTO,
+  McQuestionOptionDTO,
+  UserAnswerDataDTO,
+  userAnswerFeedbackDTO,
+  TaskViewData,
+} from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TaskViewData } from '@DTOs/index';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { Subject } from 'rxjs';

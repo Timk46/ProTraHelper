@@ -205,7 +205,7 @@ export interface GraphQuestionDTO {
 }
 
 export interface TaskViewData {
-  contentNodeId: number;
+  contentNodeId?: number;
   contentElementId: number;
   id: number;
   name?: string;

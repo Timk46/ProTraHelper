@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { Location } from '@angular/common';
 interface TaskViewData {
-  contentNodeId: number;
+  contentNodeId?: number;
   contentElementId: number;
   id: number;
   name: string;
@@ -23,6 +23,7 @@ export class FreeTextTaskComponent {
   @Output() submitClicked = new EventEmitter<any>();
   @Input() conceptId!: number;
   @Input() questionId!: number;
+  @Input() taskViewData!: TaskViewData;
 
   editorConfig = {
     //tinyMCE
@@ -39,8 +40,6 @@ export class FreeTextTaskComponent {
   feedbackText: string = '';
   isSending: boolean = false;
 
-  taskViewData: TaskViewData;
-
   freeTextQuestion: freeTextQuestionDTO = {
     questionId: -1,
     contentElementId: -1,
@@ -56,7 +55,12 @@ export class FreeTextTaskComponent {
     private readonly questionService: QuestionDataService,
     private readonly location: Location,
   ) {
-    this.taskViewData = data.taskViewData;
+    if (data && data.taskViewData) {
+      this.taskViewData = data.taskViewData;
+    }
+  }
+
+  ngOnInit() {
     this.questionService.getFreeTextQuestion(this.taskViewData.id).subscribe(data => {
       this.freeTextQuestion = data;
       this.freeTextQuestion.contentElementId = this.taskViewData.contentElementId;

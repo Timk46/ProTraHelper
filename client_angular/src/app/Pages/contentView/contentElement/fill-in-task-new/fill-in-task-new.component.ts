@@ -32,11 +32,12 @@ export class FillinTaskNewComponent implements OnInit {
   @Output() submitClicked = new EventEmitter<any>();
   @Input() conceptId!: number;
   @Input() questionId!: number;
+  @Input() taskViewData!: taskViewDTO;
+
   private readonly destroy$ = new Subject<void>();
   protected fillinTypes = FillinQuestionType;
   protected processedContent: SafeHtml | undefined;
-  protected taskViewData: taskViewDTO;
-  protected contentElementId: number;
+  //protected contentElementId: number;
   protected fillinQuestionData: FillinQuestionDTO | undefined;
   protected isLoading: boolean = true;
   protected isSending: boolean = false;
@@ -56,8 +57,9 @@ export class FillinTaskNewComponent implements OnInit {
     private readonly location: Location,
     private readonly dialogRef: MatDialogRef<FillinTaskNewComponent>,
   ) {
-    this.taskViewData = data.taskViewData;
-    this.contentElementId = data.taskViewData.contentElementId || -1;
+    if (data && data.taskViewData) {
+      this.taskViewData = data.taskViewData;
+    }
   }
 
   ngOnInit() {
@@ -180,7 +182,7 @@ export class FillinTaskNewComponent implements OnInit {
     const userAnswerData: UserAnswerDataDTO = {
       id: -1,
       questionId: this.fillinQuestionData.question.id,
-      contentElementId: this.contentElementId,
+      contentElementId: this.taskViewData.contentElementId || -1,
       userId: -1,
       userFillinTextAnswer: this.gapValues,
     };

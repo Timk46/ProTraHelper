@@ -173,12 +173,12 @@ export class ContentListItemComponent implements OnInit {
     const question: taskViewDTO = this.contentElementData.question;
     // Create dialog configuration
     const dialogConfig = new MatDialogConfig();
-    dialogConfig.data = {
+    /* dialogConfig.data = { //dialog data is not needed because of the input new approach
       taskViewData: {
         contentElementId: this.contentElementData.id,
         ...question,
       },
-    };
+    }; */
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 
@@ -249,7 +249,12 @@ export class ContentListItemComponent implements OnInit {
 
     // Handle dialog submission if a dialog was opened
     if (dialogRef) {
-      //const prevScore = selectedTask.progress;
+      //Provide the data over inputs instead of dialog data to allow embedding
+      dialogRef.componentInstance.taskViewData = {
+        contentElementId: this.contentElementData.id,
+        name: this.contentElementData.title || 'Namenlose Aufgabe',
+        ...question,
+      };
 
       // Subscribe to dialog events and manage with takeUntil
       dialogRef.componentInstance.submitClicked

@@ -68,6 +68,7 @@ export interface ContentsForConceptDTO {
 
 export interface taskViewDTO {
   id: number;
+  contentElementId?: number;
   name?: string;
   description?: string;
   type: string;

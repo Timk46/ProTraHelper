@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TaskViewData, uploadQuestionDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
@@ -12,8 +12,9 @@ import { UserAnswerDataDTO } from '@DTOs/index';
 })
 export class UploadTaskComponent {
   @Output() submitClicked = new EventEmitter<any>();
+  @Input() taskViewData!: TaskViewData;
+
   uploadQuestion: uploadQuestionDTO | undefined;
-  taskViewData: TaskViewData;
 
   // File upload properties
   selectedFile: File | null = null;
@@ -27,13 +28,17 @@ export class UploadTaskComponent {
     private readonly snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: any,
   ) {
-    this.taskViewData = data.taskViewData;
+    if (data && data.taskViewData) {
+      this.taskViewData = data.taskViewData;
+    }
+  }
+
+  ngOnInit() {
     this.questionService.getUploadQuestion(this.taskViewData.id).subscribe(data => {
       console.log('Upload question data:', data);
       this.uploadQuestion = data;
       this.uploadQuestion.contentElementId = this.taskViewData.contentElementId;
     });
-    // Initialization logic can go here if needed
   }
 
   // File handling methods
