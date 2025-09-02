@@ -43,14 +43,19 @@ export class QuestionDataCollectionService {
     contentNodeId: number,
     userId: number,
   ): Promise<QuestionCollectionDto> {
-    /* const collection = await this.prisma.questionCollection.findUnique({
+    const collection = await this.prisma.questionCollection.findUnique({
       where: {
         questionId,
       },
-      include: {
-        links: true,
+      select: {
+        textHTML: true,
+        question: {
+          select: {
+            text: true,
+          },
+        },
       },
-    }); */
+    });
 
     const linkedElements = await this.prisma.questionCollectionLink.findMany({
       where: {
@@ -128,6 +133,7 @@ export class QuestionDataCollectionService {
 
     return {
       questionId,
+      textHTML: collection.textHTML || collection.question.text || '',
       linkedContentElements: processedElements,
     };
   }
