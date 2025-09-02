@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { roles, RolesGuard } from '../auth/common/guards/roles.guard';
-import { ModuleDTO } from '../../../shared/dtos';
+import { ModuleDTO } from '@DTOs/index';
 import { UserModuleService } from './userModule.service';
 
 @UseGuards(RolesGuard)
