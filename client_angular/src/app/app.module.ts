@@ -94,6 +94,8 @@ import { ContentListNodeEditDialogComponent } from './Pages/content-list/content
 import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-task/upload-task.component';
 import { GroupReviewGateDialogComponent } from './Pages/contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
 import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
+import { TaskCollectionComponent } from './Pages/contentView/contentElement/task-collection/task-collection.component';
+import { PerformanceProfilingDirective } from 'src/app/Pages/evaluation-discussion-forum/directives/performance-profiling.directive';
 
 @NgModule({
   declarations: [
@@ -159,6 +161,7 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
     HighlightConceptDialogComponent,
     UploadTaskComponent,
     GroupReviewGateDialogComponent,
+    TaskCollectionComponent,
   ],
   bootstrap: [AppComponent],
   imports: [
@@ -185,6 +188,7 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
     MatIconModule,
     ToastrModule.forRoot(),
     TinymceModule,
+    PerformanceProfilingDirective,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

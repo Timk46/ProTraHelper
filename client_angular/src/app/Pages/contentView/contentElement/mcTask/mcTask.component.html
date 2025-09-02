@@ -8,7 +8,7 @@
   </div>
 
   <!-- Close button (outside the content section) -->
-  <div *ngIf="dataLoaded" class="close-button">
+  <div *ngIf="dataLoaded && !collectionMode" class="close-button">
     <button mat-icon-button (click)="onClose()" aria-label="Frage schließen">
       <mat-icon aria-hidden="true">close</mat-icon>
     </button>
@@ -138,7 +138,7 @@
 
     <!-- Close button after correct answer -->
     <button
-      *ngIf="submitDisabled && checkCorrect()"
+      *ngIf="!collectionMode && submitDisabled && checkCorrect()"
       class="mc-button mc-button--success"
       (click)="onClose()"
       aria-label="Fortfahren"

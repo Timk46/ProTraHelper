@@ -51,6 +51,7 @@ export class McTaskComponent implements OnInit, OnDestroy {
   @Input() questionId!: number;
   @Input() isSelfAssessment: boolean = false;
   @Input() taskViewData!: TaskViewData;
+  @Input() collectionMode: boolean = false;
 
   // Track component state
   componentState: McTaskState = McTaskState.LOADING;

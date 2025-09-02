@@ -278,6 +278,7 @@ export interface QuestionCollectionDto {
 export interface LinkedCollectionContentElementDto {
   id: number;
   questionId?: number;
+  questionType?: questionType;
   markedAsDone?: boolean;
   userProgress?: number;
   position?: number;

@@ -24,6 +24,7 @@ export class FreeTextTaskComponent {
   @Input() conceptId!: number;
   @Input() questionId!: number;
   @Input() taskViewData!: TaskViewData;
+  @Input() collectionMode: boolean = false;
 
   editorConfig = {
     //tinyMCE

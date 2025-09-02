@@ -4,6 +4,7 @@ import {
   detailedQuestionCollectionDTO,
   LinkedCollectionContentElementDto,
   QuestionCollectionDto,
+  questionType,
 } from '@DTOs/index';
 import { connect } from 'node:http2';
 
@@ -82,6 +83,7 @@ export class QuestionDataCollectionService {
             question: {
               select: {
                 id: true,
+                type: true,
                 userAnswer: {
                   where: {
                     userId: userId,
@@ -116,6 +118,7 @@ export class QuestionDataCollectionService {
       return {
         id: contentElement.id,
         questionId: contentElement.question?.id || undefined,
+        questionType: (contentElement.question?.type as questionType) || undefined,
         markedAsDone: contentElement.UserContentProgress[0]?.markedAsDone || false,
         userProgress: bestScore,
         position: contentElement.ContentView[0]?.position || 0,

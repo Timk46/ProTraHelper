@@ -33,6 +33,7 @@ export class FillinTaskNewComponent implements OnInit {
   @Input() conceptId!: number;
   @Input() questionId!: number;
   @Input() taskViewData!: taskViewDTO;
+  @Input() collectionMode: boolean = false;
 
   private readonly destroy$ = new Subject<void>();
   protected fillinTypes = FillinQuestionType;
