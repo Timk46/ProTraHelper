@@ -19,6 +19,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { ContentListNodeEditDialogComponent } from './content-list-node-edit-dialog/content-list-node-edit-dialog.component';
 import { BatRhinoService } from '../../Services/bat-rhino.service';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-content-list',
@@ -129,26 +130,35 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   /**
    * Filters and returns the content elements of type QUESTION from the given content.
+   * Elements are sorted by their position in the specific content view.
    *
    * @param {ContentDTO} content - The content object containing content elements.
-   * @returns {ContentElement[]} An array of content elements that are of type QUESTION.
+   * @returns {ContentElement[]} An array of content elements that are of type QUESTION, sorted by position.
    */
   getQuestions(content: ContentDTO): ContentElementDTO[] {
-    return content.contentElements.filter(element => element.type === contentElementType.QUESTION);
+    return content.contentElements
+      .filter(element => element.type === contentElementType.QUESTION)
+      .sort(
+        (a, b) => (a.positionInSpecificContentView || 0) - (b.positionInSpecificContentView || 0),
+      );
   }
 
   /**
    * Retrieves the attachments from the given content.
-   * Filters the content elements to include only those of type PDF or VIDEO.
+   * Filters the content elements to include only those of type PDF or VIDEO and sorts them by position.
    *
    * @param content - The content object containing content elements.
-   * @returns An array of content elements that are either of type PDF or VIDEO.
+   * @returns An array of content elements that are either of type PDF or VIDEO, sorted by position.
    */
   getAttachments(content: ContentDTO): ContentElementDTO[] {
-    return content.contentElements.filter(
-      element =>
-        element.type === contentElementType.PDF || element.type === contentElementType.VIDEO,
-    );
+    return content.contentElements
+      .filter(
+        element =>
+          element.type === contentElementType.PDF || element.type === contentElementType.VIDEO,
+      )
+      .sort(
+        (a, b) => (a.positionInSpecificContentView || 0) - (b.positionInSpecificContentView || 0),
+      );
   }
 
   /**
@@ -321,6 +331,52 @@ export class ContentListComponent implements OnInit, OnChanges {
       }
     });
     this.applyFilter();
+  }
+
+  onTaskDrop(event: CdkDragDrop<ContentElementDTO[]>, content: ContentDTO) {
+    if (!this.editModeActive || event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    const questionElements = this.getQuestions(content);
+    const movedElement = questionElements[event.previousIndex];
+
+    moveItemInArray(questionElements, event.previousIndex, event.currentIndex);
+
+    // Update the positionInSpecificContentView for all question elements
+    questionElements.forEach((element, index) => {
+      element.positionInSpecificContentView = index + 1;
+    });
+
+    // Create array with new order of element IDs
+    const orderedElementIds = questionElements.map(element => element.id);
+
+    console.log(
+      'Updating position for element:',
+      movedElement.id,
+      'from position',
+      event.previousIndex,
+      'to',
+      event.currentIndex,
+      'New order:',
+      orderedElementIds,
+    );
+
+    this.contentLinkerService
+      .updateContentElementPositions(content.contentNodeId, orderedElementIds)
+      .subscribe({
+        next: () => {
+          this.snackBar.open('Reihenfolge aktualisiert', 'OK', { duration: 2000 });
+        },
+        error: (err: any) => {
+          console.error('Failed to update order', err);
+          this.snackBar.open('Fehler beim Aktualisieren der Reihenfolge', 'OK', {
+            duration: 3000,
+          });
+          // Revert local changes on error
+          this.fetchContentsForConcept.emit();
+        },
+      });
   }
 
   // TODO: implement

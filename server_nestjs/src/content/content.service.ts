@@ -202,6 +202,7 @@ export class ContentService {
       requires: true,
       trains: true,
       ContentView: {
+        orderBy: { position: 'asc' as const },
         include: {
           contentElement: {
             include: {
@@ -849,6 +850,54 @@ export class ContentService {
 
     const highestLevel: number = highestAwardsResult.awards || -1;
     return highestLevel;
+  }
+
+  /**
+   * Updates the positions of content elements within a content node.
+   *
+   * The method reorders the elements so that the specified `positionedElementIds`
+   * appear first in the given order, followed by any remaining elements in their original order.
+   * It validates that all provided IDs exist in the content node before updating.
+   *
+   * @param contentNodeId - The ID of the content node whose elements are to be reordered.
+   * @param positionedElementIds - An array of content element IDs specifying the desired order for those elements.
+   * @returns A promise that resolves to `true` if the update was successful, or `false` if any provided IDs are invalid.
+   */
+  async updateContentElementPositions(
+    contentNodeId: number,
+    positionedElementIds: number[],
+  ): Promise<boolean> {
+    const contentViews = await this.prisma.contentView.findMany({
+      where: { contentNodeId },
+      orderBy: { position: 'asc' },
+    });
+
+    // Check if all provided element IDs are valid
+    const allValid = positionedElementIds.every(id =>
+      contentViews.some(view => view.contentElementId === id),
+    );
+    if (!allValid) return false;
+
+    // Create final order: specified elements first, then remaining elements in original order
+    const specifiedIds = new Set(positionedElementIds);
+    const remainingElements = contentViews
+      .filter(view => !specifiedIds.has(view.contentElementId))
+      .map(view => view.contentElementId);
+
+    const finalOrder = [...positionedElementIds, ...remainingElements];
+
+    // Update positions for all elements
+    const updates = finalOrder.map((id, index) =>
+      this.prisma.contentView.updateMany({
+        where: {
+          contentNodeId,
+          contentElementId: id,
+        },
+        data: { position: index + 1 },
+      }),
+    );
+    await Promise.all(updates);
+    return true;
   }
 
   /**

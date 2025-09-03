@@ -115,9 +115,18 @@
         </div>
       </div>
       <h2 style="margin-top: 10px">Aufgaben</h2>
-      <div class="content-list-element-items">
+      <div
+        class="content-list-element-items"
+        cdkDropList
+        cdkDropListOrientation="mixed"
+        [cdkDropListData]="getQuestions(content)"
+        (cdkDropListDropped)="onTaskDrop($event, content)"
+        [cdkDropListDisabled]="!editModeActive"
+      >
         <app-content-list-item
           *ngFor="let task of getQuestions(content)"
+          cdkDrag
+          [cdkDragDisabled]="!editModeActive"
           [contentElementData]="task"
           [contentNodeId]="content.contentNodeId"
           [allContentElements]="getQuestions(content)"

@@ -96,6 +96,7 @@ import { GroupReviewGateDialogComponent } from './Pages/contentView/contentEleme
 import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module';
 import { TaskCollectionComponent } from './Pages/contentView/contentElement/task-collection/task-collection.component';
 import { PerformanceProfilingDirective } from 'src/app/Pages/evaluation-discussion-forum/directives/performance-profiling.directive';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 @NgModule({
   declarations: [
@@ -186,6 +187,7 @@ import { PerformanceProfilingDirective } from 'src/app/Pages/evaluation-discussi
     LecturersViewModule,
     MatMenuModule,
     MatIconModule,
+    DragDropModule,
     ToastrModule.forRoot(),
     TinymceModule,
     PerformanceProfilingDirective,

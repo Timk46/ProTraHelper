@@ -54,6 +54,15 @@
   }
 }
 
+:host-context(.cdk-drag-disabled) .list-item:hover {
+  cursor: pointer;
+}
+
+:host-context(:not(.cdk-drag-disabled)) .list-item {
+  cursor: move;
+}
+
+
 .example-header-image {
   background-image: url('https://material.angular.io/assets/img/examples/shiba1.jpg');
   background-size: cover;

@@ -72,6 +72,25 @@ export class ContentLinkerService {
     );
   }
 
+  /**
+   * Updates the positions of content elements within a specified content node.
+   *
+   * Sends a PUT request to the server to update the order of elements based on the provided array of element IDs.
+   *
+   * @param contentNodeId - The ID of the content node whose elements' positions are to be updated.
+   * @param orderedElementIds - An array of element IDs representing the new order of the elements.
+   * @returns An Observable that emits `true` if the update was successful, otherwise `false`.
+   */
+  updateContentElementPositions(
+    contentNodeId: number,
+    orderedElementIds: number[],
+  ): Observable<boolean> {
+    return this.http.put<boolean>(
+      `${environment.server}/content/updateElementPosition/${contentNodeId}/`,
+      { positionedElementIds: orderedElementIds },
+    );
+  }
+
   updateContentViewVisibility(contentViewId: number, isVisible: boolean): Observable<boolean> {
     return this.http.put<boolean>(
       `${environment.server}/content/updateVisibility/${contentViewId}`,

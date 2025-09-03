@@ -193,6 +193,18 @@ export class ContentController {
     return this.contentService.updateConcept(Number(conceptId), body);
   }
 
+  @roles('ADMIN')
+  @Put('/updateElementPosition/:contentNodeId/')
+  async updateContentElementPosition(
+    @Param('contentNodeId') contentNodeId: number,
+    @Body('positionedElementIds') positionedElementIds: number[],
+  ): Promise<boolean> {
+    return this.contentService.updateContentElementPositions(
+      Number(contentNodeId),
+      positionedElementIds,
+    );
+  }
+
   /**
    * Update ContentNode Position
    * @route POST /content/updatePosition/:contentNodeId/:newPosition
