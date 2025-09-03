@@ -8,7 +8,7 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO } from '@DTOs/index';
+import { MCOptionViewDTO, McQuestionDTO, TaskViewData } from '@DTOs/index';
 import { QuestionDTO, McQuestionOptionDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
