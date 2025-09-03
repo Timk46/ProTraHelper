@@ -7,7 +7,7 @@
   class="content mat-elevation-z8"
 >
   <div
-    *ngIf="(isHandset$ | async) === true && !editModeActive"
+    *ngIf="(isHandset$ | async) === true && !editModeActive && showDiscussionButtons"
     class="button-group"
     style="display: flex"
   >
@@ -31,7 +31,7 @@
       {{ activeConceptNode.name }}
     </h1>
     <h1 *ngIf="!(sSS.isLandscape | async)">{{ activeConceptNode.name }}</h1>
-    <div *ngIf="(isHandset$ | async) === false && !editModeActive" class="button-group">
+    <div *ngIf="(isHandset$ | async) === false && !editModeActive && showDiscussionButtons" class="button-group">
       <button
         mat-button
         [ngClass]="{ active: activeTab === 'content' }"
@@ -101,7 +101,7 @@
   </div>
 
   <div
-    *ngIf="!editModeActive"
+    *ngIf="!editModeActive && showDiscussionButtons"
     [ngStyle]="{ display: activeTab === 'discussion' ? 'block' : 'none' }"
     class="tab-content-container"
   >

@@ -25,7 +25,6 @@ HEFL (Hybrid E-Learning Framework) is a sophisticated full-stack e-learning plat
 npm install              # Install dependencies
 npm start               # Start dev server (http://localhost:4200)
 npm run start-local     # Start on local network (192.168.137.1:4200)
-npm run build           # Production build
 npm test                # Run unit tests
 npm run compodoc        # Generate documentation (port 8001)
 ```
@@ -34,42 +33,11 @@ npm run compodoc        # Generate documentation (port 8001)
 
 ```bash
 npm install             # Install dependencies
-npm start               # Start server
-npm run start:dev       # Start with watch mode (recommended)
-npm run start:debug     # Start in debug mode
-npm run build           # Build for production
 npm test                # Run unit tests
 npm run test:watch      # Run tests in watch mode
 npm run test:cov        # Test with coverage
-npm run lint            # Run linter
 npm run format          # Format code
 npm run compodoc        # Generate documentation (port 8002)
-```
-
-### Database Management
-
-```bash
-npm run seed            # Reset database and seed with test data
-npm run seedProTra      # Seed ProTra-specific data
-npx prisma migrate deploy  # Run pending migrations
-npx prisma studio       # Open Prisma Studio GUI
-```
-
-### E2E Testing
-
-```bash
-npx playwright test                    # Run all E2E tests
-npx playwright test --ui               # Interactive UI mode
-npx playwright test --project=chromium # Chrome only
-npx playwright test --debug            # Debug mode
-npx playwright codegen                 # Generate test code
-```
-
-### Docker Operations
-
-```bash
-docker-compose up -d                   # Start production containers
-docker-compose -f Docker/docker-compose.yml up -d  # Start dev database
 ```
 
 ## Architecture & Key Concepts
@@ -116,21 +84,23 @@ docker-compose -f Docker/docker-compose.yml up -d  # Start dev database
 ## Development Workflow
 
 ### Daily Development
+
 - Split terminal: `cd client_angular && npm start` | `cd server_nestjs && npm run start:dev`
 - Database is external (postgres.goals.eti.uni-siegen.de)
 
 ### Before Committing
-- Run linter: `npm run lint` (backend)
-- Run tests: `npm test` (both directories)
+
 - Ensure no TypeScript errors
 
 ### Effective Communication with Claude Code
+
 For complex tasks, use structured prompts to ensure clarity and efficiency:
 
 **Quick Template:**
+
 ```
 **Aufgabe:** [Clear task description]
-**Kontext:** [Relevant files/modules - use @ prefixes like @client_angular/src/app/Pages/]  
+**Kontext:** [Relevant files/modules - use @ prefixes like @client_angular/src/app/Pages/]
 **Anforderungen:**
 - [Specific requirement 1]
 - [Specific requirement 2]
@@ -143,6 +113,7 @@ For complex tasks, use structured prompts to ensure clarity and efficiency:
 ```
 
 **Advanced XML Structure (for complex features):**
+
 ```xml
 <task>
   <objective>Clear goal description</objective>
@@ -160,12 +131,14 @@ For complex tasks, use structured prompts to ensure clarity and efficiency:
 ```
 
 **Key Principles:**
+
 - **Reference specific files**: Use precise paths like `@client_angular/src/app/Services/`
 - **Categorize information**: Separate context, requirements, and implementation steps
 - **Be explicit about expectations**: Define what success looks like
 - **Mention agent usage**: Specify when specialized agents should be used
 
 ### Code Standards
+
 - Follow existing patterns in neighboring files
 - Use Prisma for all database operations
 - DTOs must be defined in `shared/dtos/`
@@ -174,6 +147,7 @@ For complex tasks, use structured prompts to ensure clarity and efficiency:
 - **All code, variable names, function names, and comments must be written in English**
 
 ### Documentation Requirements
+
 - **All code must be documented with Compodoc-style JSDoc comments in English**
 - Classes, methods, complex functions need comprehensive documentation
 - Use JSDoc tags: `@description`, `@param`, `@returns`, `@memberof`, `@example`
@@ -182,24 +156,28 @@ For complex tasks, use structured prompts to ensure clarity and efficiency:
 ## Core Patterns & Best Practices
 
 ### API Design
+
 - RESTful with standard HTTP methods
 - URL structure: `/api/module/resource`
 - DTOs for request/response validation
 - Proper HTTP status codes
 
 ### Database Operations
+
 - Always use Prisma client, never raw SQL
 - Include error handling
 - Use transactions for multi-step operations
 - Implement soft deletes where appropriate
 
 ### Frontend Services
+
 - Centralize API calls in services
 - Use RxJS observables for async operations
 - Proper error handling and user feedback
 - Cache data with BehaviorSubjects
 
 ### Security
+
 - Never commit .env files or secrets
 - Validate all user inputs
 - Use guards for route protection
@@ -209,12 +187,14 @@ For complex tasks, use structured prompts to ensure clarity and efficiency:
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test services and complex logic
 - Mock external dependencies
 - Focus on edge cases
 - Maintain 70%+ coverage
 
 ### E2E Tests
+
 - Test critical user flows
 - Use page object pattern
 - Test desktop and mobile views
@@ -223,6 +203,7 @@ For complex tasks, use structured prompts to ensure clarity and efficiency:
 ## Environment Variables
 
 Essential variables:
+
 - `DATABASE_URL`: PostgreSQL connection string
 - `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`: Token secrets
 - `OPENAI_API_KEY`, `COHERE_API_KEY`: AI features
@@ -232,11 +213,13 @@ Essential variables:
 ## Angular Frontend Best Practices
 
 ### Architecture: Separation of Concerns
+
 - **Smart Components** (`src/app/Pages`): Views that inject services, manage state, handle data
 - **Dumb Components** (`src/app/components`): Reusable UI via `@Input()/@Output()`, no services
 - **Services** (`src/app/Services`): All HTTP calls, state management, business logic
 
 ### Type Safety: shared/dtos Contract
+
 **Most important rule**: Use `shared/dtos` as single source of truth for all client-server data structures. Strict typing required, `any` forbidden.
 
 ```typescript
@@ -247,20 +230,24 @@ getCurrentUser(): Observable<UserDTO> {
 ```
 
 ### RxJS Standards
+
 - Use `async` pipe in templates (prevents memory leaks)
 - Observable variables: `user$`, `contentList$`
 - Manual subscriptions: unsubscribe in `ngOnDestroy`
 
 ### State Management
+
 - Service-based state with `BehaviorSubject`s for global/shared state
 
 ### Additional Patterns
+
 - **Lazy Loading**: Feature modules for performance
 - **Route Guards**: Authentication and role checking
 - **Reactive Forms**: For complex forms
 - **SCSS**: Component-scoped styles
 
 ### Naming Conventions
+
 - Files: `feature.type.ts`
 - Classes: `UpperCamelCase` with suffix
 - Interfaces: `UpperCamelCase`, DTOs with `DTO` suffix
@@ -269,52 +256,63 @@ getCurrentUser(): Observable<UserDTO> {
 ## NestJS Backend Best Practices
 
 ### Modular Architecture
+
 Each feature = independent module with:
+
 - `*.module.ts`: Defines module, imports/exports
 - `*.controller.ts`: HTTP layer only (thin controllers)
 - `*.service.ts`: All business logic (platform-independent)
 
 ### Controller Layer
+
 - Handle HTTP requests/responses only
 - Use decorators: `@Controller()`, `@Get()`, `@Post()`, `@Body()`
 - Validate with DTOs from `shared/dtos/`
 - Delegate all logic to services
 
 ### Service Layer
+
 - Implement all business logic
 - Database interaction via `PrismaService`
 - Platform-independent (no HTTP knowledge)
 
 ### Data Layer (Prisma)
+
 - Schema exclusively in `prisma/schema.prisma`
 - All changes via migrations: `npx prisma migrate dev`
 - Use generated TypeScript types
 - `PrismaService` for dependency injection
 
 ### Authentication & Authorization
+
 - JWT with Passport.js (`JwtStrategy`)
 - Guards: `@UseGuards(JwtAuthGuard)`
 - Role-based access control (RBAC)
 
 ### Error Handling
+
 - Use NestJS exceptions: `NotFoundException`, `BadRequestException`
 - Custom exception filters for specific needs
 
 ### Configuration
+
 - Environment variables in `.env`
 - `@nestjs/config` module for type-safe access
 
 ## TypeScript Best Practices
 
 ### Core Philosophy
+
 **Avoid `any` at all costs** - use `unknown`, generics, or proper types
 
 ### Type Definitions
+
 - `interface`: Object shapes, extensible
 - `type`: Complex types, unions, intersections
 - `class`: Instances with logic, required for NestJS DTOs
 
 ### Strict Configuration
+
 ```json
 {
   "compilerOptions": {
@@ -328,11 +326,13 @@ Each feature = independent module with:
 ```
 
 ### Code Organization
+
 - Path aliases: `@dtos`, `@components`
 - Barrel files: `index.ts` for exports
 - Consistent naming: `UpperCamelCase` classes, `camelCase` functions
 
 ### Documentation Example
+
 ```typescript
 /**
  * Retrieves user data with role-based permissions
@@ -351,15 +351,20 @@ async getUserWithPermissions(userId: number, role: UserRole): Promise<UserDTO> {
 ## Agentic Workflow Protocol
 
 ### Phase 1: Exploration
+
 - **Read-only mode**: Understand problem space, code, dependencies
 - **Sub-agent delegation**: Complex investigations to specialized agents
 - **Information ingestion**: Source files, directories, visual content, web docs
 
 ### Phase 2: Strategic Planning
+
 - **Deep analysis**: `think`, `think hard`, `think harder`, `ultrathink` for complexity levels
+- **Step by Step Todo List**: always make a stept by stept todo list when implementing or planning and adhere to it strictly.
 - **Documented plan**: Formal blueprint with objectives, steps, files, risks
+- **Follow-up Questions**: Always ask follow-up questions after the planning phase for potentially unanswered aspects
 - **Checkpoint**: Human review before implementation
 
 ### Phase 3: Implementation
-- **Step-by-step execution**: Follow documented plan strictly
+
+- **Step-by-step execution**: Follow documented plan of planning agent strictly if its used.
 - **Continuous verification**: Plan adherence, codebase consistency, robustness, clarity

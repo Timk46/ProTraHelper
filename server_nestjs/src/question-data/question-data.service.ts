@@ -64,7 +64,7 @@ export class QuestionDataService {
       id: question.id,
       name: question.name,
       description: question.description,
-      score: question.score,
+      score: question.score || 3,
       type: question.type,
       text: question.text,
       isApproved: question.isApproved,
@@ -351,13 +351,9 @@ export class QuestionDataService {
   async updateWholeQuestion(
     question: detailedQuestionDTO,
     authorId: number,
-    createNewVersion: boolean = false,
+    createNewVersion = false,
   ): Promise<detailedQuestionDTO> {
-    const currentQuestion = await this.getDetailedQuestion(
-      question.id,
-      question.type as questionType,
-      authorId,
-    );
+    const currentQuestion = await this.getDetailedQuestion(question.id, question.type, authorId);
 
     if (!this.detailedQuestionsUpdateable(currentQuestion, question)) {
       console.log('currentQuestion: ', currentQuestion);
@@ -518,11 +514,7 @@ export class QuestionDataService {
         break;
     }
 
-    return await this.getDetailedQuestion(
-      updatedQuestion.id,
-      question.type as questionType,
-      authorId,
-    );
+    return await this.getDetailedQuestion(updatedQuestion.id, question.type, authorId);
   }
 
   /**
@@ -620,20 +612,56 @@ export class QuestionDataService {
         ).id,
       );
       let userScore = 0;
-      const scorePerOption = question.score / mcOptions.length;
 
-      //generate user score
-      for (const mcOption of mcOptions) {
-        if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
-          userScore += scorePerOption;
-        } else if (!mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
-          userScore += scorePerOption;
+      // Ensure consistent score handling with nullish coalescing
+      const questionScore = question.score ?? 3;
+      console.log(
+        `[MC Evaluation] Using questionScore: ${questionScore} (original: ${question.score})`,
+      );
+
+      // Check if this is a Single Choice question (only one correct option)
+      const correctOptions = mcOptions.filter(option => option.correct);
+      const isSingleChoice = correctOptions.length === 1;
+
+      console.log(
+        `[MC Evaluation] Total options: ${mcOptions.length}, Correct options: ${correctOptions.length}, Is Single Choice: ${isSingleChoice}`,
+      );
+
+      if (isSingleChoice) {
+        // Single Choice: Full points if the one correct option is selected
+        const correctOptionId = correctOptions[0].id;
+        if (
+          answerData.userMCAnswer.includes(correctOptionId) &&
+          answerData.userMCAnswer.length === 1
+        ) {
+          userScore = questionScore; // Full points
+          console.log(
+            `[MC Evaluation] Single Choice correct: awarded full ${questionScore} points`,
+          );
+        } else {
+          userScore = 0; // No points for wrong single choice
+          console.log(`[MC Evaluation] Single Choice incorrect: awarded 0 points`);
         }
+      } else {
+        // Multiple Choice: Original proportional scoring logic
+        const scorePerOption = questionScore / mcOptions.length;
+        for (const mcOption of mcOptions) {
+          if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
+            userScore += scorePerOption;
+          } else if (!mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
+            userScore += scorePerOption;
+          }
+        }
+        console.log(
+          `[MC Evaluation] Multiple Choice: calculated ${userScore} points from ${mcOptions.length} options`,
+        );
       }
-      // Round the userScore to avoid floating point precision issues
-      userScore = Math.round(userScore * 100) / 100;
 
-      const progress = userScore / question.score;
+      // Round the userScore to avoid floating point precision issues and cap at maximum
+      userScore = Math.round(userScore * 100) / 100;
+      userScore = Math.min(userScore, questionScore); // Never exceed maximum
+
+      const progress = userScore / questionScore;
       let feedbackText = '';
       let markedAsDone = false;
       if (progress == 1) {
@@ -641,7 +669,7 @@ export class QuestionDataService {
           'Du hast ' +
           userScore +
           ' von ' +
-          question.score +
+          questionScore +
           ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
         //set contentElement as done
         console.log(
@@ -662,7 +690,7 @@ export class QuestionDataService {
         );
         markedAsDone = true;
       } else {
-        feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+        feedbackText = 'Du hast ' + userScore + ' von ' + questionScore + ' Punkten erreicht.';
       }
 
       console.log(feedbackText);
@@ -700,10 +728,16 @@ export class QuestionDataService {
       let userScore = 0;
       let progress = 0;
 
+      // Ensure consistent score handling with fallback
+      const questionScore = question.score || 3;
+      console.log(
+        `[SC Evaluation] Using questionScore: ${questionScore} (original: ${question.score})`,
+      );
+
       //generate user score
       for (const mcOption of mcOptions) {
         if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
-          userScore += question.score;
+          userScore += questionScore;
           progress = 1;
           break;
         } else {
@@ -719,7 +753,7 @@ export class QuestionDataService {
           'Du hast ' +
           userScore +
           ' von ' +
-          question.score +
+          questionScore +
           ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
         console.log(
           'contentElementId: ' +
@@ -739,7 +773,7 @@ export class QuestionDataService {
         );
         markedAsDone = true;
       } else {
-        feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+        feedbackText = 'Du hast ' + userScore + ' von ' + questionScore + ' Punkten erreicht.';
       }
 
       console.log(feedbackText);
@@ -763,6 +797,176 @@ export class QuestionDataService {
         feedbackText: feedback.text,
         elementDone: markedAsDone,
         progress: progress * 100,
+      };
+    }
+
+    //generate feedback for MC-Slider user answer
+    if (question.type === questionType.MCSLIDER) {
+      console.log('generate feedback for MC-Slider user answer');
+
+      // Ensure consistent score handling with nullish coalescing
+      const questionScore = question.score ?? 3;
+      console.log(
+        `[MC-Slider Debug] Using questionScore: ${questionScore} (original: ${question.score})`,
+      );
+
+      const mcQuestion = await this.qdChoice.getMCQuestion(answerData.questionId);
+      const mcOptions = await this.qdChoice.getMCCheckOptions(mcQuestion.id);
+
+      console.log(`[MC-Slider Debug] Total options loaded: ${mcOptions.length}`);
+      console.log(
+        `[MC-Slider Debug] Options data:`,
+        mcOptions.map(opt => ({ id: opt.id, text: opt.text, correct: opt.correct })),
+      );
+      console.log(`[MC-Slider Debug] User selected options:`, answerData.userMCAnswer);
+
+      // Check if this is a Single Choice question (only one correct option)
+      const correctOptions = mcOptions.filter(option => option.correct);
+      const isSingleChoice = correctOptions.length === 1;
+
+      console.log(
+        `[MC-Slider Debug] Total options: ${mcOptions.length}, Correct options: ${correctOptions.length}, Is Single Choice: ${isSingleChoice}`,
+      );
+
+      let userScore = 0;
+      let progress = 0;
+      let feedbackText = '';
+
+      if (isSingleChoice) {
+        // Single Choice: Full points if the one correct option is selected (and ONLY that one)
+        const correctOptionId = correctOptions[0].id;
+        if (
+          answerData.userMCAnswer.includes(correctOptionId) &&
+          answerData.userMCAnswer.length === 1
+        ) {
+          userScore = questionScore; // Full points
+          progress = 1.0;
+          feedbackText = `Richtig beantwortet! Du hast die einzig richtige Antwort gewählt. Punktzahl: ${userScore} von ${questionScore} Punkten`;
+          console.log(
+            `[MC-Slider Debug] Single Choice correct: awarded full ${questionScore} points`,
+          );
+        } else {
+          userScore = 0; // No points for wrong single choice
+          progress = 0;
+          if (answerData.userMCAnswer.length === 0) {
+            feedbackText = `Keine Antwort gegeben. Bei dieser Einzelauswahl-Frage gibt es nur eine richtige Antwort. Punktzahl: ${userScore} von ${questionScore} Punkten`;
+          } else if (answerData.userMCAnswer.length > 1) {
+            feedbackText = `Zu viele Antworten gewählt. Bei dieser Einzelauswahl-Frage gibt es nur eine richtige Antwort. Punktzahl: ${userScore} von ${questionScore} Punkten`;
+          } else {
+            feedbackText = `Falsch beantwortet! Bei dieser Einzelauswahl-Frage gibt es nur eine richtige Antwort. Punktzahl: ${userScore} von ${questionScore} Punkten`;
+          }
+          console.log(`[MC-Slider Debug] Single Choice incorrect: awarded 0 points`);
+        }
+      } else {
+        // Multiple Choice: Calculate based on correctly identified options
+        let correctAnswers = 0;
+        let totalOptions = mcOptions.length;
+
+        // Calculate how many options were correctly identified
+        for (const mcOption of mcOptions) {
+          if (mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
+            correctAnswers++; // Correctly selected a correct option
+            console.log(
+              `[MC-Slider Debug] ✓ Correctly selected: ${mcOption.text} (ID: ${mcOption.id})`,
+            );
+          } else if (!mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
+            correctAnswers++; // Correctly did NOT select an incorrect option
+            console.log(
+              `[MC-Slider Debug] ✓ Correctly NOT selected: ${mcOption.text} (ID: ${mcOption.id})`,
+            );
+          } else if (mcOption.correct && !answerData.userMCAnswer.includes(mcOption.id)) {
+            console.log(
+              `[MC-Slider Debug] ✗ Missed correct option: ${mcOption.text} (ID: ${mcOption.id})`,
+            );
+          } else if (!mcOption.correct && answerData.userMCAnswer.includes(mcOption.id)) {
+            console.log(
+              `[MC-Slider Debug] ✗ Incorrectly selected: ${mcOption.text} (ID: ${mcOption.id})`,
+            );
+          }
+        }
+
+        console.log(
+          `[MC-Slider Debug] Final score calculation: ${correctAnswers}/${totalOptions} = ${
+            (correctAnswers / totalOptions) * 100
+          }%`,
+        );
+
+        const scorePercentage = totalOptions > 0 ? correctAnswers / totalOptions : 0;
+        progress = scorePercentage;
+
+        // Calculate score: proportional to percentage of correctly identified options
+        userScore = Math.round(questionScore * scorePercentage * 100) / 100;
+        userScore = Math.min(userScore, questionScore); // Never exceed maximum
+
+        console.log(`[MC-Slider Debug] Multiple Choice score calculation details:
+          - Question max score: ${questionScore}
+          - Score percentage: ${scorePercentage}
+          - Calculated score: ${questionScore * scorePercentage}
+          - Final user score: ${userScore}`);
+
+        // Generate feedback text for multiple choice
+        if (scorePercentage === 1) {
+          feedbackText = `Richtig beantwortet! Du hast alle ${totalOptions} Optionen korrekt bewertet (${Math.round(
+            scorePercentage * 100,
+          )}%). Punktzahl: ${userScore} von ${questionScore} Punkten`;
+        } else {
+          feedbackText = `Du hast ${correctAnswers} von ${totalOptions} Optionen korrekt bewertet (${Math.round(
+            scorePercentage * 100,
+          )}%). Punktzahl: ${userScore} von ${questionScore} Punkten`;
+        }
+      }
+
+      let markedAsDone = false;
+
+      if (progress >= 0.75) {
+        feedbackText += ' Gut gemacht!';
+        if (progress === 1) {
+          // Mark as done only for 100%
+          console.log(
+            'MC-Slider contentElementId: ' +
+              answerData.contentElementId +
+              ' conceptNode: ' +
+              question.conceptNodeId +
+              ' level: ' +
+              question.level +
+              ' userId: ' +
+              userId,
+          );
+          await this.contentService.questionContentElementDone(
+            answerData.contentElementId,
+            question.conceptNodeId,
+            question.level,
+            userId,
+          );
+          markedAsDone = true;
+          feedbackText += ' Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
+        }
+      } else {
+        feedbackText += ' Versuche es erneut, um eine bessere Bewertung zu erreichen.';
+      }
+
+      console.log(
+        `MC-Slider feedback: ${feedbackText}, score: ${userScore}, progress: ${progress}`,
+      );
+
+      const feedback = await this.prisma.feedback.create({
+        data: {
+          userAnswerId: createdData.id,
+          text: feedbackText,
+          score: userScore,
+        },
+      });
+
+      if (!feedback) throw new Error('Could not create MC-Slider Feedback');
+
+      console.log('MC-Slider element done: ' + markedAsDone);
+      return {
+        id: feedback.id,
+        userAnswerId: feedback.userAnswerId,
+        score: feedback.score,
+        feedbackText: feedback.text,
+        elementDone: markedAsDone,
+        progress: Math.round(progress * 100),
       };
     }
 
@@ -987,6 +1191,12 @@ export class QuestionDataService {
         throw new Error('No code game evaluation provided');
       }
 
+      // Ensure consistent score handling with fallback
+      const questionScore = question.score || 3;
+      console.log(
+        `[CodeGame Evaluation] Using questionScore: ${questionScore} (original: ${question.score})`,
+      );
+
       const codeGameAnswer = await this.prisma.codeGameAnswer.create({
         data: {
           codeGameQuestionId: question.originId,
@@ -1044,7 +1254,7 @@ export class QuestionDataService {
       }
       userScore = Math.round((userScore / countEvaluationOptions) * 100);
 
-      const progress = userScore / question.score;
+      const progress = userScore / questionScore;
       let feedbackText = '';
       let markedAsDone = false;
       if (progress == 1) {
@@ -1052,7 +1262,7 @@ export class QuestionDataService {
           'Du hast ' +
           userScore +
           ' von ' +
-          question.score +
+          questionScore +
           ' Punkten erreicht. Das ist die maximale Punktzahl. Gut gemacht! Die Aufgabe wird als gelöst markiert und dein Fortschritt erhöht.';
         //set contentElement as done
         console.log(
@@ -1073,7 +1283,7 @@ export class QuestionDataService {
         );
         markedAsDone = true;
       } else {
-        feedbackText = 'Du hast ' + userScore + ' von ' + question.score + ' Punkten erreicht.';
+        feedbackText = 'Du hast ' + userScore + ' von ' + questionScore + ' Punkten erreicht.';
       }
 
       const feedback = await this.prisma.feedback.create({

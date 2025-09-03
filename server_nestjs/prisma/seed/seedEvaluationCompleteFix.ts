@@ -304,10 +304,10 @@ export async function seedEvaluationCompleteFix() {
 
     // 5. Create evaluation session with fixed ID for consistency
     const evaluationSession = await prisma.evaluationSession.upsert({
-      where: { id: 1000 }, // Use fixed ID for demo
+      where: { id: 1 }, // Use fixed ID for demo
       update: {},
       create: {
-        id: 1000,
+        id: 1,
         title: 'Peer-Review: Stabile Rahmenkonstruktionen WS2024',
         description:
           'Peer-Review Sitzung für eingereichte Entwürfe zu stabilen Rahmenkonstruktionen',

@@ -30,12 +30,6 @@ export class EvaluationSubmissionController {
     return this.evaluationSubmissionService.findAll(sessionId ? Number(sessionId) : undefined);
   }
 
-  @Get(':id')
-  @roles('ANY')
-  async findOne(@Param('id') id: string): Promise<EvaluationSubmissionDTO> {
-    return this.evaluationSubmissionService.findOne(id);
-  }
-
   @Post()
   @roles('STUDENT', 'TEACHER', 'ADMIN')
   async create(
@@ -43,22 +37,6 @@ export class EvaluationSubmissionController {
     @Req() req: any,
   ): Promise<EvaluationSubmissionDTO> {
     return this.evaluationSubmissionService.create(createDto, req.user.id);
-  }
-
-  @Put(':id')
-  @roles('STUDENT', 'TEACHER', 'ADMIN')
-  async update(
-    @Param('id') id: string,
-    @Body() updateDto: UpdateEvaluationSubmissionDTO,
-    @Req() req: any,
-  ): Promise<EvaluationSubmissionDTO> {
-    return this.evaluationSubmissionService.update(id, updateDto, req.user.id);
-  }
-
-  @Delete(':id')
-  @roles('STUDENT', 'TEACHER', 'ADMIN')
-  async remove(@Param('id') id: string, @Req() req: any): Promise<void> {
-    return this.evaluationSubmissionService.remove(id, req.user.id);
   }
 
   @Get(':id/pdf')
@@ -137,5 +115,27 @@ export class EvaluationSubmissionController {
     @Body() body: { phase: 'DISCUSSION' | 'EVALUATION' },
   ): Promise<EvaluationSessionDTO> {
     return this.evaluationSubmissionService.switchPhase(id, body.phase);
+  }
+
+  @Put(':id')
+  @roles('STUDENT', 'TEACHER', 'ADMIN')
+  async update(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateEvaluationSubmissionDTO,
+    @Req() req: any,
+  ): Promise<EvaluationSubmissionDTO> {
+    return this.evaluationSubmissionService.update(id, updateDto, req.user.id);
+  }
+
+  @Delete(':id')
+  @roles('STUDENT', 'TEACHER', 'ADMIN')
+  async remove(@Param('id') id: string, @Req() req: any): Promise<void> {
+    return this.evaluationSubmissionService.remove(id, req.user.id);
+  }
+
+  @Get(':id')
+  @roles('ANY')
+  async findOne(@Param('id') id: string): Promise<EvaluationSubmissionDTO> {
+    return this.evaluationSubmissionService.findOne(id);
   }
 }

@@ -95,7 +95,8 @@ export class ContentListItemComponent implements OnInit {
       case questionType.SINGLECHOICE:
         return 'Single Choice';
       case questionType.MCSLIDER:
-        return 'MC Slider Quiz';
+        const mcSliderCount = this.getAllMCSliderQuestions().length;
+        return mcSliderCount > 1 ? `MC Slider Quiz (${mcSliderCount} Fragen)` : 'MC Slider Quiz';
       case questionType.FREETEXT:
         return 'Freitext';
       case questionType.FILLIN:
@@ -202,11 +203,11 @@ export class ContentListItemComponent implements OnInit {
         dialogRef = this.dialog.open(McTaskComponent, dialogConfig);
         break;
       case questionType.MCSLIDER:
-        // Check if there are multiple MCSlider questions in the same content
+        // Always load all MCSlider questions in the same content (grouped behavior)
         const allMCSliderQuestions = this.getAllMCSliderQuestions();
         dialogConfig.data = {
           ...dialogConfig.data,
-          questions: allMCSliderQuestions.length > 1 ? allMCSliderQuestions : [question],
+          questions: allMCSliderQuestions.length > 0 ? allMCSliderQuestions : [question],
         };
         // Configure optimized dialog for MCSlider with minimal whitespace
         dialogConfig.width = '90vw';
@@ -483,11 +484,31 @@ export class ContentListItemComponent implements OnInit {
 
   /**
    * Holt alle MCSlider-Fragen aus der aktuellen Inhaltsliste
+   * Sortiert nach Position um korrekte Reihenfolge sicherzustellen
    */
   private getAllMCSliderQuestions(): any[] {
     return this.allContentElements
       .filter(element => element.question?.type === questionType.MCSLIDER)
+      .sort((a, b) => {
+        // Sortiere nach positionInSpecificContentView oder ID als Fallback
+        const posA = a.positionInSpecificContentView || a.id || 0;
+        const posB = b.positionInSpecificContentView || b.id || 0;
+        return posA - posB;
+      })
       .map(element => element.question)
       .filter(question => question != null);
+  }
+
+  /**
+   * Generates the title for MCSlider groups, showing individual title or group summary
+   */
+  getMCSliderGroupTitle(): string {
+    if (this.contentElementData.question?.type === questionType.MCSLIDER) {
+      const mcSliderCount = this.getAllMCSliderQuestions().length;
+      if (mcSliderCount > 1) {
+        return `MCSlider: Komplettquiz`;
+      }
+    }
+    return this.contentElementData.question?.name || '';
   }
 }

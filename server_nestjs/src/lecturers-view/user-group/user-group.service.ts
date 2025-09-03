@@ -7,8 +7,7 @@ import { UserDTO, UserSubjectDTO } from '@DTOs/user.dto';
 
 @Injectable()
 export class UserGroupService {
-
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // UserGroup methods
   async createUserGroup(createUserGroupDto: CreateUserGroupDto): Promise<UserGroup> {
@@ -90,10 +89,10 @@ export class UserGroupService {
       include: {
         userSubjects: {
           include: {
-            subject: true
-          }
-        }
-      }
+            subject: true,
+          },
+        },
+      },
     });
     return users.map(user => this.mapToUserDTO(user));
   }
@@ -105,7 +104,9 @@ export class UserGroupService {
       firstname: user.firstname,
       lastname: user.lastname,
       globalRole: user.globalRole,
-      userSubjects: user.userSubjects ? user.userSubjects.map(userSubject => this.mapToUserSubjectDTO(userSubject)) : [],
+      userSubjects: user.userSubjects
+        ? user.userSubjects.map(userSubject => this.mapToUserSubjectDTO(userSubject))
+        : [],
     };
   }
 
@@ -121,13 +122,15 @@ export class UserGroupService {
   }
 
   // UserGroupMembership methods
-  async createUserGroupMembership(createMembershipDto: CreateUserGroupMembershipDto): Promise<UserGroupMembership> {
+  async createUserGroupMembership(
+    createMembershipDto: CreateUserGroupMembershipDto,
+  ): Promise<UserGroupMembership> {
     try {
       // Check if user and group exist
       const user = await this.prisma.user.findUnique({
         where: { id: createMembershipDto.userId },
       });
-      
+
       if (!user) {
         throw new NotFoundException(`User with ID ${createMembershipDto.userId} not found`);
       }

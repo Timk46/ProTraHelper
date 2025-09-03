@@ -28,10 +28,10 @@ export async function seedEvaluationDemo() {
     console.log('👥 Using these users for demo:', demoUsers.map(u => `ID:${u.id} (${u.email})`).join(', '));
     // 1. Create evaluation session
     const session = await prisma.evaluationSession.upsert({
-      where: { id: 1000 },
+      where: { id: 1 },
       update: {},
       create: {
-        id: 1000,
+        id: 1,
         title: 'CAD Konstruktionsaufgabe - Demo Session',
         description: 'Demo session for evaluation discussion forum',
         startDate: new Date('2024-01-15T00:00:00Z'),
@@ -49,8 +49,8 @@ export async function seedEvaluationDemo() {
     // 2. Create evaluation categories
     const categories = [
       {
-        id: 1001,
-        sessionId: 1000,
+        id: 1,
+        sessionId: 1,
         name: 'vollstaendigkeit',
         displayName: 'Vollständigkeit',
         description: 'Vollständigkeit der Lösung',
@@ -59,8 +59,8 @@ export async function seedEvaluationDemo() {
         order: 1,
       },
       {
-        id: 1002,
-        sessionId: 1000,
+        id: 2,
+        sessionId: 1,
         name: 'grafische_darstellung',
         displayName: 'Grafische Darstellungsqualität',
         description: 'Qualität der grafischen Darstellung',
@@ -69,8 +69,8 @@ export async function seedEvaluationDemo() {
         order: 2,
       },
       {
-        id: 1003,
-        sessionId: 1000,
+        id: 3,
+        sessionId: 1,
         name: 'vergleichbarkeit',
         displayName: 'Vergleichbarkeit',
         description: 'Vergleichbarkeit mit anderen Lösungen',
@@ -79,8 +79,8 @@ export async function seedEvaluationDemo() {
         order: 3,
       },
       {
-        id: 1004,
-        sessionId: 1000,
+        id: 4,
+        sessionId: 1,
         name: 'komplexitaet',
         displayName: 'Komplexität',
         description: 'Komplexität der Lösung',
@@ -110,7 +110,7 @@ export async function seedEvaluationDemo() {
         description: 'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
         authorId: demoUsers[0].id, // Use first demo user
         pdfFileId: 9, // Assuming file 9 exists
-        sessionId: 1000,
+        sessionId: 1,
         status: 'SUBMITTED',
         phase: 'DISCUSSION',
         submittedAt: new Date('2024-01-20T00:00:00Z'),
@@ -124,7 +124,7 @@ export async function seedEvaluationDemo() {
       {
         id: 'demo-comment-001',
         submissionId: 'demo-submission-001',
-        categoryId: 1001,
+        categoryId: 1,
         userId: demoUsers[1].id, // Second demo user
         content: 'Die Konstruktion wirkt sehr durchdacht. Alle wesentlichen Bauteile sind klar erkennbar und sinnvoll dimensioniert.',
         anonymousDisplayName: 'Student B',
@@ -135,7 +135,7 @@ export async function seedEvaluationDemo() {
       {
         id: 'demo-comment-002',
         submissionId: 'demo-submission-001',
-        categoryId: 1001,
+        categoryId: 1,
         userId: demoUsers[2].id, // Third demo user
         content: 'Mir fehlen einige Details bei den Verbindungselementen. Wie sollen die Träger miteinander verbunden werden?',
         anonymousDisplayName: 'Student C',
@@ -146,7 +146,7 @@ export async function seedEvaluationDemo() {
       {
         id: 'demo-comment-003',
         submissionId: 'demo-submission-001',
-        categoryId: 1002,
+        categoryId: 2,
         userId: demoUsers[1].id, // Second demo user again
         content: 'Sehr saubere technische Zeichnung! Die Bemaßung ist vollständig und korrekt dargestellt.',
         anonymousDisplayName: 'Student B',
@@ -157,7 +157,7 @@ export async function seedEvaluationDemo() {
       {
         id: 'demo-comment-004',
         submissionId: 'demo-submission-001',
-        categoryId: 1003,
+        categoryId: 3,
         userId: demoUsers[3].id, // Fourth demo user
         content: 'Standardisierte CAD-Symbole verwendet - das ist gut für Vergleiche mit anderen Entwürfen.',
         anonymousDisplayName: 'Student D',

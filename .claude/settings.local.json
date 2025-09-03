@@ -43,7 +43,14 @@
       "mcp__puppeteer__puppeteer_connect_active_tab",
       "mcp__puppeteer__puppeteer_navigate",
       "mcp__puppeteer__puppeteer_screenshot",
-      "mcp__puppeteer__puppeteer_evaluate"
+      "mcp__puppeteer__puppeteer_evaluate",
+      "Bash(npx prisma db seed:*)",
+      "Bash(npx prisma migrate reset:*)",
+      "Bash(npm test:*)",
+      "Bash(git checkout:*)",
+      "Bash(start chrome.exe:*)",
+      "Bash(\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --remote-debugging-port=9222 --user-data-dir=\"C:\\temp\\chrome-debug\" \"http://localhost:4202\")",
+      "Bash(ng serve:*)"
     ],
     "deny": [],
     "additionalDirectories": [

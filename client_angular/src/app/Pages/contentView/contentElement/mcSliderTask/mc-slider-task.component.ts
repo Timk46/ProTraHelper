@@ -8,13 +8,9 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import {
-  MCOptionViewDTO,
-  McQuestionDTO,
-  UserAnswerDataDTO,
-  userAnswerFeedbackDTO,
-  TaskViewData,
-} from '@DTOs/index';
+import { MCOptionViewDTO, McQuestionDTO } from '@DTOs/index';
+import { QuestionDTO, McQuestionOptionDTO } from '@DTOs/index';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -24,6 +20,10 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RhinoFocusService } from 'src/app/Services/rhino-focus.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfettiService } from 'src/app/Services/animations/confetti.service';
+
+// Threshold for partial credit - 60% is considered correct for MC-Slider questions
+const PARTIAL_CREDIT_THRESHOLD = 0.6;
 
 // Extended interface for our options to include correctness information
 interface MCOptionViewModel extends MCOptionViewDTO {
@@ -33,7 +33,7 @@ interface MCOptionViewModel extends MCOptionViewDTO {
 
 // Question state interface for tracking individual questions
 interface QuestionState {
-  questionData: any; // Can be QuestionDTO or taskViewDTO
+  questionData: QuestionDTO; // Can be QuestionDTO or taskViewDTO
   mcQuestion: McQuestionDTO;
   options: MCOptionViewModel[];
   selectedOptions: number[];
@@ -100,6 +100,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     private readonly cdr: ChangeDetectorRef,
     private readonly rhinoFocusService: RhinoFocusService,
     private readonly snackBar: MatSnackBar,
+    private readonly confettiService: ConfettiService,
   ) {
     if (data) {
       this.taskViewData = data.taskViewData;
@@ -127,6 +128,16 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Sort questions by ID to ensure correct order (first question first)
+    this.questions.sort((a, b) => (a.id || 0) - (b.id || 0));
+
+    console.log(
+      '[MC-Slider] Questions loaded in order:',
+      this.questions.map(q => `ID: ${q.id}, Name: ${q.name}`),
+    );
+
+    // Ensure we start with the first question
+    this.currentQuestionIndex = 0;
     this.loadQuestionAtIndex(0);
   }
 
@@ -135,21 +146,40 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
    */
   private loadQuestionAtIndex(index: number): void {
     if (index >= this.questions.length) {
+      // All questions loaded - ensure we start with the first question
+      this.currentQuestionIndex = 0;
       this.componentState = McSliderTaskState.QUESTIONS;
+      console.log(
+        `[MC-Slider] All ${this.questions.length} questions loaded. Starting with question index: ${this.currentQuestionIndex}`,
+      );
       this.cdr.detectChanges();
       return;
     }
 
     const questionData = this.questions[index];
 
+    // Debug Score-Handling
+    console.log(`[MC-Slider Debug] Question ${index + 1} (ID: ${questionData.id}):`);
+    console.log(`  - Raw score from backend:`, questionData.score);
+    console.log(`  - Type of score:`, typeof questionData.score);
+    console.log(`  - Is null/undefined:`, questionData.score == null);
+
     // Initialize question state
     const questionState: QuestionState = {
-      questionData,
+      questionData: {
+        ...questionData,
+        score: questionData.score ?? 3, // Nullish coalescing: nur bei null/undefined fallback
+      },
       mcQuestion: this.getEmptyMcQuestion(),
       options: [],
       selectedOptions: [],
       isSubmitted: false,
     };
+
+    console.log(
+      `[MC-Slider] Question ${questionData.id} initialized with final score: ${questionState.questionData.score}`,
+    );
+    console.log(`  - Original: ${questionData.score} → Final: ${questionState.questionData.score}`);
 
     // Load MC question data
     this.questionDataService
@@ -157,6 +187,18 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(mcQuestionData => {
         questionState.mcQuestion = mcQuestionData as McQuestionDTO;
+
+        // Fragetext aus mcQuestion übernehmen falls questionData.text fehlt
+        if (mcQuestionData.textHTML && !questionState.questionData.text) {
+          questionState.questionData.text = mcQuestionData.textHTML;
+          console.log(
+            `[MC-Slider] Question text loaded from mcQuestion: ${mcQuestionData.textHTML}`,
+          );
+        } else if (!questionState.questionData.text) {
+          // Fallback-Text falls auch mcQuestion keinen Text hat
+          questionState.questionData.text = `Frage ${index + 1}: Wählen Sie die richtigen Antworten aus.`;
+          console.log(`[MC-Slider] Using fallback question text for question ${questionData.id}`);
+        }
 
         // Load options
         this.questionDataService
@@ -176,7 +218,7 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
             }
 
             this.questionStates[index] = questionState;
-            this.maxScore += questionData.score || 0;
+            this.maxScore += questionData.score ?? 0;
 
             // Load next question or finish loading
             this.loadQuestionAtIndex(index + 1);
@@ -303,8 +345,52 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
         // Check if answer is correct
         currentState.isCorrect = this.checkQuestionCorrect(currentState);
 
+        // Celebrate if answer is correct (75% or higher)
+        // Use backend feedback as authoritative source for max score
+        const feedbackScore = currentState.feedback?.score ?? 0;
+        const maxScoreFromBackend = this.extractMaxScoreFromFeedback(
+          currentState.feedback?.feedbackText,
+        );
+        const questionScore = maxScoreFromBackend ?? currentState.questionData.score ?? 3;
+        const scoreRatio = questionScore > 0 ? feedbackScore / questionScore : 0;
+
+        console.log(
+          `[MC-Slider Debug] After feedback received for question ${currentState.questionData.id}:`,
+        );
+        console.log(
+          `  - questionScore: ${questionScore} (backend-extracted: ${maxScoreFromBackend}, input: ${currentState.questionData.score})`,
+        );
+        console.log(`  - feedbackScore: ${feedbackScore}`);
+        console.log(`  - scoreRatio: ${scoreRatio}`);
+        console.log(`  - isCorrect: ${currentState.isCorrect}`);
+        console.log(`  - isSingleChoice: ${this.isSingleChoice(currentState)}`);
+        console.log(`  - feedbackStatus: ${this.getFeedbackStatus()}`);
+        console.log(`  - shouldCelebrate: ${scoreRatio >= 0.75}`);
+        console.log(`  - feedbackText: "${currentState.feedback?.feedbackText}"`);
+
+        if (scoreRatio >= 0.75) {
+          this.celebrateCorrectAnswer(scoreRatio);
+        }
+
         // Update total score
         this.updateTotalScore();
+
+        // Comprehensive debug summary after question feedback
+        console.log(`[MC-Slider] ========== QUESTION FEEDBACK SUMMARY ==========`);
+        console.log(`Question ID: ${currentState.questionData.id}`);
+        console.log(
+          `Question Type: ${this.isSingleChoice(currentState) ? 'Single Choice' : 'Multiple Choice'}`,
+        );
+        console.log(`Frontend questionData.score: ${currentState.questionData.score}`);
+        console.log(`Backend feedbackScore: ${feedbackScore}`);
+        console.log(`Backend maxScore extracted: ${maxScoreFromBackend}`);
+        console.log(`Final questionScore used: ${questionScore}`);
+        console.log(`Score ratio: ${scoreRatio}`);
+        console.log(`Is correct: ${currentState.isCorrect}`);
+        console.log(`Feedback status: ${this.getFeedbackStatus()}`);
+        console.log(`Should celebrate (ratio >= 0.75): ${scoreRatio >= 0.75}`);
+        console.log(`Backend feedback text: "${currentState.feedback?.feedbackText}"`);
+        console.log(`[MC-Slider] ===============================================`);
 
         this.componentState = McSliderTaskState.QUESTIONS;
         this.cdr.detectChanges();
@@ -338,11 +424,33 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
 
   /**
    * Check if question was answered correctly
+   * Uses partial credit threshold (60%) to determine correctness
+   * Uses backend feedback as authoritative source for max score
    */
   private checkQuestionCorrect(questionState: QuestionState): boolean {
-    const questionScore = questionState.questionData.score || 0;
-    const feedbackScore = questionState.feedback?.score || 0;
-    return questionScore > 0 && feedbackScore === questionScore;
+    const feedbackScore = questionState.feedback?.score!;
+
+    // Extract max score from backend feedback text (authoritative source)
+    const maxScoreFromBackend = this.extractMaxScoreFromFeedback(
+      questionState.feedback?.feedbackText,
+    );
+    const questionScore = maxScoreFromBackend ?? questionState.questionData.score ?? 3;
+
+    console.log(
+      `[MC-Slider] checkQuestionCorrect: questionScore=${questionScore} (backend: ${maxScoreFromBackend}), feedbackScore=${feedbackScore}`,
+    );
+
+    if (questionScore <= 0) {
+      console.warn('[MC-Slider] Warning: questionScore is 0 or negative!');
+      // Bei fehlendem Score auf Feedback-basierte Bewertung zurückfallen
+      return feedbackScore > 0;
+    }
+
+    const scoreRatio = feedbackScore / questionScore;
+    console.log(
+      `[MC-Slider] scoreRatio=${scoreRatio}, threshold=${PARTIAL_CREDIT_THRESHOLD}, isCorrect=${scoreRatio >= PARTIAL_CREDIT_THRESHOLD}`,
+    );
+    return scoreRatio >= PARTIAL_CREDIT_THRESHOLD;
   }
 
   /**
@@ -352,6 +460,166 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     this.totalScore = this.questionStates.reduce((sum, state) => {
       return sum + (state.feedback?.score || 0);
     }, 0);
+  }
+
+  /**
+   * Celebrate correct answer with confetti and success message
+   */
+  private celebrateCorrectAnswer(scoreRatio: number): void {
+    // Show confetti animation
+    this.confettiService.celebrate(3, 500);
+
+    // Show success message
+    const percentage = Math.round(scoreRatio * 100);
+    this.snackBar.open(
+      `Großartig! Du hast ${percentage}% der Frage korrekt beantwortet! 🎉`,
+      'Schließen',
+      {
+        duration: 3000,
+        panelClass: ['success-snackbar'],
+      },
+    );
+  }
+
+  /**
+   * Check if a question is Single Choice (only one correct option)
+   * Uses the authoritative mcQuestion.isSC property instead of counting options
+   */
+  isSingleChoice(questionState: QuestionState): boolean {
+    // Use mcQuestion.isSC directly - this is the authoritative source
+    // and is available before option.isCorrect is set
+    return questionState.mcQuestion?.isSC || false;
+  }
+
+  /**
+   * Get score ratio for current question state (0-1)
+   * Extracts max score from backend feedback for accurate ratio calculation
+   */
+  getCurrentScoreRatio(): number {
+    const currentState = this.getCurrentQuestionState();
+    if (!currentState || !currentState.feedback) return 0;
+
+    const feedbackScore = currentState.feedback.score || 0;
+
+    // Extract max score from backend feedback text (authoritative source)
+    const maxScoreFromBackend = this.extractMaxScoreFromFeedback(
+      currentState.feedback.feedbackText,
+    );
+    const questionScore = maxScoreFromBackend ?? currentState.questionData.score ?? 3;
+
+    console.log(
+      `[MC-Slider] getCurrentScoreRatio: questionScore=${questionScore} (backend: ${maxScoreFromBackend}, input: ${currentState.questionData.score}), feedbackScore=${feedbackScore}, ratio=${feedbackScore / questionScore}`,
+    );
+    console.log(`[MC-Slider] Is Single Choice: ${this.isSingleChoice(currentState)}`);
+
+    if (questionScore <= 0) return 0;
+    return Math.min(feedbackScore / questionScore, 1);
+  }
+
+  /**
+   * Extract maximum score from backend feedback text
+   * Parses "X von Y Punkten" pattern to get authoritative max score
+   */
+  private extractMaxScoreFromFeedback(feedbackText?: string): number | null {
+    if (!feedbackText) {
+      console.log(`[MC-Slider] No feedback text provided for score extraction`);
+      return null;
+    }
+
+    console.log(`[MC-Slider] Attempting to extract max score from: "${feedbackText}"`);
+
+    // Try multiple patterns to be more robust
+    const patterns = [
+      /Punktzahl:\s*\d+\s*von\s*(\d+)\s*Punkt/i, // "Punktzahl: X von Y Punkten"
+      /(\d+)\s*von\s*(\d+)\s*Punkt/i, // "X von Y Punkten" (general)
+      /von\s*(\d+)\s*Punkt/i, // "von Y Punkten" (fallback)
+    ];
+
+    for (let i = 0; i < patterns.length; i++) {
+      const match = feedbackText.match(patterns[i]);
+      if (match) {
+        // For pattern 1 and 3, use match[1]; for pattern 2, use match[2]
+        const maxScoreStr = i === 1 ? match[2] : match[1];
+        if (maxScoreStr) {
+          const maxScore = parseInt(maxScoreStr, 10);
+          if (!isNaN(maxScore) && maxScore > 0) {
+            console.log(`[MC-Slider] ✅ Extracted max score ${maxScore} using pattern ${i + 1}`);
+            return maxScore;
+          }
+        }
+      }
+    }
+
+    console.log(`[MC-Slider] ❌ Could not extract max score from: "${feedbackText}"`);
+    console.log(
+      `[MC-Slider] Tried patterns:`,
+      patterns.map(p => p.toString()),
+    );
+    return null;
+  }
+
+  /**
+   * Get feedback status for current question
+   */
+  getFeedbackStatus(): 'perfect' | 'correct' | 'partial' | 'wrong' {
+    const currentState = this.getCurrentQuestionState();
+    const scoreRatio = this.getCurrentScoreRatio();
+    const isSingleChoice = currentState ? this.isSingleChoice(currentState) : false;
+
+    // Comprehensive debug logging for feedback status
+    console.log(`[MC-Slider] getFeedbackStatus() Debug:`);
+    console.log(`  - currentState exists: ${!!currentState}`);
+    console.log(`  - scoreRatio: ${scoreRatio}`);
+    console.log(`  - isSingleChoice: ${isSingleChoice}`);
+
+    if (currentState) {
+      console.log(`  - questionId: ${currentState.questionData.id}`);
+      console.log(`  - feedback exists: ${!!currentState.feedback}`);
+      if (currentState.feedback) {
+        console.log(`  - feedbackScore: ${currentState.feedback.score}`);
+        console.log(`  - feedbackText: "${currentState.feedback.feedbackText}"`);
+      }
+      console.log(`  - questionData.score: ${currentState.questionData.score}`);
+    }
+
+    let status: 'perfect' | 'correct' | 'partial' | 'wrong';
+
+    // For Single Choice questions, it's either 100% correct or 0% wrong
+    if (currentState && isSingleChoice) {
+      status = scoreRatio === 1 ? 'perfect' : 'wrong';
+    } else {
+      // For Multiple Choice questions, use gradual scoring
+      if (scoreRatio === 1)
+        status = 'perfect'; // 100% - Perfekt
+      else if (scoreRatio >= 0.75)
+        status = 'correct'; // 75-99% - Richtig
+      else if (scoreRatio >= 0.6)
+        status = 'partial'; // 60-74% - Teilweise richtig
+      else status = 'wrong'; // <60% - Falsch
+    }
+
+    console.log(`  - final status: ${status}`);
+    console.log(`[MC-Slider] getFeedbackStatus() End`);
+
+    return status;
+  }
+
+  /**
+   * Get score ratio for specific question by index
+   * Uses backend feedback as authoritative source for max score
+   */
+  getQuestionScoreRatio(index: number): number {
+    const state = this.questionStates[index];
+    if (!state || !state.feedback) return 0;
+
+    const feedbackScore = state.feedback.score || 0;
+
+    // Extract max score from backend feedback text (authoritative source)
+    const maxScoreFromBackend = this.extractMaxScoreFromFeedback(state.feedback.feedbackText);
+    const questionScore = maxScoreFromBackend ?? state.questionData.score ?? 3;
+
+    if (questionScore <= 0) return 0;
+    return Math.min(feedbackScore / questionScore, 1);
   }
 
   /**
@@ -389,6 +657,33 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
 
           this.updateOptionCorrectness(state);
           state.isCorrect = this.checkQuestionCorrect(state);
+
+          // Enhanced debug logging for scoring
+          const feedbackScore = state.feedback?.score || 0;
+          const maxScoreFromBackend = this.extractMaxScoreFromFeedback(
+            state.feedback?.feedbackText,
+          );
+          const questionScore = maxScoreFromBackend ?? state.questionData.score ?? 0;
+          const scoreRatio = questionScore > 0 ? feedbackScore / questionScore : 0;
+          const isSingleChoice = this.isSingleChoice(state);
+
+          console.log(`[MC-Slider] Question submission completed:`, {
+            questionId: state.questionData.id,
+            questionText: state.questionData.text?.substring(0, 50) + '...',
+            isSingleChoice: isSingleChoice,
+            maxScore: questionScore,
+            achievedScore: feedbackScore,
+            scoreRatio: scoreRatio,
+            feedbackText: state.feedback?.feedbackText || 'No feedback text',
+            selectedOptions: state.selectedOptions,
+            correctOptions: state.options.filter(opt => opt.isCorrect).map(opt => opt.id),
+            isCorrect: state.isCorrect,
+          });
+
+          if (scoreRatio >= 0.75 && submittedCount === 0) {
+            console.log(`[MC-Slider Debug] Bulk submission celebration: scoreRatio=${scoreRatio}`);
+            this.celebrateCorrectAnswer(scoreRatio);
+          }
 
           submittedCount++;
 

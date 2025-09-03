@@ -4,6 +4,7 @@ import {
   ContentElementDTO,
   ContentsForConceptDTO,
   LinkableContentElementDTO,
+  questionType,
 } from '@DTOs/index';
 import { contentElementType } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
@@ -89,7 +90,7 @@ export class ContentListComponent implements OnInit, OnChanges {
   ngOnChanges() {
     if (this.contentsForActiveConceptNode.trainedBy.length > 0) {
       // Sortiere nach position, falls vorhanden
-      this.filteredContents = [...this.contentsForActiveConceptNode.trainedBy].sort((a, b) => {
+      let sortedContents = [...this.contentsForActiveConceptNode.trainedBy].sort((a, b) => {
         // Wenn beide Positionen vorhanden sind, sortiere danach
         if (a.position != null && b.position != null) {
           if (a.position === b.position) {
@@ -104,6 +105,15 @@ export class ContentListComponent implements OnInit, OnChanges {
         // Wenn keine Position vorhanden ist, sortiere nach contentNodeId
         return a.contentNodeId - b.contentNodeId;
       });
+
+      // Filter für Architekturstudenten: Entferne "Analyse Teil 2"
+      if (this.userService.isArchitectureStudent()) {
+        sortedContents = sortedContents.filter(
+          content => !content.name.toLowerCase().includes('analyse teil 2'),
+        );
+      }
+
+      this.filteredContents = sortedContents;
     }
   }
 
@@ -126,6 +136,29 @@ export class ContentListComponent implements OnInit, OnChanges {
    */
   hasContentElementType(content: ContentDTO, type: string): boolean {
     return content.contentElements.some(element => element.type === type);
+  }
+
+  /**
+   * Determines if the Rhino button should be shown for the given content.
+   * For architecture students: only show for "Analyse Teil 1" content.
+   * For other users: show for all content with QUESTION type (original behavior).
+   *
+   * @param content - The content object to check.
+   * @returns `true` if the Rhino button should be displayed, otherwise `false`.
+   */
+  shouldShowRhinoButton(content: ContentDTO): boolean {
+    // Check if content has questions first (base requirement)
+    if (!this.hasContentElementType(content, 'QUESTION')) {
+      return false;
+    }
+
+    // For architecture students: only show for "Analyse Teil 1"
+    if (this.userService.isArchitectureStudent()) {
+      return content.name.toLowerCase().includes('analyse teil 1');
+    }
+
+    // For regular users: show for all content with questions (original behavior)
+    return true;
   }
 
   /**
@@ -242,8 +275,18 @@ export class ContentListComponent implements OnInit, OnChanges {
    */
   applyFilter(term: string = '') {
     if (term !== '') this.searchTerm = term;
+
+    let baseContents = [...this.contentsForActiveConceptNode.trainedBy];
+
+    // Filter für Architekturstudenten: Entferne "Analyse Teil 2"
+    if (this.userService.isArchitectureStudent()) {
+      baseContents = baseContents.filter(
+        content => !content.name.toLowerCase().includes('analyse teil 2'),
+      );
+    }
+
     if (this.searchTerm != '') {
-      this.filteredContents = this.contentsForActiveConceptNode.trainedBy.filter(content => {
+      this.filteredContents = baseContents.filter(content => {
         let context: string = content.name + ' ';
         content.contentElements.forEach(element => {
           context += element.id + ' ' + element.title + ' ';
@@ -251,7 +294,7 @@ export class ContentListComponent implements OnInit, OnChanges {
         return context.toLowerCase().includes(this.searchTerm.toLowerCase());
       });
     } else {
-      this.filteredContents = this.contentsForActiveConceptNode.trainedBy;
+      this.filteredContents = baseContents;
     }
   }
 

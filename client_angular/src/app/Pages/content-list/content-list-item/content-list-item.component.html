@@ -18,7 +18,7 @@
     >
       <mat-icon [fontIcon]="getQuestionTypeIcon(contentElementData.question?.type)"></mat-icon>
     </div>
-    <mat-card-title class="list-item-title">{{ contentElementData.question?.name }}</mat-card-title>
+    <mat-card-title class="list-item-title">{{ getMCSliderGroupTitle() }}</mat-card-title>
     <mat-card-subtitle>{{
       getQuestionTypeReadable(contentElementData.question?.type)
     }}</mat-card-subtitle>

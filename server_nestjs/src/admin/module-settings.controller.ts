@@ -12,7 +12,7 @@ export class ModuleSettingsController {
   async getSetting(@Param('moduleId', ParseIntPipe) moduleId: number, @Param('key') key: string) {
     console.log('getSetting', moduleId, key);
     const setting = await this.moduleSettingsService.getSetting(moduleId, key);
-    
+
     // If setting doesn't exist, return a default value instead of null
     if (!setting) {
       // For enabled_navigators, return default configuration
@@ -22,7 +22,7 @@ export class ModuleSettingsController {
       // For other settings, return empty value
       return { value: '{}' };
     }
-    
+
     return { value: setting.value };
   }
 

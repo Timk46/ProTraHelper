@@ -65,7 +65,7 @@
 
             <!-- Direct Bat-Rhino Button (executes Rhino directly via .bat script) -->
             <mat-icon
-              *ngIf="hasContentElementType(content, 'QUESTION')"
+              *ngIf="shouldShowRhinoButton(content)"
               class="direct-bat-rhino-launcher-icon"
               matTooltip="⚡ Rhino direkt ausführen (Ein-Klick-Lösung)"
               (click)="onRhinoBatDirectButtonClick($event)"
@@ -129,7 +129,7 @@
           [cdkDragDisabled]="!editModeActive"
           [contentElementData]="task"
           [contentNodeId]="content.contentNodeId"
-          [allContentElements]="getQuestions(content)"
+          [allContentElements]="content.contentElements"
           (scoreUpdated)="onScoreUpdated(content, $event)"
           (fetchContentsForConcept)="fetchContentsForConcept.emit()"
           (contentElementDeleted)="onContentElementDeleted(content.contentNodeId, $event)"

@@ -57,13 +57,7 @@
     <!-- Action Buttons Container -->
     <div class="action-buttons">
       
-      <!-- Keyboard Hint -->
-      <div class="keyboard-hint" *ngIf="isFocused && !disabled">
-        <mat-icon class="hint-icon">keyboard</mat-icon>
-        <span class="hint-text">
-          {{ isInReplyMode() ? 'Strg+Enter zum Antworten, Escape zum Abbrechen' : 'Strg+Enter zum Senden' }}
-        </span>
-      </div>
+      <!-- Keyboard Hint removed - now using tooltip on button -->
       
       <!-- 🚀 PHASE 4: Cancel Button for Reply Mode -->
       <button 
@@ -87,7 +81,8 @@
         type="button"
         class="submit-button"
         [disabled]="!isFormValid() || isSubmitting || disabled"
-        [matTooltip]="getSubmitTooltip()"
+        [matTooltip]="getKeyboardHintTooltip()"
+        matTooltipPosition="above"
         (click)="onSubmit()">
         
         <!-- Loading Spinner -->
@@ -113,43 +108,7 @@
     
   </mat-card-actions>
   
-  <!-- Status Bar -->
-  <div class="status-bar" *ngIf="isFocused && !disabled">
-    
-    <!-- Form Status Indicators -->
-    <div class="status-indicators">
-      
-      <!-- Content Length Indicator -->
-      <div class="length-indicator" [ngClass]="getCharacterCountClass()">
-        <mat-icon class="status-icon">
-          {{ currentLength > 0 ? 'edit' : 'create' }}
-        </mat-icon>
-        <span class="status-text">
-          {{ currentLength === 0 ? 'Kommentar eingeben' : currentLength + ' Zeichen' }}
-        </span>
-      </div>
-      
-      <!-- Validation Status -->
-      <div class="validation-indicator" *ngIf="currentLength > 0">
-        <mat-icon class="status-icon" 
-                  [ngClass]="{ 'valid': isFormValid(), 'invalid': !isFormValid() }">
-          {{ isFormValid() ? 'check_circle' : 'error' }}
-        </mat-icon>
-        <span class="status-text">
-          {{ isFormValid() ? 'Bereit zum Senden' : 'Eingabe prüfen' }}
-        </span>
-      </div>
-      
-    </div>
-    
-    <!-- Tips -->
-    <div class="input-tips" *ngIf="currentLength === 0">
-      <span class="tip-text">
-        💡 Teilen Sie Ihre Gedanken zu dieser Bewertung
-      </span>
-    </div>
-    
-  </div>
+  <!-- Status Bar removed for compact design -->
   
   <!-- Disabled State Overlay -->
   <div class="disabled-overlay" *ngIf="disabled">

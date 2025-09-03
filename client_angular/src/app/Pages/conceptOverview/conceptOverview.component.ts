@@ -47,6 +47,9 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
 
+  // controls visibility of discussion and edit buttons for different student types
+  protected showDiscussionButtons: boolean = true;
+
   // init with dummy node
   activeConceptNode: ConceptNodeDTO = {
     databaseId: -1,
@@ -83,6 +86,8 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private readonly snackBar: MatSnackBar,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
+    // Hide discussion/edit buttons for architecture students
+    this.showDiscussionButtons = !this.userService.isArchitectureStudent();
 
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
     this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe(

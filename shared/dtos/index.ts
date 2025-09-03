@@ -64,6 +64,7 @@ export * from "./phase-switch.dto";
 export * from "./phase-switch-schedule.dto";
 export * from "./evaluation-user-vote-response.dto";
 export * from './group-review-gate.dto';
+export * from './vote-limit-status.dto';
 
 // Additional types and enums from evaluation DTOs
 export { EvaluationDiscussionDTO, VoteType } from "./evaluation-comment.dto";

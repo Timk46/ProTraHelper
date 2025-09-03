@@ -58,7 +58,8 @@ export class EvaluationRatingController {
   async getUserRatings(
     @Param('submissionId') submissionId: string,
     @Param('userId') userId: string,
-  ): Promise<any> {
+  ): Promise<EvaluationRatingDTO[]> {
+    console.log('getUserRatings', submissionId, 'userId', userId);
     return this.evaluationRatingService.getUserRatings(submissionId, Number(userId));
   }
 
@@ -68,6 +69,7 @@ export class EvaluationRatingController {
     @Param('submissionId') submissionId: string,
     @Param('categoryId') categoryId: string,
   ): Promise<any> {
+    console.log('getCategoryStats', submissionId, 'categoryId', categoryId);
     return this.evaluationRatingService.getCategoryStats(submissionId, Number(categoryId));
   }
 
@@ -112,15 +114,15 @@ export class EvaluationRatingController {
    * @param {any} req - Request object containing user information
    * @returns {Promise<CategoryRatingStatus[]>} Array of category rating statuses
    */
-  @Get('submission/:submissionId/user/status')
+  @Get('submission/:submissionId/user/:userId/status')
   @roles('ANY')
   async getUserRatingStatus(
     @Param('submissionId') submissionId: string,
-    @Req() req: any,
+    @Param('userId') userId: string,
   ): Promise<CategoryRatingStatus[]> {
     // Handle authenticated users
-    if (req.user && req.user.id) {
-      return this.evaluationRatingService.getUserRatingStatus(submissionId, req.user.id);
+    if (userId) {
+      return this.evaluationRatingService.getUserRatingStatus(submissionId, Number(userId));
     }
 
     // Handle anonymous/demo scenarios - extract user ID from submission or use default
@@ -131,10 +133,10 @@ export class EvaluationRatingController {
 
   /**
    * Cache for consistent anonymous user IDs per session
-   * 
+   *
    * @description Stores mapping between submission IDs and generated anonymous user IDs
    * to ensure consistency within a single application session while maintaining security
-   * 
+   *
    * @private
    * @static
    * @memberof EvaluationRatingController
@@ -143,11 +145,11 @@ export class EvaluationRatingController {
 
   /**
    * Extracts or generates a secure demo user ID for anonymous access
-   * 
+   *
    * @description For demo submissions, uses a consistent demo user ID.
    * For other anonymous cases, generates a cryptographically secure random ID
    * that is cached per session to maintain consistency without predictability.
-   * 
+   *
    * @param {string} submissionId - The submission ID to generate user ID for
    * @returns {number} Secure anonymous user ID
    * @memberof EvaluationRatingController
@@ -157,19 +159,19 @@ export class EvaluationRatingController {
     if (submissionId.includes('demo') || submissionId.includes('test')) {
       return 999; // Known demo user ID for testing
     }
-    
+
     // Check if we already have a cached ID for this submission
     if (EvaluationRatingController.anonymousUserCache.has(submissionId)) {
       return EvaluationRatingController.anonymousUserCache.get(submissionId)!;
     }
-    
+
     // Generate a cryptographically secure random ID for anonymous users
     // Range: 1000-9999 for anonymous users (avoiding conflicts with real user IDs)
     const secureAnonymousId = randomInt(1000, 10000);
-    
+
     // Cache the ID for consistency within this session
     EvaluationRatingController.anonymousUserCache.set(submissionId, secureAnonymousId);
-    
+
     // Optional: Clean up cache periodically (implementation depends on requirements)
     // This prevents unlimited memory growth in long-running applications
     if (EvaluationRatingController.anonymousUserCache.size > 100) {
@@ -177,7 +179,7 @@ export class EvaluationRatingController {
       const firstKey = EvaluationRatingController.anonymousUserCache.keys().next().value;
       EvaluationRatingController.anonymousUserCache.delete(firstKey);
     }
-    
+
     return secureAnonymousId;
   }
 }

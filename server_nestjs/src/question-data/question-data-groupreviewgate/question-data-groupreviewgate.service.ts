@@ -53,7 +53,7 @@ export class QuestionDataGroupReviewGateService {
     // Check if the group review gate exists for the given questionId
     const groupReviewGate = await this.prisma.groupReviewGate.findUnique({
       where: { questionId },
-      select: { linkedQuestionId: true }
+      select: { linkedQuestionId: true },
     });
 
     if (!groupReviewGate) {
@@ -66,16 +66,16 @@ export class QuestionDataGroupReviewGateService {
         group: {
           UserGroupMembership: {
             some: {
-              userId: userId
-            }
+              userId: userId,
+            },
           },
         },
         userId: {
-          not: userId // Exclude the current user
-        }
+          not: userId, // Exclude the current user
+        },
       },
       select: {
-        userId: true
+        userId: true,
       },
     });
 
@@ -115,17 +115,16 @@ export class QuestionDataGroupReviewGateService {
     // Reduce to get the latest answer for each user
     const latestAnswersByUser = allAnswers.reduce((acc, answer) => {
       const userId = answer.userAnswer.user.id;
-      if (!acc[userId] || acc[userId].createdAt < answer.createdAt)
-        acc[userId] = answer;
+      if (!acc[userId] || acc[userId].createdAt < answer.createdAt) acc[userId] = answer;
       return acc;
-    }, {} as Record<number, typeof allAnswers[0]>);
+    }, {} as Record<number, (typeof allAnswers)[0]>);
 
     // Map to the desired DTO format // TODO: Make anonymous and get real data
     return Object.values(latestAnswersByUser).map(answer => ({
-      submissionIdentifier: answer.userAnswer.user.firstname + ' ' + answer.userAnswer.user.lastname,
+      submissionIdentifier:
+        answer.userAnswer.user.firstname + ' ' + answer.userAnswer.user.lastname,
       reviewPhase: 'lorem phase',
       userStatus: 'lorem status',
     }));
-
   }
 }

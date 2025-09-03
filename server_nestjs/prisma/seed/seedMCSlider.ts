@@ -2,6 +2,33 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+/**
+ * Seeds MCSlider test questions with standardized 3-point scoring for Multiple Choice questions.
+ * Creates comprehensive test data including geography, math, science, and single choice questions.
+ * 
+ * @description Initializes MCSlider test questions with:
+ *   - 3 Multiple Choice questions (3 points each)
+ *   - 1 Single Choice question (1 point)
+ *   - Associated MCOptions for each question
+ *   - Links to existing users and content nodes
+ * 
+ * @returns {Promise<object>} Seeding result statistics including created questions count
+ * @throws {Error} If required dependencies (admin user, ConceptNodes, ContentNodes) are missing
+ * @throws {Error} If database operations fail during seeding process
+ * 
+ * @example
+ * ```typescript
+ * try {
+ *   const result = await seedMCSlider();
+ *   console.log(`Created ${result.questionsCount} MCSlider questions`);
+ * } catch (error) {
+ *   console.error('MCSlider seeding failed:', error);
+ * }
+ * ```
+ * 
+ * @memberof PrismaSeeding
+ * @since 1.0.0
+ */
 export async function seedMCSlider() {
   console.log('🎯 Seeding MCSlider test data...');
 
@@ -11,7 +38,7 @@ export async function seedMCSlider() {
 
     // Get existing user (use first available user)
     const testUser = await prisma.user.findFirst({
-      where: { globalRole: 'STUDENT', email: 'hund@proband.de' },
+      where: { globalRole: 'ADMIN', email: 'admin@admin.de' },
     });
 
     if (!testUser) {
@@ -51,7 +78,7 @@ export async function seedMCSlider() {
       {
         name: 'MCSlider: Mathematik Grundlagen',
         text: 'Welche Aussagen über Grundrechenarten sind korrekt?',
-        score: 2,
+        score: 3,
         type: 'MCSlider',
         isSC: false,
         options: [
@@ -64,7 +91,7 @@ export async function seedMCSlider() {
       {
         name: 'MCSlider: Naturwissenschaften',
         text: 'Welche Aussagen über Naturphänomene sind richtig?',
-        score: 4,
+        score: 3,
         type: 'MCSlider',
         isSC: false,
         options: [
