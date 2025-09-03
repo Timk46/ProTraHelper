@@ -265,4 +265,28 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
       this.dialogRef.close();
     }
   }
+
+  /**
+   * Finds the index of the first task that is not yet completed.
+   * @returns The index of the first uncompleted task, or -1 if all are completed.
+   */
+  private getFirstUncompletedTaskIndex(): number {
+    return this.sortedTasks.findIndex(task => (task.userProgress ?? 0) < 100);
+  }
+
+  /**
+   * Determines if a task at a given index is accessible to the user.
+   * A task is accessible if all previous tasks are completed.
+   * @param index The index of the task to check.
+   * @returns True if the task is accessible.
+   */
+  isTaskAccessible(index: number): boolean {
+    const firstUncompletedIndex = this.getFirstUncompletedTaskIndex();
+    // If all tasks are completed, all are accessible.
+    if (firstUncompletedIndex === -1) {
+      return true;
+    }
+    // Otherwise, only tasks up to and including the first uncompleted one are accessible.
+    return index <= firstUncompletedIndex;
+  }
 }

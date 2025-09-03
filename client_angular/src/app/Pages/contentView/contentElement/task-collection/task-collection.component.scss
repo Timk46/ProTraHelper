@@ -103,6 +103,19 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
       border-color: $nord-aurora-4;
       color: white;
     }
+
+    &--disabled {
+      background-color: $nord-snow-storm-2;
+      color: $nord-polar-night-2;
+      opacity: 0.6;
+      cursor: not-allowed;
+      border-color: $nord-snow-storm-1;
+
+      &:hover {
+        transform: none;
+        box-shadow: none;
+      }
+    }
   }
 }
 

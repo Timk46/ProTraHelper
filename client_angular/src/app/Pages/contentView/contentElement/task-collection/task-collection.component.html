@@ -47,9 +47,15 @@
         class="progress-dot"
         [class.progress-dot--current]="i === currentIndex"
         [class.progress-dot--completed]="isTaskCompleted(i)"
+        [class.progress-dot--disabled]="!isTaskAccessible(i)"
+        [disabled]="!isTaskAccessible(i)"
         (click)="goToTask(i)"
         [attr.aria-label]="'Zu Aufgabe ' + (i + 1) + ' gehen'"
-        [matTooltip]="'Aufgabe ' + (i + 1)"
+        [matTooltip]="
+          isTaskAccessible(i)
+            ? 'Aufgabe ' + (i + 1)
+            : 'Schließe erst die vorherigen Aufgaben ab'
+        "
       >
         <mat-icon *ngIf="isTaskCompleted(i)">check</mat-icon>
         <span *ngIf="!isTaskCompleted(i)">{{ i + 1 }}</span>
