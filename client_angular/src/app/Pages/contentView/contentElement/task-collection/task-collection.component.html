@@ -1,5 +1,12 @@
-<div class="collection-wrapper" *ngIf="questionCollection">
-  <!-- Start Page View -->
+<div class="collection-wrapper enhanced" *ngIf="questionCollection">
+  <!-- Close Button -->
+  <div class="close-button">
+    <button mat-icon-button (click)="onClose()" aria-label="Aufgabensammlung schließen">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Start Page View (existing logic, new container) -->
   <div class="start-page-container" *ngIf="showStartPage; else taskView">
     <div class="start-page-header">
       <h2>{{ questionCollection.title }}</h2>
@@ -10,50 +17,83 @@
     </div>
   </div>
 
-  <!-- Task Sequence View -->
+  <!-- Enhanced Task View -->
   <ng-template #taskView>
-    <div class="task-view-container">
-      <div class="collection-header">
-        <h2>{{ questionCollection.title }}</h2>
-        <p class="progress-text" *ngIf="sortedTasks.length > 0">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loading">
+        <div class="loading__spinner"></div>
+        <p class="loading__text">Aufgabe wird geladen...</p>
+      </div>
+    </div>
+
+    <!-- Progress Header -->
+    <div class="progress-header">
+      <h2 class="progress-title">{{ questionCollection.title }}</h2>
+      <div class="progress-info" *ngIf="sortedTasks.length > 0">
+        <span class="progress-text">
           Aufgabe {{ currentIndex + 1 }} von {{ sortedTasks.length }}
-        </p>
+        </span>
+        <span class="progress-score">
+          {{ getCompletedTasksCount() }} von {{ sortedTasks.length }} abgeschlossen
+        </span>
       </div>
+    </div>
 
-      <div class="task-host-container">
-        <!-- This is where the dynamic task component will be injected -->
-        <ng-template #taskHost></ng-template>
+    <!-- Progress Dots Navigation -->
+    <div class="progress-dots" role="tablist" *ngIf="sortedTasks.length > 0">
+      <button
+        *ngFor="let task of sortedTasks; let i = index"
+        class="progress-dot"
+        [class.progress-dot--current]="i === currentIndex"
+        [class.progress-dot--completed]="isTaskCompleted(i)"
+        (click)="goToTask(i)"
+        [attr.aria-label]="'Zu Aufgabe ' + (i + 1) + ' gehen'"
+        [matTooltip]="'Aufgabe ' + (i + 1)"
+      >
+        <mat-icon *ngIf="isTaskCompleted(i)">check</mat-icon>
+        <span *ngIf="!isTaskCompleted(i)">{{ i + 1 }}</span>
+      </button>
+    </div>
 
-        <!-- Placeholder for unsupported task types -->
-        <div *ngIf="!componentRef && sortedTasks.length > 0" class="unsupported-task">
-          <mat-icon>warning</mat-icon>
-          <p>Dieser Aufgabentyp wird in einer Sammlung noch nicht unterstützt.</p>
-        </div>
+    <!-- Task Content Container -->
+    <div class="task-content-container" [class.loading]="isLoading">
+      <!-- This is where the dynamic task component will be injected -->
+      <ng-template #taskHost></ng-template>
+
+      <!-- Placeholder for unsupported task types -->
+      <div *ngIf="!componentRef && sortedTasks.length > 0 && !isLoading" class="unsupported-task">
+        <mat-icon>warning</mat-icon>
+        <p>Dieser Aufgabentyp wird in einer Sammlung noch nicht unterstützt.</p>
       </div>
+    </div>
 
-      <div class="collection-footer" *ngIf="sortedTasks.length > 0">
+    <!-- Fixed Footer -->
+    <div class="fixed-footer" *ngIf="sortedTasks.length > 0">
+      <div class="footer-content">
+        <!-- Left Navigation -->
         <button
-          mat-stroked-button
-          color="primary"
+          mat-icon-button
           (click)="goToPreviousTask()"
           [disabled]="currentIndex <= 0"
+          aria-label="Vorherige Aufgabe"
         >
           <mat-icon>navigate_before</mat-icon>
-          Zurück
         </button>
 
-        <mat-progress-bar
-          mode="determinate"
-          [value]="(currentIndex / sortedTasks.length) * 100"
-        ></mat-progress-bar>
+        <!-- Center Progress -->
+        <div class="center-progress">
+          <mat-progress-bar mode="determinate" [value]="getOverallProgress()"></mat-progress-bar>
+        </div>
 
+        <!-- Right Navigation -->
         <button
           mat-flat-button
           color="primary"
           (click)="goToNextTask()"
           [disabled]="!isCurrentTaskCompleted"
           [matTooltip]="
-            isCurrentTaskCompleted ? '' : 'Bitte schließe die aktuelle Aufgabe zuerst ab.'
+            !isCurrentTaskCompleted ? 'Bitte schließe die aktuelle Aufgabe zuerst ab.' : ''
           "
         >
           <span *ngIf="currentIndex < sortedTasks.length - 1">Weiter</span>
