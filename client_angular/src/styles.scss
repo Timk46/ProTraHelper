@@ -96,7 +96,7 @@ mat-card-content {
 // =============================================================================
 
 // Basis-Zentrierung für alle Material Design Buttons mit höchster Priorität
-.mat-mdc-fab,
+/* .mat-mdc-fab,
 .mat-mdc-mini-fab,
 .mat-mdc-icon-button,
 button[mat-fab],
@@ -107,10 +107,10 @@ button[mat-icon-button] {
   justify-content: center !important;
   position: relative !important;
   overflow: visible !important;
-  padding: 0 !important;
-  
-  // Icon-spezifische Zentrierung mit maximaler Spezifität
-  .mat-icon,
+  padding: 0 !important; */
+
+// Icon-spezifische Zentrierung mit maximaler Spezifität
+/*   .mat-icon,
   mat-icon,
   .material-icons,
   .mat-button-wrapper .mat-icon,
@@ -127,10 +127,10 @@ button[mat-icon-button] {
     transform: none !important;
     text-align: center !important;
   }
-}
+} */
 
 // FAB-Buttons deutlich vergrößern für bessere Icon-Erkennbarkeit
-.mat-mdc-fab,
+/* .mat-mdc-fab,
 button[mat-fab] {
   // Button-Größe dramatisch vergrößern
   min-width: 96px !important;
@@ -138,7 +138,7 @@ button[mat-fab] {
   width: 96px !important;
   height: 96px !important;
   border-radius: 50% !important;
-  
+
   // Icons auf 50% der Button-Größe vergrößern
   .mat-icon,
   mat-icon,
@@ -148,17 +148,17 @@ button[mat-fab] {
     height: 48px !important;
     line-height: 48px !important;
   }
-}
+} */
 
 // Mini-FAB-Buttons ebenfalls vergrößern
-.mat-mdc-mini-fab,
+/* .mat-mdc-mini-fab,
 button[mat-mini-fab] {
   min-width: 64px !important;
   min-height: 64px !important;
   width: 64px !important;
   height: 64px !important;
   border-radius: 50% !important;
-  
+
   .mat-icon,
   mat-icon,
   .material-icons {
@@ -167,17 +167,17 @@ button[mat-mini-fab] {
     height: 32px !important;
     line-height: 32px !important;
   }
-}
+} */
 
 // Icon-Buttons ebenfalls optimieren
-.mat-mdc-icon-button,
+/* .mat-mdc-icon-button,
 button[mat-icon-button] {
   min-width: 56px !important;
   min-height: 56px !important;
   width: 56px !important;
   height: 56px !important;
   border-radius: 50% !important;
-  
+
   .mat-icon,
   mat-icon,
   .material-icons {
@@ -186,10 +186,10 @@ button[mat-icon-button] {
     height: 28px !important;
     line-height: 28px !important;
   }
-}
+} */
 
 // Spezielle Fixes für problematische Fälle
-.mat-mdc-fab .mat-button-wrapper,
+/* .mat-mdc-fab .mat-button-wrapper,
 .mat-mdc-mini-fab .mat-button-wrapper,
 .mat-mdc-icon-button .mat-button-wrapper {
   display: flex !important;
@@ -204,12 +204,12 @@ button[mat-icon-button] {
 .mat-mdc-mini-fab {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
   transition: all 0.2s ease-in-out !important;
-  
+
   &:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
     transform: translateY(-1px) !important;
   }
-  
+
   &:active {
     transform: translateY(0) !important;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
@@ -224,4 +224,4 @@ button[mat-icon-button] {
     width: 20px;
     height: 20px;
   }
-}
+} */
