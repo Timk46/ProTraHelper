@@ -179,6 +179,14 @@ export class EvaluationRatingService {
     // Invalidate cache for this submission (both old and new patterns)
     this.cacheService.invalidateByPattern(`ratings:${ratingDto.submissionId}:.*`);
     this.cacheService.invalidateByPattern(`rating-status-batch:${ratingDto.submissionId}:.*`);
+    
+    // BUGFIX: Also invalidate the specific user's cache key to ensure immediate freshness
+    const specificCacheKey = this.utilsService.generateCacheKey(
+      'rating-status-batch',
+      ratingDto.submissionId,
+      userId.toString()
+    );
+    this.cacheService.delete(specificCacheKey);
 
     return this.mapToDTO(rating);
   }

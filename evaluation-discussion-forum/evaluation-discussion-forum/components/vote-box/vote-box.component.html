@@ -1,0 +1,35 @@
+<!-- Vote Box Container (Matching HTML Template) -->
+<div class="message-actions" [ngClass]="getContainerClass()">
+  
+  <!-- Plus/Upvote Button -->
+  <button class="vote-btn plus"
+          [ngClass]="getUpvoteButtonClass()"
+          [disabled]="isDisabled()"
+          [matTooltip]="getUpvoteTooltip()"
+          [attr.aria-label]="getUpvoteAriaLabel()"
+          (click)="onUpvote()">
+    <span>+</span>
+  </button>
+  
+  <!-- Minus/Downvote Button -->
+  <button class="vote-btn minus"
+          [ngClass]="getDownvoteButtonClass()"
+          [disabled]="isDisabled()"
+          [matTooltip]="getDownvoteTooltip()"
+          [attr.aria-label]="getDownvoteAriaLabel()"
+          (click)="onDownvote()">
+    <span>-</span>
+  </button>
+  
+  <!-- Vote Count Display (HTML Template Style) -->
+  <span class="vote-count" 
+        [matTooltip]="'Gesamtbewertungen: ' + getTotalVotes() + ' (' + upvotes + ' positiv, ' + downvotes + ' negativ)'">
+    {{ formatVoteCount(upvotes) }} 👍 {{ formatVoteCount(downvotes) }} 👎
+  </span>
+  
+  <!-- Voting Loading Indicator -->
+  <div *ngIf="isVoting" class="voting-loading">
+    <mat-spinner [diameter]="16" [strokeWidth]="2"></mat-spinner>
+  </div>
+  
+</div>

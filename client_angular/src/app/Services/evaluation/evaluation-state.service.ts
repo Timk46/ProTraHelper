@@ -513,26 +513,68 @@ export class EvaluationStateService {
           categoriesReceived: statuses.map(s => ({ id: s.categoryId, hasRated: s.hasRated, rating: s.rating }))
         });
 
-        // Convert array to Map for efficient lookups
-        const statusMap = new Map<number, CategoryRatingStatus>();
+        // BUGFIX: Merge backend data with local updates to preserve fresh ratings
+        const currentStatusMap = this.categoryRatingStatusSubject.value;
+        const mergedStatusMap = new Map<number, CategoryRatingStatus>();
+        
+        // Convert backend array to map first
+        const backendStatusMap = new Map<number, CategoryRatingStatus>();
         statuses.forEach(status => {
-          statusMap.set(status.categoryId, status);
+          backendStatusMap.set(status.categoryId, status);
+        });
+
+        // For each category, decide whether to use backend or local data
+        const allCategoryIds = new Set([
+          ...Array.from(currentStatusMap.keys()),
+          ...Array.from(backendStatusMap.keys())
+        ]);
+
+        allCategoryIds.forEach(categoryIdKey => {
+          const localStatus = currentStatusMap.get(categoryIdKey);
+          const backendStatus = backendStatusMap.get(categoryIdKey);
+          
+          // If we have local data and it's fresher (updated within last 2 minutes), keep it
+          if (localStatus?.lastUpdatedAt) {
+            const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+            const isLocalFresh = localStatus.lastUpdatedAt > twoMinutesAgo;
+            const localHasRating = localStatus.hasRated && localStatus.rating !== null;
+            
+            if (isLocalFresh && localHasRating) {
+              console.log('🔄 Preserving fresh local rating:', {
+                categoryId: categoryIdKey,
+                localRating: localStatus.rating,
+                backendRating: backendStatus?.rating,
+                localUpdatedAt: localStatus.lastUpdatedAt,
+                reason: 'Local data is fresher than backend cache'
+              });
+              mergedStatusMap.set(categoryIdKey, localStatus);
+              return;
+            }
+          }
+          
+          // Otherwise, use backend data if available, or fall back to local
+          if (backendStatus) {
+            mergedStatusMap.set(categoryIdKey, backendStatus);
+          } else if (localStatus) {
+            mergedStatusMap.set(categoryIdKey, localStatus);
+          }
         });
 
         // Atomic update: Set both category and rating status simultaneously
         this.activeCategorySubject.next(categoryId);
-        this.categoryRatingStatusSubject.next(statusMap);
+        this.categoryRatingStatusSubject.next(mergedStatusMap);
 
         console.log('✅ Atomic transition completed - status preserved:', {
           categoryId,
-          newStatusCount: statusMap.size,
-          targetCategoryHasStatus: statusMap.has(categoryId),
-          targetCategoryStatus: statusMap.get(categoryId),
-          allStatusEntries: Array.from(statusMap.entries()).map(([id, status]) => ({
+          newStatusCount: mergedStatusMap.size,
+          targetCategoryHasStatus: mergedStatusMap.has(categoryId),
+          targetCategoryStatus: mergedStatusMap.get(categoryId),
+          allStatusEntries: Array.from(mergedStatusMap.entries()).map(([id, status]) => ({
             categoryId: id, 
             hasRated: status.hasRated, 
             rating: status.rating,
-            canAccessDiscussion: status.canAccessDiscussion
+            canAccessDiscussion: status.canAccessDiscussion,
+            lastUpdatedAt: status.lastUpdatedAt
           }))
         });
 

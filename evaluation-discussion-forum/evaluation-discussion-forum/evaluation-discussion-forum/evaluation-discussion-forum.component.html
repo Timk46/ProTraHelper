@@ -88,9 +88,7 @@
               <div class="vote-limit-display-header">
                 <div class="vote-counter">
                   <span class="vote-icon">🗳️</span>
-                  <span class="vote-text"
-                    >{{ vm.availableUpvotes }}/{{ vm.totalVotes }} verfügbar</span
-                  >
+                  <span class="vote-text">{{ vm.availableUpvotes }}/{{ vm.totalVotes }} verfügbar</span>
                 </div>
                 <div class="vote-status" [class.no-votes]="vm.availableUpvotes === 0">
                   <span *ngIf="vm.availableUpvotes > 0; else noVotesLeft">
@@ -119,6 +117,7 @@
 
             <!-- Discussion Phase with Rating Gate -->
             <div class="discussion-phase-content" *ngIf="vm.isDiscussionPhase && vm.anonymousUser">
+              
               <!-- Rating Gate Component (Controls access to discussion) -->
               <app-rating-gate
                 *ngIf="vm.activeCategoryInfo"
@@ -143,10 +142,28 @@
               </app-rating-gate>
 
               <!-- Message Input Area (only shown when discussion is accessible) -->
-              <div
-                class="action-area"
-                *ngIf="vm.canComment && (hasCommentedCurrentCategory$ | async)"
-              ></div>
+              <div class="action-area" *ngIf="vm.canComment && (hasCommentedCurrentCategory$ | async)">
+                <div class="message-input">
+                  <input
+                    type="text"
+                    class="message-input-field"
+                    [(ngModel)]="currentMessageText"
+                    [placeholder]="'Antworten Sie auf die Diskussion...'"
+                    [disabled]="vm.isSubmittingComment"
+                    (keydown.enter)="onMessageSubmit()"
+                    maxlength="1000"
+                  />
+                  <button
+                    class="send-btn"
+                    [disabled]="!currentMessageText.trim() || vm.isSubmittingComment"
+                    (click)="onMessageSubmit()"
+                  >
+                    <span *ngIf="!vm.isSubmittingComment">Senden</span>
+                    <mat-spinner *ngIf="vm.isSubmittingComment" diameter="16"></mat-spinner>
+                  </button>
+                </div>
+              </div>
+              
             </div>
 
             <!-- Evaluation Phase -->
@@ -157,7 +174,7 @@
                   [discussions]="vm.discussions"
                   [anonymousUser]="vm.anonymousUser"
                   [canComment]="false"
-                  [canVote]="true"
+                  [canVote]="false"
                   [availableUpvotes]="0"
                   [availableDownvotes]="0"
                   [isReadOnly]="true"
@@ -169,131 +186,16 @@
 
               <!-- Rating Section at Bottom -->
               <div class="action-area">
-                <!-- Einheitliches aufklappbares Rating Panel -->
                 <div class="rating-section">
-                  <mat-expansion-panel
-                    class="rating-expansion-panel"
-                    [(expanded)]="isRatingPanelExpanded"
-                    [class.has-rating]="hasRatedCurrentCategory$ | async"
-                    [class.glow-effect]="!(hasRatedCurrentCategory$ | async) && !showRatingPanel"
-                    hideToggle="false"
+                  <h4>Ihre Endbewertung für "{{ vm.activeCategoryInfo?.displayName }}"</h4>
+                  <app-rating-slider
+                    [categoryId]="vm.activeCategoryInfo?.id || 0"
+                    [categoryName]="vm.activeCategoryInfo?.displayName || ''"
+                    [currentRating]="getCurrentRating(vm.activeCategoryInfo?.id || 0) | async"
+                    [disabled]="!vm.canRate"
+                    (ratingSubmitted)="onRatingSubmitted($event)"
                   >
-                    <!-- Panel Header - Kompakte Ansicht für alle Zustände -->
-                    <mat-expansion-panel-header>
-                      <mat-panel-title>
-                        <div class="rating-panel-title">
-                          <mat-icon
-                            class="rating-icon"
-                            [class.completed]="hasRatedCurrentCategory$ | async"
-                          >
-                            {{ (hasRatedCurrentCategory$ | async) ? 'star' : 'star_border' }}
-                          </mat-icon>
-                          <span class="rating-label">Numerische Bewertung</span>
-                        </div>
-                      </mat-panel-title>
-                      <mat-panel-description>
-                        <div class="panel-description">
-                          <span class="category-description">
-                            Bewerten Sie "{{ vm.activeCategoryInfo?.displayName }}" mit 0-15 Punkten
-                          </span>
-                          <div class="rating-status">
-                            <span *ngIf="hasRatedCurrentCategory$ | async" class="score-badge">
-                              <strong>{{
-                                (getCurrentRating(vm.activeCategoryInfo?.id || 0) | async)?.score ||
-                                  0
-                              }}</strong
-                              >/15 Punkte
-                            </span>
-                            <span *ngIf="!(hasRatedCurrentCategory$ | async)" class="pending-badge">
-                              Noch nicht bewertet
-                            </span>
-                            <mat-icon class="expand-icon">
-                              {{ isRatingPanelExpanded ? 'expand_less' : 'expand_more' }}
-                            </mat-icon>
-                          </div>
-                        </div>
-                      </mat-panel-description>
-                    </mat-expansion-panel-header>
-
-                    <!-- Panel Content - Dynamischer Inhalt je nach Bewertungsstatus -->
-                    <div class="rating-panel-content">
-                      <!-- Inhalt für noch nicht bewertete Kategorien oder Reset-Modus -->
-                      <div
-                        *ngIf="!(hasRatedCurrentCategory$ | async) || showRatingPanel"
-                        class="rating-input-section"
-                      >
-                        <div class="rating-panel-header" *ngIf="showRatingPanel">
-                          <h4>
-                            Bewertung für "{{ vm.activeCategoryInfo?.displayName }}" zurücksetzen
-                          </h4>
-                          <button
-                            mat-icon-button
-                            (click)="onCancelReset()"
-                            matTooltip="Abbrechen und zur kompakten Ansicht zurückkehren"
-                            class="cancel-edit-btn"
-                          >
-                            <mat-icon>close</mat-icon>
-                          </button>
-                        </div>
-
-                        <app-rating-slider
-                          [categoryId]="vm.activeCategoryInfo?.id || 0"
-                          [categoryName]="vm.activeCategoryInfo?.displayName || ''"
-                          [currentRating]="getCurrentRating(vm.activeCategoryInfo?.id || 0) | async"
-                          [disabled]="!vm.canRate"
-                          (ratingSubmitted)="onRatingSubmitted($event)"
-                        >
-                        </app-rating-slider>
-                      </div>
-
-                      <!-- Inhalt für bereits bewertete Kategorien -->
-                      <div
-                        *ngIf="(hasRatedCurrentCategory$ | async) && !showRatingPanel"
-                        class="rating-details-section"
-                      >
-                        <div class="current-rating-display">
-                          <div class="rating-details">
-                            <p class="rating-text">
-                              Sie haben diese Kategorie mit
-                              <strong
-                                >{{
-                                  (getCurrentRating(vm.activeCategoryInfo?.id || 0) | async)
-                                    ?.score || 0
-                                }}
-                                von 15 Punkten</strong
-                              >
-                              bewertet.
-                            </p>
-                            <p
-                              class="rating-timestamp"
-                              *ngIf="
-                                (getCurrentRating(vm.activeCategoryInfo?.id || 0) | async)
-                                  ?.createdAt
-                              "
-                            >
-                              Bewertet am
-                              {{
-                                (getCurrentRating(vm.activeCategoryInfo?.id || 0) | async)
-                                  ?.createdAt | date: 'dd.MM.yyyy HH:mm'
-                              }}
-                            </p>
-                          </div>
-
-                          <div class="rating-actions">
-                            <button
-                              mat-raised-button
-                              color="primary"
-                              (click)="onResetRating()"
-                              matTooltip="Bewertung zurücksetzen und Slider reaktivieren"
-                            >
-                              <mat-icon>refresh</mat-icon>
-                              Zurücksetzen
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </mat-expansion-panel>
+                  </app-rating-slider>
                 </div>
               </div>
             </div>
@@ -301,6 +203,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Development Phase Toggle (Bottom Right) -->
+    <button
+      class="dev-phase-toggle"
+      mat-fab
+      color="warn"
+      (click)="togglePhase()"
+      matTooltip="Entwickler: Phase wechseln"
+    >
+      <mat-icon>{{ vm.isEvaluationPhase ? 'forum' : 'star' }}</mat-icon>
+    </button>
   </div>
 
   <!-- Empty State -->
