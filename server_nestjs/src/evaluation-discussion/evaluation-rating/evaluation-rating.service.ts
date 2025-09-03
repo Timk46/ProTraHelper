@@ -675,8 +675,8 @@ export class EvaluationRatingService {
   }
 
   private validateRatingScore(score: number): void {
-    if (score < 0 || score > 10) {
-      throw new BadRequestException('Rating score must be between 0 and 10');
+    if (score < 0 || score > 15) {
+      throw new BadRequestException('Rating score must be between 0 and 15');
     }
   }
 

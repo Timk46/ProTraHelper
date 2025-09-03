@@ -16,6 +16,250 @@ $error-color: #e74c3c;
 $warning-color: #e67e22;
 
 // =============================================================================
+// RATING COMPLETION STYLES
+// =============================================================================
+
+.rating-completed-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid $success-color;
+  border-radius: 12px;
+  margin: 16px 0;
+  
+  .mat-card-header {
+    .mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: $success-color;
+      font-weight: 600;
+      
+      .completed-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+  }
+  
+  .rating-summary {
+    .rating-display {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      
+      .rating-category {
+        font-weight: 500;
+        color: $text-primary;
+        font-size: 16px;
+      }
+      
+      .rating-score {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        
+        .score-value {
+          font-size: 32px;
+          font-weight: 700;
+          color: $success-color;
+        }
+        
+        .score-max {
+          font-size: 20px;
+          color: $text-secondary;
+          font-weight: 500;
+        }
+        
+        .score-label {
+          font-size: 14px;
+          color: $text-secondary;
+          margin-left: 4px;
+        }
+      }
+    }
+  }
+  
+  .mat-card-actions {
+    padding-top: 16px;
+    
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}
+
+.rating-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  
+  h4 {
+    margin: 0;
+    color: $text-primary;
+  }
+  
+  .cancel-edit-btn {
+    color: $text-secondary;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+}
+
+// =============================================================================
+// RATING EXPANSION PANEL STYLES
+// =============================================================================
+
+.rating-expansion-panel {
+  margin: 16px 0;
+  border: 2px solid $success-color !important;
+  border-radius: 12px !important;
+  box-shadow: $card-shadow !important;
+  
+  .mat-expansion-panel-header {
+    padding: 16px 24px !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    
+    &.mat-expanded {
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .mat-expansion-panel-header-title {
+      .rating-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        
+        .completed-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+          color: $success-color;
+        }
+        
+        .rating-info {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          
+          .rating-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: $text-primary;
+          }
+          
+          .rating-score-compact {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+            
+            .score-value {
+              font-size: 20px;
+              font-weight: 700;
+              color: $success-color;
+            }
+            
+            .score-max {
+              font-size: 14px;
+              color: $text-secondary;
+              font-weight: 500;
+            }
+            
+            .score-description {
+              font-size: 12px;
+              color: $text-secondary;
+              margin-left: 4px;
+            }
+          }
+        }
+      }
+    }
+    
+    .mat-expansion-panel-header-description {
+      justify-content: space-between;
+      align-items: center;
+      margin-right: 0 !important;
+      
+      .category-name {
+        color: $text-secondary;
+        font-size: 13px;
+        font-weight: 500;
+      }
+      
+      .expand-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        color: $text-secondary;
+      }
+    }
+  }
+  
+  .mat-expansion-panel-content {
+    .mat-expansion-panel-body {
+      padding: 16px 24px 24px 24px;
+    }
+  }
+  
+  .rating-panel-content {
+    .current-rating-display {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      
+      .rating-details {
+        .rating-text {
+          margin: 0 0 8px 0;
+          color: $text-primary;
+          font-size: 16px;
+          line-height: 1.4;
+          
+          strong {
+            color: $success-color;
+            font-weight: 600;
+          }
+        }
+        
+        .rating-timestamp {
+          margin: 0;
+          color: $text-secondary;
+          font-size: 13px;
+          font-style: italic;
+        }
+      }
+      
+      .rating-actions {
+        display: flex;
+        justify-content: flex-end;
+        
+        button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Hover effects for the expansion panel
+.rating-expansion-panel:hover {
+  .mat-expansion-panel-header:not(.mat-expanded) {
+    background: linear-gradient(135deg, #f1f3f5 0%, #e0e4e7 100%) !important;
+  }
+}
+
+// =============================================================================
 // DEMO MODE BANNER
 // =============================================================================
 
@@ -699,5 +943,268 @@ a:focus-visible {
   
   .mdc-snackbar__surface {
     border-left: 4px solid #1b5e20;
+  }
+}
+
+// =============================================================================
+// UNIFIED RATING PANEL STYLES WITH GLOW EFFECT
+// =============================================================================
+
+.rating-expansion-panel {
+  margin: 16px 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  
+  // Base shadow
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 
+              0 4px 16px rgba(0, 0, 0, 0.08) !important;
+
+  // Glow effect for unrated categories
+  &.glow-effect {
+    animation: rating-glow 3s ease-in-out infinite;
+    border: 2px solid $primary-color !important;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, 
+                                  $primary-color, 
+                                  lighten($primary-color, 20%), 
+                                  $primary-color);
+      border-radius: 12px;
+      z-index: -1;
+      animation: glow-rotation 4s linear infinite;
+      opacity: 0.6;
+    }
+    
+    .mat-expansion-panel-header {
+      background: linear-gradient(135deg, 
+                                  rgba(52, 152, 219, 0.1) 0%, 
+                                  rgba(52, 152, 219, 0.05) 100%) !important;
+    }
+  }
+
+  // Completed rating state
+  &.has-rating {
+    border: 2px solid $success-color !important;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.15), 
+                0 4px 16px rgba(39, 174, 96, 0.1) !important;
+    
+    .mat-expansion-panel-header {
+      background: linear-gradient(135deg, 
+                                  rgba(39, 174, 96, 0.1) 0%, 
+                                  rgba(39, 174, 96, 0.05) 100%) !important;
+    }
+  }
+
+  .mat-expansion-panel-header {
+    padding: 20px 24px !important;
+    min-height: 80px !important;
+    transition: all 0.3s ease !important;
+    
+    &:hover:not(.mat-expanded) {
+      background: linear-gradient(135deg, 
+                                  rgba(0, 0, 0, 0.02) 0%, 
+                                  rgba(0, 0, 0, 0.01) 100%) !important;
+    }
+    
+    .mat-expansion-panel-header-title {
+      flex: 1;
+      margin-right: 16px;
+    }
+    
+    .mat-expansion-panel-header-description {
+      flex: 0 0 auto;
+      max-width: none;
+    }
+  }
+}
+
+// Panel header content styling
+.rating-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  .rating-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: $text-secondary;
+    transition: color 0.3s ease;
+    
+    &.completed {
+      color: $success-color;
+    }
+  }
+  
+  .rating-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.panel-description {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+  
+  .category-description {
+    font-size: 13px;
+    color: $text-secondary;
+    max-width: 250px;
+    line-height: 1.4;
+  }
+  
+  .rating-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    .score-badge {
+      background: linear-gradient(135deg, $success-color, lighten($success-color, 10%));
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+    }
+    
+    .pending-badge {
+      background: linear-gradient(135deg, $warning-color, lighten($warning-color, 10%));
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(230, 126, 34, 0.3);
+    }
+    
+    .expand-icon {
+      font-size: 18px;
+      color: $text-secondary;
+      transition: transform 0.3s ease;
+    }
+  }
+}
+
+// Panel content styling
+.rating-panel-content {
+  padding: 24px !important;
+  background: #fafbfc;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  
+  .rating-input-section,
+  .rating-details-section {
+    .rating-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      
+      h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: $text-primary;
+      }
+      
+      .cancel-edit-btn {
+        color: $text-secondary;
+        
+        &:hover {
+          color: $error-color;
+          background: rgba(231, 76, 60, 0.1);
+        }
+      }
+    }
+    
+    .current-rating-display {
+      .rating-details {
+        margin-bottom: 20px;
+        
+        .rating-text {
+          margin: 0 0 8px 0;
+          font-size: 14px;
+          color: $text-primary;
+          line-height: 1.5;
+        }
+        
+        .rating-timestamp {
+          margin: 0;
+          font-size: 12px;
+          color: $text-secondary;
+          font-style: italic;
+        }
+      }
+      
+      .rating-actions {
+        button {
+          transition: all 0.3s ease;
+          border-radius: 8px;
+          
+          &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animations
+@keyframes rating-glow {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 
+                0 4px 16px rgba(0, 0, 0, 0.08),
+                0 0 20px rgba(52, 152, 219, 0.2);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 
+                0 4px 16px rgba(0, 0, 0, 0.08),
+                0 0 30px rgba(52, 152, 219, 0.4);
+  }
+}
+
+@keyframes glow-rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .rating-expansion-panel {
+    margin: 12px 0 !important;
+    
+    .mat-expansion-panel-header {
+      padding: 16px 20px !important;
+      min-height: 70px !important;
+    }
+    
+    .rating-panel-content {
+      padding: 20px !important;
+    }
+    
+    .panel-description {
+      .category-description {
+        max-width: 200px;
+        font-size: 12px;
+      }
+    }
   }
 }

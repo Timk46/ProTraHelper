@@ -108,14 +108,26 @@
   background-color: #ffffff;
 
   .virtual-item {
-    padding: 8px 0;
+    padding: 2px 0;
 
     &:first-child {
-      padding-top: 16px;
+      padding-top: 8px;
     }
 
     &:last-child {
-      padding-bottom: 16px;
+      padding-bottom: 8px;
+    }
+
+    // Hide virtual-items that contain only empty or commented out content
+    &:empty {
+      display: none;
+      padding: 0;
+    }
+
+    // Hide virtual-items with comment containers that have no actual content
+    &:has(.comment-item-container:empty) {
+      display: none;
+      padding: 0;
     }
   }
 }
@@ -181,6 +193,13 @@
   margin: 8px 16px;
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   position: relative;
+
+  // Hide empty comment containers to prevent visual artifacts
+  &:empty {
+    display: none;
+    margin: 0;
+    padding: 0;
+  }
 
   // Modern reply indentation with subtle depth indicators and progressive scaling
   &[style*="margin-left"] {
@@ -733,17 +752,17 @@
         transform: scale(0.82) !important;  // Slightly larger on mobile for readability
       }
 
-      // Adjust threading indicators for mobile
-      &::before {
-        left: -8px;
-        width: 1px;
-      }
+      // Removed threading indicators that could cause visual artifacts
+      // &::before {
+      //   left: -8px;
+      //   width: 1px;
+      // }
 
-      &::after {
-        left: -8px;
-        width: 12px;
-        height: 1px;
-      }
+      // &::after {
+      //   left: -8px;
+      //   width: 12px;
+      //   height: 1px;
+      // }
       
       // Preserve hover effects on mobile with scaling
       &:hover {
@@ -796,9 +815,10 @@
     &[style*="margin-left"] {
       margin-left: 12px !important;
 
-      &::before {
-        left: -6px;
-      }
+      // Removed threading indicator that could cause visual artifacts
+      // &::before {
+      //   left: -6px;
+      // }
     }
   }
 
@@ -897,10 +917,11 @@ button:focus,
     border-left-width: 6px !important;
   }
 
-  .comment-item-container::before {
-    background-color: #000 !important;
-    width: 3px !important;
-  }
+  // Removed black pseudo-elements that were causing black stripes
+  // .comment-item-container::before {
+  //   background-color: #000 !important;
+  //   width: 3px !important;
+  // }
 }
 
 // Reduced motion support

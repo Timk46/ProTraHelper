@@ -24,6 +24,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 // DTOs
 import {
@@ -54,7 +55,6 @@ import { CategoryTabsComponent } from '../components/category-tabs/category-tabs
 import { PdfViewerPanelComponent } from '../components/pdf-viewer-panel/pdf-viewer-panel.component';
 import { PerformanceDashboardComponent } from '../components/performance-dashboard/performance-dashboard.component';
 import { DiscussionThreadComponent } from '../components/discussion-thread/discussion-thread.component';
-import { PhaseToggleComponent } from '../components/phase-toggle/phase-toggle.component';
 import { ErrorFallbackComponent } from '../components/error-fallback/error-fallback.component';
 import { RatingSliderComponent } from '../components/rating-slider/rating-slider.component';
 import { RatingGateComponent } from '../components/rating-gate/rating-gate.component';
@@ -89,10 +89,10 @@ import { UserService } from 'src/app/Services/auth/user.service';
     MatSidenavModule,
     MatDividerModule,
     MatTooltipModule,
+    MatExpansionModule,
     CategoryTabsComponent,
     PdfViewerPanelComponent,
     DiscussionThreadComponent,
-    PhaseToggleComponent,
     RatingSliderComponent,
     RatingGateComponent,
     ErrorFallbackComponent,
@@ -228,6 +228,15 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   private currentSnackBarRef: any = null;
 
   // Rating gate access control - replaced with reactive state from stateService
+  
+  // Rating panel visibility control
+  showRatingPanel: boolean = false;
+  
+  // Rating panel expansion control
+  isRatingPanelExpanded: boolean = false;
+  
+  // Temporary flag to immediately hide rating input after submission
+  ratingJustSubmitted: boolean = false;
 
   // 🚀 PHASE 5: Enhanced initialization with comprehensive setup
   private initializeObservableStreams(): void {
@@ -315,7 +324,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         ]) => {
           // Get dynamic vote limit status for current category (NEW SYSTEM)
           const voteLimitStatus = voteLimitStatusMap.get(activeCategory);
-          
+
           // Fallback to legacy system if new system not loaded yet
           const categoryLimits = voteLimits.get(activeCategory);
 
@@ -683,7 +692,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           console.log('📡 Real mode - calling stateService.loadSubmission...', submissionId);
           this.submissionId = submissionId;
           this.stateService.loadSubmission(submissionId, Number(this.userservice.getTokenID()));
-          
+
           // Load comment status from localStorage
           this.stateService.loadCommentStatusFromStorage(submissionId);
           console.log('📝 Loaded comment status for submission:', submissionId);
@@ -692,7 +701,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           console.log('🎭 Entering demo mode (no submissionId)');
           this.submissionId = null;
           this.stateService.loadMockData();
-          
+
           // Clear any existing comment status in mock mode
           this.stateService.clearCommentStatus();
         }
@@ -748,7 +757,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       .subscribe(categoryId => {
         console.log('🔄 Active category changed to:', categoryId, '- rating status tracked reactively');
         // Rating status is now handled automatically by hasRatedCurrentCategory$ observable
-        
+
         // Load vote limits for the new category
         if (this.submissionId) {
           console.log('📊 Loading vote limits for category:', categoryId);
@@ -770,7 +779,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    */
   onCategorySelected(categoryId: number): void {
     console.log('🔄 Initiating atomic category transition to:', categoryId);
-    
+
+    // Reset rating submission state when changing categories
+    this.ratingJustSubmitted = false;
+    this.showRatingPanel = false;
+
     // Use atomic category transition to prevent race conditions
     this.stateService.transitionToCategory(categoryId).pipe(
       take(1),
@@ -778,7 +791,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         console.log('✅ Atomic category transition completed successfully');
-        this.cdr.markForCheck();
+        
+        // Set panel expansion based on rating status
+        this.stateService.isCategoryRated$(categoryId).pipe(take(1)).subscribe(isRated => {
+          // Expand panel for unrated categories, collapse for rated ones
+          this.isRatingPanelExpanded = !isRated;
+          console.log(`📋 Panel ${isRated ? 'collapsed' : 'expanded'} for category ${categoryId} (rated: ${isRated})`);
+          this.cdr.markForCheck();
+        });
       },
       error: (error) => {
         console.error('❌ Category transition failed:', error);
@@ -967,7 +987,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         .subscribe({
           next: comment => {
             console.log('✅ Comment added successfully:', comment);
-            
+
             // Different success messages for initial vs regular comments
             if (isInitialComment) {
               this.showSnackBar('Schriftliche Bewertung erfolgreich abgegeben - Diskussion freigeschaltet!', 'OK', 4000, false);
@@ -1083,13 +1103,18 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           // Update rating status in state service for reactive updates
           // This triggers the centralized state update with category isolation
           this.stateService.updateCategoryRatingStatus(this.submissionId!, data.categoryId, data.score);
-          
+
+          // Hide rating panel and collapse to show completed state
+          this.showRatingPanel = false;
+          this.isRatingPanelExpanded = false; // Automatically collapse after rating
+          this.ratingJustSubmitted = true;
+
           // Force change detection
           this.cdr.markForCheck();
 
           this.snackBar.open(
-            `Bewertung wurde erfolgreich abgegeben (${data.score} Punkte)`, 
-            'Schließen', 
+            `Bewertung wurde erfolgreich abgegeben (${data.score} Punkte)`,
+            'Schließen',
             {
               duration: 4000,
               horizontalPosition: 'center',
@@ -1105,8 +1130,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           });
 
           this.snackBar.open(
-            `Fehler beim Abgeben der Bewertung`, 
-            'Schließen', 
+            `Fehler beim Abgeben der Bewertung`,
+            'Schließen',
             {
               duration: 5000,
               horizontalPosition: 'center',
@@ -1139,11 +1164,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // Trigger change detection
     this.cdr.markForCheck();
 
-    // Refresh comment stats to reflect new rating
-    if (this.submissionId) {
-      // Trigger a reload of comment stats (load initial data again)
-      this.stateService.refreshAll(this.submissionId, Number(this.userservice.getTokenID()));
-    }
+    // Comment stats will be updated automatically through reactive streams
+    // No manual refresh needed - the state service handles this reactively
   }
 
   onPhaseToggled(targetPhase: 'discussion' | 'evaluation'): void {
@@ -1424,6 +1446,48 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    */
   onNavigateToDashboard(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  /**
+   * Toggles the rating panel expansion state
+   */
+  onToggleRatingPanel(): void {
+    this.isRatingPanelExpanded = !this.isRatingPanelExpanded;
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Resets the rating by clearing it from state and enabling edit mode
+   */
+  onResetRating(): void {
+    this.activeCategory$.pipe(take(1)).subscribe(activeCategory => {
+      if (activeCategory && this.submissionId) {
+        console.log('🔄 Resetting rating for category:', activeCategory);
+        
+        // Clear the rating from state service
+        this.stateService.clearCategoryRating(this.submissionId, activeCategory);
+        
+        // Enable rating panel for new input and expand it
+        this.showRatingPanel = true;
+        this.isRatingPanelExpanded = true; // Expand for rating input
+        this.ratingJustSubmitted = false;
+        
+        // Force change detection
+        this.cdr.markForCheck();
+        
+        // Show success message
+        this.showSuccessMessage('Bewertung wurde zurückgesetzt - Sie können erneut bewerten');
+      }
+    });
+  }
+
+  /**
+   * Cancels the rating reset and returns to collapsed state
+   */
+  onCancelReset(): void {
+    this.showRatingPanel = false;
+    this.isRatingPanelExpanded = false;
+    this.cdr.markForCheck();
   }
 
   // =============================================================================

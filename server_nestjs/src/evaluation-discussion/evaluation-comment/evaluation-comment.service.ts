@@ -10,6 +10,8 @@ import type {
   VoteType,
   VoteLimitStatusDTO,
   VoteLimitResponseDTO,
+  ResetVotesDTO,
+  ResetVotesResponseDTO,
 } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
@@ -1248,5 +1250,146 @@ export class EvaluationCommentService {
       voteLimitStatus: updatedStatus,
       message: 'Vote successfully processed.',
     };
+  }
+
+  /**
+   * Resets user votes in a specific category
+   * 
+   * @param userId - The user ID whose votes to reset
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param voteType - The type of votes to reset ('UP', 'DOWN', or 'ALL')
+   * @returns Promise containing reset result and updated vote limit status
+   */
+  async resetUserVotes(
+    userId: number,
+    submissionId: string,
+    categoryId: number,
+    voteType: 'UP' | 'DOWN' | 'ALL'
+  ): Promise<{
+    success: boolean;
+    resetCount: number;
+    voteLimitStatus: VoteLimitStatusDTO;
+    affectedCommentIds: string[];
+  }> {
+    console.log('🔄 Resetting user votes:', {
+      userId,
+      submissionId,
+      categoryId,
+      voteType,
+      timestamp: new Date().toISOString()
+    });
+
+    try {
+      // Get all comments in this category that the user has voted on
+      const commentsWithVotes = await this.prisma.evaluationComment.findMany({
+        where: {
+          submissionId,
+          categoryId,
+          parentId: null, // Only top-level comments
+        },
+        select: {
+          id: true,
+          voteDetails: true,
+          upvotes: true,
+          downvotes: true,
+        }
+      });
+
+      const affectedCommentIds: string[] = [];
+      let resetCount = 0;
+
+      // Process each comment to reset votes
+      for (const comment of commentsWithVotes) {
+        const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+        const userVotes = voteDetails.userVotes || {};
+        const userVote = userVotes[userId.toString()];
+
+        // Check if this comment has a vote from this user that matches our reset criteria
+        if (userVote && this.shouldResetVote(userVote, voteType)) {
+          // Remove the user's vote
+          delete userVotes[userId.toString()];
+          
+          // Update vote counts
+          let newUpvotes = comment.upvotes;
+          let newDownvotes = comment.downvotes;
+          
+          if (userVote === 'UP') {
+            newUpvotes = Math.max(0, newUpvotes - 1);
+          } else if (userVote === 'DOWN') {
+            newDownvotes = Math.max(0, newDownvotes - 1);
+          }
+
+          // Update the comment in database
+          await this.prisma.evaluationComment.update({
+            where: { id: comment.id },
+            data: {
+              voteDetails: { userVotes },
+              upvotes: newUpvotes,
+              downvotes: newDownvotes,
+            }
+          });
+
+          affectedCommentIds.push(comment.id);
+          resetCount++;
+
+          console.log(`✅ Reset vote for comment ${comment.id}:`, {
+            previousVote: userVote,
+            newUpvotes,
+            newDownvotes
+          });
+        }
+      }
+
+      // Invalidate cache for this user's vote limit status
+      const cacheKey = this.utilsService.generateCacheKey(
+        'vote-limit-status',
+        submissionId,
+        categoryId.toString(),
+        userId.toString()
+      );
+      this.cacheService.delete(cacheKey);
+
+      // Get updated vote limit status
+      const updatedVoteLimitStatus = await this.getVoteLimitStatus(
+        userId,
+        submissionId,
+        categoryId.toString()
+      );
+
+      console.log('🎯 Vote reset completed:', {
+        resetCount,
+        affectedCommentIds: affectedCommentIds.length,
+        updatedVoteLimitStatus: {
+          remainingVotes: updatedVoteLimitStatus.remainingVotes,
+          maxVotes: updatedVoteLimitStatus.maxVotes
+        }
+      });
+
+      return {
+        success: true,
+        resetCount,
+        voteLimitStatus: updatedVoteLimitStatus,
+        affectedCommentIds
+      };
+
+    } catch (error) {
+      console.error('❌ Error resetting user votes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Helper method to determine if a vote should be reset based on criteria
+   * 
+   * @param userVote - The user's current vote ('UP' or 'DOWN')
+   * @param resetType - The type of reset requested ('UP', 'DOWN', or 'ALL')
+   * @returns boolean indicating if the vote should be reset
+   */
+  private shouldResetVote(userVote: 'UP' | 'DOWN', resetType: 'UP' | 'DOWN' | 'ALL'): boolean {
+    if (resetType === 'ALL') {
+      return true;
+    }
+    return userVote === resetType;
   }
 }

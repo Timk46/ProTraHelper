@@ -41,6 +41,10 @@ export interface ContentElementDTO {
     text?: string;
     file?: FileDto;
     question?: taskViewDTO;
+    
+    // MCSlider grouping properties (for client-side grouping only)
+    mcSliderGroupKey?: string;
+    mcSliderGroupSize?: number;
 }
 
 export interface ContentsForConceptDTO {

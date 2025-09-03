@@ -38,8 +38,7 @@
   </div>
 
   <!-- Voting Actions and Panel Controls -->
-  <div *ngIf="canVote" 
-       class="vote-actions"
+  <div class="vote-actions"
        role="toolbar"
        [attr.aria-label]="'Comment actions for comment by ' + cachedAuthorDisplayName"
        [attr.aria-controls]="'comment-content-' + comment.id">
@@ -94,7 +93,7 @@
 
     <!-- Reply Button - Only for top-level comments (depth = 0) -->
     <button
-      *ngIf="depth === 0 && canVote && !isReadOnly"
+      *ngIf="depth === 0 && !isReadOnly"
       class="reply-btn"
       [disabled]="isReadOnly"
       [matTooltip]="'Auf diesen Kommentar antworten'"

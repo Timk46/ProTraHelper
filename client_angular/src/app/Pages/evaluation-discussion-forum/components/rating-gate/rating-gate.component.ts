@@ -19,6 +19,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, takeUntil, tap, filter, take } from 'rxjs/operators';
 
@@ -103,13 +104,13 @@ interface RatingGateViewModel {
 
       <!-- Initial Comment Required State -->
       <div class="initial-comment-required" *ngIf="!vm.isLoading && !vm.error && vm.requiresInitialComment">
-        
+
         <!-- Main Panel: "Schriftliche Bewertung erforderlich" -->
-        <mat-expansion-panel 
+        <mat-expansion-panel
           [(expanded)]="mainPanelExpanded"
           (expandedChange)="onMainPanelExpansionChange($event)"
           class="required-evaluation-panel">
-          
+
           <mat-expansion-panel-header>
             <mat-panel-title>
               <mat-icon class="panel-icon">edit</mat-icon>
@@ -121,13 +122,13 @@ interface RatingGateViewModel {
           </mat-expansion-panel-header>
 
           <div class="main-panel-content">
-            
+
             <!-- Category Information -->
             <div class="category-info">
               <h4>{{ currentCategory.displayName }}</h4>
               <p class="category-description">{{ currentCategory.description || 'Angemessene Komplexität der Konstruktionslösung' }}</p>
             </div>
-            
+
             <!-- Instructions Panel -->
             <mat-expansion-panel
               [(expanded)]="instructionsExpanded"
@@ -215,7 +216,7 @@ interface RatingGateViewModel {
           <mat-icon class="success-icon">check_circle</mat-icon>
           <span class="access-text">
             Diskussion freigeschaltet durch Ihren Kommentar
-            <span class="rating-value" *ngIf="vm.ratingStatus?.rating !== null">
+            <span class="rating-value" *ngIf="vm.ratingStatus?.hasRated && vm.ratingStatus?.rating !== null && vm.ratingStatus?.rating !== undefined">
               - Numerische Bewertung: {{ vm.ratingStatus?.rating }}/10 Punkte
             </span>
           </span>
@@ -271,11 +272,92 @@ interface RatingGateViewModel {
                 }}</span>
               </div>
             </div>
+
+            <!-- Vote Reset Actions (nur anzeigen wenn bereits Votes abgegeben wurden) -->
+            <div class="vote-reset-actions" *ngIf="voteLimit.percentage > 0">
+              <div class="reset-section">
+                <p class="reset-info">Bewertungen zurücksetzen:</p>
+                <div class="reset-buttons">
+                  <button mat-stroked-button
+                          color="primary"
+                          (click)="resetVotes('UP')"
+                          [disabled]="isResettingVotes"
+                          matTooltip="Alle positiven Bewertungen zurücksetzen">
+                    <mat-icon>thumb_up</mat-icon>
+                    <span *ngIf="!isResettingVotes">Alle positiven</span>
+                    <mat-spinner *ngIf="isResettingVotes" diameter="16"></mat-spinner>
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          (click)="resetVotes('DOWN')"
+                          [disabled]="isResettingVotes"
+                          matTooltip="Alle negativen Bewertungen zurücksetzen">
+                    <mat-icon>thumb_down</mat-icon>
+                    <span *ngIf="!isResettingVotes">Alle negativen</span>
+                    <mat-spinner *ngIf="isResettingVotes" diameter="16"></mat-spinner>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Discussion Content -->
-        <div class="discussion-content">
+        <!-- Collapsible Discussion Panel -->
+        <div class="discussion-panel" 
+             [class.expanded]="isDiscussionExpanded"
+             *ngIf="hasDiscussions()">
+          
+          <!-- Discussion Panel Header -->
+          <div class="panel-header" (click)="toggleDiscussionPanel()">
+            <mat-icon class="discussion-icon">forum</mat-icon>
+            <span class="panel-title">Diskussionsbeiträge</span>
+            
+            <div class="discussion-stats">
+              <mat-icon>comment</mat-icon>
+              <span>{{ getTotalCommentCount() }} {{ getTotalCommentCount() === 1 ? 'Kommentar' : 'Kommentare' }}</span>
+            </div>
+            
+            <mat-icon class="expand-icon" [class.rotated]="isDiscussionExpanded">
+              expand_more
+            </mat-icon>
+          </div>
+          
+          <!-- Collapsed Preview -->
+          <div class="collapsed-preview" *ngIf="!isDiscussionExpanded && getTopComment()">
+            <div class="preview-content">
+              <div class="top-comment">
+                <mat-icon>star</mat-icon>
+                <span class="preview-text">{{ getTopComment().content | slice:0:100 }}{{ getTopComment().content.length > 100 ? '...' : '' }}</span>
+                <span class="vote-count" *ngIf="getTopComment().voteStats?.upVotes > 0">+{{ getTopComment().voteStats.upVotes }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Expandable Panel Content -->
+          <div class="panel-content" *ngIf="isDiscussionExpanded" [@slideToggle]="isDiscussionExpanded">
+            <div class="discussion-content-wrapper">
+              <app-discussion-thread
+                [discussions]="discussions"
+                [anonymousUser]="anonymousUser"
+                [canComment]="canComment"
+                [canVote]="canVote"
+                [availableUpvotes]="availableUpvotes"
+                [availableDownvotes]="availableDownvotes"
+                [isReadOnly]="isReadOnly"
+                [isSubmittingComment]="isSubmittingComment"
+                [isVotingComment]="isVotingComment"
+                [trackByFn]="trackByDiscussion"
+                (commentSubmitted)="onCommentSubmitted($event)"
+                (commentVoted)="onCommentVoted($event)"
+                (replySubmitted)="onReplySubmitted($event)"
+              >
+              </app-discussion-thread>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fallback Discussion Content (when no discussions exist) -->
+        <div class="discussion-content" *ngIf="!hasDiscussions()">
           <app-discussion-thread
             [discussions]="discussions"
             [anonymousUser]="anonymousUser"
@@ -296,27 +378,93 @@ interface RatingGateViewModel {
 
         <!-- Rating Slider Section (After Discussion) -->
         <div class="rating-slider-section" *ngIf="vm.showRatingSlider">
-          <mat-card class="rating-slider-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>star_rate</mat-icon>
-                Numerische Bewertung
-              </mat-card-title>
-              <mat-card-subtitle>
-                Bewerten Sie "{{ currentCategory.displayName }}" mit 0-10 Punkten
-              </mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <app-rating-slider
-                [categoryId]="currentCategory.id"
-                [categoryName]="currentCategory.displayName"
-                [currentRating]="convertRatingStatusToDTO(vm.ratingStatus)"
-                [disabled]="false"
-                (ratingSubmitted)="onRatingSubmitted($event)"
-              >
-              </app-rating-slider>
-            </mat-card-content>
-          </mat-card>
+          <mat-expansion-panel
+            class="rating-expansion-panel"
+            [(expanded)]="isRatingSliderExpanded"
+            [class.has-rating]="vm.hasRated"
+            [class.glow-effect]="!vm.hasRated && !vm.isLoading"
+            hideToggle="false">
+
+            <!-- Panel Header -->
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <div class="rating-panel-title">
+                  <mat-icon class="rating-icon" [class.completed]="vm.hasRated">
+                    {{ vm.hasRated ? 'star' : 'star_border' }}
+                  </mat-icon>
+                  <span class="rating-label">Numerische Bewertung</span>
+                </div>
+              </mat-panel-title>
+              <mat-panel-description>
+                <div class="panel-description">
+                  <span class="category-description">
+                    Bewerten Sie "{{ currentCategory.displayName }}" mit 0-15 Punkten
+                  </span>
+                  <div class="rating-status">
+                    <span *ngIf="vm.hasRated" class="score-badge">
+                      <strong>{{ vm.ratingStatus?.rating || 0 }}</strong>/15 Punkte
+                    </span>
+                    <span *ngIf="!vm.hasRated" class="pending-badge">
+                      Noch nicht bewertet
+                    </span>
+                    <mat-icon class="expand-icon">
+                      {{ isRatingSliderExpanded ? 'expand_less' : 'expand_more' }}
+                    </mat-icon>
+                  </div>
+                </div>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Panel Content -->
+            <div class="rating-panel-content">
+              <!-- Inhalt für noch nicht bewertete Kategorien oder Reset-Modus -->
+              <div *ngIf="!vm.hasRated || showRatingReset" class="rating-input-section">
+                <div class="rating-panel-header" *ngIf="showRatingReset">
+                  <h4>Bewertung für "{{ currentCategory.displayName }}" zurücksetzen</h4>
+                  <button mat-icon-button
+                          (click)="onCancelRatingReset()"
+                          matTooltip="Abbrechen und zur kompakten Ansicht zurückkehren"
+                          class="cancel-edit-btn">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+
+                <app-rating-slider
+                  [categoryId]="currentCategory.id"
+                  [categoryName]="currentCategory.displayName"
+                  [currentRating]="convertRatingStatusToDTO(vm.ratingStatus)"
+                  [disabled]="false"
+                  (ratingSubmitted)="onRatingSubmitted($event)"
+                >
+                </app-rating-slider>
+              </div>
+
+              <!-- Inhalt für bereits bewertete Kategorien -->
+              <div *ngIf="vm.hasRated && !showRatingReset" class="rating-details-section">
+                <div class="current-rating-display">
+                  <div class="rating-details">
+                    <p class="rating-text">
+                      Sie haben diese Kategorie mit
+                      <strong>{{ vm.ratingStatus?.rating || 0 }} von 15 Punkten</strong> bewertet.
+                    </p>
+                    <p class="rating-timestamp" *ngIf="vm.ratingStatus">
+                      Bewertet am {{ vm.ratingStatus.ratedAt | date:'dd.MM.yyyy HH:mm' }}
+                    </p>
+                  </div>
+
+                  <div class="rating-actions">
+                    <button mat-raised-button
+                            color="primary"
+                            (click)="onResetRatingSlider()"
+                            matTooltip="Bewertung zurücksetzen und Slider reaktivieren">
+                      <mat-icon>refresh</mat-icon>
+                      Zurücksetzen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
         </div>
       </div>
     </div>
@@ -403,35 +551,182 @@ interface RatingGateViewModel {
         margin-top: 0.5rem;
       }
 
+      // Rating Slider Section Expansion Panel
       .rating-slider-section {
         margin-top: 2rem;
       }
 
-      .rating-slider-card {
-        border: 2px solid #4caf50;
-        background: #f8fff8;
+      .rating-slider-section .rating-expansion-panel {
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        background: #fff;
+        transition: all 0.3s ease;
+
+        // Always glow in synchronized GREEN when not rated (same timing as blue panels)
+        &:not(.has-rating) {
+          animation: synchronizedGreenGlow 2.5s ease-in-out infinite;
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+        
+        // Additional rule for explicit glow-effect class - also GREEN
+        &.glow-effect {
+          animation: synchronizedGreenGlow 2.5s ease-in-out infinite;
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+        
+        // Different styling when rating is completed (no glow)
+        &.has-rating {
+          animation: none;
+          border-color: #4caf50;
+          background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+        }
+
+        .mat-expansion-panel-header {
+          padding: 0 16px;
+          height: 64px;
+          background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+          transition: all 0.3s ease;
+
+          &.mat-expanded {
+            background: linear-gradient(135deg, #c8e6c9 0%, #dcedc8 100%);
+          }
+        }
+
+        .rating-panel-title {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .rating-icon {
+          font-size: 1.5rem;
+          color: #4caf50;
+
+          &.completed {
+            color: #2e7d32;
+          }
+        }
+
+        .rating-label {
+          font-weight: 500;
+          color: #2e7d32;
+          font-size: 1rem;
+        }
+
+        .panel-description {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          flex: 1;
+        }
+
+        .category-description {
+          font-size: 0.85rem;
+          color: #555;
+        }
+
+        .rating-status {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .score-badge {
+          background: #c8e6c9;
+          color: #1b5e20;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .pending-badge {
+          background: #fff3e0;
+          color: #e65100;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 500;
+        }
+
+        .expand-icon {
+          color: #666;
+          transition: transform 0.3s ease;
+        }
+
+        .rating-panel-content {
+          padding: 16px;
+          background: #fff;
+        }
+
+        .rating-panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #e0e0e0;
+
+          h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1rem;
+          }
+
+          .cancel-edit-btn {
+            color: #666;
+
+            &:hover {
+              background-color: rgba(255, 0, 0, 0.1);
+              color: #d32f2f;
+            }
+          }
+        }
+
+        .rating-details-section {
+          .current-rating-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+          }
+
+          .rating-details {
+            flex: 1;
+
+            .rating-text {
+              margin: 0 0 0.5rem 0;
+              color: #333;
+              font-size: 0.95rem;
+            }
+
+            .rating-timestamp {
+              margin: 0;
+              color: #666;
+              font-size: 0.85rem;
+            }
+          }
+
+          .rating-actions {
+            display: flex;
+            gap: 0.5rem;
+
+            button {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-size: 0.9rem;
+
+              mat-icon {
+                font-size: 1.2rem;
+              }
+            }
+          }
+        }
       }
 
-      .rating-slider-card mat-card-header {
-        background: #4caf50;
-        color: white;
-        margin: -16px -16px 16px -16px;
-        padding: 16px;
-        border-radius: 4px 4px 0 0;
-      }
-
-      .rating-slider-card mat-card-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: white;
-        margin: 0;
-      }
-
-      .rating-slider-card mat-card-subtitle {
-        color: rgba(255, 255, 255, 0.8);
-        margin-top: 0.5rem;
-      }
 
       .access-granted-header {
         display: flex;
@@ -465,26 +760,28 @@ interface RatingGateViewModel {
         min-height: 400px;
       }
 
-      // Available Ratings Panel Styles with Green Glow
+      // Available Ratings Panel Styles with Synchronized Blue Glow
       .available-ratings-panel {
-        margin: 1rem 0;
+        margin: 0.7rem 0;
         border: 1px solid #e0e0e0;
-        border-radius: 12px;
+        border-radius: 8px;
         background: #fff;
         overflow: hidden;
         transition: all 0.3s ease;
         cursor: pointer;
+        max-height: 120px; // Reduced from ~170px to 120px (30% reduction)
 
-        // Green pulsing glow effect when collapsed
+        // Synchronized blue pulsing glow effect when collapsed
         &:not(.expanded) {
-          animation: greenPulseGlow 2s ease-in-out infinite;
-          border-color: rgba(76, 175, 80, 0.3);
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
-        // When expanded, remove animation
+        // When expanded, remove animation and allow full height
         &.expanded {
           animation: none;
           border-color: #e0e0e0;
+          max-height: none;
 
           .expand-icon {
             transform: rotate(180deg);
@@ -492,29 +789,55 @@ interface RatingGateViewModel {
         }
 
         &:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
       }
 
-      // Green pulse glow keyframe animation
-      @keyframes greenPulseGlow {
+      // Synchronized blue glow keyframe animation for both panel and badge
+      @keyframes synchronizedBlueGlow {
         0%, 100% {
-          box-shadow: 0 0 5px rgba(76, 175, 80, 0.4), 0 0 10px rgba(76, 175, 80, 0.2);
-          border-color: rgba(76, 175, 80, 0.3);
+          box-shadow: 0 0 5px rgba(33, 150, 243, 0.4), 0 0 10px rgba(33, 150, 243, 0.2);
+          border-color: rgba(33, 150, 243, 0.3);
         }
         50% {
-          box-shadow: 0 0 15px rgba(76, 175, 80, 0.8), 0 0 25px rgba(76, 175, 80, 0.4);
-          border-color: rgba(76, 175, 80, 0.6);
+          box-shadow: 0 0 15px rgba(33, 150, 243, 0.8), 0 0 25px rgba(33, 150, 243, 0.5);
+          border-color: rgba(33, 150, 243, 0.7);
         }
       }
+
+      // Synchronized blue glow hover animation for badge
+      @keyframes synchronizedBlueGlowHover {
+        0%, 100% {
+          box-shadow: 0 0 6px rgba(33, 150, 243, 0.6), 0 0 12px rgba(33, 150, 243, 0.4);
+          border-color: rgba(33, 150, 243, 0.5);
+        }
+        50% {
+          box-shadow: 0 0 18px rgba(33, 150, 243, 1.0), 0 0 30px rgba(33, 150, 243, 0.7);
+          border-color: rgba(33, 150, 243, 0.9);
+        }
+      }
+
+      // Synchronized green glow for rating panel (same timing as blue panels)
+      @keyframes synchronizedGreenGlow {
+        0%, 100% {
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 8px rgba(76, 175, 80, 0.4);
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+        50% {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 20px rgba(76, 175, 80, 0.8);
+          border-color: rgba(76, 175, 80, 0.7);
+        }
+      }
+
 
       .panel-header {
         display: flex;
         align-items: center;
-        padding: 12px 16px;
+        padding: 8px 12px; // Reduced padding from 12px 16px to 8px 12px
         background: #fafafa;
         border-bottom: 1px solid transparent;
         transition: all 0.3s ease;
+        min-height: 44px; // Explicit min-height instead of relying on padding
 
         &:hover {
           background: #f5f5f5;
@@ -526,15 +849,39 @@ interface RatingGateViewModel {
       }
 
       .info-badge {
-        margin-right: 12px;
-        width: 36px;
-        height: 36px;
+        margin-right: 10px; // Reduced from 12px
+        width: 32px; // Reduced from 36px
+        height: 32px; // Reduced from 36px
+        background-color: rgba(33, 150, 243, 0.1) !important; // Blue background
+        border: 1px solid rgba(33, 150, 243, 0.3);
+        transition: all 0.3s ease;
 
         mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
+          font-size: 16px; // Reduced from 18px
+          width: 16px; // Reduced from 18px
+          height: 16px; // Reduced from 18px
+          color: #2196f3 !important; // Blue icon color
         }
+
+        // Default no animation
+        animation: none;
+      }
+      
+      // Badge glows when panel is collapsed
+      .available-ratings-panel:not(.expanded) .info-badge {
+        animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+
+        &:hover {
+          background-color: rgba(33, 150, 243, 0.15) !important;
+          border-color: rgba(33, 150, 243, 0.5);
+          animation: synchronizedBlueGlowHover 1.5s ease-in-out infinite;
+        }
+      }
+
+      // Normal hover state when panel is expanded
+      .info-badge:hover {
+        background-color: rgba(33, 150, 243, 0.15) !important;
+        border-color: rgba(33, 150, 243, 0.5);
       }
 
       .panel-title {
@@ -573,32 +920,32 @@ interface RatingGateViewModel {
       }
 
       .panel-content {
-        padding: 16px;
+        padding: 12px; // Reduced from 16px
         background: #fff;
 
         .vote-stats {
           display: flex;
           flex-direction: column;
-          gap: 12px;
+          gap: 8px; // Reduced from 12px
         }
 
         .vote-count-display {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px; // Reduced from 8px
         }
 
         .vote-progress-container {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 8px; // Reduced from 12px
         }
 
         .vote-progress-bar {
           flex: 1;
-          height: 8px;
+          height: 6px; // Reduced from 8px
           background: #f0f0f0;
-          border-radius: 4px;
+          border-radius: 3px; // Reduced from 4px
           overflow: hidden;
         }
 
@@ -610,19 +957,19 @@ interface RatingGateViewModel {
 
         .vote-percentage {
           font-weight: 600;
-          font-size: 12px;
+          font-size: 11px; // Reduced from 12px
           color: #666;
-          min-width: 40px;
+          min-width: 35px; // Reduced from 40px
           text-align: right;
         }
 
         .vote-status {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 13px;
+          gap: 6px; // Reduced from 8px
+          padding: 6px 10px; // Reduced from 8px 12px
+          border-radius: 6px; // Reduced from 8px
+          font-size: 12px; // Reduced from 13px
           font-weight: 500;
 
           &.can-vote {
@@ -636,9 +983,228 @@ interface RatingGateViewModel {
           }
 
           mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
+            font-size: 14px; // Reduced from 16px
+            width: 14px; // Reduced from 16px
+            height: 14px; // Reduced from 16px
+          }
+        }
+      }
+
+      // Vote Reset Actions
+      .vote-reset-actions {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e0e0;
+
+        .reset-section {
+          text-align: center;
+        }
+
+        .reset-info {
+          font-size: 12px;
+          color: #666;
+          margin-bottom: 8px;
+          font-weight: 500;
+        }
+
+        .reset-buttons {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+
+          button {
+            font-size: 11px;
+            padding: 4px 8px;
+            height: 28px;
+            min-width: 90px;
+            border-radius: 4px;
+
+            mat-icon {
+              font-size: 14px;
+              width: 14px;
+              height: 14px;
+              margin-right: 4px;
+            }
+
+            span {
+              font-size: 11px;
+            }
+
+            &:disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+            }
+
+            mat-spinner {
+              margin-right: 4px;
+            }
+          }
+
+          // Specific button colors
+          button[color="primary"] {
+            border-color: #1976d2;
+            color: #1976d2;
+
+            &:hover:not(:disabled) {
+              background-color: rgba(25, 118, 210, 0.04);
+              border-color: #1565c0;
+            }
+          }
+
+          button[color="warn"] {
+            border-color: #d32f2f;
+            color: #d32f2f;
+
+            &:hover:not(:disabled) {
+              background-color: rgba(211, 47, 47, 0.04);
+              border-color: #c62828;
+            }
+          }
+        }
+      }
+
+      // Discussion Panel Styles with Synchronized Blue Glow
+      .discussion-panel {
+        margin: 1rem 0;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fff;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
+
+        // Synchronized blue pulsing glow effect when collapsed
+        &:not(.expanded) {
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
+        }
+
+        // When expanded, remove animation and allow full height
+        &.expanded {
+          animation: none;
+          border-color: #e0e0e0;
+          max-height: none;
+          cursor: default;
+
+          .expand-icon {
+            transform: rotate(180deg);
+          }
+        }
+
+        &:hover {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .panel-header {
+          display: flex;
+          align-items: center;
+          padding: 12px 16px;
+          background: #fafafa;
+          border-bottom: 1px solid transparent;
+          transition: all 0.3s ease;
+          cursor: pointer;
+
+          &:hover {
+            background: #f5f5f5;
+          }
+
+          .discussion-panel.expanded & {
+            border-bottom-color: #e0e0e0;
+          }
+
+          .discussion-icon {
+            color: #1976d2;
+            margin-right: 12px;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+
+          .panel-title {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+          }
+
+          .discussion-stats {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 12px;
+            color: #666;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(25, 118, 210, 0.1);
+            
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+              color: #1976d2;
+            }
+          }
+
+          .expand-icon {
+            transition: transform 0.3s ease;
+            color: #666;
+
+            &.rotated {
+              transform: rotate(180deg);
+            }
+          }
+        }
+
+        .collapsed-preview {
+          padding: 8px 16px 12px 16px;
+          background: #f8f9fa;
+          border-top: 1px solid #e0e0e0;
+
+          .preview-content {
+            .top-comment {
+              display: flex;
+              align-items: flex-start;
+              gap: 8px;
+              
+              mat-icon {
+                color: #ffc107;
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                margin-top: 2px;
+                flex-shrink: 0;
+              }
+              
+              .preview-text {
+                flex: 1;
+                color: #555;
+                font-size: 13px;
+                font-style: italic;
+                line-height: 1.4;
+                margin-right: 8px;
+              }
+              
+              .vote-count {
+                color: #4caf50;
+                font-weight: 600;
+                font-size: 12px;
+                background: rgba(76, 175, 80, 0.1);
+                padding: 2px 6px;
+                border-radius: 10px;
+                flex-shrink: 0;
+              }
+            }
+          }
+        }
+
+        .panel-content {
+          padding: 0;
+          background: #fff;
+
+          .discussion-content-wrapper {
+            // Remove any default margins/padding from discussion thread
+            padding: 16px;
           }
         }
       }
@@ -667,6 +1233,49 @@ interface RatingGateViewModel {
             padding: 12px;
           }
         }
+
+        .discussion-panel {
+          margin: 0.5rem 0;
+
+          .panel-header {
+            padding: 10px 12px;
+
+            .panel-title {
+              font-size: 13px;
+            }
+
+            .discussion-stats {
+              font-size: 12px;
+              padding: 3px 6px;
+              
+              mat-icon {
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+              }
+            }
+          }
+
+          .collapsed-preview {
+            padding: 8px 12px 10px 12px;
+
+            .top-comment {
+              .preview-text {
+                font-size: 12px;
+              }
+
+              .vote-count {
+                font-size: 11px;
+              }
+            }
+          }
+
+          .panel-content {
+            .discussion-content-wrapper {
+              padding: 12px;
+            }
+          }
+        }
       }
 
       // Required Evaluation Panel Styles (Main Panel)
@@ -678,10 +1287,10 @@ interface RatingGateViewModel {
         background: #fff;
         transition: all 0.3s ease;
 
-        // Blue glow effect when collapsed
+        // Synchronized blue glow effect when collapsed
         &:not(.mat-expanded) {
-          animation: requiredEvaluationPulse 1.5s ease-in-out infinite;
-          border-color: #2196f3;
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
         // When expanded, remove the glow animation but keep blue border
@@ -724,36 +1333,9 @@ interface RatingGateViewModel {
         }
       }
 
-      // Required Evaluation Panel Pulse Animation
-      @keyframes requiredEvaluationPulse {
-        0%, 100% {
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 8px rgba(33, 150, 243, 0.4);
-        }
-        50% {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 25px rgba(33, 150, 243, 0.8);
-        }
-      }
 
 
-      // Shared Panel Pulse Animation (used by main panel and comment input panel)
-      @keyframes mainPanelPulse {
-        0%, 100% {
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 5px rgba(33, 150, 243, 0.3);
-        }
-        50% {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 20px rgba(33, 150, 243, 0.6);
-        }
-      }
 
-      // Instructions Panel Pulse Animation (darker and 50% more intense)
-      @keyframes instructionsPanelPulse {
-        0%, 100% {
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 3px rgba(25, 118, 210, 0.4);
-        }
-        50% {
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 9px rgba(25, 118, 210, 0.7);
-        }
-      }
 
       // Nested Instructions Panel Styles
       .instructions-panel {
@@ -764,10 +1346,10 @@ interface RatingGateViewModel {
         background: #fafafa;
         transition: all 0.3s ease;
 
-        // Blue glow animation when collapsed (darker and more intense)
+        // Synchronized blue glow animation when collapsed
         &:not(.mat-expanded) {
-          animation: instructionsPanelPulse 1s ease-in-out infinite;
-          border-color: #1976d2;
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
         // When expanded, remove animation
@@ -792,13 +1374,13 @@ interface RatingGateViewModel {
 
         .instructions {
           padding: 12px 16px;
-          
+
           .instruction-list {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
           }
-          
+
           .instruction-item {
             display: flex;
             align-items: center;
@@ -806,11 +1388,11 @@ interface RatingGateViewModel {
             padding: 0.5rem;
             border-radius: 4px;
             transition: background 0.2s ease;
-            
+
             &:hover {
               background: rgba(33, 150, 243, 0.05);
             }
-            
+
             .instruction-bullet {
               color: #2196f3;
               font-size: 1.25rem;
@@ -818,7 +1400,7 @@ interface RatingGateViewModel {
               height: 1.25rem;
               flex-shrink: 0;
             }
-            
+
             span {
               color: #555;
               line-height: 1.4;
@@ -837,10 +1419,10 @@ interface RatingGateViewModel {
         background: #fff;
         transition: all 0.3s ease;
 
-        // Same glow effect as main panel when collapsed
+        // Synchronized blue glow effect when collapsed
         &:not(.mat-expanded) {
-          animation: mainPanelPulse 1s ease-in-out infinite;
-          border-color: #2196f3;
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
         // When expanded, remove the glow animation but keep blue border
@@ -944,12 +1526,18 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   private isSubmittingInitialComment = false;
 
   /**
+   * State for tracking vote reset operations
+   */
+  isResettingVotes = false;
+
+  /**
    * LocalStorage keys for remembering expansion states
    */
   private readonly EXPANSION_STORAGE_KEY = 'rating_gate_instructions_expanded';
   private readonly MAIN_PANEL_STORAGE_KEY = 'rating_gate_required_evaluation_expanded';
   private readonly COMMENT_INPUT_STORAGE_KEY = 'rating_gate_comment_input_expanded';
   private readonly RATINGS_PANEL_STORAGE_KEY = 'rating_gate_ratings_panel_expanded';
+  private readonly DISCUSSION_PANEL_STORAGE_KEY = 'rating_gate_discussion_panel_expanded';
 
   /**
    * State for expansion panels - loads from localStorage
@@ -959,6 +1547,13 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   mainPanelExpanded = this.loadMainPanelStateCollapsed();
   commentInputExpanded = this.loadCommentInputState();
   isRatingsExpanded = this.loadRatingsPanelState();
+  isDiscussionExpanded = this.loadDiscussionPanelState();
+
+  /**
+   * State for rating slider expansion panel
+   */
+  isRatingSliderExpanded = false;
+  showRatingReset = false;
 
 
   /**
@@ -1022,6 +1617,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     private readonly evaluationService: EvaluationDiscussionService,
     private readonly stateService: EvaluationStateService,
     private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
   ) {
     super();
 
@@ -1231,6 +1827,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    *
    * @description Called when the user submits a rating through the rating slider.
    * Now forwards to parent component which handles centralized state updates.
+   * Auto-collapses the rating panel after submission.
    *
    * @param {any} ratingEvent - The rating event from the rating slider
    */
@@ -1239,6 +1836,10 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       categoryId: this.currentCategory.id,
       rating: ratingEvent.rating || ratingEvent.score,
     });
+
+    // Auto-collapse the rating panel after submission
+    this.isRatingSliderExpanded = false;
+    this.showRatingReset = false;
 
     // Emit the rating submitted event to parent component
     // The parent will handle the centralized state update
@@ -1505,5 +2106,190 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     };
   }
 
+  /**
+   * Handles rating reset button click
+   *
+   * @description Opens the rating panel and switches to reset mode
+   */
+  onResetRatingSlider(): void {
+    this.showRatingReset = true;
+    this.isRatingSliderExpanded = true;
+  }
 
+  /**
+   * Handles cancel rating reset
+   *
+   * @description Closes reset mode and collapses the panel
+   */
+  onCancelRatingReset(): void {
+    this.showRatingReset = false;
+    this.isRatingSliderExpanded = false;
+  }
+
+  /**
+   * Resets user votes in the current category
+   *
+   * @param voteType - The type of votes to reset ('UP' or 'DOWN')
+   */
+  resetVotes(voteType: 'UP' | 'DOWN'): void {
+    if (!this.submissionId || this.isResettingVotes) {
+      return;
+    }
+
+    console.log('🔄 Resetting votes from rating gate:', {
+      voteType,
+      categoryId: this.currentCategory.id,
+      submissionId: this.submissionId
+    });
+
+    // Set loading state
+    this.isResettingVotes = true;
+
+    // Call the state service to reset votes
+    this.stateService.resetCategoryVotes(
+      this.submissionId,
+      this.currentCategory.id,
+      voteType
+    ).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (response) => {
+        console.log('✅ Vote reset successful:', response);
+
+        // Show success snackbar with appropriate color
+        const voteTypeText = voteType === 'UP' ? 'Positive' : 'Negative';
+        const snackBarClass = voteType === 'UP' ? 'success-snackbar' : 'warn-snackbar';
+
+        this.snackBar.open(
+          `${voteTypeText} Bewertungen zurückgesetzt (${response.resetCount})`,
+          'OK',
+          {
+            duration: 4000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: [snackBarClass]
+          }
+        );
+
+        // Reset loading state
+        this.isResettingVotes = false;
+      },
+      error: (error) => {
+        console.error('❌ Vote reset failed:', error);
+
+        // Show error snackbar
+        this.snackBar.open(
+          'Fehler beim Zurücksetzen der Bewertungen',
+          'OK',
+          {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          }
+        );
+
+        // Reset loading state
+        this.isResettingVotes = false;
+      }
+    });
+  }
+
+  /**
+   * Loads discussion panel expansion state from localStorage
+   *
+   * @returns boolean indicating if discussion panel should be expanded
+   */
+  private loadDiscussionPanelState(): boolean {
+    try {
+      const stored = localStorage.getItem(this.DISCUSSION_PANEL_STORAGE_KEY);
+      return stored ? stored === 'true' : false; // Default to collapsed
+    } catch (error) {
+      console.warn('Failed to load discussion panel expansion state from localStorage:', error);
+      return false; // Default to collapsed
+    }
+  }
+
+  /**
+   * Toggles the discussion panel expanded state
+   */
+  toggleDiscussionPanel(): void {
+    this.isDiscussionExpanded = !this.isDiscussionExpanded;
+
+    try {
+      localStorage.setItem(this.DISCUSSION_PANEL_STORAGE_KEY, String(this.isDiscussionExpanded));
+      console.log('📝 Discussion panel expansion state saved:', this.isDiscussionExpanded);
+    } catch (error) {
+      console.warn('Failed to save discussion panel expansion state to localStorage:', error);
+    }
+  }
+
+  /**
+   * Checks if there are any discussions available
+   *
+   * @returns boolean indicating if discussions exist
+   */
+  hasDiscussions(): boolean {
+    return this.discussions && this.discussions.length > 0;
+  }
+
+  /**
+   * Gets the total count of comments across all discussions
+   *
+   * @returns number of total comments
+   */
+  getTotalCommentCount(): number {
+    if (!this.discussions || this.discussions.length === 0) {
+      return 0;
+    }
+
+    return this.discussions.reduce((total, discussion) => {
+      const commentsCount = discussion.comments ? discussion.comments.length : 0;
+      const repliesCount = discussion.comments 
+        ? discussion.comments.reduce((repliesSum, comment) => {
+            return repliesSum + (comment.replies ? comment.replies.length : 0);
+          }, 0)
+        : 0;
+      return total + commentsCount + repliesCount;
+    }, 0);
+  }
+
+  /**
+   * Gets the top-rated comment for preview display
+   *
+   * @returns the comment with highest upvotes or null
+   */
+  getTopComment(): any | null {
+    if (!this.discussions || this.discussions.length === 0) {
+      return null;
+    }
+
+    let topComment = null;
+    let maxUpvotes = 0; // Start at 0, only show comments with actual upvotes
+
+    this.discussions.forEach(discussion => {
+      if (discussion.comments) {
+        discussion.comments.forEach(comment => {
+          const upvotes = comment.voteStats?.upVotes || 0;
+          if (upvotes > maxUpvotes) {
+            maxUpvotes = upvotes;
+            topComment = comment;
+          }
+
+          // Check replies too
+          if (comment.replies) {
+            comment.replies.forEach(reply => {
+              const replyUpvotes = reply.voteStats?.upVotes || 0;
+              if (replyUpvotes > maxUpvotes) {
+                maxUpvotes = replyUpvotes;
+                topComment = reply;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    return topComment;
+  }
 }

@@ -48,7 +48,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   @Input() categoryName: string = '';
   @Input() currentRating: EvaluationRatingDTO | null = null;
   @Input() minValue: number = 1;
-  @Input() maxValue: number = 10;
+  @Input() maxValue: number = 15;
   @Input() step: number = 1;
   @Input() disabled: boolean = false;
   @Input() showLabels: boolean = true;
@@ -180,30 +180,6 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   // EVENT HANDLERS
   // =============================================================================
 
-  /**
-   * Handles slider change events
-   * @param event - The input event from the slider
-   */
-  onSliderChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const value = Number(target.value);
-    this.hasUserInteracted = true; // Mark that user has manually interacted
-    
-    // Update current value immediately to prevent UI lag
-    this.currentValue = value;
-    
-    // Use setValue instead of patchValue for more consistent updates
-    this.ratingForm.get('rating')?.setValue(value, { emitEvent: false });
-    
-    // Manually trigger change detection
-    this.cdr.markForCheck();
-    
-    // Emit the change event manually
-    this.ratingChanged.emit({
-      categoryId: this.categoryId,
-      score: value
-    });
-  }
 
   onSubmitRating(): void {
     if (!this.disabled && this.isModified) {
@@ -242,7 +218,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     this.currentValue = value;
     
     // Force change detection for OnPush components
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
     
     console.log('📊 Quick rating completed:', { 
       selectedValue: value, 
@@ -263,13 +239,18 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
       1: 'Sehr schlecht',
       2: 'Schlecht',
       3: 'Mangelhaft',
-      4: 'Ausreichend',
-      5: 'Befriedigend',
-      6: 'Befriedigend+',
-      7: 'Gut',
-      8: 'Gut+',
-      9: 'Sehr gut',
-      10: 'Ausgezeichnet'
+      4: 'Mangelhaft+',
+      5: 'Ausreichend',
+      6: 'Ausreichend+',
+      7: 'Befriedigend',
+      8: 'Befriedigend+',
+      9: 'Gut',
+      10: 'Gut+',
+      11: 'Sehr gut',
+      12: 'Sehr gut+',
+      13: 'Ausgezeichnet',
+      14: 'Hervorragend',
+      15: 'Perfekt'
     };
 
     return descriptions[this.currentValue] || 'Unbewertet';
@@ -362,10 +343,10 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
    */
   getQuickRatingOptions(): Array<{ value: number; label: string; icon: string }> {
     return [
-      { value: 2, label: 'Schlecht', icon: 'thumb_down' },
-      { value: 5, label: 'Mittel', icon: 'horizontal_rule' },
-      { value: 8, label: 'Gut', icon: 'thumb_up' },
-      { value: 10, label: 'Perfekt', icon: 'star' }
+      { value: 3, label: 'Schlecht', icon: 'thumb_down' },
+      { value: 8, label: 'Mittel', icon: 'horizontal_rule' },
+      { value: 12, label: 'Gut', icon: 'thumb_up' },
+      { value: 15, label: 'Perfekt', icon: 'star' }
     ];
   }
 

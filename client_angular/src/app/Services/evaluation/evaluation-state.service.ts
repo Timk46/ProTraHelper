@@ -1536,6 +1536,40 @@ export class EvaluationStateService {
     );
   }
 
+  /**
+   * Clears the rating for a specific category (removes it from the state)
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID to clear the rating for
+   */
+  clearCategoryRating(submissionId: string, categoryId: number): void {
+    console.log('🔄 Clearing rating for category:', { submissionId, categoryId });
+    
+    // Clear from category rating status map
+    const currentStatusMap = new Map(this.categoryRatingStatusSubject.value);
+    currentStatusMap.delete(categoryId);
+    this.categoryRatingStatusSubject.next(currentStatusMap);
+    
+    // Clear from ratings array
+    const currentRatings = this.ratingsSubject.value;
+    const updatedRatings = currentRatings.filter(r => r.categoryId !== categoryId);
+    this.ratingsSubject.next(updatedRatings);
+    
+    // Clear rating stats cache
+    const ratingStatsSubject = this.ratingStatsCache.get(categoryId);
+    if (ratingStatsSubject) {
+      ratingStatsSubject.next({
+        submissionId,
+        categoryId: categoryId,
+        averageScore: 0,
+        totalRatings: 0,
+        scoreDistribution: [],
+        userHasRated: false,
+      });
+    }
+    
+    console.log('✅ Rating cleared successfully for category:', categoryId);
+  }
+
   // =============================================================================
   // PHASE MANAGEMENT
   // =============================================================================
@@ -2154,6 +2188,51 @@ export class EvaluationStateService {
         // Rollback optimistic update on error
         this.optimisticVoteLimitUpdate(categoryId, Number(commentId), voteType === null);
         console.error('Failed to vote with enhanced limits:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Resets user votes in a specific category and refreshes the UI state
+   * 
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param voteType - The type of votes to reset ('UP', 'DOWN', or 'ALL')
+   * @returns Observable with reset result
+   */
+  resetCategoryVotes(
+    submissionId: string,
+    categoryId: number,
+    voteType: 'UP' | 'DOWN' | 'ALL'
+  ): Observable<any> {
+    console.log('🔄 State service: Resetting category votes:', { submissionId, categoryId, voteType });
+
+    return this.evaluationService.resetVotes(submissionId, categoryId, voteType).pipe(
+      tap(response => {
+        console.log('✅ Vote reset successful in state service:', response);
+
+        // Update vote limit status with the new status from backend
+        if (response.voteLimitStatus) {
+          this.updateVoteLimitStatus(categoryId, response.voteLimitStatus);
+          console.log('📊 Updated vote limit status:', response.voteLimitStatus);
+        }
+
+        // Refresh discussions to show updated vote counts on comments
+        this.loadDiscussionsForCategory(submissionId, categoryId);
+        console.log('🔄 Refreshed discussions for category:', categoryId);
+
+        // Trigger vote limit status refresh for immediate UI update
+        const anonymousUser = this.anonymousUserSubject.value;
+        if (anonymousUser) {
+          this.loadVoteLimitStatus(submissionId, categoryId).subscribe({
+            next: () => console.log('🎯 Vote limit status refreshed after reset'),
+            error: (error) => console.error('❌ Failed to refresh vote limit status:', error)
+          });
+        }
+      }),
+      catchError(error => {
+        console.error('❌ State service: Vote reset failed:', error);
         throw error;
       })
     );

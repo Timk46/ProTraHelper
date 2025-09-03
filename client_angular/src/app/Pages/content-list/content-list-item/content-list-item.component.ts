@@ -92,6 +92,14 @@ export class ContentListItemComponent implements OnInit {
       case questionType.SINGLECHOICE:
         return 'Single Choice';
       case questionType.MCSLIDER:
+        // Use group size if available (from the grouping logic)
+        if (this.contentElementData.mcSliderGroupSize) {
+          return this.contentElementData.mcSliderGroupSize > 1 
+            ? `MC Slider Quiz (${this.contentElementData.mcSliderGroupSize} Fragen)` 
+            : 'MC Slider Quiz';
+        }
+        
+        // Fallback to old logic for compatibility
         const mcSliderCount = this.getAllMCSliderQuestions().length;
         return mcSliderCount > 1 ? `MC Slider Quiz (${mcSliderCount} Fragen)` : 'MC Slider Quiz';
       case questionType.FREETEXT:
@@ -447,10 +455,39 @@ export class ContentListItemComponent implements OnInit {
   }
 
   /**
-   * Holt alle MCSlider-Fragen aus der aktuellen Inhaltsliste
+   * Holt alle MCSlider-Fragen aus der aktuellen Inhaltsliste für die gleiche Gruppe
    * Sortiert nach Position um korrekte Reihenfolge sicherzustellen
    */
   private getAllMCSliderQuestions(): any[] {
+    // If we have a group key, filter by the same group
+    if (this.contentElementData.mcSliderGroupKey) {
+      const targetGroupKey = this.contentElementData.mcSliderGroupKey;
+      
+      return this.allContentElements
+        .filter(element => {
+          if (element.question?.type !== questionType.MCSLIDER) return false;
+          if (!element.question?.name) return false;
+          
+          // Determine group key for this element
+          let elementGroupKey = 'MCSlider: Komplettquiz'; // Default: alle gehen ins Komplettquiz
+          if (element.question.name.includes('Strukturmechanik')) {
+            elementGroupKey = 'MCSlider: Strukturmechanik';
+          }
+          // Alle anderen MCSlider-Fragen (Standard, Geografie, Mathematik, etc.) gehen ins Komplettquiz
+          
+          return elementGroupKey === targetGroupKey;
+        })
+        .sort((a, b) => {
+          // Sortiere nach positionInSpecificContentView oder ID als Fallback
+          const posA = a.positionInSpecificContentView || a.id || 0;
+          const posB = b.positionInSpecificContentView || b.id || 0;
+          return posA - posB;
+        })
+        .map(element => element.question)
+        .filter(question => question != null);
+    }
+    
+    // Fallback to old logic for compatibility
     return this.allContentElements
       .filter(element => element.question?.type === questionType.MCSLIDER)
       .sort((a, b) => {
@@ -468,6 +505,12 @@ export class ContentListItemComponent implements OnInit {
    */
   getMCSliderGroupTitle(): string {
     if (this.contentElementData.question?.type === questionType.MCSLIDER) {
+      // Use the group key if available (from the grouping logic)
+      if (this.contentElementData.mcSliderGroupKey) {
+        return this.contentElementData.mcSliderGroupKey;
+      }
+      
+      // Fallback to old logic for compatibility
       const mcSliderCount = this.getAllMCSliderQuestions().length;
       if (mcSliderCount > 1) {
         return `MCSlider: Komplettquiz`;

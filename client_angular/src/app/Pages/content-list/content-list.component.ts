@@ -162,7 +162,7 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   /**
    * Filters and returns the content elements of type QUESTION from the given content.
-   * Groups MCSlider questions into a single panel to avoid multiple panels for the same quiz.
+   * Groups MCSlider questions by their name prefix to create separate quiz groups.
    *
    * @param {ContentDTO} content - The content object containing content elements.
    * @returns {ContentElement[]} An array of content elements that are of type QUESTION.
@@ -170,13 +170,44 @@ export class ContentListComponent implements OnInit, OnChanges {
   getQuestions(content: ContentDTO): ContentElementDTO[] {
     const questions = content.contentElements.filter(element => element.type === contentElementType.QUESTION);
     
-    // Gruppiere MCSlider-Fragen: Nur die erste MCSlider-Frage anzeigen
+    // Gruppiere MCSlider-Fragen nach Name-Präfix
     const mcSliderQuestions = questions.filter(q => q.question?.type === questionType.MCSLIDER);
     const otherQuestions = questions.filter(q => q.question?.type !== questionType.MCSLIDER);
     
     if (mcSliderQuestions.length > 0) {
-      // Nur die erste MCSlider-Frage behalten, sie repräsentiert alle
-      return [...otherQuestions, mcSliderQuestions[0]];
+      // Gruppiere MCSlider-Fragen nach Präfixen
+      const groups = new Map<string, ContentElementDTO[]>();
+      
+      mcSliderQuestions.forEach(question => {
+        if (!question.question?.name) return;
+        
+        // Erkenne verschiedene MCSlider-Gruppen basierend auf Namen
+        let groupKey = 'MCSlider: Komplettquiz'; // Default: alle gehen ins Komplettquiz
+        
+        if (question.question.name.includes('Strukturmechanik')) {
+          groupKey = 'MCSlider: Strukturmechanik';
+        }
+        // Alle anderen MCSlider-Fragen (Standard, Geografie, Mathematik, etc.) gehen ins Komplettquiz
+        
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, []);
+        }
+        groups.get(groupKey)!.push(question);
+      });
+      
+      // Für jede Gruppe nur die erste Frage als Repräsentant nehmen
+      const groupRepresentatives: ContentElementDTO[] = [];
+      groups.forEach((groupQuestions, groupKey) => {
+        if (groupQuestions.length > 0) {
+          const representative = groupQuestions[0];
+          // Setze eine spezielle Markierung für die Gruppierung
+          representative.mcSliderGroupKey = groupKey;
+          representative.mcSliderGroupSize = groupQuestions.length;
+          groupRepresentatives.push(representative);
+        }
+      });
+      
+      return [...otherQuestions, ...groupRepresentatives];
     }
     
     return questions;

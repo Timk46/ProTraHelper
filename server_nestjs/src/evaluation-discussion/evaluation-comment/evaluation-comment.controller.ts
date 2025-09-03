@@ -8,7 +8,9 @@ import {
   EvaluationCommentDTO, 
   UserVoteResponseDTO,
   VoteLimitStatusDTO,
-  VoteLimitResponseDTO 
+  VoteLimitResponseDTO,
+  ResetVotesDTO,
+  ResetVotesResponseDTO
 } from '@DTOs/index';
 import { CreateEvaluationCommentDTO, UpdateEvaluationCommentDTO } from '@DTOs/index';
 
@@ -78,6 +80,28 @@ export class EvaluationCommentController {
     @GetUser() user: User,
   ): Promise<VoteLimitResponseDTO> {
     return this.evaluationCommentService.voteWithLimitCheck(id, body.voteType, user.id);
+  }
+
+  @Delete('votes/reset')
+  @roles('ANY')
+  async resetVotes(
+    @Body() resetVotesDto: ResetVotesDTO,
+    @GetUser() user: User,
+  ): Promise<ResetVotesResponseDTO> {
+    const result = await this.evaluationCommentService.resetUserVotes(
+      user.id,
+      resetVotesDto.submissionId,
+      resetVotesDto.categoryId,
+      resetVotesDto.voteType
+    );
+
+    return {
+      success: result.success,
+      resetCount: result.resetCount,
+      voteLimitStatus: result.voteLimitStatus,
+      message: `Successfully reset ${result.resetCount} ${resetVotesDto.voteType.toLowerCase()} vote(s) in category ${resetVotesDto.categoryId}`,
+      affectedCommentIds: result.affectedCommentIds
+    };
   }
 
   @Put(':id')

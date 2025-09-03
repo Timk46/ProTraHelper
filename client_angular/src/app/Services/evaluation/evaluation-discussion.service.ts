@@ -37,6 +37,8 @@ import {
   UserVoteResponseDTO,
   VoteLimitStatusDTO,
   VoteLimitResponseDTO,
+  ResetVotesDTO,
+  ResetVotesResponseDTO,
 } from '@DTOs/index';
 
 @Injectable({
@@ -543,6 +545,34 @@ export class EvaluationDiscussionService {
     return this.http.post<VoteLimitResponseDTO>(url, body).pipe(
       retry(2),
       catchError(this.handleError<VoteLimitResponseDTO>('voteCommentWithLimits'))
+    );
+  }
+
+  /**
+   * Resets user votes in a specific category
+   * 
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param voteType - The type of votes to reset ('UP', 'DOWN', or 'ALL')
+   * @returns Observable containing reset result and updated vote limit status
+   */
+  resetVotes(submissionId: string, categoryId: number, voteType: 'UP' | 'DOWN' | 'ALL'): Observable<ResetVotesResponseDTO> {
+    const url = `${this.apiUrls.comments}/votes/reset`;
+    const body: ResetVotesDTO = { submissionId, categoryId, voteType };
+    
+    console.log('🔄 Resetting votes via frontend service:', { submissionId, categoryId, voteType });
+    
+    return this.http.delete<ResetVotesResponseDTO>(url, { body }).pipe(
+      retry(2),
+      tap(response => {
+        console.log('✅ Vote reset successful:', {
+          resetCount: response.resetCount,
+          voteType,
+          categoryId,
+          voteLimitStatus: response.voteLimitStatus
+        });
+      }),
+      catchError(this.handleError<ResetVotesResponseDTO>('resetVotes'))
     );
   }
 
