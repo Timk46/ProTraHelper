@@ -24,6 +24,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 
 // Services
@@ -46,7 +47,8 @@ import { EvaluationCommentDTO, AnonymousEvaluationUserDTO, VoteType } from '@DTO
     MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatIconModule
   ],
   templateUrl: './comment-item.component.html',
   styleUrl: './comment-item.component.scss',
@@ -106,6 +108,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   userVoteStatus$ = this._userVoteStatusCache.asObservable();
   userVoteLoading$ = this._userVoteLoadingState.asObservable();
   
+  // 🚀 LOCAL VOTE TRACKING: Track actual number of votes given to this comment
+  private localVoteCount: number = 0;
+  
   // Public getters for templates (avoid function calls)
   get cachedUserVote(): VoteType | null { return this._cachedUserVote; }
   get cachedIsCurrentUser(): boolean { return this._cachedIsCurrentUser; }
@@ -147,6 +152,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     
     // 🚀 PHASE 3: Initialize async vote status loading
     this.loadUserVoteStatus();
+    
+    // 🚀 LOCAL VOTE TRACKING: Initialize local vote count
+    this.initializeLocalVoteCount();
     
     // 🚀 PHASE 4: Listen to vote completion events for cache synchronization
     this.setupVoteEventListeners();
@@ -360,6 +368,36 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
+   * Initializes local vote count by loading from backend
+   */
+  private initializeLocalVoteCount(): void {
+    if (!this.anonymousUser) {
+      this.localVoteCount = 0;
+      return;
+    }
+
+    // Try to get vote count from backend
+    this.evaluationStateService
+      .evaluationService
+      .getUserVoteCountForComment(this.comment.id)
+      .pipe(
+        catchError(() => {
+          // Fallback: use legacy vote status (0 or 1)
+          return of(this._cachedUserVote === 'UP' ? 1 : 0);
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((count: number) => {
+        this.localVoteCount = count;
+        this.cdr.markForCheck();
+        console.log('🔢 Initialized local vote count:', {
+          commentId: this.comment.id,
+          voteCount: this.localVoteCount
+        });
+      });
+  }
+
+  /**
    * 🚀 PHASE 4: Setup vote event listeners for cache synchronization
    */
   private setupVoteEventListeners(): void {
@@ -476,59 +514,88 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // EVENT HANDLERS
   // =============================================================================
 
-  onVote(voteType: VoteType): void {
-    if (!this.canVote || this.isVoting) {
+  /**
+   * Adds a single vote to the comment
+   */
+  addVote(): void {
+    if (!this.canVote || this.isVoting || this.cachedIsCurrentUser) {
       return;
     }
 
-    // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
+    // Check if user can add more votes
+    if (!this.canAddMoreVotes()) {
+      console.log('❌ Cannot add vote - limit exceeded');
+      this.showVoteLimitWarning();
+      return;
+    }
+
+    // 🚀 Trigger haptic feedback for mobile devices
     this.triggerHapticFeedback('light');
-
-    // Ranking system: Only allow UP votes or null to remove
-    if (voteType !== 'UP' && voteType !== null) {
-      console.log('❌ Invalid vote type for ranking system:', voteType);
-      return;
-    }
-
-    // Multiple votes logic: Each click adds a vote (with limits)
-    let newVote: VoteType;
     
-    if (voteType === null) {
-      // Remove one vote - only if user has votes to remove
-      if (this._cachedUserVote !== null) {
-        newVote = null;
-      } else {
-        console.log('❌ Cannot remove vote - user has not voted on this comment');
-        return;
-      }
-    } else if (voteType === 'UP') {
-      // Add one vote - check limits first
-      if (!this.canAddMoreVotes()) {
-        console.log('❌ Cannot add vote - limit exceeded');
-        this.showVoteLimitWarning();
-        return;
-      }
-      newVote = 'UP';
-    } else {
-      console.log('❌ Invalid vote type:', voteType);
-      return;
-    }
-    
-    console.log('🗳️ Multiple votes - ranking vote initiated:', {
+    console.log('➕ Adding vote:', {
       commentId: this.comment.id,
-      currentVote: this._cachedUserVote,
-      attemptedVote: voteType,
-      newVote,
+      currentVoteCount: this.getUserVoteCount(),
       availableVotes: this.availableVotes,
     });
 
-    // Optimistic update for immediate UI feedback using unified method
-    this.setVoteStatus(newVote, 'optimistic-update');
+    // Update local vote count
+    this.localVoteCount++;
+
+    // Optimistic update for immediate UI feedback
+    this.setVoteStatus('UP', 'optimistic-add-vote');
 
     this.voted.emit({
       commentId: this.comment.id,
-      voteType: voteType,
+      voteType: 'UP',
     });
+  }
+
+  /**
+   * Removes a single vote from the comment
+   */
+  removeVote(): void {
+    if (!this.canVote || this.isVoting || this.cachedIsCurrentUser) {
+      return;
+    }
+
+    // Check if user has votes to remove
+    if (this.getUserVoteCount() === 0) {
+      console.log('❌ Cannot remove vote - user has no votes on this comment');
+      return;
+    }
+
+    // 🚀 Trigger haptic feedback for mobile devices
+    this.triggerHapticFeedback('light');
+    
+    console.log('➖ Removing vote:', {
+      commentId: this.comment.id,
+      currentVoteCount: this.getUserVoteCount(),
+      availableVotes: this.availableVotes,
+    });
+
+    // Update local vote count
+    this.localVoteCount = Math.max(0, this.localVoteCount - 1);
+
+    // For removing votes, we pass null to indicate vote removal
+    // The backend will handle decrementing the user's vote count
+    this.voted.emit({
+      commentId: this.comment.id,
+      voteType: null,
+    });
+  }
+
+  /**
+   * Legacy method - kept for backward compatibility
+   * Now delegates to addVote() and removeVote() methods
+   */
+  onVote(voteType: VoteType): void {
+    if (voteType === 'UP') {
+      this.addVote();
+    } else if (voteType === null) {
+      this.removeVote();
+    } else {
+      console.log('❌ Invalid vote type for ranking system:', voteType);
+    }
   }
 
 
@@ -701,14 +768,13 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
   /**
    * Gets the number of votes the current user has given to this comment
-   * This will need to be enhanced when backend fully supports multiple votes
+   * Now uses local vote count tracking for accurate multiple votes
    */
   getUserVoteCount(): number {
     if (!this.anonymousUser) return 0;
     
-    // For now, simplified: if user has voted, count as 1
-    // This will be enhanced when backend provides actual vote counts
-    return this._cachedUserVote === 'UP' ? 1 : 0;
+    // Use local vote count for accurate tracking
+    return this.localVoteCount;
   }
 
   /**
@@ -754,6 +820,27 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     }
 
     return 'Positiv bewerten - Sie können bis zu 3 Votes pro Kommentar vergeben';
+  }
+
+  /**
+   * Gets tooltip text for remove vote button
+   */
+  getRemoveVoteTooltip(): string {
+    const currentVotes = this.getUserVoteCount();
+    
+    if (currentVotes === 0) {
+      return 'Keine Votes zum Entfernen vorhanden';
+    }
+    
+    if (this.cachedIsCurrentUser) {
+      return 'Sie können nicht für Ihren eigenen Kommentar stimmen';
+    }
+    
+    if (this.isVoting) {
+      return 'Vote wird verarbeitet...';
+    }
+    
+    return `Vote entfernen (aktuell: ${currentVotes}/3)`;
   }
 
   /**

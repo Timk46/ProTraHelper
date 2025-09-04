@@ -1061,8 +1061,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               data.voteType === 'UP'
                 ? 'positiv bewertet'
                 : 'Bewertung entfernt';
-
-            this.showSnackBar(`Kommentar ${action}`, 'OK', 2000, false);
+            
+            const isRemoval = data.voteType === null;
+            this.showSnackBar(
+              `Kommentar ${action}`, 
+              'OK', 
+              2000, 
+              isRemoval // Rot für Entfernung, Grün für Hinzufügen
+            );
           },
           error: error => {
             console.error('❌ Vote failed:', error);

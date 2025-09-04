@@ -42,30 +42,57 @@
        role="toolbar"
        [attr.aria-label]="'Comment actions for comment by ' + cachedAuthorDisplayName"
        [attr.aria-controls]="'comment-content-' + comment.id">
-    <!-- Plus Vote Button - Only for top-level comments (depth = 0) -->
-    <button
-      *ngIf="depth === 0"
-      class="vote-btn plus"
-      [ngClass]="{
-        voted: cachedUserVote === 'UP',
-        'multiple-votes': getUserVoteCount() > 1,
-        'disabled-limit': !canAddMoreVotes() && !cachedIsCurrentUser,
-        'max-reached': getUserVoteCount() >= 3
-      }"
-      [disabled]="cachedIsCurrentUser || isVoting || (!canAddMoreVotes() && !cachedIsCurrentUser)"
-      [matTooltip]="getEnhancedUpvoteTooltip()"
-      (click)="onVote('UP')"
-      type="button"
-      role="button"
-      [attr.aria-label]="getEnhancedUpvoteTooltip()"
-      [attr.aria-pressed]="cachedUserVote === 'UP'"
-      [attr.aria-describedby]="'vote-stats-' + comment.id"
-      [attr.data-vote-type]="'upvote'"
-      [attr.data-vote-count]="getUserVoteCount()"
-      [attr.data-vote-state]="cachedUserVote === 'UP' ? 'active' : 'inactive'">
-      <span aria-hidden="true" class="vote-symbol">+</span>
-      <span *ngIf="getUserVoteCount() > 0" class="vote-count-badge">{{ getUserVoteCount() }}</span>
-    </button>
+    <!-- Vote Control Widget - Only for top-level comments (depth = 0) -->
+    <div *ngIf="depth === 0 && !cachedIsCurrentUser" 
+         class="vote-controls"
+         role="group"
+         [attr.aria-label]="'Vote controls for comment by ' + cachedAuthorDisplayName">
+      
+      <!-- Minus Button (Remove Vote) -->
+      <button
+        class="vote-btn minus"
+        [disabled]="getUserVoteCount() === 0 || isVoting"
+        [matTooltip]="getRemoveVoteTooltip()"
+        (click)="removeVote()"
+        type="button"
+        role="button"
+        [attr.aria-label]="'Remove one vote (current: ' + getUserVoteCount() + '/3)'"
+        [attr.data-action]="'remove-vote'">
+        <mat-icon aria-hidden="true">remove</mat-icon>
+      </button>
+      
+      <!-- Vote Counter Display -->
+      <span class="vote-counter"
+            [attr.aria-label]="'You have given ' + getUserVoteCount() + ' out of 3 possible votes to this comment'">
+        <span class="current-votes">{{ getUserVoteCount() }}</span>
+        <span class="vote-separator">/</span>
+        <span class="max-votes">3</span>
+      </span>
+      
+      <!-- Plus Button (Add Vote) -->
+      <button
+        class="vote-btn plus"
+        [disabled]="!canAddMoreVotes() || isVoting"
+        [matTooltip]="getEnhancedUpvoteTooltip()"
+        (click)="addVote()"
+        type="button"
+        role="button"
+        [attr.aria-label]="'Add one vote (current: ' + getUserVoteCount() + '/3)'"
+        [attr.data-action]="'add-vote'">
+        <mat-icon aria-hidden="true">add</mat-icon>
+      </button>
+    </div>
+
+    <!-- Disabled State Message for Own Comments -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser" 
+         class="vote-controls disabled"
+         role="status"
+         aria-label="You cannot vote on your own comments">
+      <span class="own-comment-indicator">
+        <mat-icon>person</mat-icon>
+        <span>Eigener Kommentar</span>
+      </span>
+    </div>
 
 
     <!-- Vote Counts - Only for top-level comments (depth = 0) -->

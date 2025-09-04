@@ -87,7 +87,7 @@ export class EvaluationStateService {
   private isMockModeActive = false;
 
   constructor(
-    private evaluationService: EvaluationDiscussionService,
+    public evaluationService: EvaluationDiscussionService,
     private mockDataService: EvaluationMockDataService,
     private userservice: UserService,
   ) {
@@ -1368,16 +1368,21 @@ export class EvaluationStateService {
     const voteStatusSubject = this.commentVoteStatusCache.get(commentId)!;
     const currentVote = voteStatusSubject.value;
     const newVote = currentVote === voteType ? null : voteType; // Toggle logic
+    const isAdding = newVote !== null;
 
     console.log('🗳️ Vote initiated:', {
       commentId,
       currentVote,
       voteType,
       newVote,
+      isAdding
     });
 
     // Optimistic update for immediate UI feedback
     voteStatusSubject.next(newVote);
+    
+    // FIXED: Add optimistic vote limit update for immediate counter feedback
+    this.optimisticVoteLimitUpdate(categoryId, Number(commentId), isAdding);
 
     // Perform actual vote
     return this.voteCommentWithLimits(commentId, voteType, categoryId).pipe(
@@ -1395,6 +1400,9 @@ export class EvaluationStateService {
       catchError(error => {
         // Vote failed - revert optimistic update
         console.log('❌ Vote failed, reverting optimistic update');
+
+        // FIXED: Rollback the vote limit optimistic update
+        this.optimisticVoteLimitUpdate(categoryId, Number(commentId), !isAdding);
 
         // Reload vote status from local data first (faster fallback)
         const localVote = this.getUserVoteFromLocalComment(commentId);
@@ -1998,6 +2006,8 @@ export class EvaluationStateService {
     voteType: 'UP' | null,
     categoryId: number,
   ): Observable<any> {
+    const isAdding = voteType !== null;
+    
     if (this.isMockModeActive) {
       // Mock mode - graceful handling without throwing errors
       if (voteType !== null && !this.canVote(categoryId)) {
@@ -2046,12 +2056,13 @@ export class EvaluationStateService {
 
     return this.evaluationService.voteComment(commentId, voteType).pipe(
       map(result => {
-        // Update vote limits based on result
-        if (result.userVote && voteType) {
-          this.updateVoteLimits(categoryId, voteType, true);
-        } else if (!result.userVote && voteType === null) {
-          // Vote was removed - need to determine which type was removed
-          // This would need to be tracked separately or returned from backend
+        // FIXED: Update vote limits based on actual action (not previous state)
+        if (isAdding && result.userVote) {
+          // Vote was successfully added
+          this.updateVoteLimits(categoryId, 'UP', true);
+        } else if (!isAdding && !result.userVote) {
+          // Vote was successfully removed
+          this.updateVoteLimits(categoryId, 'UP', false);
         }
 
         // Backend now returns result.voteStats structure
@@ -2136,11 +2147,14 @@ export class EvaluationStateService {
     const newVotedIds = new Set(currentStatus.votedCommentIds);
     let remainingVotes = currentStatus.remainingVotes;
 
-    if (isAdding && !newVotedIds.has(commentId)) {
-      newVotedIds.add(commentId);
+    if (isAdding) {
+      // Adding vote: always decrease remaining votes (multiple votes per comment allowed)
+      newVotedIds.add(commentId); // Mark as voted (even if already voted)
       remainingVotes = Math.max(0, remainingVotes - 1);
-    } else if (!isAdding && newVotedIds.has(commentId)) {
-      newVotedIds.delete(commentId);
+    } else {
+      // Removing vote: increase remaining votes (but keep comment marked as voted if user still has votes on it)
+      // Note: For simplicity, we don't remove from votedCommentIds since the user might still have other votes
+      // The backend tracks the actual vote counts per user per comment
       remainingVotes = Math.min(currentStatus.maxVotes, remainingVotes + 1);
     }
 
@@ -2325,14 +2339,25 @@ export class EvaluationStateService {
     voteType: 'UP' | null, 
     categoryId: number
   ): Observable<VoteLimitResponseDTO> {
+    const isAdding = voteType !== null;
+    
     // Optimistic update for immediate UI feedback
-    this.optimisticVoteLimitUpdate(categoryId, Number(commentId), voteType !== null);
+    this.optimisticVoteLimitUpdate(categoryId, Number(commentId), isAdding);
+    
+    console.log('🎯 Optimistic vote limit update:', {
+      categoryId,
+      commentId,
+      voteType,
+      isAdding,
+      currentStatus: this.getVoteLimitStatusForCategory(categoryId)
+    });
 
     return this.evaluationService.voteCommentWithLimits(commentId, voteType).pipe(
       tap(response => {
         // Update vote limit status from backend response
         if (response.voteLimitStatus) {
           this.updateVoteLimitStatus(categoryId, response.voteLimitStatus);
+          console.log('✅ Updated vote limit status from backend:', response.voteLimitStatus);
         }
 
         // Handle vote update for comment display
@@ -2348,9 +2373,9 @@ export class EvaluationStateService {
         }
       }),
       catchError(error => {
-        // Rollback optimistic update on error
-        this.optimisticVoteLimitUpdate(categoryId, Number(commentId), voteType === null);
-        console.error('Failed to vote with enhanced limits:', error);
+        // FIXED: Rollback optimistic update on error (opposite of original action)
+        this.optimisticVoteLimitUpdate(categoryId, Number(commentId), !isAdding);
+        console.error('❌ Failed to vote with enhanced limits, rolling back optimistic update:', error);
         throw error;
       })
     );
