@@ -59,11 +59,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
   @Input() comment!: EvaluationCommentDTO;
   @Input() anonymousUser: AnonymousEvaluationUserDTO | null = null;
-  @Input() canVote: boolean = true;
-  @Input() canVoteUp: boolean = true;
-  @Input() canVoteDown: boolean = true;
-  @Input() availableUpvotes: number = 3;
-  @Input() availableDownvotes: number = 3;
+  @Input() canVote: boolean = true; // Simplified for ranking system
+  @Input() availableVotes: number = 3; // Single vote counter for ranking
   @Input() isVoting: boolean = false;
   @Input() depth: number = 0;
   @Input() isReadOnly: boolean = false;
@@ -94,7 +91,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   private _cachedDisplayContent: string = '';
   private _cachedFormattedContent: string = '';
   private _cachedUpvoteTooltip: string = '';
-  private _cachedDownvoteTooltip: string = '';
   
   // 🚀 PHASE 3: Vote status cache and loading state
   private _userVoteLoadingState = new BehaviorSubject<boolean>(false);
@@ -116,7 +112,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   get cachedAuthorDisplayName(): string { return this._cachedAuthorDisplayName; }
   get cachedFormattedContent(): string { return this._cachedFormattedContent; }
   get cachedUpvoteTooltip(): string { return this._cachedUpvoteTooltip; }
-  get cachedDownvoteTooltip(): string { return this._cachedDownvoteTooltip; }
 
   // =============================================================================
   // CONSTRUCTOR
@@ -181,7 +176,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
   ngOnChanges(changes: SimpleChanges): void {
     // 🚀 PHASE 2.3 + PHASE 3: Update cached values when inputs change
-    if (changes['comment'] || changes['anonymousUser'] || changes['canVoteUp'] || changes['canVoteDown']) {
+    if (changes['comment'] || changes['anonymousUser'] || changes['canVote'] || changes['availableVotes']) {
       this.updateCachedValues();
       
       // 🚀 PHASE 3: Reload vote status if comment or anonymousUser changed
@@ -192,13 +187,13 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     }
     
     // 🚀 PHASE 1.3: Aggressive change detection for immediate UI updates
-    if (changes['comment'] || changes['isVoting'] || changes['canVoteUp'] || changes['canVoteDown'] || changes['availableUpvotes'] || changes['availableDownvotes']) {
+    if (changes['comment'] || changes['isVoting'] || changes['canVote'] || changes['availableVotes']) {
       console.log('🔄 Vote-related inputs changed, triggering change detection:', {
         commentId: this.comment?.id,
         hasCommentChanged: !!changes['comment'],
         hasVotingStateChanged: !!changes['isVoting'],
-        hasVoteLimitsChanged: !!(changes['canVoteUp'] || changes['canVoteDown']),
-        hasVoteCountsChanged: !!(changes['availableUpvotes'] || changes['availableDownvotes']),
+        hasVoteLimitsChanged: !!(changes['canVote'] || changes['availableVotes']),
+        hasVoteCountsChanged: !!changes['availableVotes'],
         newVotingState: changes['isVoting']?.currentValue,
         previousVotingState: changes['isVoting']?.previousValue,
       });
@@ -219,14 +214,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       const previousVoteStats = changes['comment'].previousValue.voteStats;
       
       if (currentVoteStats && previousVoteStats && 
-          (currentVoteStats.upVotes !== previousVoteStats.upVotes || 
-           currentVoteStats.downVotes !== previousVoteStats.downVotes)) {
+          (currentVoteStats.upVotes !== previousVoteStats.upVotes)) {
         console.log('📊 Vote stats changed - forcing immediate update:', {
           commentId: this.comment.id,
           previousUpVotes: previousVoteStats.upVotes,
           currentUpVotes: currentVoteStats.upVotes,
-          previousDownVotes: previousVoteStats.downVotes,
-          currentDownVotes: currentVoteStats.downVotes,
         });
         this.cdr.detectChanges();
       }
@@ -253,8 +245,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this._cachedDisplayContent = this.getDisplayContent();
     this._cachedFormattedContent = this.formatContent(this.sanitizeContent(this._cachedDisplayContent));
     
-    // Cache tooltips (computed based on current Observable value)
-    this.updateCachedTooltips();
+    // Cache upvote tooltip only (ranking system)
+    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
     
     console.log('🚀 Cached values updated for performance:', {
       commentId: this.comment?.id,
@@ -353,19 +345,18 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Update cached value for backward compatibility
     this._cachedUserVote = voteStatus;
     
-    // Update tooltips based on new vote status
-    this.updateCachedTooltips();
+    // Update upvote tooltip based on new vote status
+    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
     
     // Force immediate UI update
     this.cdr.detectChanges();
   }
 
   /**
-   * Updates cached tooltips when vote status changes
+   * Updates cached upvote tooltip when vote status changes (ranking system)
    */
   private updateCachedTooltips(): void {
     this._cachedUpvoteTooltip = this.getUpvoteTooltip();
-    this._cachedDownvoteTooltip = this.getDownvoteTooltip();
   }
 
   /**
@@ -490,28 +481,45 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
-    // Check if user has already voted - prevent changing/removing votes
-    const currentVote = this._cachedUserVote;
-    if (currentVote !== null) {
-      console.log('❌ Vote blocked - user has already voted:', {
-        commentId: this.comment.id,
-        currentVote,
-        attemptedVote: voteType,
-      });
-      return; // Block the vote - no toggle allowed
-    }
-
     // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
     this.triggerHapticFeedback('light');
 
-    // Only allow voting if user hasn't voted yet
-    const newVote = voteType; // No toggle - direct vote only
+    // Ranking system: Only allow UP votes or null to remove
+    if (voteType !== 'UP' && voteType !== null) {
+      console.log('❌ Invalid vote type for ranking system:', voteType);
+      return;
+    }
+
+    // Multiple votes logic: Each click adds a vote (with limits)
+    let newVote: VoteType;
     
-    console.log('🗳️ Vote initiated:', {
+    if (voteType === null) {
+      // Remove one vote - only if user has votes to remove
+      if (this._cachedUserVote !== null) {
+        newVote = null;
+      } else {
+        console.log('❌ Cannot remove vote - user has not voted on this comment');
+        return;
+      }
+    } else if (voteType === 'UP') {
+      // Add one vote - check limits first
+      if (!this.canAddMoreVotes()) {
+        console.log('❌ Cannot add vote - limit exceeded');
+        this.showVoteLimitWarning();
+        return;
+      }
+      newVote = 'UP';
+    } else {
+      console.log('❌ Invalid vote type:', voteType);
+      return;
+    }
+    
+    console.log('🗳️ Multiple votes - ranking vote initiated:', {
       commentId: this.comment.id,
-      currentVote,
-      voteType,
+      currentVote: this._cachedUserVote,
+      attemptedVote: voteType,
       newVote,
+      availableVotes: this.availableVotes,
     });
 
     // Optimistic update for immediate UI feedback using unified method
@@ -628,10 +636,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * Gets the vote score (net votes)
+   * Gets the vote score (upvotes only for ranking system)
    */
   getVoteScore(): number {
-    return this.comment.voteStats.upVotes - this.comment.voteStats.downVotes;
+    return this.comment.voteStats.upVotes;
   }
 
   /**
@@ -655,12 +663,113 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * Gets tooltip text for the vote score
+   * Gets tooltip text for the vote score (ranking system)
    */
   getVoteScoreTooltip(): string {
     const upvotes = this.comment.voteStats.upVotes;
-    const downvotes = this.comment.voteStats.downVotes;
-    return `${upvotes} positive, ${downvotes} negative Bewertungen`;
+    return `${upvotes} positive Bewertungen`;
+  }
+
+  /**
+   * Gets enhanced vote count display with user-specific information
+   * Shows total votes and user's contribution
+   */
+  getVoteCountDisplay(): string {
+    const totalVotes = this.comment.voteStats.upVotes || 0;
+    const userVotes = this.getUserVoteCount();
+    
+    if (userVotes > 0) {
+      return `${totalVotes} 👍 <span class="user-votes-badge">+${userVotes}</span>`;
+    }
+    
+    return `${totalVotes} 👍`;
+  }
+
+  /**
+   * Gets enhanced aria label for vote statistics
+   */
+  getVoteStatsAriaLabel(): string {
+    const totalVotes = this.comment.voteStats.upVotes || 0;
+    const userVotes = this.getUserVoteCount();
+    
+    if (userVotes > 0) {
+      return `Vote statistics: ${totalVotes} positive votes total, including ${userVotes} from you`;
+    }
+    
+    return `Vote statistics: ${totalVotes} positive votes`;
+  }
+
+  /**
+   * Gets the number of votes the current user has given to this comment
+   * This will need to be enhanced when backend fully supports multiple votes
+   */
+  getUserVoteCount(): number {
+    if (!this.anonymousUser) return 0;
+    
+    // For now, simplified: if user has voted, count as 1
+    // This will be enhanced when backend provides actual vote counts
+    return this._cachedUserVote === 'UP' ? 1 : 0;
+  }
+
+  /**
+   * Checks if user can add more votes (considering limits)
+   */
+  canAddMoreVotes(): boolean {
+    // Check global vote limit (availableVotes from parent)
+    if (this.availableVotes <= 0) {
+      return false;
+    }
+
+    // Check per-comment vote limit (max 3 votes per comment for fair distribution)
+    const maxVotesPerComment = 3;
+    const currentUserVotes = this.getUserVoteCount();
+    if (currentUserVotes >= maxVotesPerComment) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Gets enhanced tooltip for upvote button with multiple votes context
+   */
+  getEnhancedUpvoteTooltip(): string {
+    if (this.isCurrentUser()) {
+      return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
+    }
+
+    const userVotes = this.getUserVoteCount();
+    const maxVotesPerComment = 3;
+
+    if (userVotes >= maxVotesPerComment) {
+      return `Maximum erreicht: Sie haben bereits ${userVotes} Votes für diesen Kommentar vergeben`;
+    }
+
+    if (this.availableVotes <= 0) {
+      return 'Keine Votes mehr verfügbar in dieser Kategorie';
+    }
+
+    if (userVotes > 0) {
+      return `Weiteren Vote hinzufügen (aktuell: ${userVotes}/${maxVotesPerComment})`;
+    }
+
+    return 'Positiv bewerten - Sie können bis zu 3 Votes pro Kommentar vergeben';
+  }
+
+  /**
+   * Shows a user-friendly warning about vote limits
+   */
+  private showVoteLimitWarning(): void {
+    const currentUserVotes = this.getUserVoteCount();
+    const maxVotesPerComment = 3;
+    
+    if (this.availableVotes <= 0) {
+      console.log('⚠️ No more votes available in category');
+      // Could trigger a snackbar or tooltip here
+    } else if (currentUserVotes >= maxVotesPerComment) {
+      console.log(`⚠️ Maximum ${maxVotesPerComment} votes per comment reached`);
+      // Could trigger a snackbar or tooltip here
+    }
   }
 
   /**
@@ -717,8 +826,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     switch (userVote) {
       case 'UP':
         return 'thumb_up';
-      case 'DOWN':
-        return 'thumb_down';
       default:
         return '';
     }
@@ -735,8 +842,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     switch (userVote) {
       case 'UP':
         return '#4caf50';
-      case 'DOWN':
-        return '#f44336';
       default:
         return '#666';
     }
@@ -756,7 +861,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // =============================================================================
 
   /**
-   * Gets tooltip text for upvote button
+   * Gets tooltip text for upvote button (ranking system)
    * @returns string The tooltip text
    */
   getUpvoteTooltip(): string {
@@ -764,40 +869,15 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
     }
     const userVote = this.getUserVote();
-    if (userVote !== null) {
-      if (userVote === 'UP') {
-        return 'Sie haben bereits positiv bewertet.';
-      } else {
-        return 'Sie haben bereits negativ bewertet.';
-      }
+    if (userVote === 'UP') {
+      return 'Sie haben bereits positiv bewertet.';
     }
-    if (!this.canVoteUp) {
-      return 'Keine positiven Bewertungen mehr verfügbar';
+    if (!this.canVote) {
+      return 'Keine Bewertungen mehr verfügbar';
     }
     return 'Positiv bewerten';
   }
 
-  /**
-   * Gets tooltip text for downvote button
-   * @returns string The tooltip text
-   */
-  getDownvoteTooltip(): string {
-    if (this.isCurrentUser()) {
-      return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
-    }
-    const userVote = this.getUserVote();
-    if (userVote !== null) {
-      if (userVote === 'DOWN') {
-        return 'Sie haben bereits negativ bewertet.';
-      } else {
-        return 'Sie haben bereits positiv bewertet.';
-      }
-    }
-    if (!this.canVoteDown) {
-      return 'Keine negativen Bewertungen mehr verfügbar';
-    }
-    return 'Negativ bewerten';
-  }
 
   /**
    * Sanitizes HTML content for safe display

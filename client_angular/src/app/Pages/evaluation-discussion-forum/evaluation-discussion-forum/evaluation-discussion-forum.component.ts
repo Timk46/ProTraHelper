@@ -215,8 +215,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     loading: boolean;
     error: string | null;
     isSubmittingComment: boolean;
-    availableUpvotes: number;
-    availableDownvotes: number;
+    availableVotes: number;
     totalVotes: number;
   }>;
 
@@ -353,8 +352,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             error,
             isSubmittingComment,
             // NEW DYNAMIC SYSTEM: Use actual remaining votes instead of static limits
-            availableUpvotes: voteLimitStatus?.remainingVotes ?? (categoryLimits?.plusVotes || 3),
-            availableDownvotes: voteLimitStatus?.remainingVotes ?? (categoryLimits?.minusVotes || 3),
+            availableVotes: voteLimitStatus?.remainingVotes ?? 3,
             totalVotes: voteLimitStatus?.maxVotes ?? 3,
           };
         }
@@ -1029,7 +1027,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     }
   }
 
-  onCommentVoted(data: { commentId: string; voteType: 'UP' | 'DOWN' | null }): void {
+  onCommentVoted(data: { commentId: string; voteType: 'UP' | null }): void {
     console.log('🗳️ Vote action triggered:', data);
 
     // Prevent voting if already in progress for this comment
@@ -1062,9 +1060,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             const action =
               data.voteType === 'UP'
                 ? 'positiv bewertet'
-                : data.voteType === 'DOWN'
-                  ? 'negativ bewertet'
-                  : 'Bewertung entfernt';
+                : 'Bewertung entfernt';
 
             this.showSnackBar(`Kommentar ${action}`, 'OK', 2000, false);
           },
@@ -1935,12 +1931,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     };
   }
 
-  private createMockVoteLimits(): Map<number, { plusVotes: number; minusVotes: number }> {
+  private createMockVoteLimits(): Map<number, { availableVotes: number }> {
     return new Map([
-      [1, { plusVotes: 2, minusVotes: 3 }],
-      [2, { plusVotes: 3, minusVotes: 2 }],
-      [3, { plusVotes: 1, minusVotes: 3 }],
-      [4, { plusVotes: 3, minusVotes: 1 }],
+      [1, { availableVotes: 2 }],
+      [2, { availableVotes: 3 }],
+      [3, { availableVotes: 1 }],
+      [4, { availableVotes: 3 }],
     ]);
   }
 

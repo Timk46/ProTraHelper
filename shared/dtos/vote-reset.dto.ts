@@ -21,10 +21,10 @@ export class ResetVotesDTO {
   categoryId!: number;
 
   /**
-   * The type of votes to reset
+   * The type of votes to reset (Ranking System: UP or ALL only)
    */
-  @IsIn(['UP', 'DOWN', 'ALL'])
-  voteType!: 'UP' | 'DOWN' | 'ALL';
+  @IsIn(['UP', 'ALL'])
+  voteType!: 'UP' | 'ALL';
 }
 
 /**

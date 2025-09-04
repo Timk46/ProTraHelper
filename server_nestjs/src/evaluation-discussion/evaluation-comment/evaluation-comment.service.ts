@@ -23,9 +23,11 @@ import type { Prisma } from '@prisma/client';
 
 /**
  * Definiert die Struktur für die Speicherung von Stimmdetails als JSON-Objekt in Prisma.
+ * Erweitert für Ranking-System mit mehrfachen Votes pro User.
  */
 interface VoteDetails {
-  userVotes: { [userId: string]: VoteType };
+  userVotes: { [userId: string]: VoteType }; // Legacy: Tracks if user has voted
+  userVoteCounts?: { [userId: string]: number }; // New: Tracks how many votes each user gave
 }
 
 @Injectable()
@@ -568,16 +570,17 @@ export class EvaluationCommentService {
   }
 
   /**
-   * Verarbeitet eine Stimme (Upvote/Downvote) für einen Kommentar.
-   * Fügt eine Stimme hinzu, entfernt sie oder ändert sie.
+   * Verarbeitet eine positive Bewertung für einen Kommentar (Ranking-System).
+   * Fügt eine Stimme hinzu oder entfernt sie. Negative Bewertungen sind nicht mehr möglich.
    *
    * @param commentId Die ID des Kommentars, für den abgestimmt wird.
-   * @param voteType Der Typ der Stimme ('UP', 'DOWN') oder `null` zum Entfernen der Stimme.
+   * @param voteType Der Typ der Stimme ('UP' für positive Bewertung) oder `null` zum Entfernen.
    * @param userId Die ID des abstimmenden Benutzers.
    * @returns Ein Promise, das ein Objekt mit den aktualisierten Stimmergebnissen auflöst.
    * @throws {NotFoundException} Wenn kein Kommentar mit der gegebenen ID gefunden wird.
+   * @throws {BadRequestException} Wenn ein ungültiger voteType verwendet wird.
    */
-  async vote(commentId: string, voteType: 'UP' | 'DOWN' | null, userId: number) {
+  async vote(commentId: string, voteType: 'UP' | null, userId: number) {
     const comment = await this.prisma.evaluationComment.findUnique({
       where: { id: commentId },
     });
@@ -586,40 +589,35 @@ export class EvaluationCommentService {
       throw new NotFoundException(`Comment with ID ${commentId} not found`);
     }
 
-    // Defensive programming: Ensure voteDetails and userVotes exist
-    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+    // Defensive programming: Ensure voteDetails structure exists
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { 
+      userVotes: {},
+      userVoteCounts: {}
+    };
+    const previousVote = voteDetails.userVotes[userId.toString()];
 
-    // Ensure userVotes object exists before accessing
-    const userVotes = voteDetails.userVotes || {};
-    const previousVote = userVotes[userId.toString()];
-
-    // Prevent changing or removing existing votes
-    if (previousVote !== undefined) {
+    // Validate voteType for ranking system
+    if (voteType !== null && voteType !== 'UP') {
       throw new BadRequestException(
-        `User has already voted on this comment. Votes cannot be changed or removed.`
-      );
-    }
-
-    // Prevent null votes (removing votes)
-    if (voteType === null) {
-      throw new BadRequestException(
-        `Cannot remove vote. Votes are permanent once cast.`
+        `Invalid vote type. Only 'UP' votes are allowed in the ranking system.`
       );
     }
 
     let newUpvotes = comment.upvotes;
     let newDownvotes = comment.downvotes;
 
-    // Only allow new votes (no previous vote exists)
-    userVotes[userId.toString()] = voteType;
-    if (voteType === 'UP') {
-      newUpvotes++;
-    } else {
-      newDownvotes++;
-    }
+    // Use the new calculateVoteChanges method for multiple votes support
+    ({ newUpvotes, newDownvotes } = this.calculateVoteChanges(
+      voteType,
+      previousVote,
+      newUpvotes,
+      newDownvotes,
+      voteDetails,
+      userId,
+    ));
 
-    // Update voteDetails with the modified userVotes
-    const updatedVoteDetails = { userVotes };
+    // Keep the complete voteDetails structure
+    const updatedVoteDetails = voteDetails;
 
     const updatedComment = await this.prisma.evaluationComment.update({
       where: { id: commentId },
@@ -657,15 +655,15 @@ export class EvaluationCommentService {
     return {
       commentId: commentId,
       upvotes: newUpvotes,
-      downvotes: newDownvotes,
+      downvotes: 0, // Always 0 in ranking system
       voteStats: {
         upVotes: newUpvotes,
-        downVotes: newDownvotes,
-        totalVotes: newUpvotes + newDownvotes,
-        score: newUpvotes - newDownvotes,
+        downVotes: 0, // Always 0 in ranking system
+        totalVotes: newUpvotes, // Only positive votes count
+        score: newUpvotes, // Score equals upvotes in ranking system
       },
-      userVote: userVotes[userId.toString()] || null,
-      netVotes: newUpvotes - newDownvotes,
+      userVote: voteDetails.userVotes[userId.toString()] || null,
+      netVotes: newUpvotes, // Equals upvotes in ranking system
     };
   }
 
@@ -675,7 +673,7 @@ export class EvaluationCommentService {
    * @param userId - The user ID
    * @returns Array of vote results
    */
-  async batchVote(votes: { commentId: string; voteType: 'UP' | 'DOWN' | null }[], userId: number) {
+  async batchVote(votes: { commentId: string; voteType: 'UP' | null }[], userId: number) {
     const results = [];
 
     // Use transaction for atomic batch operations
@@ -703,7 +701,7 @@ export class EvaluationCommentService {
   private async processVoteInTransaction(
     tx: any,
     commentId: string,
-    voteType: 'UP' | 'DOWN' | null,
+    voteType: 'UP' | null,
     userId: number,
   ) {
     const comment = await tx.evaluationComment.findUnique({
@@ -714,25 +712,28 @@ export class EvaluationCommentService {
       throw new NotFoundException(`Comment with ID ${commentId} not found`);
     }
 
-    // Process vote logic (same as single vote)
-    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
-    const userVotes = voteDetails.userVotes || {};
-    const previousVote = userVotes[userId.toString()];
+    // Process vote logic with multiple votes support
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { 
+      userVotes: {},
+      userVoteCounts: {}
+    };
+    const previousVote = voteDetails.userVotes[userId.toString()];
 
     let newUpvotes = comment.upvotes;
     let newDownvotes = comment.downvotes;
 
-    // Vote processing logic (extracted for reuse)
+    // Vote processing logic (extracted for reuse) - now supports multiple votes
     ({ newUpvotes, newDownvotes } = this.calculateVoteChanges(
       voteType,
       previousVote,
       newUpvotes,
       newDownvotes,
-      userVotes,
+      voteDetails,
       userId,
     ));
 
-    const updatedVoteDetails = { userVotes };
+    // Keep the complete voteDetails structure (including userVoteCounts)
+    const updatedVoteDetails = voteDetails;
 
     const updatedComment = await tx.evaluationComment.update({
       where: { id: commentId },
@@ -747,67 +748,87 @@ export class EvaluationCommentService {
       commentId,
       upvotes: newUpvotes,
       downvotes: newDownvotes,
-      userVote: userVotes[userId.toString()] || null,
+      userVote: voteDetails.userVotes[userId.toString()] || null,
       netVotes: newUpvotes - newDownvotes,
     };
   }
 
   /**
-   * Extract vote calculation logic for reuse
+   * Extract vote calculation logic for multiple votes per user (Ranking System)
+   * Now supports userVoteCounts for tracking multiple votes per user
    */
   private calculateVoteChanges(
-    voteType: 'UP' | 'DOWN' | null,
+    voteType: 'UP' | null,
     previousVote: string | undefined,
     upvotes: number,
     downvotes: number,
-    userVotes: { [userId: string]: VoteType },
+    voteDetails: VoteDetails,
     userId: number,
   ): { newUpvotes: number; newDownvotes: number } {
     let newUpvotes = upvotes;
     let newDownvotes = downvotes;
+    
+    // Initialize userVoteCounts if it doesn't exist
+    if (!voteDetails.userVoteCounts) {
+      voteDetails.userVoteCounts = {};
+    }
+
+    const userKey = userId.toString();
+    const currentUserVoteCount = voteDetails.userVoteCounts[userKey] || 0;
 
     if (voteType === null) {
-      // Remove vote
-      if (previousVote) {
-        delete userVotes[userId.toString()];
-        if (previousVote === 'UP') {
-          newUpvotes--;
-        } else {
-          newDownvotes--;
+      // Remove ONE vote from this user (if any exist)
+      if (currentUserVoteCount > 0) {
+        voteDetails.userVoteCounts[userKey] = currentUserVoteCount - 1;
+        newUpvotes--;
+        
+        // If no votes left, remove from userVotes as well
+        if (voteDetails.userVoteCounts[userKey] === 0) {
+          delete voteDetails.userVotes[userKey];
+          delete voteDetails.userVoteCounts[userKey];
         }
       }
-    } else {
-      // Add or change vote
-      if (previousVote === voteType) {
-        // Same vote - remove it
-        delete userVotes[userId.toString()];
-        if (voteType === 'UP') {
-          newUpvotes--;
-        } else {
-          newDownvotes--;
-        }
-      } else {
-        // New vote or change vote
-        if (previousVote) {
-          // Remove previous vote first
-          if (previousVote === 'UP') {
-            newUpvotes--;
-          } else {
-            newDownvotes--;
-          }
-        }
-
-        // Add new vote
-        userVotes[userId.toString()] = voteType;
-        if (voteType === 'UP') {
-          newUpvotes++;
-        } else {
-          newDownvotes++;
-        }
-      }
+    } else if (voteType === 'UP') {
+      // Add ONE more vote for this user (multiple votes allowed)
+      voteDetails.userVotes[userKey] = 'UP'; // Mark that user has voted
+      voteDetails.userVoteCounts[userKey] = currentUserVoteCount + 1;
+      newUpvotes++;
     }
 
     return { newUpvotes, newDownvotes };
+  }
+
+  /**
+   * Helper method to count votes from a specific user
+   * Uses the new userVoteCounts structure
+   */
+  private countUserVotes(voteDetails: VoteDetails, userId: number): number {
+    if (!voteDetails.userVoteCounts) {
+      return voteDetails.userVotes[userId.toString()] ? 1 : 0; // Fallback to legacy
+    }
+    return voteDetails.userVoteCounts[userId.toString()] || 0;
+  }
+
+  /**
+   * Gets the number of votes the user has given to a specific comment
+   * @param commentId - The comment ID
+   * @param userId - The user ID
+   * @returns The number of votes the user has given to this comment
+   */
+  async getUserVoteCount(commentId: string, userId: number): Promise<number> {
+    const comment = await this.prisma.evaluationComment.findUnique({
+      where: { id: commentId },
+      select: {
+        voteDetails: true,
+      },
+    });
+
+    if (!comment) {
+      return 0;
+    }
+
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+    return this.countUserVotes(voteDetails, userId);
   }
 
   /**
@@ -816,7 +837,7 @@ export class EvaluationCommentService {
    * @param userId - The user ID
    * @returns The user's vote type or null if no vote exists
    */
-  async getUserVoteForComment(commentId: string, userId: number): Promise<'UP' | 'DOWN' | null> {
+  async getUserVoteForComment(commentId: string, userId: number): Promise<'UP' | null> {
     const comment = await this.prisma.evaluationComment.findUnique({
       where: { id: commentId },
       select: {
@@ -872,12 +893,12 @@ export class EvaluationCommentService {
       commentId: commentId,
       voteStats: {
         upVotes: comment.upvotes,
-        downVotes: comment.downvotes,
-        totalVotes: comment.upvotes + comment.downvotes,
-        score: comment.upvotes - comment.downvotes,
+        downVotes: 0, // Always 0 in ranking system
+        totalVotes: comment.upvotes, // Only positive votes count
+        score: comment.upvotes, // Score equals upvotes in ranking system
       },
       userVote: userVote,
-      netVotes: comment.upvotes - comment.downvotes,
+      netVotes: comment.upvotes, // Equals upvotes in ranking system
     };
   }
 
@@ -972,9 +993,9 @@ export class EvaluationCommentService {
       replyCount: this.calculateReplyCount(comment.replies || []), // Calculate total reply count
       voteStats: {
         upVotes: comment.upvotes,
-        downVotes: comment.downvotes,
-        totalVotes: comment.upvotes + comment.downvotes,
-        score: comment.upvotes - comment.downvotes,
+        downVotes: 0, // Always 0 in ranking system
+        totalVotes: comment.upvotes, // Only positive votes count
+        score: comment.upvotes, // Score equals upvotes in ranking system
       },
     };
   }
@@ -1175,13 +1196,13 @@ export class EvaluationCommentService {
    * Enhanced vote method that includes limit validation
    * 
    * @param commentId - The comment ID to vote on
-   * @param voteType - The type of vote ('UP', 'DOWN', or null to remove)
+   * @param voteType - The type of vote ('UP' or null to remove) - Ranking System
    * @param userId - The user ID
    * @returns Promise containing vote result and updated limit status
    */
   async voteWithLimitCheck(
     commentId: string,
-    voteType: 'UP' | 'DOWN' | null,
+    voteType: 'UP' | null,
     userId: number
   ): Promise<VoteLimitResponseDTO> {
     // Get comment to find submission and category
@@ -1202,7 +1223,7 @@ export class EvaluationCommentService {
     const currentStatus = await this.getVoteLimitStatus(
       userId,
       comment.submissionId,
-      comment.categoryId.toString()
+      comment.categoryId?.toString() || 'null'
     );
 
     // Check if user is trying to add a new vote but has no remaining votes
@@ -1227,7 +1248,7 @@ export class EvaluationCommentService {
     const updatedStatus = await this.updateVoteLimitStatus(
       userId,
       comment.submissionId,
-      comment.categoryId.toString(),
+      comment.categoryId?.toString() || 'null',
       commentId,
       isAddingVote
     );
@@ -1245,14 +1266,14 @@ export class EvaluationCommentService {
    * @param userId - The user ID whose votes to reset
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
-   * @param voteType - The type of votes to reset ('UP', 'DOWN', or 'ALL')
+   * @param voteType - The type of votes to reset ('UP' or 'ALL') - Ranking System
    * @returns Promise containing reset result and updated vote limit status
    */
   async resetUserVotes(
     userId: number,
     submissionId: string,
     categoryId: number,
-    voteType: 'UP' | 'DOWN' | 'ALL'
+    voteType: 'UP' | 'ALL' // Removed 'DOWN' for ranking system
   ): Promise<{
     success: boolean;
     resetCount: number;
@@ -1297,15 +1318,14 @@ export class EvaluationCommentService {
           // Remove the user's vote
           delete userVotes[userId.toString()];
           
-          // Update vote counts
+          // Update vote counts (only upvotes in ranking system)
           let newUpvotes = comment.upvotes;
-          let newDownvotes = comment.downvotes;
+          const newDownvotes = 0; // Always 0 in ranking system
           
           if (userVote === 'UP') {
             newUpvotes = Math.max(0, newUpvotes - 1);
-          } else if (userVote === 'DOWN') {
-            newDownvotes = Math.max(0, newDownvotes - 1);
           }
+          // No need to handle 'DOWN' votes in ranking system
 
           // Update the comment in database
           await this.prisma.evaluationComment.update({
@@ -1313,7 +1333,7 @@ export class EvaluationCommentService {
             data: {
               voteDetails: { userVotes },
               upvotes: newUpvotes,
-              downvotes: newDownvotes,
+              downvotes: 0, // Always 0 in ranking system
             }
           });
 
@@ -1373,10 +1393,10 @@ export class EvaluationCommentService {
    * @param resetType - The type of reset requested ('UP', 'DOWN', or 'ALL')
    * @returns boolean indicating if the vote should be reset
    */
-  private shouldResetVote(userVote: 'UP' | 'DOWN', resetType: 'UP' | 'DOWN' | 'ALL'): boolean {
+  private shouldResetVote(userVote: 'UP', resetType: 'UP' | 'ALL'): boolean {
     if (resetType === 'ALL') {
       return true;
     }
-    return userVote === resetType;
+    return userVote === resetType; // Only 'UP' votes exist in ranking system
   }
 }

@@ -2,7 +2,8 @@ import { UserDTO } from './user.dto';
 import { EvaluationSubmissionDTO } from './evaluation-submission.dto';
 import { EvaluationCategoryDTO } from './evaluation-category.dto';
 
-export type VoteType = 'UP' | 'DOWN' | null;
+// Updated for ranking system: only positive votes allowed
+export type VoteType = 'UP' | null;
 
 export interface AuthorDTO {
   id: string;
@@ -38,9 +39,9 @@ export interface EvaluationCommentDTO {
   }>;
   voteStats: {
     upVotes: number;
-    downVotes: number;
+    downVotes: number; // @deprecated - kept for backward compatibility, always 0
     totalVotes: number;
-    score: number;
+    score: number; // Now equals upVotes in ranking system
   };
   
   // Threading

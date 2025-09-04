@@ -48,50 +48,34 @@
       class="vote-btn plus"
       [ngClass]="{
         voted: cachedUserVote === 'UP',
-        'disabled-limit': !canVoteUp && cachedUserVote !== 'UP',
+        'multiple-votes': getUserVoteCount() > 1,
+        'disabled-limit': !canAddMoreVotes() && !cachedIsCurrentUser,
+        'max-reached': getUserVoteCount() >= 3
       }"
-      [disabled]="cachedIsCurrentUser || isVoting || cachedUserVote !== null || !canVoteUp"
-      [matTooltip]="cachedUpvoteTooltip"
+      [disabled]="cachedIsCurrentUser || isVoting || (!canAddMoreVotes() && !cachedIsCurrentUser)"
+      [matTooltip]="getEnhancedUpvoteTooltip()"
       (click)="onVote('UP')"
       type="button"
       role="button"
-      [attr.aria-label]="cachedUpvoteTooltip"
+      [attr.aria-label]="getEnhancedUpvoteTooltip()"
       [attr.aria-pressed]="cachedUserVote === 'UP'"
       [attr.aria-describedby]="'vote-stats-' + comment.id"
       [attr.data-vote-type]="'upvote'"
+      [attr.data-vote-count]="getUserVoteCount()"
       [attr.data-vote-state]="cachedUserVote === 'UP' ? 'active' : 'inactive'">
-      <span aria-hidden="true">+</span>
+      <span aria-hidden="true" class="vote-symbol">+</span>
+      <span *ngIf="getUserVoteCount() > 0" class="vote-count-badge">{{ getUserVoteCount() }}</span>
     </button>
 
-    <!-- Minus Vote Button - Only for top-level comments (depth = 0) -->
-    <button
-      *ngIf="depth === 0"
-      class="vote-btn minus"
-      [ngClass]="{
-        voted: cachedUserVote === 'DOWN',
-        'disabled-limit': !canVoteDown && cachedUserVote !== 'DOWN',
-      }"
-      [disabled]="cachedIsCurrentUser || isVoting || cachedUserVote !== null || !canVoteDown"
-      [matTooltip]="cachedDownvoteTooltip"
-      (click)="onVote('DOWN')"
-      type="button"
-      role="button"
-      [attr.aria-label]="cachedDownvoteTooltip"
-      [attr.aria-pressed]="cachedUserVote === 'DOWN'"
-      [attr.aria-describedby]="'vote-stats-' + comment.id"
-      [attr.data-vote-type]="'downvote'"
-      [attr.data-vote-state]="cachedUserVote === 'DOWN' ? 'active' : 'inactive'">
-      <span aria-hidden="true">-</span>
-    </button>
 
     <!-- Vote Counts - Only for top-level comments (depth = 0) -->
     <span *ngIf="depth === 0" 
           class="vote-count"
           [attr.id]="'vote-stats-' + comment.id"
           role="status"
-          [attr.aria-label]="'Vote statistics: ' + (comment.voteStats!.upVotes || 0) + ' upvotes and ' + (comment.voteStats!.downVotes || 0) + ' downvotes'"
+          [attr.aria-label]="getVoteStatsAriaLabel()"
           [attr.aria-live]="'polite'">
-      <span aria-hidden="true">{{ comment.voteStats!.upVotes || 0 }} 👍 {{ comment.voteStats!.downVotes || 0 }} 👎</span>
+      <span aria-hidden="true" [innerHTML]="getVoteCountDisplay()"></span>
     </span>
 
     <!-- Reply Button - Only for top-level comments (depth = 0) -->

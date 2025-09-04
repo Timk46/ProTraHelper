@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
@@ -72,13 +72,24 @@ export class EvaluationCommentController {
     return { voteType };
   }
 
+  @Get(':id/user-vote-count')
+  @roles('ANY')
+  async getUserVoteCount(@Param('id') id: string, @GetUser() user: User): Promise<{ voteCount: number }> {
+    const voteCount = await this.evaluationCommentService.getUserVoteCount(id, user.id);
+    return { voteCount };
+  }
+
   @Post(':id/vote')
   @roles('ANY')
   async vote(
     @Param('id') id: string,
-    @Body() body: { voteType: 'UP' | 'DOWN' | null },
+    @Body() body: { voteType: 'UP' | null }, // Updated for ranking system
     @GetUser() user: User,
   ): Promise<VoteLimitResponseDTO> {
+    // Validate vote type for ranking system
+    if (body.voteType !== null && body.voteType !== 'UP') {
+      throw new BadRequestException('Only UP votes are allowed in the ranking system');
+    }
     return this.evaluationCommentService.voteWithLimitCheck(id, body.voteType, user.id);
   }
 

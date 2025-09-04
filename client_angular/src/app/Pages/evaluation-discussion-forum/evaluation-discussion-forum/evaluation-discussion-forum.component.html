@@ -89,12 +89,12 @@
                 <div class="vote-counter">
                   <span class="vote-icon">🗳️</span>
                   <span class="vote-text"
-                    >{{ vm.availableUpvotes }}/{{ vm.totalVotes }} verfügbar</span
+                    >{{ vm.availableVotes }}/{{ vm.totalVotes }} verfügbar</span
                   >
                 </div>
-                <div class="vote-status" [class.no-votes]="vm.availableUpvotes === 0">
-                  <span *ngIf="vm.availableUpvotes > 0; else noVotesLeft">
-                    Sie können noch {{ vm.availableUpvotes }} Kommentare bewerten
+                <div class="vote-status" [class.no-votes]="vm.availableVotes === 0">
+                  <span *ngIf="vm.availableVotes > 0; else noVotesLeft">
+                    Sie können noch {{ vm.availableVotes }} Kommentare bewerten
                   </span>
                   <ng-template #noVotesLeft>
                     <span class="warning">Alle Bewertungen vergeben</span>
@@ -128,8 +128,7 @@
                 [anonymousUser]="vm.anonymousUser"
                 [canComment]="vm.canComment"
                 [canVote]="vm.canVote"
-                [availableUpvotes]="vm.availableUpvotes"
-                [availableDownvotes]="vm.availableDownvotes"
+                [availableVotes]="vm.availableVotes"
                 [isReadOnly]="!vm.canComment"
                 [isSubmittingComment]="vm.isSubmittingComment"
                 [isVotingComment]="isVotingComment"
@@ -159,8 +158,7 @@
                   [anonymousUser]="vm.anonymousUser"
                   [canComment]="false"
                   [canVote]="true"
-                  [availableUpvotes]="0"
-                  [availableDownvotes]="0"
+                  [availableVotes]="0"
                   [isReadOnly]="true"
                   [isSubmittingComment]="false"
                   [trackByFn]="trackByDiscussion"

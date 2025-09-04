@@ -16,27 +16,27 @@ export interface EvaluationVoteDTO {
 export interface VoteResultDTO {
   commentId: string;
   upvotes: number;
-  downvotes: number;
+  downvotes: number; // @deprecated - kept for compatibility, always 0
   userVote: VoteType;
-  netVotes: number; // upvotes - downvotes
+  netVotes: number; // Now equals upvotes (no downvotes in ranking system)
   // Added voteStats to match frontend expectations
   voteStats: {
     upVotes: number;
-    downVotes: number;
-    totalVotes: number;
-    score: number;
+    downVotes: number; // @deprecated - always 0 in ranking system
+    totalVotes: number; // Now equals upVotes
+    score: number; // Now equals upVotes
   };
 }
 
 export interface VoteUpdateData {
   voteStats: {
     upVotes: number;
-    downVotes: number;
-    totalVotes: number;
-    score: number;
+    downVotes: number; // @deprecated - always 0 in ranking system
+    totalVotes: number; // Now equals upVotes
+    score: number; // Now equals upVotes
   };
   userVote?: VoteType;
-  netVotes: number;
+  netVotes: number; // Now equals upVotes
 }
 
 export interface VoteRequestDTO {
@@ -44,15 +44,16 @@ export interface VoteRequestDTO {
   voteType: VoteType;
 }
 
-// Extended vote information with color indicators
+// Extended vote information for ranking display
 export interface VoteDisplayData {
   upvotes: number;
-  downvotes: number;
+  downvotes: number; // @deprecated - always 0 in ranking system
   userVote: VoteType;
-  netVotes: number;
+  netVotes: number; // Now equals upvotes
   
-  // UI Display properties
-  upvoteColor: 'success' | 'primary' | 'default';
-  downvoteColor: 'warn' | 'primary' | 'default';
+  // UI Display properties (updated for ranking system)
+  voteColor: 'success' | 'primary' | 'default';
+  downvoteColor?: 'warn' | 'primary' | 'default'; // @deprecated - not used in ranking system
   showAnimation?: boolean;
+  rank?: number; // New: comment ranking position
 }

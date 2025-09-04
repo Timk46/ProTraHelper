@@ -12,17 +12,11 @@ export interface CommentVoteData {
   /** Whether vote status is currently loading */
   isVoteLoading: boolean;
   
-  /** Whether user can vote up for this comment */
-  canVoteUp: boolean;
+  /** Whether user can vote for this comment (ranking system) */
+  canVote: boolean;
   
-  /** Whether user can vote down for this comment */
-  canVoteDown: boolean;
-  
-  /** Number of available upvotes for this category */
-  availableUpvotes: number;
-  
-  /** Number of available downvotes for this category */
-  availableDownvotes: number;
+  /** Number of available votes for this category (ranking system) */
+  availableVotes: number;
 }
 
 /**
@@ -34,7 +28,7 @@ export interface VoteEvent {
   /** ID of the comment being voted on */
   commentId: string;
   
-  /** Type of vote ('UP' or 'DOWN') */
+  /** Type of vote ('UP' only in ranking system) */
   voteType: VoteType;
 }
 

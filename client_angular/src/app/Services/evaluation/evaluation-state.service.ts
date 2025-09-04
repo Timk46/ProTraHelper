@@ -70,9 +70,9 @@ export class EvaluationStateService {
   private commentCreationInProgress = new Set<string>(); // Track ongoing comment creations by category
   private categoryLoadingStates = new Map<number, boolean>(); // Track loading state per category
 
-  // Vote limits tracking (per category) - Legacy system
+  // Vote limits tracking (per category) - Ranking system
   private voteLimitsSubject = new BehaviorSubject<
-    Map<number, { plusVotes: number; minusVotes: number }>
+    Map<number, { availableVotes: number }>
   >(new Map());
 
   // Enhanced vote limit tracking (per category) - New dynamic system
@@ -267,7 +267,7 @@ export class EvaluationStateService {
     return this.errorSubject.asObservable();
   }
 
-  get voteLimits$(): Observable<Map<number, { plusVotes: number; minusVotes: number }>> {
+  get voteLimits$(): Observable<Map<number, { availableVotes: number }>> {
     return this.voteLimitsSubject.asObservable();
   }
 
@@ -1352,7 +1352,7 @@ export class EvaluationStateService {
    * Performs optimistic voting with proper state management
    *
    * @param commentId - The comment ID
-   * @param voteType - The vote type ('UP' or 'DOWN')
+   * @param voteType - The vote type ('UP' for ranking, or null to remove)
    * @param categoryId - The category ID for vote limits
    * @returns Observable<VoteResultDTO> - Vote result
    * @memberof EvaluationStateService
@@ -1522,7 +1522,7 @@ export class EvaluationStateService {
     );
   }
 
-  voteComment(commentId: string, voteType: 'UP' | 'DOWN' | null): Observable<VoteResultDTO> {
+  voteComment(commentId: string, voteType: 'UP' | null): Observable<VoteResultDTO> {
     return this.evaluationService.voteComment(commentId, voteType).pipe(
       map(result => {
         // Backend now returns result.voteStats structure
@@ -1578,7 +1578,7 @@ export class EvaluationStateService {
 
           const newVotes = [...otherVotes];
           if (voteData.userVote) {
-            // 'UP' or 'DOWN'
+            // 'UP' only (Ranking System)
             newVotes.push({
               id: `temp-vote-${Date.now()}`, // Temporary ID for client-side rendering
               userId: anonymousUser.id,
@@ -1919,32 +1919,34 @@ export class EvaluationStateService {
   // =============================================================================
 
   /**
-   * Initialize vote limits for all categories (3 plus and 3 minus votes per category)
+   * Initialize vote limits for all categories (Ranking system: total available votes)
+   * Each category gets votes equal to the number of comments for ranking
    */
   initializeVoteLimits(categories: EvaluationCategoryDTO[]): void {
-    const limits = new Map<number, { plusVotes: number; minusVotes: number }>();
+    const limits = new Map<number, { availableVotes: number }>(); 
     categories.forEach(category => {
-      limits.set(category.id, { plusVotes: 3, minusVotes: 3 });
+      // Start with default 3 votes, will be updated when comments are loaded
+      limits.set(category.id, { availableVotes: 3 });
     });
     this.voteLimitsSubject.next(limits);
   }
 
   /**
-   * Check if user can vote for a specific category and vote type
+   * Check if user can vote for a specific category (Ranking system: only positive votes)
    */
-  canVote(categoryId: number, voteType: 'UP' | 'DOWN'): boolean {
+  canVote(categoryId: number): boolean {
     const currentLimits = this.voteLimitsSubject.value;
     const categoryLimits = currentLimits.get(categoryId);
 
     if (!categoryLimits) return false;
 
-    return voteType === 'UP' ? categoryLimits.plusVotes > 0 : categoryLimits.minusVotes > 0;
+    return categoryLimits.availableVotes > 0;
   }
 
   /**
-   * Get available votes for a specific category
+   * Get available votes for a specific category (Ranking system)
    */
-  getAvailableVotes(categoryId: number): { plusVotes: number; minusVotes: number } | null {
+  getAvailableVotes(categoryId: number): { availableVotes: number } | null {
     const currentLimits = this.voteLimitsSubject.value;
     return currentLimits.get(categoryId) || null;
   }
@@ -1954,7 +1956,7 @@ export class EvaluationStateService {
    */
   private updateVoteLimits(
     categoryId: number,
-    voteType: 'UP' | 'DOWN',
+    voteType: 'UP',
     isAddingVote: boolean,
   ): void {
     const currentLimits = new Map(this.voteLimitsSubject.value);
@@ -1963,16 +1965,10 @@ export class EvaluationStateService {
     if (!categoryLimits) return;
 
     const change = isAddingVote ? -1 : 1;
+    categoryLimits.availableVotes += change;
 
-    if (voteType === 'UP') {
-      categoryLimits.plusVotes += change;
-    } else {
-      categoryLimits.minusVotes += change;
-    }
-
-    // Ensure limits don't go below 0 or above 3
-    categoryLimits.plusVotes = Math.max(0, Math.min(3, categoryLimits.plusVotes));
-    categoryLimits.minusVotes = Math.max(0, Math.min(3, categoryLimits.minusVotes));
+    // Ensure limits don't go below 0
+    categoryLimits.availableVotes = Math.max(0, categoryLimits.availableVotes);
 
     currentLimits.set(categoryId, categoryLimits);
     this.voteLimitsSubject.next(currentLimits);
@@ -1999,14 +1995,14 @@ export class EvaluationStateService {
    */
   voteCommentWithLimits(
     commentId: string,
-    voteType: 'UP' | 'DOWN' | null,
+    voteType: 'UP' | null,
     categoryId: number,
   ): Observable<any> {
     if (this.isMockModeActive) {
       // Mock mode - graceful handling without throwing errors
-      if (voteType !== null && !this.canVote(categoryId, voteType)) {
+      if (voteType !== null && !this.canVote(categoryId)) {
         console.warn(
-          `⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`,
+          `⚠️ No more votes available for category ${categoryId}`,
         );
         // Return empty observable to gracefully handle limit reached
         return of(null);
@@ -2041,9 +2037,9 @@ export class EvaluationStateService {
     }
 
     // Real mode - graceful handling without throwing errors
-    if (voteType !== null && !this.canVote(categoryId, voteType)) {
+    if (voteType !== null && !this.canVote(categoryId)) {
       console.warn(
-        `⚠️ No more ${voteType.toLowerCase()} votes available for category ${categoryId}`,
+        `⚠️ No more votes available for category ${categoryId}`,
       );
       return of(null);
     }
@@ -2326,7 +2322,7 @@ export class EvaluationStateService {
    */
   voteCommentWithEnhancedLimits(
     commentId: string, 
-    voteType: 'UP' | 'DOWN' | null, 
+    voteType: 'UP' | null, 
     categoryId: number
   ): Observable<VoteLimitResponseDTO> {
     // Optimistic update for immediate UI feedback
@@ -2365,13 +2361,13 @@ export class EvaluationStateService {
    * 
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
-   * @param voteType - The type of votes to reset ('UP', 'DOWN', or 'ALL')
+   * @param voteType - The type of votes to reset ('UP' or 'ALL') - no DOWN votes in ranking system
    * @returns Observable with reset result
    */
   resetCategoryVotes(
     submissionId: string,
     categoryId: number,
-    voteType: 'UP' | 'DOWN' | 'ALL'
+    voteType: 'UP' | 'ALL'
   ): Observable<any> {
     console.log('🔄 State service: Resetting category votes:', { submissionId, categoryId, voteType });
 

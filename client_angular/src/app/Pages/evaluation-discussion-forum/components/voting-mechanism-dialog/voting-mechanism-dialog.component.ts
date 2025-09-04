@@ -76,7 +76,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
       <div class="dialog-header">
         <h1 mat-dialog-title>
           <mat-icon class="header-icon">how_to_vote</mat-icon>
-          Bewertungssystem erklärt
+          Ranking-System erklärt
         </h1>
         <button mat-icon-button 
                 mat-dialog-close
@@ -124,13 +124,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
             <mat-list-item>
               <mat-icon matListItemIcon>thumb_up</mat-icon>
               <div matListItemTitle>Kommentare bewerten</div>
-              <div matListItemLine>Sie können Kommentare anderer Teilnehmer mit einem Upvote bewerten</div>
+              <div matListItemLine>Sie können Kommentare anderer Teilnehmer positiv bewerten und so ein Ranking erstellen</div>
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>
               <mat-icon matListItemIcon>numbers</mat-icon>
-              <div matListItemTitle>Begrenztes Kontingent</div>
-              <div matListItemLine>Die Anzahl Ihrer Bewertungen entspricht der Gesamtzahl der Kommentare</div>
+              <div matListItemTitle>Vote-Kontingent verteilen</div>
+              <div matListItemLine>Verteilen Sie Ihr begrenztes Vote-Kontingent strategisch auf die besten Kommentare</div>
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>
@@ -143,17 +143,17 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
         <mat-divider class="section-divider"></mat-divider>
 
-        <!-- Point Calculation Section -->
+        <!-- Ranking System Section -->
         <div class="section">
           <h2>
-            <mat-icon>calculate</mat-icon>
-            Punkteberechnung
+            <mat-icon>leaderboard</mat-icon>
+            Ranking-System
           </h2>
           <div class="point-explanation">
             <div class="point-item">
               <mat-icon class="point-icon upvote">thumb_up</mat-icon>
               <div class="point-details">
-                <div class="point-action">Upvote vergeben</div>
+                <div class="point-action">Positive Bewertung</div>
                 <div class="point-value">+1 Punkt für den Kommentar</div>
               </div>
             </div>
@@ -164,6 +164,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
                 <div class="point-value">0 Punkte</div>
               </div>
             </div>
+            <div class="ranking-note">
+              <mat-icon>info</mat-icon>
+              <strong>Hinweis:</strong> Es gibt keine negativen Bewertungen. Kommentare werden nur durch positive Votes nach oben im Ranking befördert.
+            </div>
           </div>
         </div>
 
@@ -173,13 +177,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
         <div class="section">
           <h2>
             <mat-icon>info</mat-icon>
-            Warum gibt es ein Bewertungslimit?
+            Warum das Ranking-System?
           </h2>
           <mat-list class="benefits-list">
             <mat-list-item>
               <mat-icon matListItemIcon class="benefit-icon">psychology</mat-icon>
-              <div matListItemTitle>Durchdachte Bewertungen</div>
-              <div matListItemLine>Das Limit fördert sorgfältige Überlegung bei jeder Bewertung</div>
+              <div matListItemTitle>Strategische Bewertungen</div>
+              <div matListItemLine>Das begrenzte Kontingent fördert durchdachte Entscheidungen bei der Vote-Verteilung</div>
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>
@@ -190,8 +194,8 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
             <mat-divider></mat-divider>
             <mat-list-item>
               <mat-icon matListItemIcon class="benefit-icon">balance</mat-icon>
-              <div matListItemTitle>Faire Punkteverteilung</div>
-              <div matListItemLine>Sorgt für eine ausgewogene Bewertung aller Beiträge</div>
+              <div matListItemTitle>Echtes Ranking</div>
+              <div matListItemLine>Erstellt ein authentisches Ranking der wertvollsten Kommentare</div>
             </mat-list-item>
           </mat-list>
         </div>
@@ -202,7 +206,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
         <div class="section">
           <h2>
             <mat-icon>lightbulb</mat-icon>
-            Tipps für effektive Bewertungen
+            Tipps für strategisches Ranking
           </h2>
           <div class="tips-container">
             <div class="tip-card">
@@ -212,13 +216,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
             </div>
             <div class="tip-card">
               <mat-icon>star</mat-icon>
-              <h3>Qualität bewerten</h3>
-              <p>Bewerten Sie hilfreiche, konstruktive und gut begründete Beiträge</p>
+              <h3>Beste Kommentare identifizieren</h3>
+              <p>Verwenden Sie Ihre Votes für die hilfreichsten und konstruktivsten Beiträge</p>
             </div>
             <div class="tip-card">
               <mat-icon>refresh</mat-icon>
-              <h3>Automatische Aktualisierung</h3>
-              <p>Neue Kommentare erhöhen Ihr Bewertungslimit automatisch</p>
+              <h3>Vote-Kontingent</h3>
+              <p>Neue Kommentare erweitern Ihr verfügbares Vote-Kontingent automatisch</p>
             </div>
           </div>
         </div>

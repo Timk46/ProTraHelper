@@ -107,8 +107,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   @Input() anonymousUser: AnonymousEvaluationUserDTO | null = null;
   @Input() canComment: boolean = true;
   @Input() canVote: boolean = true;
-  @Input() availableUpvotes: number = 0;
-  @Input() availableDownvotes: number = 0;
+  @Input() availableVotes: number = 0;
   @Input() isReadOnly: boolean = false;
   @Input() isSubmittingComment: boolean = false;
   @Input() trackByFn: ((index: number, item: EvaluationDiscussionDTO) => string) | null = null;
@@ -120,7 +119,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   @Output() commentSubmitted = new EventEmitter<string>();
   @Output() commentVoted = new EventEmitter<{
     commentId: string;
-    voteType: 'UP' | 'DOWN' | null;
+    voteType: 'UP' | null;
   }>();
   @Output() replyRequested = new EventEmitter<{
     parentCommentId: string;
@@ -264,11 +263,8 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       case ' ': // Space for voting
         if (this.focusedCommentIndex >= 0) {
           preventDefault();
-          if (event.shiftKey) {
-            this.voteOnFocusedComment('DOWN');
-          } else {
-            event.key === 'Enter' ? this.expandFocusedComment() : this.voteOnFocusedComment('UP');
-          }
+          // Ranking system: only UP votes, no shift key needed
+          event.key === 'Enter' ? this.expandFocusedComment() : this.voteOnFocusedComment('UP');
         }
         break;
       
@@ -344,7 +340,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     }
   }
 
-  private voteOnFocusedComment(voteType: 'UP' | 'DOWN'): void {
+  private voteOnFocusedComment(voteType: 'UP'): void {
     const focusedComment = this.getFocusedComment();
     if (focusedComment?.comment) {
       this.onCommentVoted({
@@ -767,7 +763,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     this.commentSubmitted.emit(content.trim());
   }
 
-  onCommentVoted(data: { commentId: string; voteType: 'UP' | 'DOWN' | null }): void {
+  onCommentVoted(data: { commentId: string; voteType: 'UP' | null }): void {
     if (!this.canVote || this.isVotingComment.get(data.commentId)) {
       return;
     }

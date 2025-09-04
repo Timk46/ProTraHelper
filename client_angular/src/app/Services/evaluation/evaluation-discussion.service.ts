@@ -332,6 +332,20 @@ export class EvaluationDiscussionService {
   }
 
   /**
+   * Get user's vote count for a comment (multiple votes support)
+   * @param commentId - The comment ID to check
+   * @returns Observable containing user's vote count
+   */
+  getUserVoteCountForComment(commentId: string): Observable<number> {
+    const url = `${this.apiUrls.comments}/${commentId}/user-vote-count`;
+    return this.http.get<{ voteCount: number }>(url).pipe(
+      map(response => response.voteCount),
+      retry(2),
+      catchError(this.handleError<number>('getUserVoteCountForComment'))
+    );
+  }
+
+  /**
    * Gets comprehensive comment statistics for a submission
    * Includes per-category limits and usage tracking
    */
@@ -421,7 +435,7 @@ export class EvaluationDiscussionService {
    */
   getUserRatingStatus(submissionId: string, userId: number): Observable<CategoryRatingStatus[]> {
     const endpoint = `${this.apiUrls.ratings}/submission/${submissionId}/user/${userId}/status`;
-    
+
     // DEBUG: API call verification
     console.log('🐛 DEBUG API Call:', {
       method: 'getUserRatingStatus',
@@ -464,17 +478,17 @@ export class EvaluationDiscussionService {
 
   /**
    * Deletes a user's rating for a specific category and submission
-   * 
+   *
    * @description Removes the user's rating from the database and triggers
    * cache invalidation to ensure consistent state across the application
-   * 
+   *
    * @param {string} submissionId - The submission ID
    * @param {number} categoryId - The category ID
    * @returns {Observable<{success: boolean, message: string}>} Observable containing deletion result
    */
   deleteUserRating(submissionId: string, categoryId: number): Observable<{success: boolean, message: string}> {
     const deleteEndpoint = `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`;
-    
+
     console.log('🗑️ Calling backend to delete rating:', {
       endpoint: deleteEndpoint,
       submissionId,
@@ -485,7 +499,7 @@ export class EvaluationDiscussionService {
     return this.http.delete<{success: boolean, message: string}>(deleteEndpoint).pipe(
       tap(response => {
         console.log('✅ Rating deleted successfully from backend:', response);
-        
+
         // Update local ratings state by removing the deleted rating
         const currentRatings = this.ratingsSubject.value;
         const updatedRatings = currentRatings.filter(
@@ -555,14 +569,14 @@ export class EvaluationDiscussionService {
 
   /**
    * Gets the vote limit status for a user in a specific submission and category
-   * 
+   *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
    * @returns Observable containing vote limit status
    */
   getVoteLimitStatus(submissionId: string, categoryId: string): Observable<VoteLimitStatusDTO> {
     const url = `${this.apiUrls.comments}/vote-limit/${submissionId}/${categoryId}`;
-    
+
     return this.http.get<VoteLimitStatusDTO>(url).pipe(
       retry(2),
       catchError(this.handleError<VoteLimitStatusDTO>('getVoteLimitStatus'))
@@ -571,15 +585,15 @@ export class EvaluationDiscussionService {
 
   /**
    * Votes on a comment with vote limit checking
-   * 
+   *
    * @param commentId - The comment ID to vote on
-   * @param voteType - The vote type ('UP', 'DOWN', or null)
+   * @param voteType - The vote type ('UP' or null) - Ranking System
    * @returns Observable containing vote result and updated limit status
    */
-  voteCommentWithLimits(commentId: string, voteType: 'UP' | 'DOWN' | null): Observable<VoteLimitResponseDTO> {
+  voteCommentWithLimits(commentId: string, voteType: 'UP' | null): Observable<VoteLimitResponseDTO> {
     const url = `${this.apiUrls.comments}/${commentId}/vote`;
     const body = { voteType };
-    
+
     return this.http.post<VoteLimitResponseDTO>(url, body).pipe(
       retry(2),
       catchError(this.handleError<VoteLimitResponseDTO>('voteCommentWithLimits'))
@@ -588,18 +602,18 @@ export class EvaluationDiscussionService {
 
   /**
    * Resets user votes in a specific category
-   * 
+   *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
-   * @param voteType - The type of votes to reset ('UP', 'DOWN', or 'ALL')
+   * @param voteType - The type of votes to reset ('UP' or 'ALL') - Ranking System
    * @returns Observable containing reset result and updated vote limit status
    */
-  resetVotes(submissionId: string, categoryId: number, voteType: 'UP' | 'DOWN' | 'ALL'): Observable<ResetVotesResponseDTO> {
+  resetVotes(submissionId: string, categoryId: number, voteType: 'UP' | 'ALL'): Observable<ResetVotesResponseDTO> {
     const url = `${this.apiUrls.comments}/votes/reset`;
     const body: ResetVotesDTO = { submissionId, categoryId, voteType };
-    
+
     console.log('🔄 Resetting votes via frontend service:', { submissionId, categoryId, voteType });
-    
+
     return this.http.delete<ResetVotesResponseDTO>(url, { body }).pipe(
       retry(2),
       tap(response => {
@@ -616,13 +630,13 @@ export class EvaluationDiscussionService {
 
   /**
    * Gets the current vote statistics for a comment
-   * 
+   *
    * @param commentId - The comment ID
    * @returns Observable containing vote result
    */
   getCommentVotes(commentId: string): Observable<VoteResultDTO> {
     const url = `${this.apiUrls.comments}/${commentId}/votes`;
-    
+
     return this.http.get<VoteResultDTO>(url).pipe(
       retry(2),
       catchError(this.handleError<VoteResultDTO>('getCommentVotes'))

@@ -276,24 +276,15 @@ interface RatingGateViewModel {
             <!-- Vote Reset Actions (nur anzeigen wenn bereits Votes abgegeben wurden) -->
             <div class="vote-reset-actions" *ngIf="voteLimit.percentage > 0">
               <div class="reset-section">
-                <p class="reset-info">Bewertungen zurücksetzen:</p>
+                <p class="reset-info">Alle Bewertungen zurücksetzen:</p>
                 <div class="reset-buttons">
                   <button mat-stroked-button
                           color="primary"
                           (click)="resetVotes('UP')"
                           [disabled]="isResettingVotes"
-                          matTooltip="Alle positiven Bewertungen zurücksetzen">
-                    <mat-icon>thumb_up</mat-icon>
-                    <span *ngIf="!isResettingVotes">Alle positiven</span>
-                    <mat-spinner *ngIf="isResettingVotes" diameter="16"></mat-spinner>
-                  </button>
-                  <button mat-stroked-button
-                          color="warn"
-                          (click)="resetVotes('DOWN')"
-                          [disabled]="isResettingVotes"
-                          matTooltip="Alle negativen Bewertungen zurücksetzen">
-                    <mat-icon>thumb_down</mat-icon>
-                    <span *ngIf="!isResettingVotes">Alle negativen</span>
+                          matTooltip="Alle Bewertungen zurücksetzen">
+                    <mat-icon>refresh</mat-icon>
+                    <span *ngIf="!isResettingVotes">Alle zurücksetzen</span>
                     <mat-spinner *ngIf="isResettingVotes" diameter="16"></mat-spinner>
                   </button>
                 </div>
@@ -341,8 +332,7 @@ interface RatingGateViewModel {
                 [anonymousUser]="anonymousUser"
                 [canComment]="canComment"
                 [canVote]="canVote"
-                [availableUpvotes]="availableUpvotes"
-                [availableDownvotes]="availableDownvotes"
+                [availableVotes]="availableVotes"
                 [isReadOnly]="isReadOnly"
                 [isSubmittingComment]="isSubmittingComment"
                 [isVotingComment]="isVotingComment"
@@ -363,8 +353,7 @@ interface RatingGateViewModel {
             [anonymousUser]="anonymousUser"
             [canComment]="canComment"
             [canVote]="canVote"
-            [availableUpvotes]="availableUpvotes"
-            [availableDownvotes]="availableDownvotes"
+            [availableVotes]="availableVotes"
             [isReadOnly]="isReadOnly"
             [isSubmittingComment]="isSubmittingComment"
             [isVotingComment]="isVotingComment"
@@ -1501,14 +1490,9 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   @Input() canVote: boolean = false;
 
   /**
-   * Number of available upvotes
+   * Number of available votes (ranking system)
    */
-  @Input() availableUpvotes: number = 0;
-
-  /**
-   * Number of available downvotes
-   */
-  @Input() availableDownvotes: number = 0;
+  @Input() availableVotes: number = 0;
 
   /**
    * Whether the discussion is read-only
@@ -2178,11 +2162,11 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   }
 
   /**
-   * Resets user votes in the current category
+   * Resets user votes in the current category (ranking system: UP votes only)
    *
-   * @param voteType - The type of votes to reset ('UP' or 'DOWN')
+   * @param voteType - The type of votes to reset ('UP' only in ranking system)
    */
-  resetVotes(voteType: 'UP' | 'DOWN'): void {
+  resetVotes(voteType: 'UP'): void {
     if (!this.submissionId || this.isResettingVotes) {
       return;
     }
@@ -2207,9 +2191,9 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       next: (response) => {
         console.log('✅ Vote reset successful:', response);
 
-        // Show success snackbar with appropriate color
-        const voteTypeText = voteType === 'UP' ? 'Positive' : 'Negative';
-        const snackBarClass = voteType === 'UP' ? 'success-snackbar' : 'warn-snackbar';
+        // Show success snackbar
+        const voteTypeText = 'Alle';
+        const snackBarClass = 'success-snackbar';
 
         this.snackBar.open(
           `${voteTypeText} Bewertungen zurückgesetzt (${response.resetCount})`,
