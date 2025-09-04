@@ -462,6 +462,44 @@ export class EvaluationDiscussionService {
     );
   }
 
+  /**
+   * Deletes a user's rating for a specific category and submission
+   * 
+   * @description Removes the user's rating from the database and triggers
+   * cache invalidation to ensure consistent state across the application
+   * 
+   * @param {string} submissionId - The submission ID
+   * @param {number} categoryId - The category ID
+   * @returns {Observable<{success: boolean, message: string}>} Observable containing deletion result
+   */
+  deleteUserRating(submissionId: string, categoryId: number): Observable<{success: boolean, message: string}> {
+    const deleteEndpoint = `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`;
+    
+    console.log('🗑️ Calling backend to delete rating:', {
+      endpoint: deleteEndpoint,
+      submissionId,
+      categoryId,
+      timestamp: new Date().toISOString()
+    });
+
+    return this.http.delete<{success: boolean, message: string}>(deleteEndpoint).pipe(
+      tap(response => {
+        console.log('✅ Rating deleted successfully from backend:', response);
+        
+        // Update local ratings state by removing the deleted rating
+        const currentRatings = this.ratingsSubject.value;
+        const updatedRatings = currentRatings.filter(
+          rating => !(rating.categoryId === categoryId && rating.submissionId === submissionId)
+        );
+        this.ratingsSubject.next(updatedRatings);
+      }),
+      catchError(error => {
+        console.error('❌ Failed to delete rating from backend:', error);
+        throw error;
+      })
+    );
+  }
+
   // =============================================================================
   // PHASE MANAGEMENT
   // =============================================================================

@@ -4,6 +4,7 @@ import {
   OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -125,6 +126,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // =============================================================================
 
   protected readonly EvaluationPhase = EvaluationPhase;
+
+  // =============================================================================
+  // COMPONENT REFERENCES
+  // =============================================================================
+  
+  @ViewChild(RatingSliderComponent) ratingSlider!: RatingSliderComponent;
 
   // =============================================================================
   // COMPONENT STATE - ENHANCED WITH GLOBAL STATE MANAGEMENT
@@ -1154,6 +1161,61 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Handles rating deletion events from rating gate component
+   * 
+   * @description Called when user clicks the "Zurücksetzen" button to delete their rating.
+   * This will call the backend to delete the rating and update the local state.
+   * 
+   * @param {any} data - The deletion event data containing categoryId
+   */
+  onRatingDeleted(data: { categoryId: number }): void {
+    if (!this.submissionId) {
+      console.error('❌ Cannot delete rating: No submission ID');
+      return;
+    }
+
+    console.log('🗑️ Processing rating deletion:', {
+      categoryId: data.categoryId,
+      submissionId: this.submissionId,
+      timestamp: new Date().toISOString()
+    });
+
+    // Call backend to delete rating from database
+    this.stateService.deleteCategoryRating(this.submissionId!, data.categoryId).subscribe({
+      next: () => {
+        console.log('✅ Rating deletion completed successfully');
+        
+        // Show success message
+        this.snackBar.open(
+          `Bewertung wurde erfolgreich gelöscht`,
+          'Schließen',
+          {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['success-snackbar']
+          }
+        );
+      },
+      error: (error) => {
+        console.error('❌ Failed to delete rating:', error);
+        
+        // Show error message
+        this.snackBar.open(
+          `Fehler beim Löschen der Bewertung: ${error.message || 'Unbekannter Fehler'}`,
+          'Schließen',
+          {
+            duration: 5000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
+  }
+
+  /**
    * Handles discussion access granted events from rating gate
    *
    * @description Called when the rating gate component grants access to discussion
@@ -1468,26 +1530,56 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Resets the rating by clearing it from state and enabling edit mode
+   * Resets the rating by completely deleting it from database and enabling edit mode
    */
   onResetRating(): void {
     this.activeCategory$.pipe(take(1)).subscribe(activeCategory => {
       if (activeCategory && this.submissionId) {
-        console.log('🔄 Resetting rating for category:', activeCategory);
+        console.log('🔄 Deleting rating for category:', activeCategory);
         
-        // Clear the rating from state service
-        this.stateService.clearCategoryRating(this.submissionId, activeCategory);
-        
-        // Enable rating panel for new input and expand it
-        this.showRatingPanel = true;
-        this.isRatingPanelExpanded = true; // Expand for rating input
-        this.ratingJustSubmitted = false;
-        
-        // Force change detection
-        this.cdr.markForCheck();
-        
-        // Show success message
-        this.showSuccessMessage('Bewertung wurde zurückgesetzt - Sie können erneut bewerten');
+        // Call the backend to actually delete the rating from database
+        this.stateService.deleteCategoryRating(this.submissionId, activeCategory).subscribe({
+          next: () => {
+            console.log('✅ Rating deletion completed successfully');
+            
+            // Wait for the state to propagate, then update UI
+            setTimeout(() => {
+              // Enable rating panel for new input and expand it
+              this.showRatingPanel = true;
+              this.isRatingPanelExpanded = true; // Expand for rating input
+              this.ratingJustSubmitted = false;
+              
+              // Reset the rating slider state to unrated
+              if (this.ratingSlider) {
+                this.ratingSlider.resetSliderState();
+                console.log('🔄 Rating slider state reset completed');
+              }
+              
+              // Force change detection
+              this.cdr.markForCheck();
+              
+              console.log('🔄 UI states updated after rating deletion');
+            }, 100); // Small delay to ensure state propagation
+            
+            // Show success message immediately
+            this.showSuccessMessage('Bewertung wurde erfolgreich gelöscht - Sie können erneut bewerten');
+          },
+          error: (error) => {
+            console.error('❌ Failed to delete rating:', error);
+            
+            // Show error message
+            this.snackBar.open(
+              `Fehler beim Löschen der Bewertung: ${error.message || 'Unbekannter Fehler'}`,
+              'Schließen',
+              {
+                duration: 5000,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass: ['error-snackbar']
+              }
+            );
+          }
+        });
       }
     });
   }

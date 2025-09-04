@@ -93,57 +93,14 @@
       
     </div>
     
-    <!-- Quick Rating Buttons -->
-    <div class="quick-rating-section" *ngIf="!isCompact()">
-      
-      <div class="quick-rating-header">
-        <mat-icon class="quick-icon">flash_on</mat-icon>
-        <span class="quick-title">Schnellbewertung</span>
-      </div>
-      
-      <div class="quick-buttons">
-        <button *ngFor="let option of getQuickRatingOptions()"
-                mat-stroked-button
-                class="quick-rating-button"
-                [class.selected]="currentValue === option.value"
-                [disabled]="disabled"
-                [matTooltip]="option.label + ' (' + option.value + '/10)'"
-                (click)="onQuickRating(option.value)">
-          
-          <mat-icon>{{ option.icon }}</mat-icon>
-          <span class="quick-label">{{ option.label }}</span>
-          <span class="quick-value">{{ option.value }}</span>
-          
-        </button>
-      </div>
-      
-    </div>
     
   </mat-card-content>
   
   <!-- Action Buttons -->
   <mat-card-actions class="rating-actions">
     
-    <!-- Modified Indicator -->
-    <div class="modification-indicator" *ngIf="isModified">
-      <mat-icon class="modified-icon">edit</mat-icon>
-      <span class="modified-text">Bewertung geändert</span>
-    </div>
-    
     <!-- Action Buttons -->
     <div class="action-buttons">
-      
-      <!-- Reset Button -->
-      <button mat-button
-              class="reset-button"
-              [disabled]="!isModified || disabled"
-              matTooltip="Änderungen zurücksetzen"
-              (click)="onResetRating()">
-        
-        <mat-icon>refresh</mat-icon>
-        Zurücksetzen
-        
-      </button>
       
       <!-- Submit Button -->
       <button mat-raised-button
@@ -162,21 +119,6 @@
     
   </mat-card-actions>
   
-  <!-- Confidence Indicator -->
-  <div class="confidence-indicator" *ngIf="!isCompact() && getCategoryStatus() === 'rated'">
-    <div class="confidence-content">
-      
-      <mat-icon class="confidence-icon">psychology</mat-icon>
-      
-      <div class="confidence-info">
-        <span class="confidence-label">Bewertungsvertrauen:</span>
-        <mat-chip class="confidence-chip" [ngClass]="'confidence-' + getConfidenceLevel()">
-          {{ getConfidenceLevel() === 'high' ? 'Hoch' : getConfidenceLevel() === 'medium' ? 'Mittel' : 'Niedrig' }}
-        </mat-chip>
-      </div>
-      
-    </div>
-  </div>
   
   <!-- Historical Data Section -->
   <div class="historical-section" *ngIf="hasHistoricalData() && !isCompact()">

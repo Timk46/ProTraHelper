@@ -250,6 +250,65 @@ export class EvaluationRatingService {
     return this.mapToDTO(rating);
   }
 
+  /**
+   * Deletes a user's rating for a specific category and submission
+   *
+   * @description Removes an existing rating from the database and invalidates
+   * related cache entries. Used for the reset functionality in the frontend.
+   *
+   * @param {string} submissionId - The submission ID
+   * @param {number} categoryId - The category ID
+   * @param {number} userId - The user ID who owns the rating
+   * @returns {Promise<void>} Promise indicating deletion success
+   * @throws {NotFoundException} When rating doesn't exist
+   * @throws {ForbiddenException} When user doesn't own the rating
+   * @memberof EvaluationRatingService
+   */
+  async deleteUserRating(
+    submissionId: string,
+    categoryId: number,
+    userId: number,
+  ): Promise<void> {
+    // Find the existing rating
+    const existingRating = await this.prisma.evaluationRating.findUnique({
+      where: {
+        submissionId_categoryId_userId: {
+          submissionId,
+          categoryId,
+          userId,
+        },
+      },
+      select: { id: true, userId: true },
+    });
+
+    if (!existingRating) {
+      throw new NotFoundException(
+        `Rating for submission ${submissionId} and category ${categoryId} not found`,
+      );
+    }
+
+    if (existingRating.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own ratings');
+    }
+
+    // Delete the rating
+    await this.prisma.evaluationRating.delete({
+      where: { id: existingRating.id },
+    });
+
+    // Invalidate cache for this submission (both old and new patterns)
+    this.cacheService.invalidateByPattern(`ratings:${submissionId}:.*`);
+    this.cacheService.invalidateByPattern(`rating-status-batch:${submissionId}:.*`);
+    
+    // Also invalidate the specific user's cache key to ensure immediate freshness
+    const specificCacheKey = this.utilsService.generateCacheKey(
+      'rating-status-batch',
+      submissionId,
+      userId.toString()
+    );
+    this.cacheService.delete(specificCacheKey);
+  }
+
   async getSubmissionRatings(submissionId: string): Promise<EvaluationRatingDTO[]> {
     const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId, 'all');
 

@@ -768,13 +768,63 @@ export class EvaluationStateService {
       tap(statuses => {
         console.log('✅ Received rating statuses:', statuses);
 
-        // Convert array to Map for efficient lookups
-        const statusMap = new Map<number, CategoryRatingStatus>();
+        // BUGFIX: Merge with existing local data instead of blind overwrite
+        const currentStatusMap = this.categoryRatingStatusSubject.value;
+        const mergedStatusMap = new Map<number, CategoryRatingStatus>();
+        
+        // Convert backend array to map first
+        const backendStatusMap = new Map<number, CategoryRatingStatus>();
         statuses.forEach(status => {
-          statusMap.set(status.categoryId, status);
+          backendStatusMap.set(status.categoryId, status);
         });
 
-        this.categoryRatingStatusSubject.next(statusMap);
+        // For each category, decide whether to use backend or local data
+        const allCategoryIds = new Set([
+          ...Array.from(currentStatusMap.keys()),
+          ...Array.from(backendStatusMap.keys())
+        ]);
+
+        allCategoryIds.forEach(categoryIdKey => {
+          const localStatus = currentStatusMap.get(categoryIdKey);
+          const backendStatus = backendStatusMap.get(categoryIdKey);
+          
+          // If we have local data and it's fresher (updated within last 2 minutes), keep it
+          if (localStatus?.lastUpdatedAt) {
+            const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+            const isLocalFresh = localStatus.lastUpdatedAt > twoMinutesAgo;
+            const localHasRating = localStatus.hasRated && localStatus.rating !== null;
+            
+            if (isLocalFresh && localHasRating) {
+              console.log('🔄 Preserving fresh local rating in loadCategoryRatingStatus:', {
+                categoryId: categoryIdKey,
+                localRating: localStatus.rating,
+                backendRating: backendStatus?.rating,
+                localUpdatedAt: localStatus.lastUpdatedAt,
+                reason: 'Local data is fresher than backend cache'
+              });
+              mergedStatusMap.set(categoryIdKey, localStatus);
+              return;
+            }
+          }
+          
+          // Otherwise, use backend data if available, or fall back to local
+          if (backendStatus) {
+            mergedStatusMap.set(categoryIdKey, backendStatus);
+          } else if (localStatus) {
+            mergedStatusMap.set(categoryIdKey, localStatus);
+          }
+        });
+
+        console.log('✅ Rating status merged with local preservation:', {
+          totalCategories: mergedStatusMap.size,
+          preservedLocal: Array.from(mergedStatusMap.entries())
+            .filter(([_, status]) => {
+              const localStatus = currentStatusMap.get(status.categoryId);
+              return localStatus === status;
+            }).length
+        });
+
+        this.categoryRatingStatusSubject.next(mergedStatusMap);
       }),
       catchError(error => {
         console.error('❌ Error loading rating status:', error);
@@ -843,6 +893,81 @@ export class EvaluationStateService {
       totalCategoriesInMap: newStatusMap.size,
       affectedCategory: updatedStatus
     });
+  }
+
+  /**
+   * Deletes a rating for a specific category
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID to delete rating for
+   */
+  /**
+   * Deletes a category rating both locally and on the backend
+   *
+   * @description This method calls the backend to actually delete the rating
+   * from the database, then updates the local state to reflect the deletion.
+   * This ensures the rating is completely removed and can be re-submitted.
+   *
+   * @param {string} submissionId - The submission ID
+   * @param {number} categoryId - The category ID to delete rating for
+   * @returns {Observable<void>} Observable that completes when deletion is successful
+   * @memberof EvaluationStateService
+   */
+  deleteCategoryRating(submissionId: string, categoryId: number): Observable<void> {
+    console.log('🗑️ Deleting category rating:', { 
+      submissionId, 
+      categoryId,
+      timestamp: new Date().toISOString()
+    });
+
+    // Call backend to delete rating from database
+    return this.evaluationService.deleteUserRating(submissionId, categoryId).pipe(
+      tap(response => {
+        console.log('✅ Backend deletion successful:', response);
+
+        // Update local state after successful backend deletion
+        const currentStatusMap = this.categoryRatingStatusSubject.value;
+        const existingStatus = currentStatusMap.get(categoryId);
+
+        if (existingStatus) {
+          // Create updated status with rating removed
+          const updatedStatus: CategoryRatingStatus = {
+            ...existingStatus,
+            hasRated: false,
+            rating: null,
+            ratedAt: null,
+            lastUpdatedAt: new Date(),
+            canAccessDiscussion: false, // Remove discussion access when rating is deleted
+          };
+
+          // Create new map to ensure immutability
+          const newStatusMap = new Map(currentStatusMap);
+          newStatusMap.set(categoryId, updatedStatus);
+
+          // Atomic update
+          this.categoryRatingStatusSubject.next(newStatusMap);
+
+          // BUGFIX: Also update ratingsSubject to remove the deleted rating
+          // This ensures both state containers stay synchronized
+          const currentRatings = this.ratingsSubject.value;
+          const updatedRatings = currentRatings.filter(
+            rating => !(rating.categoryId === categoryId && rating.submissionId === submissionId)
+          );
+          this.ratingsSubject.next(updatedRatings);
+
+          console.log('✅ Local state updated after rating deletion:', {
+            deletedCategoryId: categoryId,
+            totalCategoriesInMap: newStatusMap.size,
+            updatedCategory: updatedStatus,
+            ratingsRemoved: currentRatings.length - updatedRatings.length
+          });
+        }
+      }),
+      map(() => void 0), // Convert to void observable
+      catchError(error => {
+        console.error('❌ Failed to delete category rating:', error);
+        throw error;
+      })
+    );
   }
 
   /**

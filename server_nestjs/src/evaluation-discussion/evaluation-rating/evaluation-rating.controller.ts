@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
@@ -142,6 +142,39 @@ export class EvaluationRatingController {
    * @memberof EvaluationRatingController
    */
   private static readonly anonymousUserCache = new Map<string, number>();
+
+  /**
+   * Deletes a rating by category for the current user
+   *
+   * @description Removes the user's rating for a specific category and submission.
+   * This enables the reset functionality in the frontend rating system.
+   *
+   * @route DELETE /evaluation-ratings/submission/:submissionId/category/:categoryId/user
+   * @param {string} submissionId - The submission ID
+   * @param {string} categoryId - The category ID  
+   * @param {any} req - Request object containing user information
+   * @returns {Promise<{success: boolean, message: string}>} Deletion confirmation
+   */
+  @Delete('submission/:submissionId/category/:categoryId/user')
+  @roles('ANY')
+  async deleteUserRating(
+    @Param('submissionId') submissionId: string,
+    @Param('categoryId') categoryId: string,
+    @Req() req: any,
+  ): Promise<{ success: boolean; message: string }> {
+    const userId = req.user && req.user.id ? req.user.id : this.extractDemoUserId(submissionId);
+    
+    await this.evaluationRatingService.deleteUserRating(
+      submissionId,
+      Number(categoryId),
+      userId,
+    );
+    
+    return {
+      success: true,
+      message: 'Rating deleted successfully',
+    };
+  }
 
   /**
    * Extracts or generates a secure demo user ID for anonymous access

@@ -62,6 +62,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
 
   @Output() ratingChanged = new EventEmitter<{ categoryId: number; score: number }>();
   @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
+  @Output() ratingDeleted = new EventEmitter<{ categoryId: number }>();
 
   // =============================================================================
   // COMPONENT STATE & VIEW CHILDREN
@@ -192,7 +193,63 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   }
 
   onResetRating(): void {
-    this.initializeRating();
+    // Emit deletion event to parent component
+    this.ratingDeleted.emit({
+      categoryId: this.categoryId
+    });
+    
+    // Reset local state to unrated
+    this.currentRating = null;
+    this.currentValue = Math.floor((this.minValue + this.maxValue) / 2);
+    this.isModified = true; // Allow immediate re-submission
+    this.hasUserInteracted = false;
+    
+    // Update form
+    this.ratingForm.get('rating')?.setValue(this.currentValue, { 
+      emitEvent: false,
+      onlySelf: true 
+    });
+    
+    // Force change detection
+    this.cdr.markForCheck();
+    
+    console.log('🗑️ Rating reset/deleted for category:', this.categoryId);
+  }
+
+  /**
+   * Resets the slider state to unrated condition
+   * 
+   * @description This method resets all local state variables to their initial
+   * unrated state, allowing the slider to be used for a fresh rating submission.
+   * Called externally after successful backend rating deletion.
+   * 
+   * @public
+   * @returns {void}
+   * @memberof RatingSliderComponent
+   */
+  public resetSliderState(): void {
+    console.log('🔄 Resetting slider state for category:', this.categoryId);
+    
+    // Reset all local state to unrated
+    this.currentRating = null;
+    this.currentValue = Math.floor((this.minValue + this.maxValue) / 2);
+    this.isModified = true; // Allow immediate re-submission
+    this.hasUserInteracted = false;
+    
+    // Update form control with reset value
+    this.ratingForm.get('rating')?.setValue(this.currentValue, { 
+      emitEvent: false,
+      onlySelf: true 
+    });
+    
+    // Force change detection to update UI
+    this.cdr.markForCheck();
+    
+    console.log('✅ Slider state reset completed:', {
+      categoryId: this.categoryId,
+      newValue: this.currentValue,
+      isModified: this.isModified
+    });
   }
 
   /**

@@ -115,13 +115,14 @@ $warning-color: #e67e22;
 // =============================================================================
 
 .rating-expansion-panel {
-  margin: 16px 0;
+  margin: 20px 0;
   border: 2px solid $success-color !important;
-  border-radius: 12px !important;
-  box-shadow: $card-shadow !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.12) !important;
   
   .mat-expansion-panel-header {
-    padding: 16px 24px !important;
+    padding: 20px 24px !important;
+    min-height: 80px !important;
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
     
     &.mat-expanded {
@@ -132,7 +133,7 @@ $warning-color: #e67e22;
       .rating-panel-title {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 16px;
         
         .completed-icon {
           font-size: 24px;
@@ -147,9 +148,10 @@ $warning-color: #e67e22;
           gap: 4px;
           
           .rating-label {
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 600;
             color: $text-primary;
+            letter-spacing: -0.01em;
           }
           
           .rating-score-compact {
@@ -191,10 +193,11 @@ $warning-color: #e67e22;
       }
       
       .expand-icon {
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
         color: $text-secondary;
+        transition: transform 0.3s ease;
       }
     }
   }
@@ -213,10 +216,10 @@ $warning-color: #e67e22;
       
       .rating-details {
         .rating-text {
-          margin: 0 0 8px 0;
+          margin: 0 0 12px 0;
           color: $text-primary;
           font-size: 16px;
-          line-height: 1.4;
+          line-height: 1.6;
           
           strong {
             color: $success-color;
@@ -1030,12 +1033,12 @@ a:focus-visible {
 .rating-panel-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   
   .rating-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
     color: $text-secondary;
     transition: color 0.3s ease;
     
@@ -1045,9 +1048,10 @@ a:focus-visible {
   }
   
   .rating-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: $text-primary;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -1059,10 +1063,11 @@ a:focus-visible {
   text-align: right;
   
   .category-description {
-    font-size: 13px;
+    font-size: 14px;
     color: $text-secondary;
-    max-width: 250px;
-    line-height: 1.4;
+    max-width: 280px;
+    line-height: 1.5;
+    font-weight: 400;
   }
   
   .rating-status {
@@ -1073,25 +1078,27 @@ a:focus-visible {
     .score-badge {
       background: linear-gradient(135deg, $success-color, lighten($success-color, 10%));
       color: white;
-      padding: 4px 12px;
-      border-radius: 16px;
-      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
       font-weight: 600;
-      box-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+      box-shadow: 0 3px 8px rgba(39, 174, 96, 0.25);
+      letter-spacing: -0.01em;
     }
     
     .pending-badge {
-      background: linear-gradient(135deg, $warning-color, lighten($warning-color, 10%));
+      background: linear-gradient(135deg, #ff8c42, lighten(#ff8c42, 8%));
       color: white;
-      padding: 4px 12px;
-      border-radius: 16px;
-      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
       font-weight: 600;
-      box-shadow: 0 2px 4px rgba(230, 126, 34, 0.3);
+      box-shadow: 0 3px 8px rgba(255, 140, 66, 0.25);
+      letter-spacing: -0.01em;
     }
     
     .expand-icon {
-      font-size: 18px;
+      font-size: 24px;
       color: $text-secondary;
       transition: transform 0.3s ease;
     }
@@ -1100,7 +1107,7 @@ a:focus-visible {
 
 // Panel content styling
 .rating-panel-content {
-  padding: 24px !important;
+  padding: 28px 24px !important;
   background: #fafbfc;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   
@@ -1110,11 +1117,11 @@ a:focus-visible {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       
       h4 {
         margin: 0;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 600;
         color: $text-primary;
       }

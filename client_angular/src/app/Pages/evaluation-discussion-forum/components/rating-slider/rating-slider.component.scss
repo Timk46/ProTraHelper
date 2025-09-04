@@ -110,17 +110,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px;
+  padding: 12px;
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   border-radius: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   transition: all 0.3s ease;
   
   .rating-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 12px;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
     transition: all 0.3s ease;
   }
   
@@ -130,7 +130,7 @@
     margin-bottom: 8px;
     
     .value-number {
-      font-size: 32px;
+      font-size: 24px;
       font-weight: 700;
       line-height: 1;
     }
@@ -243,7 +243,7 @@
 // =============================================================================
 
 .slider-section {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   
   .rating-slider {
     width: 100%;

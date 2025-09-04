@@ -435,6 +435,7 @@ interface RatingGateViewModel {
                   [currentRating]="convertRatingStatusToDTO(vm.ratingStatus)"
                   [disabled]="false"
                   (ratingSubmitted)="onRatingSubmitted($event)"
+                  (ratingDeleted)="onRatingDeleted($event)"
                 >
                 </app-rating-slider>
               </div>
@@ -1571,6 +1572,11 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
 
   /**
+   * Emitted when a rating is deleted/reset
+   */
+  @Output() ratingDeleted = new EventEmitter<{ categoryId: number }>();
+
+  /**
    * Emitted when a comment is submitted
    */
   @Output() commentSubmitted = new EventEmitter<any>();
@@ -1857,6 +1863,32 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   }
 
   /**
+   * Handles rating deletion events from the rating slider
+   *
+   * @description Called when user clicks the "Zurücksetzen" button to delete their rating.
+   * This will call the backend to delete the rating and update the local state.
+   *
+   * @param {any} deleteEvent - The delete event from the rating slider containing categoryId
+   */
+  onRatingDeleted(deleteEvent: any): void {
+    console.log('🗑️ Rating deletion requested in rating gate:', {
+      categoryId: this.currentCategory.id,
+      deleteEvent,
+    });
+
+    // Auto-collapse the rating panel after deletion
+    this.isRatingSliderExpanded = false;
+    this.showRatingReset = false;
+
+    // Emit rating deletion event to parent component for backend deletion
+    this.ratingDeleted.emit({
+      categoryId: this.currentCategory.id,
+    });
+
+    console.log('✅ Rating deletion event emitted to parent');
+  }
+
+  /**
    * Handles initial comment submission (first comment in category)
    *
    * @description Called when user submits their first comment to unlock discussion
@@ -2108,11 +2140,31 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   /**
    * Handles rating reset button click
    *
-   * @description Opens the rating panel and switches to reset mode
+   * @description Deletes the user's rating from the database and updates the UI to allow re-rating
    */
   onResetRatingSlider(): void {
+    console.log('🔄 User clicked Zurücksetzen button - deleting rating for category:', this.currentCategory.id);
+    
+    // Delete the rating using the existing onRatingDeleted method which handles backend deletion
+    this.onRatingDeleted({ categoryId: this.currentCategory.id });
+    
+    // Set UI state to show the rating input again
     this.showRatingReset = true;
     this.isRatingSliderExpanded = true;
+    
+    // Show success message to inform user about the deletion
+    this.snackBar.open(
+      `Bewertung für "${this.currentCategory.displayName}" wurde zurückgesetzt. Sie können nun erneut bewerten.`,
+      'OK',
+      {
+        duration: 4000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['success-snackbar']
+      }
+    );
+    
+    console.log('✅ Rating deletion initiated and UI updated for re-rating');
   }
 
   /**
