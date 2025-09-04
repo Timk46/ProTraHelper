@@ -467,7 +467,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
    * Gets help text for the rating
    */
   getHelpText(): string {
-    return `Bewerten Sie die ${this.categoryName} auf einer Skala von ${this.minValue} bis ${this.maxValue}.`;
+    return ''; // Removed descriptive text as per user requirement
   }
 
   /**

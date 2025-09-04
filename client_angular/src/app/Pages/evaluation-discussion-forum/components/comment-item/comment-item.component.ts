@@ -490,12 +490,22 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
+    // Check if user has already voted - prevent changing/removing votes
+    const currentVote = this._cachedUserVote;
+    if (currentVote !== null) {
+      console.log('❌ Vote blocked - user has already voted:', {
+        commentId: this.comment.id,
+        currentVote,
+        attemptedVote: voteType,
+      });
+      return; // Block the vote - no toggle allowed
+    }
+
     // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
     this.triggerHapticFeedback('light');
 
-    // 🚀 PHASE 4: Optimistic UI update with unified state management
-    const currentVote = this._cachedUserVote;
-    const newVote = currentVote === voteType ? null : voteType; // Toggle logic
+    // Only allow voting if user hasn't voted yet
+    const newVote = voteType; // No toggle - direct vote only
     
     console.log('🗳️ Vote initiated:', {
       commentId: this.comment.id,
@@ -753,8 +763,13 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     if (this.isCurrentUser()) {
       return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
     }
-    if (this.getUserVote() === 'UP') {
-      return 'Positive Bewertung entfernen';
+    const userVote = this.getUserVote();
+    if (userVote !== null) {
+      if (userVote === 'UP') {
+        return 'Sie haben bereits positiv bewertet.';
+      } else {
+        return 'Sie haben bereits negativ bewertet.';
+      }
     }
     if (!this.canVoteUp) {
       return 'Keine positiven Bewertungen mehr verfügbar';
@@ -770,8 +785,13 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     if (this.isCurrentUser()) {
       return 'Sie können nicht für Ihren eigenen Kommentar stimmen.';
     }
-    if (this.getUserVote() === 'DOWN') {
-      return 'Negative Bewertung entfernen';
+    const userVote = this.getUserVote();
+    if (userVote !== null) {
+      if (userVote === 'DOWN') {
+        return 'Sie haben bereits negativ bewertet.';
+      } else {
+        return 'Sie haben bereits positiv bewertet.';
+      }
     }
     if (!this.canVoteDown) {
       return 'Keine negativen Bewertungen mehr verfügbar';

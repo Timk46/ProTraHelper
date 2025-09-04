@@ -398,7 +398,7 @@ interface RatingGateViewModel {
               <mat-panel-description>
                 <div class="panel-description">
                   <span class="category-description">
-                    Bewerten Sie "{{ currentCategory.displayName }}" mit 0-15 Punkten
+                    {{ currentCategory.displayName }}
                   </span>
                   <div class="rating-status">
                     <span *ngIf="vm.hasRated" class="score-badge">
@@ -1975,9 +1975,9 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   openVoteExplanationDialog(): void {
     this.dialog.open(VotingMechanismDialogComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      maxHeight: '80vh',
+      width: '800px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
       data: {
         currentVotes: this.currentVoteLimitStatus?.remainingVotes || 0,
         maxVotes: this.currentVoteLimitStatus?.maxVotes || 0,

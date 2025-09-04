@@ -777,8 +777,15 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   onReplyRequested(commentId: string): void {
     console.log('🔄 Reply requested for comment:', commentId);
 
-    // 🚀 PHASE 2: Aktiviere Reply-Input für diesen Kommentar
-    this.setReplyInputActive(commentId, true);
+    // 🚀 Toggle Reply-Input - if already active, deactivate it, otherwise activate it
+    const isCurrentlyActive = this.isReplyInputActive(commentId);
+    this.setReplyInputActive(commentId, !isCurrentlyActive);
+
+    console.log('🔄 Reply input toggled:', {
+      commentId,
+      wasActive: isCurrentlyActive,
+      nowActive: !isCurrentlyActive
+    });
 
     // Find the comment in the flattened list for legacy event
     const commentItem = this.flattenedComments.find(

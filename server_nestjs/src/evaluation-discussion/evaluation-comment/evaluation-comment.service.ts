@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
 import type {
@@ -593,48 +593,29 @@ export class EvaluationCommentService {
     const userVotes = voteDetails.userVotes || {};
     const previousVote = userVotes[userId.toString()];
 
+    // Prevent changing or removing existing votes
+    if (previousVote !== undefined) {
+      throw new BadRequestException(
+        `User has already voted on this comment. Votes cannot be changed or removed.`
+      );
+    }
+
+    // Prevent null votes (removing votes)
+    if (voteType === null) {
+      throw new BadRequestException(
+        `Cannot remove vote. Votes are permanent once cast.`
+      );
+    }
+
     let newUpvotes = comment.upvotes;
     let newDownvotes = comment.downvotes;
 
-    if (voteType === null) {
-      // Remove vote
-      if (previousVote) {
-        delete userVotes[userId.toString()];
-        if (previousVote === 'UP') {
-          newUpvotes--;
-        } else {
-          newDownvotes--;
-        }
-      }
+    // Only allow new votes (no previous vote exists)
+    userVotes[userId.toString()] = voteType;
+    if (voteType === 'UP') {
+      newUpvotes++;
     } else {
-      // Add or change vote
-      if (previousVote === voteType) {
-        // Same vote - remove it
-        delete userVotes[userId.toString()];
-        if (voteType === 'UP') {
-          newUpvotes--;
-        } else {
-          newDownvotes--;
-        }
-      } else {
-        // New vote or change vote
-        if (previousVote) {
-          // Remove previous vote first
-          if (previousVote === 'UP') {
-            newUpvotes--;
-          } else {
-            newDownvotes--;
-          }
-        }
-
-        // Add new vote
-        userVotes[userId.toString()] = voteType;
-        if (voteType === 'UP') {
-          newUpvotes++;
-        } else {
-          newDownvotes++;
-        }
-      }
+      newDownvotes++;
     }
 
     // Update voteDetails with the modified userVotes
@@ -1142,12 +1123,18 @@ export class EvaluationCommentService {
         const canVote = remainingVotes > 0;
         const displayText = `${remainingVotes}/${totalComments}`;
 
+        // Double the vote count - each user gets 2x the number of comments to vote on
+        const maxVotes = totalComments * 2;
+        const adjustedRemainingVotes = Math.max(0, maxVotes - votedCommentIds.length);
+        const adjustedCanVote = adjustedRemainingVotes > 0;
+        const adjustedDisplayText = `${adjustedRemainingVotes}/${maxVotes}`;
+
         return {
-          maxVotes: totalComments,
-          remainingVotes,
+          maxVotes,
+          remainingVotes: adjustedRemainingVotes,
           votedCommentIds,
-          canVote,
-          displayText,
+          canVote: adjustedCanVote,
+          displayText: adjustedDisplayText,
         };
       },
       60000 // 1 minute cache

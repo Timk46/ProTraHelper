@@ -42,14 +42,15 @@
        role="toolbar"
        [attr.aria-label]="'Comment actions for comment by ' + cachedAuthorDisplayName"
        [attr.aria-controls]="'comment-content-' + comment.id">
-    <!-- Plus Vote Button - 🚀 PHASE 4: Enhanced with comprehensive ARIA labels -->
+    <!-- Plus Vote Button - Only for top-level comments (depth = 0) -->
     <button
+      *ngIf="depth === 0"
       class="vote-btn plus"
       [ngClass]="{
         voted: cachedUserVote === 'UP',
         'disabled-limit': !canVoteUp && cachedUserVote !== 'UP',
       }"
-      [disabled]="cachedIsCurrentUser || isVoting || (!canVoteUp && cachedUserVote !== 'UP')"
+      [disabled]="cachedIsCurrentUser || isVoting || cachedUserVote !== null || !canVoteUp"
       [matTooltip]="cachedUpvoteTooltip"
       (click)="onVote('UP')"
       type="button"
@@ -62,14 +63,15 @@
       <span aria-hidden="true">+</span>
     </button>
 
-    <!-- Minus Vote Button - 🚀 PHASE 4: Enhanced with comprehensive ARIA labels -->
+    <!-- Minus Vote Button - Only for top-level comments (depth = 0) -->
     <button
+      *ngIf="depth === 0"
       class="vote-btn minus"
       [ngClass]="{
         voted: cachedUserVote === 'DOWN',
         'disabled-limit': !canVoteDown && cachedUserVote !== 'DOWN',
       }"
-      [disabled]="cachedIsCurrentUser || isVoting || (!canVoteDown && cachedUserVote !== 'DOWN')"
+      [disabled]="cachedIsCurrentUser || isVoting || cachedUserVote !== null || !canVoteDown"
       [matTooltip]="cachedDownvoteTooltip"
       (click)="onVote('DOWN')"
       type="button"
@@ -82,8 +84,9 @@
       <span aria-hidden="true">-</span>
     </button>
 
-    <!-- Vote Counts -->
-    <span class="vote-count"
+    <!-- Vote Counts - Only for top-level comments (depth = 0) -->
+    <span *ngIf="depth === 0" 
+          class="vote-count"
           [attr.id]="'vote-stats-' + comment.id"
           role="status"
           [attr.aria-label]="'Vote statistics: ' + (comment.voteStats!.upVotes || 0) + ' upvotes and ' + (comment.voteStats!.downVotes || 0) + ' downvotes'"
