@@ -18,6 +18,7 @@ export interface VoteResultDTO {
   upvotes: number;
   downvotes: number; // @deprecated - kept for compatibility, always 0
   userVote: VoteType;
+  userVoteCount?: number; // Number of votes the user has given to this comment
   netVotes: number; // Now equals upvotes (no downvotes in ranking system)
   // Added voteStats to match frontend expectations
   voteStats: {

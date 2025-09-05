@@ -1,6 +1,6 @@
 <div class="content-list-container">
   <!-- Search and Sort section -->
-  <div style="display: flex">
+  <div *ngIf="!isArchitectureStudent" style="display: flex">
     <div class="search-bar">
       <!-- <h3>Suchen</h3> -->
       <mat-form-field
@@ -63,19 +63,6 @@
               >help</mat-icon
             >
 
-            <!-- Direct Bat-Rhino Button (executes Rhino directly via .bat script) -->
-            <mat-icon
-              *ngIf="shouldShowRhinoButton(content)"
-              class="direct-bat-rhino-launcher-icon"
-              matTooltip="⚡ Rhino direkt ausführen (Ein-Klick-Lösung)"
-              (click)="onRhinoBatDirectButtonClick($event)"
-              [style.cursor]="'pointer'"
-              [style.color]="'#E91E63'"
-              [style.margin-left]="'4px'"
-              [style.font-weight]="'bold'"
-            >
-              flash_on
-            </mat-icon>
           </div>
         </mat-panel-description>
       </mat-expansion-panel-header>
@@ -94,6 +81,15 @@
 
         <!-- button bar -->
         <div class="content-list-element-introduction-buttons">
+          <button
+            *ngIf="shouldShowRhinoButton(content)"
+            mat-raised-button
+            class="rhino-button"
+            (click)="onRhinoBatDirectButtonClick($event)"
+          >
+            <mat-icon>flash_on</mat-icon>
+            Rhino
+          </button>
           <button
             *ngIf="hasContentElementType(content, 'PDF')"
             mat-raised-button

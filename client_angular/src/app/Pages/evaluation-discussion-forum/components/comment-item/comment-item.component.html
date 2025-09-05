@@ -56,17 +56,30 @@
         (click)="removeVote()"
         type="button"
         role="button"
-        [attr.aria-label]="'Remove one vote (current: ' + getUserVoteCount() + '/3)'"
+        [attr.aria-label]="'Remove one vote (current: ' + getUserVoteCount() + ' votes)'"
         [attr.data-action]="'remove-vote'">
         <mat-icon aria-hidden="true">remove</mat-icon>
       </button>
       
-      <!-- Vote Counter Display -->
-      <span class="vote-counter"
-            [attr.aria-label]="'You have given ' + getUserVoteCount() + ' out of 3 possible votes to this comment'">
-        <span class="current-votes">{{ getUserVoteCount() }}</span>
-        <span class="vote-separator">/</span>
-        <span class="max-votes">3</span>
+      <!-- Vote Counter Display - Only show if user has voted -->
+      <span *ngIf="getUserVoteCount() > 0" 
+            class="vote-counter"
+            [attr.aria-label]="'You have given ' + getUserVoteCount() + ' votes to this comment'">
+        <span class="current-votes">{{ getUserVoteCount() }} vergeben</span>
+      </span>
+      
+      <!-- Vote hint for non-voted comments -->
+      <span *ngIf="getUserVoteCount() === 0 && canAddMoreVotes()" 
+            class="vote-hint"
+            [attr.aria-label]="'You can give unlimited votes to this comment'">
+        Unbegrenzt möglich
+      </span>
+      
+      <!-- 🚀 CRITICAL FIX: Fallback display when no votes available but votes might be given -->
+      <span *ngIf="getUserVoteCount() === 0 && !canAddMoreVotes()" 
+            class="vote-fallback"
+            [attr.aria-label]="'No more votes available - attempting to show actual vote count'">
+        <span class="fallback-text">{{ getFallbackVoteDisplay() }}</span>
       </span>
       
       <!-- Plus Button (Add Vote) -->
@@ -77,7 +90,7 @@
         (click)="addVote()"
         type="button"
         role="button"
-        [attr.aria-label]="'Add one vote (current: ' + getUserVoteCount() + '/3)'"
+        [attr.aria-label]="'Add one vote (current: ' + getUserVoteCount() + ' votes)'"
         [attr.data-action]="'add-vote'">
         <mat-icon aria-hidden="true">add</mat-icon>
       </button>
@@ -102,7 +115,11 @@
           role="status"
           [attr.aria-label]="getVoteStatsAriaLabel()"
           [attr.aria-live]="'polite'">
-      <span aria-hidden="true" [innerHTML]="getVoteCountDisplay()"></span>
+      <span aria-hidden="true" class="vote-display">
+        <span class="vote-number">{{ getTotalVotes() }}</span>
+        <mat-icon class="thumbs-up-icon">thumb_up</mat-icon>
+        <span *ngIf="getUserVotes() > 0" class="user-votes-badge">+{{ getUserVotes() }}</span>
+      </span>
     </span>
 
     <!-- Reply Button - Only for top-level comments (depth = 0) -->

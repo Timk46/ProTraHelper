@@ -1,4 +1,4 @@
-import { IsNumber, IsArray, IsBoolean } from 'class-validator';
+import { IsNumber, IsArray, IsBoolean, IsOptional } from 'class-validator';
 
 /**
  * DTO for vote limit status tracking
@@ -48,6 +48,14 @@ export class VoteLimitResponseDTO {
   voteLimitStatus!: VoteLimitStatusDTO;
 
   message?: string;
+
+  /**
+   * Number of votes the user has given to the specific comment
+   * Used for frontend synchronization in multi-vote ranking system
+   */
+  @IsOptional()
+  @IsNumber()
+  userVoteCount?: number;
 }
 
 /**

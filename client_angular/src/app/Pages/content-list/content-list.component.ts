@@ -66,6 +66,7 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
+  protected isArchitectureStudent: boolean = false;
 
   constructor(
     private readonly dialog: MatDialog,
@@ -84,6 +85,7 @@ export class ContentListComponent implements OnInit, OnChanges {
     this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
     });
+    this.isArchitectureStudent = this.userService.isArchitectureStudent();
   }
 
   ngOnChanges() {
@@ -107,7 +109,7 @@ export class ContentListComponent implements OnInit, OnChanges {
 
       // Filter für Architekturstudenten: Entferne "Analyse Teil 2"
       if (this.userService.isArchitectureStudent()) {
-        sortedContents = sortedContents.filter(content => 
+        sortedContents = sortedContents.filter(content =>
           !content.name.toLowerCase().includes('analyse teil 2')
         );
       }
@@ -151,11 +153,6 @@ export class ContentListComponent implements OnInit, OnChanges {
       return false;
     }
 
-    // For architecture students: only show for "Analyse Teil 1"
-    if (this.userService.isArchitectureStudent()) {
-      return content.name.toLowerCase().includes('analyse teil 1');
-    }
-
     // For regular users: show for all content with questions (original behavior)
     return true;
   }
@@ -169,32 +166,32 @@ export class ContentListComponent implements OnInit, OnChanges {
    */
   getQuestions(content: ContentDTO): ContentElementDTO[] {
     const questions = content.contentElements.filter(element => element.type === contentElementType.QUESTION);
-    
+
     // Gruppiere MCSlider-Fragen nach Name-Präfix
     const mcSliderQuestions = questions.filter(q => q.question?.type === questionType.MCSLIDER);
     const otherQuestions = questions.filter(q => q.question?.type !== questionType.MCSLIDER);
-    
+
     if (mcSliderQuestions.length > 0) {
       // Gruppiere MCSlider-Fragen nach Präfixen
       const groups = new Map<string, ContentElementDTO[]>();
-      
+
       mcSliderQuestions.forEach(question => {
         if (!question.question?.name) return;
-        
+
         // Erkenne verschiedene MCSlider-Gruppen basierend auf Namen
         let groupKey = 'MCSlider: Komplettquiz'; // Default: alle gehen ins Komplettquiz
-        
+
         if (question.question.name.includes('Strukturmechanik')) {
           groupKey = 'MCSlider: Strukturmechanik';
         }
         // Alle anderen MCSlider-Fragen (Standard, Geografie, Mathematik, etc.) gehen ins Komplettquiz
-        
+
         if (!groups.has(groupKey)) {
           groups.set(groupKey, []);
         }
         groups.get(groupKey)!.push(question);
       });
-      
+
       // Für jede Gruppe nur die erste Frage als Repräsentant nehmen
       const groupRepresentatives: ContentElementDTO[] = [];
       groups.forEach((groupQuestions, groupKey) => {
@@ -206,10 +203,10 @@ export class ContentListComponent implements OnInit, OnChanges {
           groupRepresentatives.push(representative);
         }
       });
-      
+
       return [...otherQuestions, ...groupRepresentatives];
     }
-    
+
     return questions;
   }
 
@@ -308,16 +305,16 @@ export class ContentListComponent implements OnInit, OnChanges {
    */
   applyFilter(term: string = '') {
     if (term !== '') this.searchTerm = term;
-    
+
     let baseContents = [...this.contentsForActiveConceptNode.trainedBy];
-    
+
     // Filter für Architekturstudenten: Entferne "Analyse Teil 2"
     if (this.userService.isArchitectureStudent()) {
-      baseContents = baseContents.filter(content => 
+      baseContents = baseContents.filter(content =>
         !content.name.toLowerCase().includes('analyse teil 2')
       );
     }
-    
+
     if (this.searchTerm != '') {
       this.filteredContents = baseContents.filter(content => {
         let context: string = content.name + ' ';

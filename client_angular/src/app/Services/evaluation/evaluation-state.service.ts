@@ -1258,8 +1258,8 @@ export class EvaluationStateService {
   // VOTING MANAGEMENT & CACHE SYNCHRONIZATION - 🚀 PHASE 4
   // =============================================================================
 
-  // 🚀 PHASE 4: Vote completion notifications for cache synchronization
-  private voteCompletionSubject = new BehaviorSubject<{commentId: string, voteResult: VoteType | null} | null>(null);
+  // 🚀 PHASE 4: Vote completion notifications for cache synchronization - Updated to pass full result
+  private voteCompletionSubject = new BehaviorSubject<{commentId: string, fullResult: VoteResultDTO | VoteLimitResponseDTO} | null>(null);
   voteCompletion$ = this.voteCompletionSubject.asObservable();
 
   private voteErrorSubject = new BehaviorSubject<{commentId: string} | null>(null);
@@ -1388,10 +1388,10 @@ export class EvaluationStateService {
     return this.voteCommentWithLimits(commentId, voteType, categoryId).pipe(
       tap(result => {
         if (result) {
-          // Vote succeeded - emit completion event
+          // Vote succeeded - emit completion event with full result
           this.voteCompletionSubject.next({
             commentId,
-            voteResult: result.userVote,
+            fullResult: result,
           });
           // Update final vote status
           voteStatusSubject.next(result.userVote);
@@ -1543,7 +1543,7 @@ export class EvaluationStateService {
         // 🚀 PHASE 4: Emit vote completion for cache synchronization
         this.voteCompletionSubject.next({
           commentId,
-          voteResult: result.userVote,
+          fullResult: result,
         });
 
         return result;
@@ -2034,7 +2034,7 @@ export class EvaluationStateService {
             // 🚀 PHASE 4: Emit vote completion for cache synchronization
             this.voteCompletionSubject.next({
               commentId,
-              voteResult: result.userVote,
+              fullResult: result,
             });
           }
         }),
@@ -2075,7 +2075,7 @@ export class EvaluationStateService {
         // 🚀 PHASE 4: Emit vote completion for cache synchronization
         this.voteCompletionSubject.next({
           commentId,
-          voteResult: result.userVote,
+          fullResult: result,
         });
 
         return result;
@@ -2360,15 +2360,17 @@ export class EvaluationStateService {
           console.log('✅ Updated vote limit status from backend:', response.voteLimitStatus);
         }
 
-        // Handle vote update for comment display
+        // 🚀 CRITICAL FIX: Emit vote completion event for Smart Sync to work
         if (response.success) {
-          // Get updated comment vote stats (this would need to be implemented in the service)
-          this.evaluationService.getCommentVotes(commentId).subscribe(voteResult => {
-            this.handleVoteUpdate(commentId, {
-              voteStats: voteResult.voteStats,
-              userVote: voteResult.userVote,
-              netVotes: voteResult.netVotes,
-            });
+          console.log('📤 Emitting vote completion event with full response:', {
+            commentId,
+            userVoteCount: response.userVoteCount,
+            voteLimitStatus: response.voteLimitStatus
+          });
+          
+          this.voteCompletionSubject.next({
+            commentId,
+            fullResult: response as VoteLimitResponseDTO // Pass complete VoteLimitResponseDTO
           });
         }
       }),

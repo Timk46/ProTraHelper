@@ -2278,14 +2278,10 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       return 0;
     }
 
+    // Only count main comments, not their replies (filter out comments with parentId)
     return this.discussions.reduce((total, discussion) => {
-      const commentsCount = discussion.comments ? discussion.comments.length : 0;
-      const repliesCount = discussion.comments
-        ? discussion.comments.reduce((repliesSum, comment) => {
-            return repliesSum + (comment.replies ? comment.replies.length : 0);
-          }, 0)
-        : 0;
-      return total + commentsCount + repliesCount;
+      const commentsCount = discussion.comments ? discussion.comments.filter(c => !c.parentId).length : 0;
+      return total + commentsCount;
     }, 0);
   }
 

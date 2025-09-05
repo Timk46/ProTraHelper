@@ -514,7 +514,8 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     this.discussions.forEach(discussion => {
       // Defensive programming: ensure comments array exists
       const comments = discussion.comments || [];
-      console.log('🔧 Processing discussion:', discussion.id, 'with', comments.length, 'comments');
+      const mainComments = comments.filter(c => !c.parentId);
+      console.log('🔧 Processing discussion:', discussion.id, 'with', mainComments.length, 'main comments (total:', comments.length, ')');
 
       // Add discussion header (always create new for state changes)
       this.flattenedComments.push({
@@ -545,7 +546,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       sortOrder: this.sortOrder,
       commentCounts: this.discussions.map(d => ({
         id: d.id,
-        commentCount: d.comments?.length || 0,
+        commentCount: d.comments?.filter(c => !c.parentId).length || 0, // Only count main comments
         commentsHash: d.comments?.map(c => `${c.id}-${c.voteStats.upVotes}-${c.voteStats.downVotes}`).join(',') || ''
       })),
       panelStates: Array.from(this.commentPanelStateService.getCurrentPanelStates().entries()),
@@ -915,8 +916,8 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
    * Gets the total comment count for a discussion
    */
   getTotalCommentCount(discussion: EvaluationDiscussionDTO): number {
-    // Defensive programming: handle undefined comments array
-    return discussion.comments?.length || 0;
+    // Only count main comments, not replies (filter out comments with parentId)
+    return discussion.comments?.filter(c => !c.parentId).length || 0;
   }
 
   /**

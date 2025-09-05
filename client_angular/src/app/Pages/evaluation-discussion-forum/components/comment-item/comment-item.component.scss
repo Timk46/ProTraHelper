@@ -244,6 +244,17 @@
         font-weight: 500;
       }
     }
+
+    .vote-hint {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+      font-style: italic;
+      padding: 4px 8px;
+      background: rgba(100, 116, 139, 0.04);
+      border-radius: 6px;
+      white-space: nowrap;
+    }
   }
 
   .vote-btn {
@@ -431,6 +442,24 @@
     border-radius: 6px;
     white-space: nowrap;
     letter-spacing: -0.01em;
+
+    .vote-display {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .vote-number {
+        font-weight: 600;
+        color: #475569;
+      }
+
+      .thumbs-up-icon {
+        font-size: 14px;
+        color: #059669;
+        display: inline-flex;
+        align-items: center;
+      }
+    }
 
     // User votes badge for multiple votes display
     ::ng-deep .user-votes-badge {

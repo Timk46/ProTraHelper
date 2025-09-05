@@ -27,9 +27,10 @@ export class EvaluationCommentController {
   async findBySubmission(
     @Query('submissionId') submissionId: string,
     @Query('categoryId') categoryId: string,
+    @GetUser() user?: User,
   ): Promise<EvaluationCommentDTO[]> {
-    console.log('🔍 findBySubmission controller call', submissionId, categoryId);
-    return this.evaluationCommentService.findBySubmission(submissionId, categoryId);
+    console.log('🔍 findBySubmission controller call', submissionId, categoryId, 'userId:', user?.id);
+    return this.evaluationCommentService.findBySubmission(submissionId, categoryId, user?.id);
   }
 
   @Post()
@@ -133,7 +134,7 @@ export class EvaluationCommentController {
 
   @Get(':id')
   @roles('ANY')
-  async findOne(@Param('id') id: string): Promise<EvaluationCommentDTO> {
-    return this.evaluationCommentService.findOne(id);
+  async findOne(@Param('id') id: string, @GetUser() user?: User): Promise<EvaluationCommentDTO> {
+    return this.evaluationCommentService.findOne(id, user?.id);
   }
 }

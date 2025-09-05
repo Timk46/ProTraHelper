@@ -130,3 +130,44 @@
     grid-template-columns: repeat(auto-fill, 260px);
   }
 }
+
+/* Rhino Button Styling mit Rhino 8 Logo-inspiriertem Design */
+.rhino-button {
+  position: relative;
+  overflow: visible;
+  transition: all 0.3s ease-in-out;
+  background-color: #4a5568 !important; /* Dunkelgrau wie Rhino Logo */
+  color: white !important;
+  border: none;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1); /* Leichter heller Glow-Effekt */
+  
+  &:hover {
+    transform: translateY(-2px);
+    background-color: #5a6578 !important; /* Leicht aufgehelltes Grau beim Hover */
+    box-shadow: 
+      0 8px 25px rgba(239, 68, 68, 0.2),
+      0 0 20px rgba(239, 68, 68, 0.3); /* Roter Glow-Effekt */
+  }
+
+  &:active {
+    transform: translateY(0);
+    background-color: #3a4558 !important; /* Dunklerer Grau beim Klick */
+  }
+
+  mat-icon {
+    color: #ef4444 !important; /* Roter Akzent wie im Rhino Logo */
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5));
+    transition: all 0.3s ease-in-out;
+  }
+
+  &:hover mat-icon {
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
+    transform: scale(1.1);
+  }
+
+  /* Überschreibe Material Button Default-Styles */
+  .mat-button-ripple,
+  .mat-button-focus-overlay {
+    background-color: rgba(239, 68, 68, 0.1) !important;
+  }
+}

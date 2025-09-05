@@ -1775,9 +1775,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         categoryId: categoryId,
         comments: comments,
         createdAt: new Date('2024-01-15T10:00:00Z'),
-        totalComments: comments.length,
+        totalComments: comments.filter(c => !c.parentId).length, // Only count main comments
         availableComments: 3,
-        usedComments: Math.min(comments.length, 3),
+        usedComments: Math.min(comments.filter(c => !c.parentId).length, 3),
       },
     ];
   }
@@ -1987,8 +1987,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
       // Add the new comment to the beginning
       discussion.comments = [comment, ...discussion.comments];
-      discussion.totalComments = discussion.comments.length;
-      discussion.usedComments = Math.min(discussion.comments.length, 3);
+      
+      // Only count main comments (without replies) for totalComments
+      const mainComments = discussion.comments.filter(c => !c.parentId);
+      discussion.totalComments = mainComments.length;
+      discussion.usedComments = Math.min(mainComments.length, 3);
 
       // Update the subject to trigger UI update
       subject.next(updatedDiscussions);

@@ -176,7 +176,7 @@ export class EvaluationCommentService {
         });
 
         return {
-          comments: comments.map(comment => this.mapCommentToDTO(comment)),
+          comments: comments.map(comment => this.mapCommentToDTO(comment)), // No userId for paginated results (performance)
           pagination: {
             page,
             pageSize,
@@ -203,11 +203,13 @@ export class EvaluationCommentService {
   async findBySubmission(
     submissionId: string,
     categoryId: string,
+    currentUserId?: number,
   ): Promise<EvaluationCommentDTO[]> {
     const cacheKey = this.utilsService.generateCacheKey(
       'comments',
       submissionId,
       categoryId.toString(),
+      currentUserId?.toString() || 'anonymous', // Include userId in cache for userVoteCount
     );
     console.log('🔍 findBySubmission service  cachekey:', cacheKey);
     return this.cacheService.getOrSet(
@@ -299,7 +301,7 @@ export class EvaluationCommentService {
           orderBy: { createdAt: 'desc' }, // Top-level comments newest first
         });
 
-        return comments.map(comment => this.mapCommentToDTO(comment));
+        return comments.map(comment => this.mapCommentToDTO(comment, currentUserId));
       },
       300000,
     ); // 5 minutes cache
@@ -312,7 +314,7 @@ export class EvaluationCommentService {
    * @returns Ein Promise, das das Kommentar-DTO auflöst.
    * @throws {NotFoundException} Wenn kein Kommentar mit der gegebenen ID gefunden wird.
    */
-  async findOne(id: string): Promise<EvaluationCommentDTO> {
+  async findOne(id: string, currentUserId?: number): Promise<EvaluationCommentDTO> {
     const comment = await this.prisma.evaluationComment.findUnique({
       where: { id },
       include: {
@@ -365,7 +367,7 @@ export class EvaluationCommentService {
       throw new NotFoundException(`Comment with ID ${id} not found`);
     }
 
-    return this.mapCommentToDTO(comment);
+    return this.mapCommentToDTO(comment, currentUserId);
   }
 
   /**
@@ -452,7 +454,7 @@ export class EvaluationCommentService {
     // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`comments:${createDto.submissionId}:.*`);
 
-    return this.mapCommentToDTO(comment);
+    return this.mapCommentToDTO(comment, userId);
   }
 
   /**
@@ -536,7 +538,7 @@ export class EvaluationCommentService {
     // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`comments:${comment.submissionId}:.*`);
 
-    return this.mapCommentToDTO(updatedComment);
+    return this.mapCommentToDTO(updatedComment, userId);
   }
 
   /**
@@ -603,6 +605,21 @@ export class EvaluationCommentService {
       );
     }
 
+    // Check vote limits - prevent exceeding maximum votes per user
+    if (voteType === 'UP' && !previousVote) {
+      const voteLimitStatus = await this.getVoteLimitStatus(
+        userId,
+        comment.submissionId,
+        comment.categoryId?.toString() || 'null'
+      );
+      
+      if (!voteLimitStatus.canVote || voteLimitStatus.remainingVotes <= 0) {
+        throw new BadRequestException(
+          `Vote limit exceeded. You have used all ${voteLimitStatus.maxVotes} available votes for this category.`
+        );
+      }
+    }
+
     let newUpvotes = comment.upvotes;
     let newDownvotes = comment.downvotes;
 
@@ -663,6 +680,7 @@ export class EvaluationCommentService {
         score: newUpvotes, // Score equals upvotes in ranking system
       },
       userVote: voteDetails.userVotes[userId.toString()] || null,
+      userVoteCount: voteDetails.userVoteCounts?.[userId.toString()] || 0,
       netVotes: newUpvotes, // Equals upvotes in ranking system
     };
   }
@@ -749,6 +767,7 @@ export class EvaluationCommentService {
       upvotes: newUpvotes,
       downvotes: newDownvotes,
       userVote: voteDetails.userVotes[userId.toString()] || null,
+      userVoteCount: voteDetails.userVoteCounts?.[userId.toString()] || 0,
       netVotes: newUpvotes - newDownvotes,
     };
   }
@@ -949,12 +968,16 @@ export class EvaluationCommentService {
    * @param comment - Der Prisma-Kommentar-Objekt.
    * @returns Das entsprechende EvaluationCommentDTO.
    */
-  private mapCommentToDTO(comment: any): EvaluationCommentDTO {
-    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+  private mapCommentToDTO(comment: any, currentUserId?: number): EvaluationCommentDTO {
+    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {}, userVoteCounts: {} };
     const userVotes = voteDetails.userVotes || {};
+    const userVoteCounts = voteDetails.userVoteCounts || {};
+
+    // Calculate userVoteCount for the current user
+    const userVoteCount = currentUserId ? (userVoteCounts[currentUserId.toString()] || 0) : undefined;
 
     // Recursively map replies, handling cases where replies might not have full relations
-    const mappedReplies = comment.replies?.map((reply: any) => this.mapCommentToDTO(reply)) || [];
+    const mappedReplies = comment.replies?.map((reply: any) => this.mapCommentToDTO(reply, currentUserId)) || [];
 
     return {
       id: comment.id,
@@ -997,6 +1020,7 @@ export class EvaluationCommentService {
         totalVotes: comment.upvotes, // Only positive votes count
         score: comment.upvotes, // Score equals upvotes in ranking system
       },
+      userVoteCount: userVoteCount, // Number of votes the current user has given to this comment
     };
   }
 
@@ -1129,14 +1153,19 @@ export class EvaluationCommentService {
           }
         });
 
-        // Count how many comments the user has voted on
+        // Count total votes used by this user (sum of all userVoteCounts)
         const votedCommentIds: number[] = [];
+        let totalVotesUsed = 0;
+        
         commentsWithVotes.forEach(comment => {
-          const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
+          const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {}, userVoteCounts: {} };
           const userVotes = voteDetails.userVotes || {};
+          const userVoteCounts = voteDetails.userVoteCounts || {};
           
           if (userVotes[userId.toString()]) {
             votedCommentIds.push(Number(comment.id));
+            // Add the actual number of votes this user has given to this comment
+            totalVotesUsed += userVoteCounts[userId.toString()] || 1; // Default to 1 if not tracked
           }
         });
 
@@ -1146,7 +1175,7 @@ export class EvaluationCommentService {
 
         // Double the vote count - each user gets 2x the number of comments to vote on
         const maxVotes = totalComments * 2;
-        const adjustedRemainingVotes = Math.max(0, maxVotes - votedCommentIds.length);
+        const adjustedRemainingVotes = Math.max(0, maxVotes - totalVotesUsed);
         const adjustedCanVote = adjustedRemainingVotes > 0;
         const adjustedDisplayText = `${adjustedRemainingVotes}/${maxVotes}`;
 
@@ -1233,10 +1262,14 @@ export class EvaluationCommentService {
     const isNewVote = !previousVote && voteType !== null;
 
     if (isNewVote && !currentStatus.canVote) {
+      // For consistency, also return userVoteCount in error cases
+      const currentUserVoteCount = (voteDetails.userVoteCounts || {})[userId.toString()] || 0;
+      
       return {
         success: false,
         voteLimitStatus: currentStatus,
         message: 'Vote limit reached. Cannot add more votes.',
+        userVoteCount: currentUserVoteCount,
       };
     }
 
@@ -1253,10 +1286,25 @@ export class EvaluationCommentService {
       isAddingVote
     );
 
+    // Get updated comment to calculate userVoteCount for this specific comment
+    const updatedComment = await this.prisma.evaluationComment.findUnique({
+      where: { id: commentId },
+      select: { voteDetails: true }
+    });
+
+    // Calculate userVoteCount from the updated voteDetails
+    let userVoteCount = 0;
+    if (updatedComment?.voteDetails) {
+      const updatedVoteDetails = (updatedComment.voteDetails as unknown as VoteDetails) || { userVotes: {}, userVoteCounts: {} };
+      const userVoteCounts = updatedVoteDetails.userVoteCounts || {};
+      userVoteCount = userVoteCounts[userId.toString()] || 0;
+    }
+
     return {
       success: true,
       voteLimitStatus: updatedStatus,
       message: 'Vote successfully processed.',
+      userVoteCount: userVoteCount,
     };
   }
 

@@ -44,6 +44,9 @@ export interface EvaluationCommentDTO {
     score: number; // Now equals upVotes in ranking system
   };
   
+  // Number of votes the current user has given to this comment (for ranking system)
+  userVoteCount?: number;
+  
   // Threading
   replies: EvaluationCommentDTO[];
   replyCount: number;
