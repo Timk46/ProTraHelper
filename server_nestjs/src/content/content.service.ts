@@ -400,6 +400,38 @@ export class ContentService {
   }
 
   /**
+   * Updates the visibility status of a content node associated with a concept node.
+   *
+   * This method updates all training entries that match the given `conceptNodeId` and `contentNodeId`,
+   * setting their `visible` property to the specified `isVisible` value.
+   *
+   * @param conceptNodeId - The ID of the concept node.
+   * @param contentNodeId - The ID of the content node.
+   * @param isVisible - The desired visibility status to set.
+   * @returns A promise that resolves to `true` if the update was successful, or `false` if an error occurred.
+   */
+  async setContentNodeVisibility(
+    conceptNodeId: number,
+    contentNodeId: number,
+    isVisible: boolean,
+  ): Promise<boolean> {
+    try {
+      await this.prisma.training.updateMany({
+        // updateMany because technically there could be multiple entries for the same contentNodeId and conceptNodeId
+        where: {
+          conceptNodeId: conceptNodeId,
+          contentNodeId: contentNodeId,
+        },
+        data: { visible: isVisible },
+      });
+      return true;
+    } catch (error) {
+      console.error(`Failed to update content node visibility: ${error}`);
+      return false;
+    }
+  }
+
+  /**
    * Get Content Element Status
    *
    * Retrieves the completion status of a content element for a specific user.

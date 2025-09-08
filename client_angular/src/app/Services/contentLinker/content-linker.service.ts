@@ -91,9 +91,38 @@ export class ContentLinkerService {
     );
   }
 
+  /**
+   * Updates the visibility status of a specific content view.
+   *
+   * Sends an HTTP PUT request to the server to update the visibility of the content view
+   * identified by the provided `contentViewId`.
+   *
+   * @param contentViewId - The unique identifier of the content view to update.
+   * @param isVisible - A boolean indicating whether the content view should be visible.
+   * @returns An Observable that emits a boolean indicating the success of the update operation.
+   */
   updateContentViewVisibility(contentViewId: number, isVisible: boolean): Observable<boolean> {
     return this.http.put<boolean>(
-      `${environment.server}/content/updateVisibility/${contentViewId}`,
+      `${environment.server}/content/updateVisibility/contentView/${contentViewId}`,
+      { isVisible },
+    );
+  }
+
+  /**
+   * Updates the visibility status of a specific content node associated with a concept node.
+   *
+   * @param conceptNodeId - The ID of the concept node related to the content node.
+   * @param contentNodeId - The ID of the content node whose visibility is to be updated.
+   * @param isVisible - A boolean indicating whether the content node should be visible.
+   * @returns An Observable that emits a boolean indicating the success of the update operation.
+   */
+  updateContentNodeVisibility(
+    conceptNodeId: number,
+    contentNodeId: number,
+    isVisible: boolean,
+  ): Observable<boolean> {
+    return this.http.put<boolean>(
+      `${environment.server}/content/updateVisibility/contentNode/${contentNodeId}`,
       { isVisible },
     );
   }

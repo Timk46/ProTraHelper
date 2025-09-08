@@ -59,13 +59,35 @@ export class ContentController {
    * @returns A promise that resolves to a boolean indicating whether the operation was successful.
    */
   @roles('ADMIN')
-  @Put('/updateVisibility/:contentViewId')
+  @Put('/updateVisibility/contentView/:contentViewId')
   async setContentViewVisibility(
     @Param('contentViewId') contentViewId: number,
     @Body('isVisible') isVisible: boolean,
   ): Promise<boolean> {
     console.log(`Setting visibility of content view ${contentViewId} to ${isVisible}`);
     return this.contentService.setContentViewVisibility(+contentViewId, !!isVisible);
+  }
+
+  /**
+   * Sets the visibility of a specific content node within a concept node. This addresses the training db model.
+   * @param conceptNodeId - The ID of the concept node containing the content node.
+   * @param contentNodeId - The ID of the content node to update.
+   * @param isVisible - A boolean indicating the desired visibility state.
+   * @returns A promise that resolves to a boolean indicating whether the operation was successful.
+   */
+  @roles('ADMIN')
+  @Put('/updateVisibility/contentNode/:conceptNodeId/:contentNodeId')
+  async setContentNodeVisibility(
+    @Param('conceptNodeId') conceptNodeId: number,
+    @Param('contentNodeId') contentNodeId: number,
+    @Body('isVisible') isVisible: boolean,
+  ): Promise<boolean> {
+    console.log(`Setting visibility of content node ${contentNodeId} to ${isVisible}`);
+    return this.contentService.setContentNodeVisibility(
+      +conceptNodeId,
+      +contentNodeId,
+      !!isVisible,
+    );
   }
 
   /**

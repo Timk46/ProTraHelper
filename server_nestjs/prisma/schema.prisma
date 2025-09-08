@@ -184,6 +184,7 @@ model Training {
   contentNodeId Int
   conceptNodeId Int
   awards        Int?
+  visible       Boolean?    @default(true)
   conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   contentNode   ContentNode @relation(fields: [contentNodeId], references: [id], onDelete: Cascade)
 }
