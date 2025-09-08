@@ -122,7 +122,7 @@ export class ContentLinkerService {
             question: { connect: { id: question.id } },
           },
         },
-        position: (maxPosition.position || 0) + 1, // for now, inside the view, we just add the contentElement (-> the question) to the end
+        position: (maxPosition?.position || 0) + 1, // for now, inside the view, we just add the contentElement (-> the question) to the end
       },
       select: {
         contentElement: true,
