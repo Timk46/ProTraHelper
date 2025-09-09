@@ -953,6 +953,48 @@ export class ContentService {
   }
 
   /**
+   * Updates the positions of multiple content nodes within a concept node.
+   * @param conceptNodeId - The ID of the concept node whose content nodes are to be reordered.
+   * @param orderedNodeIds - An array of content node IDs specifying the desired order.
+   * @returns A promise that resolves to `true` if the update was successful, or `false` if any provided IDs are invalid.
+   */
+  async updateContentNodePositions(
+    conceptNodeId: number,
+    orderedNodeIds: number[],
+  ): Promise<boolean> {
+    // Get content nodes that are trained by this concept node via Training relation
+    const trainings = await this.prisma.training.findMany({
+      where: { conceptNodeId },
+      include: { contentNode: true },
+      orderBy: { contentNode: { position: 'asc' } },
+    });
+
+    const contentNodes = trainings.map(training => training.contentNode);
+
+    // Check if all provided node IDs are valid
+    const allValid = orderedNodeIds.every(id => contentNodes.some(node => node.id === id));
+    if (!allValid) return false;
+
+    // Create final order: specified nodes first, then remaining nodes in original order
+    const specifiedIds = new Set(orderedNodeIds);
+    const remainingNodes = contentNodes
+      .filter(node => !specifiedIds.has(node.id))
+      .map(node => node.id);
+
+    const finalOrder = [...orderedNodeIds, ...remainingNodes];
+
+    // Update positions for all nodes
+    const updates = finalOrder.map((id, index) =>
+      this.prisma.contentNode.update({
+        where: { id },
+        data: { position: index + 1 },
+      }),
+    );
+    await Promise.all(updates);
+    return true;
+  }
+
+  /**
    * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
    */
   async updateContentNodeData(

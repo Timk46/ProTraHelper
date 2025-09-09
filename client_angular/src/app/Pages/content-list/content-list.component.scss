@@ -158,3 +158,43 @@
   .app-content-list-item:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
+
+// Drag handle for content nodes
+.drag-handle {
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  margin-right: 8px;
+  color: #666;
+  order: -1; // Force to be first in flex layout
+  flex-shrink: 0; // Prevent shrinking
+
+  &:hover {
+    color: #333;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// Ensure proper layout in expansion panel header
+.content-list-item .mat-expansion-panel-header {
+  .mat-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+}
+
+// Content node drag animations
+.content-list.cdk-drop-list-dragging .mat-expansion-panel:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

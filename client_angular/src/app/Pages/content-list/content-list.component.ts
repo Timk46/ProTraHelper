@@ -409,6 +409,52 @@ export class ContentListComponent implements OnInit, OnChanges {
       });
   }
 
+  onContentNodeDrop(event: CdkDragDrop<ContentDTO[]>) {
+    if (!this.editModeActive || event.previousIndex === event.currentIndex) {
+      return;
+    }
+
+    const movedContent = this.filteredContents[event.previousIndex];
+
+    moveItemInArray(this.filteredContents, event.previousIndex, event.currentIndex);
+
+    // Update the position for all content nodes
+    this.filteredContents.forEach((content, index) => {
+      content.position = index + 1;
+    });
+
+    // Create array with new order of content node IDs
+    const orderedNodeIds = this.filteredContents.map(content => content.contentNodeId);
+
+    console.log(
+      'Updating position for content node:',
+      movedContent.contentNodeId,
+      'from position',
+      event.previousIndex,
+      'to',
+      event.currentIndex,
+      'New order:',
+      orderedNodeIds,
+    );
+
+    // Use the active concept node ID
+    const conceptNodeId = this.activeConceptNodeId;
+
+    this.contentLinkerService.updateContentNodePositions(conceptNodeId, orderedNodeIds).subscribe({
+      next: () => {
+        this.snackBar.open('Bereich-Reihenfolge aktualisiert', 'OK', { duration: 2000 });
+      },
+      error: (err: any) => {
+        console.error('Failed to update content node order', err);
+        this.snackBar.open('Fehler beim Aktualisieren der Bereich-Reihenfolge', 'OK', {
+          duration: 3000,
+        });
+        // Revert local changes on error
+        this.fetchContentsForConcept.emit();
+      },
+    });
+  }
+
   // TODO: implement
   onDeleteContentNode(contentNodeId: number) {
     console.log('onContentNodeDelete', contentNodeId);
@@ -431,29 +477,31 @@ export class ContentListComponent implements OnInit, OnChanges {
     });
   }
 
+  // deprecated
   /**
    * Bereich nach oben verschieben
    */
-  onMoveContentUp(content: ContentDTO) {
+  /* onMoveContentUp(content: ContentDTO) {
     if (content.position == null) return;
     this.contentLinkerService
       .updateContentNodePosition(content.contentNodeId, content.position - 1)
       .subscribe(() => {
         this.fetchContentsForConcept.emit();
       });
-  }
+  } */
 
+  // deprecated
   /**
    * Bereich nach unten verschieben
    */
-  onMoveContentDown(content: ContentDTO) {
+  /* onMoveContentDown(content: ContentDTO) {
     if (content.position == null) return;
     this.contentLinkerService
       .updateContentNodePosition(content.contentNodeId, content.position + 1)
       .subscribe(() => {
         this.fetchContentsForConcept.emit();
       });
-  }
+  } */
 
   /**
    * Öffnet den Dialog zum Bearbeiten eines ContentNodes

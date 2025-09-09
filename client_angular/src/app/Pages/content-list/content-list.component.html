@@ -30,14 +30,33 @@
   </div>
 
   <!-- Task section -->
-  <mat-accordion class="content-list" multi="true">
+  <mat-accordion
+    class="content-list"
+    multi="true"
+    cdkDropList
+    cdkDropListOrientation="vertical"
+    [cdkDropListData]="filteredContents"
+    (cdkDropListDropped)="onContentNodeDrop($event)"
+    [cdkDropListDisabled]="!editModeActive"
+  >
     <mat-expansion-panel
       *ngFor="let content of filteredContents; let i = index"
       [expanded]="false"
       class="content-list-item"
       [ngClass]="{ 'not-visible': !content.isVisible }"
+      cdkDrag
+      [cdkDragDisabled]="!editModeActive"
     >
       <mat-expansion-panel-header>
+        <!-- Drag Handle -->
+        <div
+          *ngIf="isAdmin && editModeActive"
+          class="drag-handle"
+          cdkDragHandle
+          matTooltip="Ziehen zum Verschieben"
+        >
+          <mat-icon>drag_indicator</mat-icon>
+        </div>
         <mat-panel-title style="flex-grow: 3">
           {{ content.name }}
         </mat-panel-title>
@@ -149,7 +168,7 @@
         >
           <mat-icon>{{ content.isVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
         </button>
-        <button
+        <!-- <button
           mat-mini-fab
           color="accent"
           (click)="onMoveContentUp(content)"
@@ -164,7 +183,7 @@
           matTooltip="Bereich nach unten verschieben"
         >
           <mat-icon>arrow_downward</mat-icon>
-        </button>
+        </button> -->
         <button
           mat-mini-fab
           color="primary"

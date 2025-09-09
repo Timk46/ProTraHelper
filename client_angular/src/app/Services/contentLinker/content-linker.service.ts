@@ -92,6 +92,22 @@ export class ContentLinkerService {
   }
 
   /**
+   * Updates the positions of content nodes based on their new order.
+   *
+   * Sends a PUT request to the server to update the order of content nodes based on the provided array of node IDs.
+   *
+   * @param conceptNodeId - The ID of the concept node containing the content nodes.
+   * @param orderedNodeIds - An array of content node IDs representing the new order.
+   * @returns An Observable that emits `true` if the update was successful, otherwise `false`.
+   */
+  updateContentNodePositions(conceptNodeId: number, orderedNodeIds: number[]): Observable<boolean> {
+    return this.http.put<boolean>(
+      `${environment.server}/content/updateNodePositions/${conceptNodeId}/`,
+      { orderedNodeIds: orderedNodeIds },
+    );
+  }
+
+  /**
    * Updates the visibility status of a specific content view.
    *
    * Sends an HTTP PUT request to the server to update the visibility of the content view

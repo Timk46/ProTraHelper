@@ -248,6 +248,23 @@ export class ContentController {
   }
 
   /**
+   * Update ContentNode Positions
+   * @route PUT /content/updateNodePositions/:conceptNodeId
+   *
+   * @param {number} conceptNodeId - Die ID des ConceptNodes
+   * @param {number[]} orderedNodeIds - Array mit ContentNode IDs in der neuen Reihenfolge
+   * @returns {Promise<boolean>} - true, wenn erfolgreich
+   */
+  @roles('ADMIN')
+  @Put('/updateNodePositions/:conceptNodeId')
+  async updateContentNodePositions(
+    @Param('conceptNodeId') conceptNodeId: number,
+    @Body('orderedNodeIds') orderedNodeIds: number[],
+  ): Promise<boolean> {
+    return this.contentService.updateContentNodePositions(Number(conceptNodeId), orderedNodeIds);
+  }
+
+  /**
    * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
    * @route PATCH /content/update/:contentNodeId
    */
