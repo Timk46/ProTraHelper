@@ -21,6 +21,7 @@ export interface ContentDTO {
   progress: number;
   levelProgress?: number;
   questionMarked?: boolean;
+  isVisible?: boolean;
 
   //for lecturers view
   isApproved?: boolean;

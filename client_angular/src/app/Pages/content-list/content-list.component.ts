@@ -106,14 +106,8 @@ export class ContentListComponent implements OnInit, OnChanges {
         return a.contentNodeId - b.contentNodeId;
       });
 
-      // Filter für Architekturstudenten: Entferne "Analyse Teil 2"
-      if (this.userService.isArchitectureStudent()) {
-        sortedContents = sortedContents.filter(
-          content => !content.name.toLowerCase().includes('analyse teil 2'),
-        );
-      }
-
       this.filteredContents = sortedContents;
+      console.log('Contents for concept node changed:', this.filteredContents);
     }
   }
 
@@ -277,13 +271,6 @@ export class ContentListComponent implements OnInit, OnChanges {
     if (term !== '') this.searchTerm = term;
 
     let baseContents = [...this.contentsForActiveConceptNode.trainedBy];
-
-    // Filter für Architekturstudenten: Entferne "Analyse Teil 2"
-    if (this.userService.isArchitectureStudent()) {
-      baseContents = baseContents.filter(
-        content => !content.name.toLowerCase().includes('analyse teil 2'),
-      );
-    }
 
     if (this.searchTerm != '') {
       this.filteredContents = baseContents.filter(content => {
@@ -485,6 +472,24 @@ export class ContentListComponent implements OnInit, OnChanges {
         });
       }
     });
+  }
+
+  onNodeVisibilityToggle(content: ContentDTO) {
+    if (!this.isAdmin || content.isVisible == undefined) return;
+
+    content.isVisible = !content.isVisible;
+
+    this.contentLinkerService
+      .updateContentNodeVisibility(
+        this.activeConceptNodeId,
+        content.contentNodeId,
+        content.isVisible,
+      )
+      .subscribe(() => {
+        this.snackBar.open('Sichtbarkeit aktualisiert', 'OK', { duration: 2000 });
+        this.filteredContents.find(c => c.contentNodeId === content.contentNodeId)!.isVisible =
+          content.isVisible;
+      });
   }
 
   /**

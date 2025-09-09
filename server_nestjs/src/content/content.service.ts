@@ -182,11 +182,17 @@ export class ContentService {
           status => status.contentElementId === cv.contentElement.id && status.markedAsQuestion,
         ),
       ),
+      isVisible:
+        contentNode.trains[0]?.visible == undefined ? true : contentNode.trains[0]?.visible,
     });
 
     // We apply our transformation function to all the content nodes
-    const requiredBy = conceptNode.requiredBy.map(r => transformContentNode(r.contentNode));
-    const trainedBy = conceptNode.trainedBy.map(t => transformContentNode(t.contentNode));
+    const requiredBy = conceptNode.requiredBy
+      .map(r => transformContentNode(r.contentNode))
+      .filter(c => c.isVisible || hasPrivileges); // include only visible content nodes or all if with privileges
+    const trainedBy = conceptNode.trainedBy
+      .map(t => transformContentNode(t.contentNode))
+      .filter(c => c.isVisible || hasPrivileges); // include only visible content nodes or all if with privileges
 
     // Finally, we return our transformed data
     return { trainedBy, requiredBy };

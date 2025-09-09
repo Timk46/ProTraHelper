@@ -35,6 +35,7 @@
       *ngFor="let content of filteredContents; let i = index"
       [expanded]="false"
       class="content-list-item"
+      [ngClass]="{ 'not-visible': !content.isVisible }"
     >
       <mat-expansion-panel-header>
         <mat-panel-title style="flex-grow: 3">
@@ -52,16 +53,21 @@
           <!-- more indicators -->
           <div class="content-list-element-header-indicators">
             <mat-icon
+              *ngIf="!content.isVisible"
+              matTooltip="Dieser Bereich ist für Lernende nicht sichtbar."
+              >visibility_off
+            </mat-icon>
+            <mat-icon
               *ngIf="hasContentElementType(content, 'QUESTION')"
               matTooltip="Enthält Übungsaufgaben."
-              >rate_review</mat-icon
-            >
+              >rate_review
+            </mat-icon>
             <mat-icon
               class="node-question"
               *ngIf="content.questionMarked"
               matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert."
-              >help</mat-icon
-            >
+              >help
+            </mat-icon>
 
             <!-- Direct Bat-Rhino Button (executes Rhino directly via .bat script) -->
             <mat-icon
@@ -138,6 +144,13 @@
 
       <!-- edit mode actions -->
       <mat-action-row *ngIf="isAdmin && editModeActive">
+        <button
+          mat-mini-fab
+          color="primary"
+          (click)="$event.stopPropagation(); onNodeVisibilityToggle(content)"
+        >
+          <mat-icon>{{ content.isVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
         <button
           mat-mini-fab
           color="accent"
