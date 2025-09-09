@@ -195,20 +195,25 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
           const linkableContentNode: LinkableContentNodeDTO = {
+            id: result.contentNodeId,
             conceptNodeId: this.activeConceptNode.databaseId,
-            name: result.name,
+            name: result.name || '',
             description: result.description !== '' ? result.description : undefined,
             awardsLevel: result.difficulty,
           };
+          console.log('Dialog result:', linkableContentNode);
           this.contentLinkerSerivce
             .createLinkedContentNode(linkableContentNode)
             .subscribe(newContentNode => {
               // update the contents for the active concept node
               this.contentService
                 .fetchContentsForConcept(this.activeConceptNode.databaseId)
-                .subscribe(
-                  contentsForConcept => (this.contentsForActiveConceptNode = contentsForConcept),
-                );
+                .subscribe(contentsForConcept => {
+                  this.contentsForActiveConceptNode = contentsForConcept;
+                  this.snackBar.open('Bereich erfolgreich erstellt', 'Schließen', {
+                    duration: 3000,
+                  });
+                });
             });
         }
       });

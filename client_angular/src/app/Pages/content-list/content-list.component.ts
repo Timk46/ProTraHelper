@@ -470,6 +470,20 @@ export class ContentListComponent implements OnInit, OnChanges {
         console.log('deleting');
 
         // TODO: implement
+        this.contentLinkerService
+          .unlinkContentNode(this.activeConceptNodeId, contentNodeId)
+          .subscribe({
+            next: () => {
+              this.snackBar.open('Bereich gelöscht', 'OK', { duration: 2000 });
+              this.fetchContentsForConcept.emit();
+            },
+            error: (err: any) => {
+              console.error('Failed to delete content node', err);
+              this.snackBar.open('Fehler beim Löschen des Bereichs', 'OK', {
+                duration: 3000,
+              });
+            },
+          });
       },
       decline: () => {
         console.log('aborted');

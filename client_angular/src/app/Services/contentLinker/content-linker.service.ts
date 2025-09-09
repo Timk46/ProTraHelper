@@ -78,6 +78,7 @@ export class ContentLinkerService {
    * Retrieves a list of content nodes that are not yet linked.
    *
    * Sends an HTTP GET request to the backend endpoint for unlinked content nodes.
+   * conceptNodeId and awardsLevel are dummy values in the returned DTOs.
    *
    * @returns An Observable emitting an array of `LinkableContentNodeDTO` objects representing unlinked content nodes.
    */

@@ -27,17 +27,22 @@ export class ContentLinkerService {
   async createLinkedContentNode(
     contentNode: LinkableContentNodeDTO,
   ): Promise<LinkableContentNodeDTO> {
-    // first create the content node
-    const dbContentNode = await this.prisma.contentNode.create({
-      data: {
-        name: contentNode.name,
-        description: contentNode.description || null,
-      },
-    });
-
+    // first find or create the content node
+    const dbContentNode = !contentNode.id
+      ? await this.prisma.contentNode.create({
+          data: {
+            name: contentNode.name,
+            description: contentNode.description || null,
+          },
+        })
+      : await this.prisma.contentNode.findUnique({
+          where: { id: contentNode.id },
+        });
+    // if the content node was not found or created, throw an error
     if (!dbContentNode) {
       throw new Error('Error creating linkable content node');
     }
+
     // then create the training to link the content node to the concept node
     const dbTraining = await this.prisma.training.create({
       data: {
