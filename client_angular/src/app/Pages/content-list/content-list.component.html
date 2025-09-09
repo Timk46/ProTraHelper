@@ -52,9 +52,7 @@
 
           <!-- more indicators -->
           <div class="content-list-element-header-indicators">
-            <mat-icon
-              *ngIf="!content.isVisible"
-              matTooltip="Dieser Bereich ist für Lernende nicht sichtbar."
+            <mat-icon *ngIf="!content.isVisible" matTooltip="Unsichtbar für Lernende."
               >visibility_off
             </mat-icon>
             <mat-icon

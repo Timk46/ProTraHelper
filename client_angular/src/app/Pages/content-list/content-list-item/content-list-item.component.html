@@ -56,6 +56,11 @@
       <button
         mat-mini-fab
         color="primary"
+        [matTooltip]="
+          contentElementData.isVisible
+            ? 'Sichtbar für Lernende. Klicken um unsichtbar zu schalten'
+            : 'Unsichtbar für Lernende. Klicken, um sichtbar zu schalten'
+        "
         (click)="$event.stopPropagation(); onTaskVisibilityToggle()"
       >
         <mat-icon>{{ contentElementData.isVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
