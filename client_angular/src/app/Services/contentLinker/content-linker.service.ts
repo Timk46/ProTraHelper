@@ -46,7 +46,7 @@ export class ContentLinkerService {
    */
   unlinkContentElement(contentElementId: number): Observable<boolean> {
     return this.http.get<boolean>(
-      environment.server + '/content/linker/unlinkContentElement/' + contentElementId,
+      `${environment.server}/content/linker/unlinkContentElement/${contentElementId}`,
     );
   }
 
@@ -57,6 +57,34 @@ export class ContentLinkerService {
    */
   getUnlinkedQuestions(): Observable<QuestionDTO[]> {
     return this.http.get<QuestionDTO[]>(environment.server + '/content/linker/unlinkedQuestions');
+  }
+
+  /**
+   * Unlinks a content node from a concept node.
+   *
+   * Sends a GET request to the server to remove the association between the specified concept node and content node.
+   *
+   * @param conceptNodeId - The ID of the concept node to unlink.
+   * @param contentNodeId - The ID of the content node to unlink.
+   * @returns An Observable that emits `true` if the unlinking was successful, otherwise `false`.
+   */
+  unlinkContentNode(conceptNodeId: number, contentNodeId: number): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${environment.server}/content/linker/unlinkContentNode/${conceptNodeId}/${contentNodeId}`,
+    );
+  }
+
+  /**
+   * Retrieves a list of content nodes that are not yet linked.
+   *
+   * Sends an HTTP GET request to the backend endpoint for unlinked content nodes.
+   *
+   * @returns An Observable emitting an array of `LinkableContentNodeDTO` objects representing unlinked content nodes.
+   */
+  getUnlinkedContentNodes(): Observable<LinkableContentNodeDTO[]> {
+    return this.http.get<LinkableContentNodeDTO[]>(
+      environment.server + '/content/linker/unlinkedContentNodes',
+    );
   }
 
   /**

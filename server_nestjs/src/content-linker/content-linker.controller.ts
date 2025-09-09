@@ -90,7 +90,7 @@ export class ContentLinkerController {
    * Retrieves a list of content nodes that are not linked to any concept.
    * @returns {Promise<ContentDTO[]>} A promise that resolves to an array of ContentDTO objects representing the unlinked content nodes.
    */
-  async getUnlinkedContentNodes(): Promise<ContentDTO[]> {
+  async getUnlinkedContentNodes(): Promise<LinkableContentNodeDTO[]> {
     return this.contentLinkerService.getUnlinkedContentNodes();
   }
 }

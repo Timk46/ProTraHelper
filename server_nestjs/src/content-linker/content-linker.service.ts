@@ -243,7 +243,7 @@ export class ContentLinkerService {
    *
    * @returns {Promise<ContentDTO[]>} A promise that resolves to an array of unlinked content nodes.
    */
-  async getUnlinkedContentNodes(): Promise<ContentDTO[]> {
+  async getUnlinkedContentNodes(): Promise<LinkableContentNodeDTO[]> {
     // get all content nodes that are not linked to any concept node
     const linkedContentNodes = await this.prisma.training.findMany({
       select: {
@@ -262,15 +262,12 @@ export class ContentLinkerService {
       },
     });
     return unlinkedContentNodes.map(node => ({
-      contentNodeId: node.id,
+      id: node.id,
       name: node.name,
       description: node.description,
       //dummy data, crucial for dto
-      contentElements: [],
-      level: 0,
-      requiresConceptIds: [],
-      trainsConceptIds: [],
-      progress: 0,
+      conceptNodeId: -1,
+      awardsLevel: 0,
     }));
   }
 }
