@@ -1,7 +1,12 @@
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDataService } from '@/question-data/question-data.service';
-import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
+import {
+  ContentDTO,
+  LinkableContentElementDTO,
+  LinkableContentNodeDTO,
+  QuestionDTO,
+} from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -176,6 +181,15 @@ export class ContentLinkerService {
     return true;
   }
 
+  /**
+   * Retrieves all questions that are not linked to any content element of type 'QUESTION'.
+   *
+   * This method first fetches all content elements of type 'QUESTION' that have a non-null `questionId`.
+   * It then collects the IDs of these linked questions and queries the database for questions whose IDs
+   * are not present in the list of linked question IDs.
+   *
+   * @returns {Promise<QuestionDTO[]>} A promise that resolves to an array of unlinked questions.
+   */
   async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
     const linkedQuestions = await this.prisma.contentElement.findMany({
       where: {
@@ -200,5 +214,63 @@ export class ContentLinkerService {
     });
 
     return unlinkedQuestions;
+  }
+
+  /**
+   * Unlinks a content node from a concept node by deleting the corresponding training records.
+   * The unlinked content node will remain in the database, but it will no longer be associated with the specified concept node.
+   *
+   * @param conceptNodeId - The ID of the concept node to unlink.
+   * @param contentNodeId - The ID of the content node to unlink.
+   * @returns A promise that resolves to `true` if any training records were deleted, otherwise `false`.
+   */
+  async unlinkContentNode(conceptNodeId: number, contentNodeId: number): Promise<boolean> {
+    const training = await this.prisma.training.deleteMany({
+      where: {
+        conceptNodeId: conceptNodeId,
+        contentNodeId: contentNodeId,
+      },
+    });
+    return training.count > 0;
+  }
+
+  /**
+   * Retrieves all content nodes that are not linked to any concept node.
+   *
+   * This method queries the database for content nodes whose IDs do not appear in the
+   * list of linked content nodes from the training table. It then maps the results to
+   * `ContentDTO` objects with default values for certain properties.
+   *
+   * @returns {Promise<ContentDTO[]>} A promise that resolves to an array of unlinked content nodes.
+   */
+  async getUnlinkedContentNodes(): Promise<ContentDTO[]> {
+    // get all content nodes that are not linked to any concept node
+    const linkedContentNodes = await this.prisma.training.findMany({
+      select: {
+        contentNodeId: true,
+      },
+      distinct: ['contentNodeId'],
+    });
+    const linkedContentNodeIds = linkedContentNodes.map(
+      linkedContentNode => linkedContentNode.contentNodeId,
+    );
+    const unlinkedContentNodes = await this.prisma.contentNode.findMany({
+      where: {
+        id: {
+          notIn: linkedContentNodeIds,
+        },
+      },
+    });
+    return unlinkedContentNodes.map(node => ({
+      contentNodeId: node.id,
+      name: node.name,
+      description: node.description,
+      //dummy data, crucial for dto
+      contentElements: [],
+      level: 0,
+      requiresConceptIds: [],
+      trainsConceptIds: [],
+      progress: 0,
+    }));
   }
 }

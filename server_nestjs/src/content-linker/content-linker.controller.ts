@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
-import { QuestionDTO } from '@Interfaces/index';
+import { ContentDTO, QuestionDTO } from '@Interfaces/index';
 import { LinkableContentElementDTO, LinkableContentNodeDTO } from '@Interfaces/index';
 import { ContentLinkerService } from './content-linker.service';
 
@@ -64,5 +64,33 @@ export class ContentLinkerController {
    */
   async getUnlinkedQuestions(): Promise<QuestionDTO[]> {
     return this.contentLinkerService.getUnlinkedQuestions();
+  }
+
+  @roles('ADMIN')
+  @Get('/unlinkContentNode/:conceptNodeId/:contentNodeId')
+  /**
+   * Unlinks a content node from a concept node.
+   * @param conceptNodeId - The ID of the concept node to unlink from.
+   * @param contentNodeId - The ID of the content node to unlink.
+   * @returns {Promise<boolean>} A promise that resolves to a boolean indicating whether the unlinking was successful.
+   */
+  async unlinkContentNode(
+    @Param('conceptNodeId') conceptNodeId: string,
+    @Param('contentNodeId') contentNodeId: string,
+  ): Promise<boolean> {
+    return this.contentLinkerService.unlinkContentNode(
+      Number(conceptNodeId),
+      Number(contentNodeId),
+    );
+  }
+
+  @roles('ADMIN')
+  @Get('/unlinkedContentNodes')
+  /**
+   * Retrieves a list of content nodes that are not linked to any concept.
+   * @returns {Promise<ContentDTO[]>} A promise that resolves to an array of ContentDTO objects representing the unlinked content nodes.
+   */
+  async getUnlinkedContentNodes(): Promise<ContentDTO[]> {
+    return this.contentLinkerService.getUnlinkedContentNodes();
   }
 }
