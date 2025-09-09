@@ -7,9 +7,9 @@
 
     <!-- No concepts message -->
     <div *ngIf="!isLoading && highlightConcepts.length === 0" class="no-concepts-message">
-      <p>No highlight concepts available.</p>
+      <p>Keine Hervorhebungskonzepte verfügbar.</p>
       <button *ngIf="canModify()" mat-raised-button color="primary" (click)="addNewConcept()">
-        <mat-icon>add</mat-icon> Add Highlight
+        <mat-icon>add</mat-icon> Hervorhebung hinzufügen
       </button>
     </div>
 
@@ -19,7 +19,7 @@
       <div *ngIf="canModify()" class="add-tile-container">
         <button mat-raised-button color="primary" class="add-button" (click)="addNewConcept()">
           <mat-icon>add</mat-icon>
-          <span>Add Highlight</span>
+          <span>Hervorhebung hinzufügen</span>
         </button>
       </div>
 
@@ -49,7 +49,7 @@
           <!-- Description overlay (shown on hover) -->
           <div class="highlight-description-overlay" [class.visible]="hoveredTileId === concept.id">
             <p class="highlight-description">
-              {{ concept.description || 'No description available' }}
+              {{ concept.description || 'Keine Beschreibung verfügbar' }}
             </p>
           </div>
 
@@ -61,7 +61,7 @@
               color="primary"
               class="edit-button"
               (click)="editConcept(concept, $event)"
-              aria-label="Edit highlight"
+              aria-label="Hervorhebung bearbeiten"
             >
               <mat-icon>edit</mat-icon>
             </button>
@@ -72,7 +72,7 @@
               color="warn"
               class="delete-button"
               (click)="deleteConcept(concept.id, $event)"
-              aria-label="Delete highlight"
+              aria-label="Hervorhebung löschen"
             >
               <mat-icon>delete</mat-icon>
             </button>
