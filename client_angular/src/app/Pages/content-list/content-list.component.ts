@@ -455,21 +455,18 @@ export class ContentListComponent implements OnInit, OnChanges {
     });
   }
 
-  // TODO: implement
   onDeleteContentNode(contentNodeId: number) {
     console.log('onContentNodeDelete', contentNodeId);
     this.confirmService.confirm({
-      title: 'Bereich löschen?',
+      title: 'Verbindung aufheben?',
       message:
-        'Dieser Bereich wird gelöscht und alle darin entahltenen Verknüpfungen werden aufgehoben. Die darin verknüpften Inhalte bleiben bestehen. Fortfahren?',
-      acceptLabel: 'Löschen',
+        'Die Verknüpfung zum Bereich wird aufgehoben. Der Bereich selbst sowie darin verknüpfte Inhalte bleiben bestehen. Fortfahren?',
+      acceptLabel: 'Aufheben',
       declineLabel: 'Abbrechen',
       swapButtons: true,
       swapColors: true,
       accept: () => {
         console.log('deleting');
-
-        // TODO: implement
         this.contentLinkerService
           .unlinkContentNode(this.activeConceptNodeId, contentNodeId)
           .subscribe({

@@ -165,6 +165,11 @@
           mat-mini-fab
           color="primary"
           (click)="$event.stopPropagation(); onNodeVisibilityToggle(content)"
+          [matTooltip]="
+            content.isVisible
+              ? 'Sichtbar für Lernende. Klicken, um unsichtbar zu schalten'
+              : 'Unsichtbar für Lernende. Klicken, um sichtbar zu schalten'
+          "
         >
           <mat-icon>{{ content.isVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
         </button>
@@ -192,14 +197,25 @@
         >
           <mat-icon>edit</mat-icon>
         </button>
-        <button mat-raised-button color="primary" (click)="onAddTask(content.contentNodeId)">
+        <button
+          mat-mini-fab
+          color="primary"
+          (click)="onAddTask(content.contentNodeId)"
+          matTooltip="Aufgabe hinzufügen"
+        >
           <mat-icon>add</mat-icon>
-          Aufgabe hinzufügen
         </button>
-        <!-- TODO: enable button after deletion implementation -->
-        <button mat-raised-button color="warn" (click)="onDeleteContentNode(content.contentNodeId)">
+
+        <!-- spacer -->
+        <div style="width: 10px"></div>
+
+        <button
+          mat-mini-fab
+          color="warn"
+          (click)="onDeleteContentNode(content.contentNodeId)"
+          matTooltip="Verknüpfung zum Bereich aufheben"
+        >
           <mat-icon>delete</mat-icon>
-          Diesen Bereich löschen
         </button>
       </mat-action-row>
     </mat-expansion-panel>

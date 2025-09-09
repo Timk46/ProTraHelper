@@ -52,23 +52,37 @@
     </div>
 
     <!-- edit mode actions -->
-    <div *ngIf="editModeActive">
+    <div style="display: flex; flex-direction: row; gap: 5px" *ngIf="editModeActive">
       <button
         mat-mini-fab
         color="primary"
         [matTooltip]="
           contentElementData.isVisible
-            ? 'Sichtbar für Lernende. Klicken um unsichtbar zu schalten'
+            ? 'Sichtbar für Lernende. Klicken, um unsichtbar zu schalten'
             : 'Unsichtbar für Lernende. Klicken, um sichtbar zu schalten'
         "
         (click)="$event.stopPropagation(); onTaskVisibilityToggle()"
       >
         <mat-icon>{{ contentElementData.isVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
       </button>
-      <button mat-mini-fab color="primary" (click)="$event.stopPropagation(); onTaskEdit()">
+      <button
+        mat-mini-fab
+        color="primary"
+        (click)="$event.stopPropagation(); onTaskEdit()"
+        matTooltip="Aufgabe bearbeiten"
+      >
         <mat-icon>edit</mat-icon>
       </button>
-      <button mat-mini-fab color="warn" (click)="$event.stopPropagation(); onTaskDelete()">
+
+      <!-- spacer -->
+      <div></div>
+
+      <button
+        mat-mini-fab
+        color="warn"
+        (click)="$event.stopPropagation(); onTaskDelete()"
+        matTooltip="Aufgabe entknüpfen"
+      >
         <mat-icon>delete</mat-icon>
       </button>
     </div>
