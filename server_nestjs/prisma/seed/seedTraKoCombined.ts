@@ -488,7 +488,7 @@ export async function seedTraKoCombined() {
     console.log(`🏗️ Module ID: ${moduleArchitektur.id} (${moduleArchitektur.name})`);
     console.log(`📚 Subject ID: ${subjectTraKo.id} (${subjectTraKo.name})`);
     console.log(`🧠 Root Concept Node ID: ${conceptNode.id}`);
-    console.log('\n📋 NOTE: For Evaluation System Test IDs, run seedEvaluationOnly.ts');
+    console.log('\n📋 NOTE: For Evaluation System Test IDs, run npm run seedEval');
 
     console.log('\n✅ TraKo base seeding completed successfully!');
   } catch (error) {

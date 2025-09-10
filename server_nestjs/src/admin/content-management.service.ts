@@ -76,6 +76,10 @@ export class ContentManagementService {
       fillinQuestions,
       blanks,
       umlQuestions,
+      mcSliderQuestions,
+      groupReviewGates,
+      questionCollections,
+      questionCollectionLinks,
       umlEditorModels,
       umlEditorElements,
       files,
@@ -134,6 +138,10 @@ export class ContentManagementService {
       this.prisma.fillinQuestion.findMany(),
       this.prisma.blank.findMany(),
       this.prisma.umlQuestion.findMany(),
+      this.prisma.mCSliderQuestion.findMany(),
+      this.prisma.groupReviewGate.findMany(),
+      this.prisma.questionCollection.findMany(),
+      this.prisma.questionCollectionLink.findMany(),
       this.prisma.umlEditorModel.findMany({
         include: {
           EditorElement: true,
@@ -181,6 +189,10 @@ export class ContentManagementService {
         fillinQuestions,
         blanks,
         umlQuestions,
+        mcSliderQuestions,
+        groupReviewGates,
+        questionCollections,
+        questionCollectionLinks,
         umlEditorModels,
         umlEditorElements,
         uploadQuestions,
@@ -247,6 +259,7 @@ export class ContentManagementService {
         console.log('Clearing learning content...');
         // Clear question-related data
         await Promise.all([
+          prisma.questionCollectionLink.deleteMany(),
           prisma.userUploadAnswer.deleteMany(),
           prisma.userUmlQuestionAnswer.deleteMany(),
           prisma.codeGameScaffoldAnswer.deleteMany(),
@@ -258,8 +271,9 @@ export class ContentManagementService {
           prisma.codeGameScaffold.deleteMany(),
           prisma.mCQuestionOption.deleteMany(),
           prisma.mCOption.deleteMany(),
+          prisma.groupReviewGate.deleteMany(),
+          prisma.mCSliderQuestion.deleteMany(),
           prisma.umlQuestion.deleteMany(),
-          // Only try to delete uploadQuestion if it exists in the schema
           ...(content.uploadQuestions && content.uploadQuestions.length > 0
             ? [prisma.uploadQuestion.deleteMany()]
             : []),
@@ -270,6 +284,7 @@ export class ContentManagementService {
           prisma.freeTextQuestion.deleteMany(),
           prisma.mCQuestion.deleteMany(),
           prisma.questionVersion.deleteMany(),
+          prisma.questionCollection.deleteMany(),
           prisma.question.deleteMany(),
         ]);
 
@@ -456,23 +471,26 @@ export class ContentManagementService {
 
         console.log('Importing question types...');
         await Promise.all([
-          content.questionVersions && content.questionVersions.length > 0
-            ? prisma.questionVersion.createMany({ data: content.questionVersions })
-            : Promise.resolve(),
+          prisma.questionVersion.createMany({ data: content.questionVersions }),
           prisma.mCQuestion.createMany({ data: content.mcQuestions }),
           prisma.mCOption.createMany({ data: content.mcOptions }),
           prisma.freeTextQuestion.createMany({ data: content.freeTextQuestions }),
           prisma.graphQuestion.createMany({ data: content.graphQuestions }),
           prisma.codingQuestion.createMany({ data: content.codingQuestions }),
-          content.codeGameQuestions && content.codeGameQuestions.length > 0
-            ? prisma.codeGameQuestion.createMany({ data: content.codeGameQuestions })
-            : Promise.resolve(),
+          prisma.codeGameQuestion.createMany({ data: content.codeGameQuestions }),
           prisma.fillinQuestion.createMany({ data: content.fillinQuestions }),
           prisma.umlQuestion.createMany({ data: content.umlQuestions }),
-          content.uploadQuestions && content.uploadQuestions.length > 0
-            ? prisma.uploadQuestion.createMany({ data: content.uploadQuestions })
-            : Promise.resolve(),
+          ...(content.uploadQuestions && content.uploadQuestions.length > 0
+            ? [prisma.uploadQuestion.createMany({ data: content.uploadQuestions })]
+            : []),
+          prisma.mCSliderQuestion.createMany({ data: content.mcSliderQuestions }),
+          prisma.groupReviewGate.createMany({ data: content.groupReviewGates }),
         ]);
+
+        if (content.questionCollections && content.questionCollections.length > 0) {
+          console.log('Importing question collections...');
+          await prisma.questionCollection.createMany({ data: content.questionCollections });
+        }
 
         console.log('Importing question details...');
         await Promise.all([
@@ -480,9 +498,7 @@ export class ContentManagementService {
           prisma.codeGeruest.createMany({ data: content.codeGerueste }),
           prisma.modelSolution.createMany({ data: content.modelSolutions }),
           prisma.automatedTest.createMany({ data: content.automatedTests }),
-          content.codeGameScaffolds && content.codeGameScaffolds.length > 0
-            ? prisma.codeGameScaffold.createMany({ data: content.codeGameScaffolds })
-            : Promise.resolve(),
+          prisma.codeGameScaffold.createMany({ data: content.codeGameScaffolds }),
           prisma.blank.createMany({ data: content.blanks }),
         ]);
 
@@ -540,6 +556,7 @@ export class ContentManagementService {
                     contentNodeId: view.contentNodeId,
                     contentElementId: createdElement.id,
                     position: view.position,
+                    isVisible: view.isVisible,
                   })),
                 });
               }
@@ -552,111 +569,73 @@ export class ContentManagementService {
 
     console.log('Content elements import completed');
 
-    // Phase 9: Reset autoincrement sequences (separate operation)
+    // Phase 9: Import remaining relationships
+    await this.prisma.$transaction(
+      async prisma => {
+        if (content.questionCollectionLinks && content.questionCollectionLinks.length > 0) {
+          console.log('Importing question collection links...');
+          await prisma.questionCollectionLink.createMany({ data: content.questionCollectionLinks });
+        }
+      },
+      { timeout: 60000 },
+    );
+
+    // Phase 10: Reset autoincrement sequences (separate operation)
     console.log('Resetting autoincrement sequences for all tables...');
-    await Promise.all([
-      // Base entities
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"File"', 'id'), COALESCE((SELECT MAX(id) FROM "File"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"Module"', 'id'), COALESCE((SELECT MAX(id) FROM "Module"), 1), true);`,
-      content.moduleSettings && content.moduleSettings.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"ModuleSetting"', 'id'), COALESCE((SELECT MAX(id) FROM "ModuleSetting"), 1), true);`
-        : Promise.resolve(),
 
-      // Concept structure
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptNode"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptNode"), 1), true);`,
-      content.moduleHighlightConcepts && content.moduleHighlightConcepts.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"ModuleHighlightConcepts"', 'id'), COALESCE((SELECT MAX(id) FROM "ModuleHighlightConcepts"), 1), true);`
-        : Promise.resolve(),
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptGraph"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptGraph"), 1), true);`,
+    const tablesToReset = [
+      'File',
+      'Module',
+      'ModuleSetting',
+      'ConceptNode',
+      'ModuleHighlightConcepts',
+      'ConceptGraph',
+      'ModuleConceptGoal',
+      'ConceptEdge',
+      'ConceptFamily',
+      'ContentNode',
+      'ContentEdge',
+      'Requirement',
+      'Training',
+      'UmlEditorModel',
+      'UmlEditorElement',
+      'Question',
+      'QuestionVersion',
+      'MCQuestion',
+      'MCOption',
+      'FreeTextQuestion',
+      'GraphQuestion',
+      'CodingQuestion',
+      'CodeGameQuestion',
+      'FillinQuestion',
+      'UmlQuestion',
+      'MCSliderQuestion',
+      'GroupReviewGate',
+      'QuestionCollection',
+      'QuestionCollectionLink',
+      'MCQuestionOption',
+      'CodeGeruest',
+      'ModelSolution',
+      'AutomatedTest',
+      'CodeGameScaffold',
+      'Blank',
+      'ContentElement',
+      'ContentView',
+    ];
 
-      // Concept relationships
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ModuleConceptGoal"', 'id'), COALESCE((SELECT MAX(id) FROM "ModuleConceptGoal"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptEdge"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptEdge"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ConceptFamily"', 'id'), COALESCE((SELECT MAX(id) FROM "ConceptFamily"), 1), true);`,
+    if (content.uploadQuestions && content.uploadQuestions.length > 0) {
+      tablesToReset.push('UploadQuestion');
+    }
 
-      // Content structure
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentNode"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentNode"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentEdge"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentEdge"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"Requirement"', 'id'), COALESCE((SELECT MAX(id) FROM "Requirement"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"Training"', 'id'), COALESCE((SELECT MAX(id) FROM "Training"), 1), true);`,
-
-      // UML editor
-      content.umlEditorModels && content.umlEditorModels.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"UmlEditorModel"', 'id'), COALESCE((SELECT MAX(id) FROM "UmlEditorModel"), 1), true);`
-        : Promise.resolve(),
-      content.umlEditorElements && content.umlEditorElements.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"UmlEditorElement"', 'id'), COALESCE((SELECT MAX(id) FROM "UmlEditorElement"), 1), true);`
-        : Promise.resolve(),
-
-      // Questions
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"Question"', 'id'), COALESCE((SELECT MAX(id) FROM "Question"), 1), true);`,
-      content.questionVersions && content.questionVersions.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"QuestionVersion"', 'id'), COALESCE((SELECT MAX(id) FROM "QuestionVersion"), 1), true);`
-        : Promise.resolve(),
-
-      // Question types
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"MCQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "MCQuestion"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"MCOption"', 'id'), COALESCE((SELECT MAX(id) FROM "MCOption"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"FreeTextQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "FreeTextQuestion"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"GraphQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "GraphQuestion"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"CodingQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "CodingQuestion"), 1), true);`,
-      content.codeGameQuestions && content.codeGameQuestions.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"CodeGameQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "CodeGameQuestion"), 1), true);`
-        : Promise.resolve(),
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"FillinQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "FillinQuestion"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"UmlQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "UmlQuestion"), 1), true);`,
-      content.uploadQuestions && content.uploadQuestions.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"UploadQuestion"', 'id'), COALESCE((SELECT MAX(id) FROM "UploadQuestion"), 1), true);`
-        : Promise.resolve(),
-
-      // Question details
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"MCQuestionOption"', 'id'), COALESCE((SELECT MAX(id) FROM "MCQuestionOption"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"CodeGeruest"', 'id'), COALESCE((SELECT MAX(id) FROM "CodeGeruest"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ModelSolution"', 'id'), COALESCE((SELECT MAX(id) FROM "ModelSolution"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"AutomatedTest"', 'id'), COALESCE((SELECT MAX(id) FROM "AutomatedTest"), 1), true);`,
-      content.codeGameScaffolds && content.codeGameScaffolds.length > 0
-        ? this.prisma
-            .$executeRaw`SELECT setval(pg_get_serial_sequence('"CodeGameScaffold"', 'id'), COALESCE((SELECT MAX(id) FROM "CodeGameScaffold"), 1), true);`
-        : Promise.resolve(),
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"Blank"', 'id'), COALESCE((SELECT MAX(id) FROM "Blank"), 1), true);`,
-
-      // Content elements
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentElement"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentElement"), 1), true);`,
-      this.prisma
-        .$executeRaw`SELECT setval(pg_get_serial_sequence('"ContentView"', 'id'), COALESCE((SELECT MAX(id) FROM "ContentView"), 1), true);`,
-    ]);
+    for (const table of tablesToReset) {
+      try {
+        console.log(`Resetting sequence for table: ${table}`);
+        await this.prisma
+          .$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 1), true);`);
+      } catch (e) {
+        console.error(`Could not reset sequence for table ${table}:`, e.message);
+      }
+    }
 
     console.log('All autoincrement sequences reset successfully');
   }

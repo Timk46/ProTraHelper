@@ -15,10 +15,10 @@ async function main() {
   //await seedAUD();
   //await seedOFP();
   //await seedTraKo();
-  //await seedTraKoCombined();
+  await seedTraKoCombined();
   //await seedTranscriptsToConceptNodes();
   //await seedUmlearn();
-  await seedMCSlider();
+  //await seedMCSlider();
   //await seedEvaluationCompleteFix();
   //await seedEvaluationDemo();
 }
