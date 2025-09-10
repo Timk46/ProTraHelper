@@ -1,5 +1,6 @@
 <div class="attachments-container">
   <!-- Section to add new attachments -->
+  <p>Vorsicht! Änderungen werden direkt übernommen!</p>
   <div class="add-attachment-section">
     <h3>Neuen Anhang hinzufügen</h3>
     <div class="add-controls">
@@ -12,13 +13,28 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <button mat-stroked-button color="primary" (click)="addExistingAttachment()" [disabled]="!selectedUnlinkedAttachment">Hinzufügen</button>
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="addExistingAttachment()"
+        [disabled]="!selectedUnlinkedAttachment"
+      >
+        Hinzufügen
+      </button>
 
       <span class="or-divider">oder</span>
 
       <!-- Upload new file -->
-      <button mat-stroked-button color="primary" (click)="fileInput.click()">Neue Datei hochladen</button>
-      <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept=".pdf,video/*">
+      <button mat-stroked-button color="primary" (click)="fileInput.click()">
+        Neue Datei hochladen
+      </button>
+      <input
+        hidden
+        (change)="onFileSelected($event)"
+        #fileInput
+        type="file"
+        accept=".pdf,video/*"
+      />
     </div>
   </div>
 

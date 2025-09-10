@@ -40,7 +40,7 @@
       class="contentElement-Container"
     >
       <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
-      <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
+      <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier!"></app-pdfViewer>
     </div>
     <div
       *ngIf="contentElem.type === 'PDF' && contentElem.file && isSafari"
@@ -48,12 +48,12 @@
     >
       <!-- Our current PDF Component cant be initialized multiple times... using an iframe instead for now -->
       <!-- <p class="message-code">Safari unterstützt den PDF Viewer nicht. Wir empfehlen hierfür die Nutzung eines alternativen Browsers, z.B. Google Chrome.</p> -->
-      <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-pdfViewer>
+      <app-pdfViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier!"></app-pdfViewer>
     </div>
 
     <!--VIDEO-->
     <div *ngIf="contentElem.type === 'VIDEO' && contentElem.file" class="contentElement-Container">
-      <app-videoViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier"></app-videoViewer>
+      <app-videoViewer [uniqueIdentifier]="contentElem.file.uniqueIdentifier!"></app-videoViewer>
     </div>
 
     <!--CODE-->
