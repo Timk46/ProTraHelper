@@ -89,6 +89,7 @@ import { AppHeaderComponent } from './Pages/app-header/app-header.component';
 import { HighlightNavigatorComponent } from './Pages/highlight-navigator/highlight-navigator.component';
 import { HighlightConceptDialogComponent } from './Pages/highlight-navigator/highlight-concept-dialog/highlight-concept-dialog.component';
 import { ContentListNodeEditDialogComponent } from './Pages/content-list/content-list-node-edit-dialog/content-list-node-edit-dialog.component';
+import { AttachmentsTabComponent } from './Pages/content-list/attachments-tab/attachments-tab.component';
 
 // ProTra 2.0 Module
 import { UploadTaskComponent } from './Pages/contentView/contentElement/upload-task/upload-task.component';
@@ -97,6 +98,7 @@ import { LecturersViewModule } from './Pages/lecturersView/lecturers-view.module
 import { TaskCollectionComponent } from './Pages/contentView/contentElement/task-collection/task-collection.component';
 import { PerformanceProfilingDirective } from 'src/app/Pages/evaluation-discussion-forum/directives/performance-profiling.directive';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
   declarations: [
@@ -155,6 +157,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ContentListComponent,
     ContentListItemComponent,
     ContentListNodeEditDialogComponent,
+    AttachmentsTabComponent,
     CodeGameConfirmDialogComponent,
     NavigationPreferenceToggleComponent,
     AppHeaderComponent,
@@ -191,6 +194,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ToastrModule.forRoot(),
     TinymceModule,
     PerformanceProfilingDirective,
+    MatTabsModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

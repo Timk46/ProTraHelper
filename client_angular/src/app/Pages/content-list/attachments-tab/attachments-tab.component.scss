@@ -1,0 +1,83 @@
+.attachments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px;
+}
+
+.add-attachment-section,
+.existing-attachments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.add-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.unlinked-select {
+  min-width: 250px;
+}
+
+.or-divider {
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.attachments-list {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  min-height: 100px;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  background-color: white;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.attachment-title {
+  flex-grow: 1;
+  margin-left: 8px;
+}
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 4px;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.attachments-list.cdk-drop-list-dragging .attachment-item:not(.cdk-drag-placeholder) {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.no-attachments-message {
+    padding: 16px;
+    color: rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
+
+mat-icon[cdkDragHandle] {
+    cursor: move;
+}

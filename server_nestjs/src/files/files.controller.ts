@@ -27,7 +27,7 @@ export class FilesController {
    * @param {Express.Multer.File} file - The file to upload
    * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
-  /*
+
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
@@ -36,7 +36,7 @@ export class FilesController {
     const fileType = mimetype.split('/')[1];
 
     return await this.filesService.uploadFile(buffer, fileName, fileType);
-  }*/
+  }
 
   /**
    * Download an existing file by its unique identifier.

@@ -1,0 +1,41 @@
+<div class="attachments-container">
+  <!-- Section to add new attachments -->
+  <div class="add-attachment-section">
+    <h3>Neuen Anhang hinzufügen</h3>
+    <div class="add-controls">
+      <!-- Add from existing unlinked attachments -->
+      <mat-form-field appearance="outline" class="unlinked-select">
+        <mat-label>Vorhandenen Anhang auswählen</mat-label>
+        <mat-select [(ngModel)]="selectedUnlinkedAttachment">
+          <mat-option *ngFor="let attachment of unlinkedAttachments" [value]="attachment.id">
+            {{ attachment.title }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-stroked-button color="primary" (click)="addExistingAttachment()" [disabled]="!selectedUnlinkedAttachment">Hinzufügen</button>
+
+      <span class="or-divider">oder</span>
+
+      <!-- Upload new file -->
+      <button mat-stroked-button color="primary" (click)="fileInput.click()">Neue Datei hochladen</button>
+      <input hidden (change)="onFileSelected($event)" #fileInput type="file" accept=".pdf,video/*">
+    </div>
+  </div>
+
+  <!-- Section to display and manage existing attachments -->
+  <div class="existing-attachments-section">
+    <h3>Vorhandene Anhänge</h3>
+    <div cdkDropList (cdkDropListDropped)="drop($event)" class="attachments-list">
+      <div *ngFor="let attachment of attachments" cdkDrag class="attachment-item">
+        <mat-icon cdkDragHandle>drag_indicator</mat-icon>
+        <span class="attachment-title">{{ attachment.title }}</span>
+        <button mat-icon-button color="warn" (click)="deleteAttachment(attachment.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      <div *ngIf="attachments.length === 0" class="no-attachments-message">
+        Keine Anhänge vorhanden.
+      </div>
+    </div>
+  </div>
+</div>
