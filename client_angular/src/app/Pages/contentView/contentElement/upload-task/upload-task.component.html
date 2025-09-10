@@ -11,7 +11,13 @@
   </div>
 
   <!-- Description Section -->
-  <div class="description-section">
+  <div
+    *ngIf="
+      (uploadQuestion.textHTML && uploadQuestion.textHTML.length > 0) ||
+      (uploadQuestion.text && uploadQuestion.text.length > 0)
+    "
+    class="description-section"
+  >
     <div
       class="description-text"
       [innerHTML]="uploadQuestion.textHTML || uploadQuestion.text || 'Lädt'"

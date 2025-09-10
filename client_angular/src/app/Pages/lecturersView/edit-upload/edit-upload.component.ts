@@ -69,7 +69,7 @@ export class EditUploadComponent implements OnInit {
   ) {
     this.uploadForm = this.fb.group({
       title: ['', Validators.required],
-      text: ['', Validators.required],
+      text: [''],
       textHTML: [''],
       maxSize: [10, [Validators.required, Validators.min(1), Validators.max(100)]],
       fileType: ['*', Validators.required],
@@ -114,6 +114,8 @@ export class EditUploadComponent implements OnInit {
         ...this.uploadForm.value,
         maxSize: this.uploadForm.value.maxSize * 1024 * 1024, // Convert MB to bytes
       };
+
+      console.log('Saving detailed question:', this.detailedQuestion);
 
       // update and wait for the response
       this.questionDataService.updateWholeQuestion(this.detailedQuestion).subscribe({

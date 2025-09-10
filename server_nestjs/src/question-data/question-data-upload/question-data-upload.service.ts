@@ -114,7 +114,8 @@ export class QuestionDataUploadService {
       },
       data: {
         title: uploadQuestion.title || originalUploadQuestion.title,
-        text: uploadQuestion.text || originalUploadQuestion.text,
+        text:
+          uploadQuestion.text || uploadQuestion.text.length == 0 ? '' : originalUploadQuestion.text,
         textHTML: uploadQuestion.textHTML || originalUploadQuestion.textHTML,
         maxSize: uploadQuestion.maxSize,
         fileType: uploadQuestion.fileType,
