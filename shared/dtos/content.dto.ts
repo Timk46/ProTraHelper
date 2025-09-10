@@ -9,6 +9,7 @@ export interface ContentDTO {
   name: string;
   description: string;
   descriptionHTML?: string;
+  taskSectorTitle?: string;
   position?: number;
   contentElements: ContentElementDTO[];
   level: number;
@@ -28,6 +29,14 @@ export interface ContentDTO {
   isApproved?: boolean;
 
   //discussion: Discussion // TODO: implement
+}
+
+export interface ContentUpdateDTO {
+  name: string;
+  description?: string;
+  descriptionHTML?: string;
+  taskSectorTitle?: string;
+  difficulty?: number;
 }
 
 export interface ContentViewDTO {

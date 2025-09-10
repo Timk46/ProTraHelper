@@ -153,6 +153,7 @@ model ContentNode {
   name            String
   description     String?
   descriptionHTML String?
+  taskSectorTitle String?           @default("Aufgaben")
   position        Int?
   prerequisites   ContentEdge[]     @relation("prerequisiteContent")
   successors      ContentEdge[]     @relation("successorContent")

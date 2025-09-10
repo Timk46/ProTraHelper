@@ -1,6 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LinkableContentElementDTO, LinkableContentNodeDTO, QuestionDTO } from '@DTOs/index';
+import {
+  ContentUpdateDTO,
+  LinkableContentElementDTO,
+  LinkableContentNodeDTO,
+  QuestionDTO,
+} from '@DTOs/index';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -186,10 +191,7 @@ export class ContentLinkerService {
    *   - `difficulty`: The new difficulty level for the content node.
    * @returns An Observable that emits `true` if the update was successful, otherwise `false`.
    */
-  updateContentNode(
-    contentNodeId: number,
-    data: { name: string; description: string; descriptionHTML: string; difficulty: number },
-  ): Observable<boolean> {
+  updateContentNode(contentNodeId: number, data: ContentUpdateDTO): Observable<boolean> {
     return this.http.patch<boolean>(`${environment.server}/content/update/${contentNodeId}`, data);
   }
 }

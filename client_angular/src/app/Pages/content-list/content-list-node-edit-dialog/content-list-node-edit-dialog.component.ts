@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, Inject, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ContentDTO } from '@DTOs/index';
+import { ContentDTO, ContentUpdateDTO } from '@DTOs/index';
 import { TinymceComponent } from '../../tinymce/tinymce.component';
 
 @Component({
@@ -12,6 +12,7 @@ export class ContentListNodeEditDialogComponent implements AfterViewInit {
   @ViewChild('desceditor') editor!: TinymceComponent;
 
   name: string;
+  taskSectorTitle: string;
   description: string;
   descriptionHTML: string;
   difficulty: number;
@@ -35,6 +36,7 @@ export class ContentListNodeEditDialogComponent implements AfterViewInit {
     this.description = data.description;
     this.descriptionHTML = data.descriptionHTML || '';
     this.difficulty = data.level;
+    this.taskSectorTitle = data.taskSectorTitle || '';
   }
 
   ngAfterViewInit(): void {
@@ -46,11 +48,12 @@ export class ContentListNodeEditDialogComponent implements AfterViewInit {
   }
 
   onSubmit(): void {
-    const result = {
+    const result: ContentUpdateDTO = {
       name: this.name,
       description: this.editor.getRawContent(),
       descriptionHTML: this.editor.getContent(),
-      level: this.difficulty,
+      taskSectorTitle: this.taskSectorTitle,
+      difficulty: this.difficulty,
     };
     this.dialogRef.close(result);
   }

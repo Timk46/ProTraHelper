@@ -10,6 +10,7 @@ import {
   ContentViewInformationDTO,
   contentElementType,
   questionType,
+  ContentUpdateDTO,
 } from '@Interfaces/index';
 import { ContentElementStatusDTO } from '@DTOs/index';
 import { UserConceptService } from '@/graph/user-concept/user-concept.service';
@@ -167,6 +168,7 @@ export class ContentService {
       name: contentNode.name,
       description: contentNode.description,
       descriptionHTML: contentNode.descriptionHTML || undefined,
+      taskSectorTitle: contentNode.taskSectorTitle || undefined,
       position: contentNode.position,
       level: contentNode.trains[0]?.awards,
       contentElements: contentNode.ContentView.filter(
@@ -998,16 +1000,14 @@ export class ContentService {
   /**
    * Aktualisiert einen ContentNode (Name, Beschreibung, Level)
    */
-  async updateContentNodeData(
-    contentNodeId: number,
-    data: { name: string; description: string; descriptionHTML: string; difficulty: number },
-  ): Promise<boolean> {
+  async updateContentNodeData(contentNodeId: number, data: ContentUpdateDTO): Promise<boolean> {
     await this.prisma.contentNode.update({
       where: { id: contentNodeId },
       data: {
         name: data.name,
         description: data.description,
         descriptionHTML: data.descriptionHTML,
+        taskSectorTitle: data.taskSectorTitle,
         // Level ist vermutlich in Training/ModuleConceptGoal, aber für Demo als Beispiel:
         // level: data.difficulty
       },

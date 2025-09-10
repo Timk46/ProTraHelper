@@ -4,6 +4,7 @@ import { ContentService } from './content.service';
 import {
   ConceptNodeEditDTO,
   ContentsForConceptDTO,
+  ContentUpdateDTO,
   ContentViewDTO,
   ContentViewInformationDTO,
 } from '@Interfaces/index';
@@ -272,8 +273,7 @@ export class ContentController {
   @Patch('/update/:contentNodeId')
   async updateContentNode(
     @Param('contentNodeId') contentNodeId: number,
-    @Body()
-    body: { name: string; description: string; descriptionHTML: string; difficulty: number },
+    @Body() body: ContentUpdateDTO,
   ): Promise<boolean> {
     return this.contentService.updateContentNodeData(Number(contentNodeId), body);
   }

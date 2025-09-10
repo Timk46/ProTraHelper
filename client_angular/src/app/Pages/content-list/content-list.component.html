@@ -140,7 +140,12 @@
           </button>
         </div>
       </div>
-      <h2 style="margin-top: 10px">Aufgaben</h2>
+      <h2
+        style="margin-top: 10px"
+        *ngIf="content.taskSectorTitle || getQuestions(content).length > 0"
+      >
+        {{ content.taskSectorTitle }}
+      </h2>
       <div
         class="content-list-element-items"
         cdkDropList
