@@ -176,18 +176,19 @@ export class ContentLinkerService {
    * Updates a content node with the specified data.
    *
    * Sends a PATCH request to the server to update the content node identified by `contentNodeId`
-   * with the provided `name`, `description`, and `difficulty`.
+   * with the provided `name`, `description`, `descriptionHTML` and `difficulty`.
    *
    * @param contentNodeId - The unique identifier of the content node to update.
    * @param data - An object containing the updated properties:
    *   - `name`: The new name for the content node.
    *   - `description`: The new description for the content node.
+   *   - `descriptionHTML`: The new HTML description for the content node.
    *   - `difficulty`: The new difficulty level for the content node.
    * @returns An Observable that emits `true` if the update was successful, otherwise `false`.
    */
   updateContentNode(
     contentNodeId: number,
-    data: { name: string; description: string; difficulty: number },
+    data: { name: string; description: string; descriptionHTML: string; difficulty: number },
   ): Observable<boolean> {
     return this.http.patch<boolean>(`${environment.server}/content/update/${contentNodeId}`, data);
   }

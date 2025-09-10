@@ -166,6 +166,7 @@ export class ContentService {
       contentNodeId: contentNode.id,
       name: contentNode.name,
       description: contentNode.description,
+      descriptionHTML: contentNode.descriptionHTML || undefined,
       position: contentNode.position,
       level: contentNode.trains[0]?.awards,
       contentElements: contentNode.ContentView.filter(
@@ -999,13 +1000,14 @@ export class ContentService {
    */
   async updateContentNodeData(
     contentNodeId: number,
-    data: { name: string; description: string; difficulty: number },
+    data: { name: string; description: string; descriptionHTML: string; difficulty: number },
   ): Promise<boolean> {
     await this.prisma.contentNode.update({
       where: { id: contentNodeId },
       data: {
         name: data.name,
         description: data.description,
+        descriptionHTML: data.descriptionHTML,
         // Level ist vermutlich in Training/ModuleConceptGoal, aber für Demo als Beispiel:
         // level: data.difficulty
       },

@@ -272,7 +272,8 @@ export class ContentController {
   @Patch('/update/:contentNodeId')
   async updateContentNode(
     @Param('contentNodeId') contentNodeId: number,
-    @Body() body: { name: string; description: string; difficulty: number },
+    @Body()
+    body: { name: string; description: string; descriptionHTML: string; difficulty: number },
   ): Promise<boolean> {
     return this.contentService.updateContentNodeData(Number(contentNodeId), body);
   }

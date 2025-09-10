@@ -519,7 +519,7 @@ export class ContentListComponent implements OnInit, OnChanges {
    */
   onEditContentNode(content: ContentDTO) {
     const dialogRef = this.dialog.open(ContentListNodeEditDialogComponent, {
-      width: '400px',
+      width: '80vh',
       data: content,
     });
     dialogRef.afterClosed().subscribe(result => {

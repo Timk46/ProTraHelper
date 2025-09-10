@@ -113,7 +113,10 @@
         </div>
 
         <!-- description -->
-        <p class="content-list-element-description">{{ content.description }}</p>
+        <p
+          class="content-list-element-description"
+          [innerHTML]="content.descriptionHTML || content.description"
+        ></p>
 
         <!-- button bar -->
         <div class="content-list-element-introduction-buttons">

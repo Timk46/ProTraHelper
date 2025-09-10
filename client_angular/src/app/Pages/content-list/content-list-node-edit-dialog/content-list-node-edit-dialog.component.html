@@ -1,31 +1,28 @@
 <h2 mat-dialog-title>ContentNode bearbeiten</h2>
 <mat-dialog-content>
-  <form [formGroup]="form">
-    <mat-form-field>
-      <input matInput placeholder="Name" formControlName="name" />
-      <mat-error *ngIf="form.get('name')!.hasError('required')">Name ist erforderlich</mat-error>
+  <div class="form-container">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Name</mat-label>
+      <input matInput [(ngModel)]="name" placeholder="Name eingeben" />
     </mat-form-field>
 
-    <mat-form-field>
-      <textarea matInput placeholder="Beschreibung" formControlName="description"></textarea>
-    </mat-form-field>
+    <!-- Rich text HTML description field -->
+    <div class="html-editor-container">
+      <label class="editor-label">Beschreibung (HTML)</label>
+      <app-tinymce #desceditor [config]="editorConfig"></app-tinymce>
+    </div>
 
-    <mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>Schwierigkeit</mat-label>
-      <mat-select formControlName="difficulty">
+      <mat-select [(ngModel)]="difficulty">
         <mat-option *ngFor="let star of [1, 2, 3, 4, 5]" [value]="star">
           Level {{ star }}
         </mat-option>
       </mat-select>
-      <mat-error *ngIf="form.get('difficulty')!.hasError('required')"
-        >Schwierigkeitsgrad ist erforderlich</mat-error
-      >
     </mat-form-field>
-  </form>
+  </div>
 </mat-dialog-content>
-<mat-dialog-actions>
+<mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Abbrechen</button>
-  <button mat-button color="primary" [disabled]="!form.valid" (click)="onSubmit()">
-    Speichern
-  </button>
+  <button mat-raised-button color="primary" (click)="onSubmit()">Speichern</button>
 </mat-dialog-actions>

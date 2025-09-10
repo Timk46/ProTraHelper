@@ -231,7 +231,7 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
       };
 
       const dialogRef = this.dialog.open(EditOverviewDialogComponent, {
-        width: '600px',
+        width: '80vh',
         data: dialogData,
       });
 
