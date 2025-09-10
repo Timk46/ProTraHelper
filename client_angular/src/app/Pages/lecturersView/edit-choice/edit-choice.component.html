@@ -251,7 +251,8 @@
               </form>
             </div>
 
-            <div class="answer-section">
+            <!-- TODO: Implement -->
+            <!-- <div class="answer-section">
               <div class="answer-section-header">
                 <h2>Begründungen</h2>
                 <button mat-mini-fab color="primary" (click)="addAdditionalInfo()">
@@ -297,35 +298,35 @@
                   </table>
                 </form>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="button-container">
-      <mat-progress-spinner
-        *ngIf="isSaving"
-        diameter="20"
-        mode="indeterminate"
-      ></mat-progress-spinner>
-      <button [disabled]="isSaving" mat-raised-button color="primary" (click)="onOverwrite()">
-        Speichern (aktualisieren)
-      </button>
-      <div
-        matTooltip="Die aktuelle Version hat noch keine Single/Multiple Choice Daten."
-        [matTooltipDisabled]="!!detailedQuestionData?.mcQuestion"
+  <div class="button-container">
+    <mat-progress-spinner
+      *ngIf="isSaving"
+      diameter="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <button [disabled]="isSaving" mat-raised-button color="primary" (click)="onOverwrite()">
+      Speichern (aktualisieren)
+    </button>
+    <div
+      matTooltip="Die aktuelle Version hat noch keine Single/Multiple Choice Daten."
+      [matTooltipDisabled]="!!detailedQuestionData?.mcQuestion"
+    >
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="onSaveNewVersion()"
+        [disabled]="!detailedQuestionData?.mcQuestion || isSaving || true"
       >
-        <button
-          mat-raised-button
-          color="primary"
-          (click)="onSaveNewVersion()"
-          [disabled]="!detailedQuestionData?.mcQuestion || isSaving || true"
-        >
-          Als neue Version speichern
-        </button>
-      </div>
-      <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
+        Als neue Version speichern
+      </button>
     </div>
+    <button mat-raised-button color="warn" (click)="onCancel()">Abbrechen</button>
   </div>
 </div>
