@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
-import { ContentDTO, QuestionDTO } from '@Interfaces/index';
+import { ContentDTO, QuestionDTO, ContentElementDTO } from '@Interfaces/index';
 import { LinkableContentElementDTO, LinkableContentNodeDTO } from '@Interfaces/index';
 import { ContentLinkerService } from './content-linker.service';
 
@@ -92,5 +92,90 @@ export class ContentLinkerController {
    */
   async getUnlinkedContentNodes(): Promise<LinkableContentNodeDTO[]> {
     return this.contentLinkerService.getUnlinkedContentNodes();
+  }
+
+  @roles('ADMIN')
+  @Post('/createContentAttachment/:contentNodeId/:fileId')
+  /**
+   * Creates a new content attachment by associating a file with a content element and linking it to a content node.
+   *
+   * @param contentNodeId - The ID of the content node to which the content element will be attached.
+   * @param fileId - The ID of the file to be attached to the content element.
+   * @param contentElement - The data transfer object representing the content element to be created.
+   * @returns A promise that resolves to `true` if the attachment was created successfully, or `false` if the operation failed.
+   */
+  async createContentAttachment(
+    @Param('contentNodeId') contentNodeId: string,
+    @Param('fileId') fileId: string,
+    @Body() contentElement: ContentElementDTO,
+  ): Promise<boolean> {
+    return this.contentLinkerService.createContentAttachment(
+      Number(contentNodeId),
+      contentElement,
+      Number(fileId),
+    );
+  }
+
+  @roles('ADMIN')
+  @Get('/contentAttachments/:contentNodeId')
+  /**
+   * Retrieves all content attachments for a given content node, excluding elements of type QUESTION.
+   *
+   * @param contentNodeId - The ID of the content node for which attachments should be retrieved.
+   * @returns A promise that resolves to an array of ContentElementDTO objects representing the attachments.
+   */
+  async getContentAttachments(
+    @Param('contentNodeId') contentNodeId: string,
+  ): Promise<ContentElementDTO[]> {
+    return this.contentLinkerService.getContentAttachments(Number(contentNodeId));
+  }
+
+  @roles('ADMIN')
+  @Post('/linkContentAttachment/:contentNodeId/:contentElementId')
+  /**
+   * Attempts to link a content element as an attachment to a content node.
+   *
+   * @param contentNodeId - The ID of the content node to link the attachment to.
+   * @param contentElementId - The ID of the content element to be linked as an attachment.
+   * @returns A promise that resolves to `true` if the link was created, or `false` if it already existed.
+   */
+  async linkContentAttachment(
+    @Param('contentNodeId') contentNodeId: string,
+    @Param('contentElementId') contentElementId: string,
+  ): Promise<boolean> {
+    return this.contentLinkerService.linkContentAttachment(
+      Number(contentNodeId),
+      Number(contentElementId),
+    );
+  }
+
+  @roles('ADMIN')
+  @Get('/unlinkContentAttachment/:contentNodeId/:contentElementId')
+  /**
+   * Unlinks an attachment from a content node by deleting the corresponding content view.
+   *
+   * @param contentNodeId - The ID of the content node to unlink the attachment from.
+   * @param contentElementId - The ID of the content element to be unlinked.
+   * @returns A promise that resolves to `true` if the unlinking was successful, or `false` if no matching entry was found.
+   */
+  async unlinkContentAttachment(
+    @Param('contentNodeId') contentNodeId: string,
+    @Param('contentElementId') contentElementId: string,
+  ): Promise<boolean> {
+    return this.contentLinkerService.unlinkContentAttachment(
+      Number(contentNodeId),
+      Number(contentElementId),
+    );
+  }
+
+  @roles('ADMIN')
+  @Get('/unlinkedAttachments')
+  /**
+   * Retrieves all content elements that are not linked to any content view.
+   *
+   * @returns A promise that resolves to an array of unlinked content element DTOs.
+   */
+  async getUnlinkedAttachments(): Promise<ContentElementDTO[]> {
+    return this.contentLinkerService.getUnlinkedAttachments();
   }
 }

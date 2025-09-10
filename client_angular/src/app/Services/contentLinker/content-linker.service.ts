@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
+  ContentElementDTO,
   ContentUpdateDTO,
   LinkableContentElementDTO,
   LinkableContentNodeDTO,
@@ -193,5 +194,74 @@ export class ContentLinkerService {
    */
   updateContentNode(contentNodeId: number, data: ContentUpdateDTO): Observable<boolean> {
     return this.http.patch<boolean>(`${environment.server}/content/update/${contentNodeId}`, data);
+  }
+
+  /**
+   * Creates a new content attachment by associating a file with a content element and linking it to a content node.
+   *
+   * @param contentNodeId - The ID of the content node to which the content element will be attached.
+   * @param fileId - The ID of the file to be attached to the content element.
+   * @param contentElement - The data transfer object representing the content element to be created.
+   * @returns An Observable that emits `true` if the attachment was created successfully, or `false` if the operation failed.
+   */
+  createContentAttachment(
+    contentNodeId: number,
+    fileId: number,
+    contentElement: ContentElementDTO,
+  ): Observable<boolean> {
+    return this.http.post<boolean>(
+      `${environment.server}/content/linker/createContentAttachment/${contentNodeId}/${fileId}`,
+      contentElement,
+    );
+  }
+
+  /**
+   * Retrieves all content attachments for a given content node, excluding elements of type QUESTION.
+   *
+   * @param contentNodeId - The ID of the content node for which attachments should be retrieved.
+   * @returns An Observable that emits an array of ContentElementDTO objects representing the attachments.
+   */
+  getContentAttachments(contentNodeId: number): Observable<ContentElementDTO[]> {
+    return this.http.get<ContentElementDTO[]>(
+      `${environment.server}/content/linker/contentAttachments/${contentNodeId}`,
+    );
+  }
+
+  /**
+   * Attempts to link a content element as an attachment to a content node.
+   *
+   * @param contentNodeId - The ID of the content node to link the attachment to.
+   * @param contentElementId - The ID of the content element to be linked as an attachment.
+   * @returns An Observable that emits `true` if the link was created, or `false` if it already existed.
+   */
+  linkContentAttachment(contentNodeId: number, contentElementId: number): Observable<boolean> {
+    return this.http.post<boolean>(
+      `${environment.server}/content/linker/linkContentAttachment/${contentNodeId}/${contentElementId}`,
+      {},
+    );
+  }
+
+  /**
+   * Unlinks an attachment from a content node by deleting the corresponding content view.
+   *
+   * @param contentNodeId - The ID of the content node to unlink the attachment from.
+   * @param contentElementId - The ID of the content element to be unlinked.
+   * @returns An Observable that emits `true` if the unlinking was successful, or `false` if no matching entry was found.
+   */
+  unlinkContentAttachment(contentNodeId: number, contentElementId: number): Observable<boolean> {
+    return this.http.get<boolean>(
+      `${environment.server}/content/linker/unlinkContentAttachment/${contentNodeId}/${contentElementId}`,
+    );
+  }
+
+  /**
+   * Retrieves all content elements that are not linked to any content view.
+   *
+   * @returns An Observable that emits an array of unlinked content element DTOs.
+   */
+  getUnlinkedAttachments(): Observable<ContentElementDTO[]> {
+    return this.http.get<ContentElementDTO[]>(
+      `${environment.server}/content/linker/unlinkedAttachments`,
+    );
   }
 }

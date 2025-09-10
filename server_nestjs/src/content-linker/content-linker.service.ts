@@ -3,6 +3,8 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { QuestionDataService } from '@/question-data/question-data.service';
 import {
   ContentDTO,
+  ContentElementDTO,
+  contentElementType,
   LinkableContentElementDTO,
   LinkableContentNodeDTO,
   QuestionDTO,
@@ -184,6 +186,232 @@ export class ContentLinkerService {
     }
 
     return true;
+  }
+
+  /**
+   * Creates a new content attachment by associating a file with a content element and linking it to a content node.
+   *
+   * @param contentNodeId - The ID of the content node to which the content element will be attached.
+   * @param contentElement - The data transfer object representing the content element to be created.
+   * @param fileId - The ID of the file to be attached to the content element.
+   * @returns A promise that resolves to `true` if the attachment was created successfully, or `false` if the operation failed (e.g., the content element already exists or the file was not found).
+   */
+  async createContentAttachment(
+    contentNodeId: number,
+    contentElement: ContentElementDTO,
+    fileId: number,
+  ): Promise<boolean> {
+    if (contentElement.id > 0) {
+      return false;
+    }
+
+    const file = await this.prisma.file.findUnique({
+      where: {
+        id: fileId,
+      },
+    });
+    if (!file) {
+      return false;
+    }
+
+    const element = await this.prisma.contentElement.create({
+      data: {
+        type: contentElement.type as contentElementType,
+        title: contentElement.title,
+        text: contentElement.text,
+        file: {
+          connect: {
+            id: fileId,
+          },
+        },
+      },
+    });
+
+    await this.prisma.contentView.create({
+      data: {
+        contentNodeId: contentNodeId,
+        contentElementId: element.id,
+      },
+    });
+
+    return true;
+  }
+
+  /**
+   * Retrieves all content attachments for a given content node, excluding elements of type `QUESTION`.
+   *
+   * Queries the database for `contentView` entries associated with the specified `contentNodeId`,
+   * and returns an array of `ContentElementDTO` objects containing metadata about each attachment,
+   * including file information. The results are ordered by their position in the content view.
+   *
+   * @param contentNodeId - The ID of the content node for which attachments should be retrieved.
+   * @returns A promise that resolves to an array of `ContentElementDTO` objects representing the attachments.
+   */
+  async getContentAttachments(contentNodeId: number): Promise<ContentElementDTO[]> {
+    const contentViews = await this.prisma.contentView.findMany({
+      where: {
+        contentNodeId: contentNodeId,
+        contentElement: {
+          NOT: {
+            type: contentElementType.QUESTION,
+          },
+        },
+      },
+      select: {
+        id: true,
+        contentElement: {
+          select: {
+            id: true,
+            type: true,
+            title: true,
+            text: true,
+            file: {
+              select: {
+                name: true,
+                type: true,
+              },
+            },
+          },
+        },
+        position: true,
+      },
+      orderBy: {
+        position: 'asc',
+      },
+    });
+
+    return contentViews.map(element => ({
+      id: element.contentElement.id,
+      type: element.contentElement.type as contentElementType,
+      contentViewId: element.id,
+      positionInSpecificContentView: element.position,
+      title: element.contentElement.title,
+      text: element.contentElement.text,
+      file: {
+        name: element.contentElement.file?.name || 'Unbenannte Datei',
+        type: element.contentElement.file?.type || 'Unbekannt',
+      },
+    }));
+  }
+
+  /**
+   * Attempts to link a content element as an attachment to a content node.
+   *
+   * This method checks if a `contentView` already exists for the given `contentNodeId` and `contentElementId`,
+   * excluding elements of type `QUESTION`. If such a link exists, it returns `false` and does not create a new link.
+   * Otherwise, it creates a new `contentView` entry and returns `true`.
+   *
+   * @param contentNodeId - The ID of the content node to link the attachment to.
+   * @param contentElementId - The ID of the content element to be linked as an attachment.
+   * @returns A promise that resolves to `true` if the link was created, or `false` if it already existed.
+   */
+  async linkContentAttachment(contentNodeId: number, contentElementId: number): Promise<boolean> {
+    const contentView = await this.prisma.contentView.findFirst({
+      where: {
+        contentNodeId: contentNodeId,
+        contentElementId: contentElementId,
+        contentElement: {
+          NOT: {
+            type: contentElementType.QUESTION,
+          },
+        },
+      },
+    });
+
+    if (contentView) {
+      return false;
+    }
+
+    await this.prisma.contentView.create({
+      data: {
+        contentNodeId: contentNodeId,
+        contentElementId: contentElementId,
+      },
+    });
+
+    return true;
+  }
+
+  /**
+   * Unlinks an attachment from a content node by deleting the corresponding content view.
+   *
+   * This method searches for a `contentView` entry matching the provided `contentNodeId` and `contentElementId`,
+   * excluding those where the content element type is `QUESTION`. If such an entry exists, it is deleted.
+   *
+   * @param contentNodeId - The ID of the content node to unlink the attachment from.
+   * @param contentElementId - The ID of the content element to be unlinked.
+   * @returns A promise that resolves to `true` if the unlinking was successful, or `false` if no matching entry was found.
+   */
+  async unlinkContentAttachment(contentNodeId: number, contentElementId: number): Promise<boolean> {
+    const contentView = await this.prisma.contentView.findFirst({
+      where: {
+        contentNodeId: contentNodeId,
+        contentElementId: contentElementId,
+        contentElement: {
+          NOT: {
+            type: contentElementType.QUESTION,
+          },
+        },
+      },
+    });
+
+    if (!contentView) {
+      return false;
+    }
+
+    await this.prisma.contentView.delete({
+      where: {
+        id: contentView.id,
+      },
+    });
+
+    return true;
+  }
+
+  /**
+   * Retrieves all content elements that are not linked to any content view.
+   *
+   * This method queries the database for content elements whose IDs are not present
+   * in the list of linked content elements. It includes associated file information
+   * for each unlinked content element. The returned DTOs have a default position of 0
+   * and placeholder values for file name and type if not available.
+   *
+   * @returns {Promise<ContentElementDTO[]>} A promise that resolves to an array of unlinked content element DTOs.
+   */
+  async getUnlinkedAttachments(): Promise<ContentElementDTO[]> {
+    const linkedContentElements = await this.prisma.contentView.findMany({
+      select: {
+        contentElementId: true,
+      },
+    });
+
+    const linkedContentElementIds = linkedContentElements.map(
+      linkedContentElement => linkedContentElement.contentElementId,
+    );
+
+    const unlinkedContentElements = await this.prisma.contentElement.findMany({
+      where: {
+        id: {
+          notIn: linkedContentElementIds,
+        },
+      },
+      include: {
+        file: true,
+      },
+    });
+
+    return unlinkedContentElements.map(element => ({
+      id: element.id,
+      type: element.type as contentElementType,
+      contentViewId: element.id,
+      positionInSpecificContentView: 0, // there is no position since it is not linked
+      title: element.title,
+      text: element.text,
+      file: {
+        name: element.file?.name || 'Unbenannte Datei',
+        type: element.file?.type || 'Unbekannt',
+      },
+    }));
   }
 
   /**
