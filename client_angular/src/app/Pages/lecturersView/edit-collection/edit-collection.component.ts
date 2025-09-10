@@ -34,7 +34,7 @@ export class EditCollectionComponent {
     readonly: false,
     plugins: 'autoresize lists table link image code codesample',
     toolbar:
-      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | image | codesample',
+      'undo redo | bold italic | alignleft aligncenter alignright | numlist bullist | table | link | image | codesample',
     min_height: 300,
     max_height: 600,
     resize: false,
