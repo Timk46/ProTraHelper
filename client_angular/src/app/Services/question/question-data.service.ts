@@ -15,6 +15,7 @@ import {
   UserUploadAnswerListItemDTO,
   GroupReviewStatusDTO,
   QuestionCollectionDto,
+  uploadQuestionUpload,
 } from '@DTOs/index';
 import { questionType } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
@@ -163,6 +164,18 @@ export class QuestionDataService {
   getUploadQuestion(questionVersionId: number): Observable<uploadQuestionDTO> {
     return this.http.get<uploadQuestionDTO>(
       environment.server + `/question-data/uploadQuestion/${questionVersionId}`,
+    );
+  }
+
+  /**
+   * Retrieves the list of uploads associated with a specific question.
+   *
+   * @param questionId - The unique identifier of the question for which uploads are requested.
+   * @returns An Observable emitting an array of `uploadQuestionUpload` objects related to the given question.
+   */
+  getUploadQuestionUploads(questionId: number): Observable<uploadQuestionUpload[]> {
+    return this.http.get<uploadQuestionUpload[]>(
+      environment.server + `/question-data/uploadQuestion/uploads/${questionId}`,
     );
   }
 

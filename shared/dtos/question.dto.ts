@@ -189,6 +189,13 @@ export interface uploadQuestionDTO {
   maxPoints?: number;
 }
 
+export interface uploadQuestionUpload {
+  fileName: string;
+  fileType: string;
+  fileSize?: string;
+  uploadedAt: Date;
+}
+
 export interface GraphQuestionDTO {
   questionId: number;
   contentElementId?: number;

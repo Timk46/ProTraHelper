@@ -49,6 +49,22 @@
     </div>
   </div>
 
+  <!-- Previous Uploads Section -->
+  <div class="previous-uploads-section" *ngIf="previousUploads.length > 0">
+    <h3 class="previous-uploads-title">Bisherige Uploads</h3>
+    <mat-list>
+      <mat-list-item *ngFor="let upload of previousUploads">
+        <mat-icon mat-list-icon [class]="getFileIconClass(upload.fileType)">
+          {{ getFileIcon(upload.fileType) }}
+        </mat-icon>
+        <div mat-line>{{ upload.fileName }}</div>
+        <div mat-line class="upload-details">
+          <span>{{ upload.uploadedAt | date: 'dd.MM.yyyy HH:mm' }}</span>
+        </div>
+      </mat-list-item>
+    </mat-list>
+  </div>
+
   <!-- Drag & Drop Zone -->
   <div
     class="drop-zone"

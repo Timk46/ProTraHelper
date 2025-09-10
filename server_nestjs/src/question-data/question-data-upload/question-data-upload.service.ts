@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
   detailedUploadQuestionDTO,
+  questionType,
   uploadQuestionDTO,
+  uploadQuestionUpload,
   UserUploadAnswerListItemDTO,
 } from '@DTOs/index';
 
@@ -58,6 +60,57 @@ export class QuestionDataUploadService {
       textHTML: uq.textHTML,
       maxSize: uq.maxSize,
       fileType: uq.fileType,
+    }));
+  }
+
+  /**
+   * Retrieves a list of uploads for a specific upload-type question.
+   *
+   * Queries the database for user answers associated with the given question ID,
+   * filtering for questions of type `UPLOAD`. For each answer, extracts the file
+   * information (ID, name, type, path) and the upload timestamp. Returns an array
+   * of objects containing the file name, file type, and upload date.
+   *
+   * @param questionId - The ID of the upload-type question to retrieve uploads for.
+   * @returns A promise that resolves to an array of `uploadQuestionUpload` objects,
+   *          each representing an uploaded file and its metadata.
+   */
+  //todo: provide file sizes
+  async getUploadsForUploadQuestion(
+    questionId: number,
+    userId: number,
+  ): Promise<uploadQuestionUpload[]> {
+    const uploads = await this.prisma.userAnswer.findMany({
+      where: {
+        userId: userId,
+        question: {
+          id: questionId,
+          type: questionType.UPLOAD,
+        },
+      },
+      select: {
+        UserUploadAnswer: {
+          select: {
+            file: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                path: true,
+              },
+            },
+          },
+        },
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return uploads.map(upload => ({
+      fileName: upload.UserUploadAnswer[0]?.file.name || 'Namenlose Datei',
+      fileType: upload.UserUploadAnswer[0]?.file.type || 'Unbekannt',
+      uploadedAt: upload.createdAt,
     }));
   }
 

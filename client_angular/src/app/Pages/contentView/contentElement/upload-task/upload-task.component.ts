@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Inject, Input, Output } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { TaskViewData, uploadQuestionDTO } from '@DTOs/index';
+import { TaskViewData, uploadQuestionDTO, uploadQuestionUpload } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { UserAnswerDataDTO } from '@DTOs/index';
@@ -15,6 +15,7 @@ export class UploadTaskComponent {
   @Input() taskViewData!: TaskViewData;
 
   uploadQuestion: uploadQuestionDTO | undefined;
+  previousUploads: uploadQuestionUpload[] = [];
 
   // File upload properties
   selectedFile: File | null = null;
@@ -38,7 +39,18 @@ export class UploadTaskComponent {
       console.log('Upload question data:', data);
       this.uploadQuestion = data;
       this.uploadQuestion.contentElementId = this.taskViewData.contentElementId;
+      this.loadPreviousUploads();
     });
+  }
+
+  loadPreviousUploads() {
+    if (this.uploadQuestion) {
+      this.questionService
+        .getUploadQuestionUploads(this.uploadQuestion.questionId)
+        .subscribe(uploads => {
+          this.previousUploads = uploads;
+        });
+    }
   }
 
   // File handling methods

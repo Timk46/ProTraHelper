@@ -197,6 +197,49 @@ $nord15: #b48ead; // Aurora (purple)
   }
 }
 
+// Previous Uploads Section
+.previous-uploads-section {
+  margin-bottom: 32px;
+
+  .previous-uploads-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: $nord0;
+    margin-bottom: 16px;
+    border-bottom: 2px solid $nord8;
+    padding-bottom: 8px;
+  }
+
+  mat-list {
+    padding-top: 0;
+  }
+
+  mat-list-item {
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    height: auto !important;
+    padding: 12px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid $nord4;
+
+    .mat-list-icon {
+      color: $nord10;
+      background: rgba(94, 129, 172, 0.1);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+    }
+
+    .upload-details {
+      font-size: 12px;
+      color: $nord3;
+    }
+  }
+}
+
 // Drag & Drop Zone
 .drop-zone {
   background: white;

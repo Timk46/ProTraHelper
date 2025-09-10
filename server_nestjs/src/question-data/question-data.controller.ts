@@ -141,6 +141,22 @@ export class QuestionDataController {
   }
 
   /**
+   * Retrieves the uploads associated with a specific upload question for the authenticated user.
+   *
+   * @param uploadQuestionId - The ID of the upload question to fetch uploads for.
+   * @param req - The request object containing the authenticated user's information.
+   * @returns A promise that resolves to the uploads related to the specified upload question for the user.
+   */
+  @roles('ANY')
+  @Get('uploadQuestion/uploads/:uploadQuestionId')
+  async getUploadQuestionUploads(
+    @Param('uploadQuestionId', ParseIntPipe) questionId: number,
+    @Req() req: any,
+  ): Promise<any> {
+    return this.qdUploadService.getUploadsForUploadQuestion(questionId, req.user.id);
+  }
+
+  /**
    * Retrieves an upload question by its unique identifier.
    *
    * @param uploadQuestionId - The unique identifier of the upload question to retrieve.
