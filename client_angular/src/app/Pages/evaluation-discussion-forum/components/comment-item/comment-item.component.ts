@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
 import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
 import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
 import { VoteSessionService } from '../../../../Services/evaluation/vote-session.service';
+import { VoteOperationsService } from '../../../../Services/evaluation/vote-operations.service';
 import { MatDialog } from '@angular/material/dialog';
 import { VoteLimitDialogComponent, VoteLimitDialogData } from '../vote-limit-dialog/vote-limit-dialog.component';
 
@@ -145,6 +146,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     private commentPanelStateService: CommentPanelStateService,
     private evaluationStateService: EvaluationStateService,
     private voteSessionService: VoteSessionService,
+    private voteOperationsService: VoteOperationsService,
     private dialog: MatDialog,
   ) {}
 
@@ -656,7 +658,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * 🚨 SECURITY FIX: Adds a vote with atomic locking to prevent race conditions
    * Prevents self-voting and unlimited voting attacks
    */
-  addVote(): void {
+  async addVote(): Promise<void> {
     // 🚨 ATOMIC LOCK: Check and set in one operation
     if (this.voteOperationLock) {
       console.warn('🔒 Vote operation already in progress, blocking duplicate');
@@ -706,7 +708,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       }
 
       // Proceed with vote operation
-      this.performVoteOperation('UP');
+      await this.performVoteOperation('UP');
 
     } finally {
       // Always release lock after short delay to prevent rapid re-clicks
@@ -718,40 +720,22 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
   /**
    * 🚨 INTERNAL: Performs the actual vote operation with proper state management
-   * ENHANCED: Now tracks session votes for immediate limit enforcement
+   * ENHANCED: Uses VoteOperationsService for consistent session tracking and limits
    */
-  private performVoteOperation(voteType: 'UP' | null): void {
+  private async performVoteOperation(voteType: 'UP' | null): Promise<void> {
     // Track operation
     this.pendingVoteOperations++;
     this.expectedVoteCount = voteType === 'UP' ? this.localVoteCount + 1 : Math.max(0, this.localVoteCount - 1);
 
-    // 🚀 CRITICAL FIX: Track session votes immediately for limit enforcement
-    if (voteType === 'UP') {
-      this.voteSessionService.addSessionVote();
-      console.log('➕ Session vote added:', {
-        commentId: this.comment.id,
-        globalSessionVotes: this.voteSessionService.getSessionVotes(),
-      });
-    } else {
-      this.voteSessionService.removeSessionVote();
-      console.log('➖ Session vote removed:', {
-        commentId: this.comment.id,
-        globalSessionVotes: this.voteSessionService.getSessionVotes(),
-      });
-    }
-
-    // 🚀 OPTIMISTIC UI UPDATE: Force immediate UI update after session vote tracking
-    this.cdr.detectChanges();
-
     // Haptic feedback
     this.triggerHapticFeedback('light');
 
-    console.log('🔧 Performing vote operation with session tracking:', {
+    console.log('🔧 Performing vote operation via VoteOperationsService:', {
       voteType,
       commentId: this.comment.id,
       previousCount: this.localVoteCount,
       expectedCount: this.expectedVoteCount,
-      sessionVotesGiven: this.voteSessionService.getSessionVotes(),
+      currentSessionVotes: this.voteSessionService.getSessionVotes(),
     });
 
     // Optimistic update
@@ -759,15 +743,15 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this.setVoteStatus(voteType === 'UP' ? 'UP' : null, 'atomic-vote-operation');
     this.cdr.detectChanges();
 
-    // API call
-    this.performLocalVoteOperation(voteType);
+    // API call with session tracking handled by VoteOperationsService
+    await this.performLocalVoteOperation(voteType);
   }
 
   /**
    * 🚨 SECURITY FIX: Removes a vote with atomic locking to prevent race conditions
    * Allows vote removal even when vote limit is reached (important for UX)
    */
-  removeVote(): void {
+  async removeVote(): Promise<void> {
     // 🚨 ATOMIC LOCK: Check and set in one operation
     if (this.voteOperationLock) {
       console.warn('🔒 Vote operation already in progress, blocking duplicate');
@@ -812,7 +796,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       }
 
       // Proceed with vote removal operation
-      this.performVoteOperation(null);
+      await this.performVoteOperation(null);
 
     } finally {
       // Always release lock after short delay
@@ -826,11 +810,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * Legacy method - kept for backward compatibility
    * Now delegates to addVote() and removeVote() methods
    */
-  onVote(voteType: VoteType): void {
+  async onVote(voteType: VoteType): Promise<void> {
     if (voteType === 'UP') {
-      this.addVote();
+      await this.addVote();
     } else if (voteType === null) {
-      this.removeVote();
+      await this.removeVote();
     } else {
       console.log('❌ Invalid vote type for ranking system:', voteType);
     }
@@ -838,66 +822,74 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
 
   /**
-   * 🔧 LOCAL VOTE MANAGEMENT: Direct API call without global state updates
-   * Prevents the re-rendering cascade by handling votes locally
+   * 🔧 LOCAL VOTE MANAGEMENT: Uses VoteOperationsService for consistent vote handling
+   * Prevents the re-rendering cascade by handling votes locally with proper error handling
    */
-  private performLocalVoteOperation(voteType: VoteType | null): void {
-    console.log('🔧 Performing local vote operation:', {
+  private async performLocalVoteOperation(voteType: VoteType | null): Promise<void> {
+    console.log('🔧 Performing local vote operation via VoteOperationsService:', {
       commentId: this.comment.id,
       voteType,
-      localVoteCount: this.localVoteCount
+      localVoteCount: this.localVoteCount,
+      submissionId: this.comment.submissionId,
+      categoryId: this.comment.categoryId,
+      anonymousUserId: this.anonymousUser?.id
     });
 
-    // Make direct API call to the evaluation service
-    this.evaluationStateService.evaluationService
-      .voteComment(this.comment.id, voteType)
-      .pipe(
-        retry({ count: 2, delay: (error, retryCount) => timer(Math.pow(2, retryCount) * 1000) }),
-        catchError((error: any) => {
-          console.error('❌ Local vote operation failed:', {
-            commentId: this.comment.id,
-            voteType,
-            error: error
-          });
-          this.onLocalVoteError();
-          return of(null);
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((result) => {
-        if (result) {
-          console.log('✅ Local vote operation completed:', {
-            commentId: this.comment.id,
-            voteType,
-            result
-          });
-          this.onLocalVoteCompleted(result);
-        }
+    try {
+      // Use VoteOperationsService for consistent vote handling with limits
+      const result = await this.voteOperationsService.performVoteOperation(
+        this.comment,
+        voteType,
+        this.comment.submissionId,
+        this.comment.categoryId || 0,
+        this.anonymousUser?.id
+      );
+
+      console.log('✅ Local vote operation completed via VoteOperationsService:', {
+        commentId: this.comment.id,
+        voteType,
+        result
       });
+
+      this.onLocalVoteCompleted(result);
+
+    } catch (error: any) {
+      console.error('❌ Local vote operation failed via VoteOperationsService:', {
+        commentId: this.comment.id,
+        voteType,
+        error: error
+      });
+
+      // Handle VoteOperationError with user-friendly messages
+      if (error?.code === 'VOTE_LIMIT_EXCEEDED') {
+        console.warn('⚠️ Vote limit exceeded - showing user notification');
+        // Could show a toast or dialog here
+      } else if (error?.code === 'SELF_VOTE_ATTEMPT') {
+        console.warn('⚠️ Self-voting attempt blocked');
+      }
+
+      this.onLocalVoteError();
+    }
   }
 
   /**
    * 🔧 LOCAL VOTE MANAGEMENT: Handles successful local vote completion
    * Updates local state without triggering parent re-render
+   * Now handles VoteLimitResponseDTO from VoteOperationsService
    */
-  private onLocalVoteCompleted(result: any): void {
+  private onLocalVoteCompleted(result: unknown): void {
     // Decrease pending operations counter
     this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
 
-    // Extract vote count from result if available
-    let backendVoteCount: number | undefined;
-
-    if (result && typeof result === 'object') {
-      backendVoteCount = result.userVoteCount ||
-                        result.data?.userVoteCount ||
-                        result.fullResult?.userVoteCount;
-    }
+    // Extract vote count from VoteLimitResponseDTO or fallback extraction
+    const backendVoteCount = this.voteOperationsService.extractVoteCountFromResponse(result);
 
     if (backendVoteCount !== undefined) {
-      console.log('🔧 Synchronizing local vote count with backend result:', {
+      console.log('🔧 Synchronizing local vote count with VoteOperationsService result:', {
         commentId: this.comment.id,
         previousCount: this.localVoteCount,
-        backendCount: backendVoteCount
+        backendCount: backendVoteCount,
+        resultType: 'VoteLimitResponseDTO'
       });
 
       this.localVoteCount = backendVoteCount;
@@ -911,6 +903,12 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       // Use expected count if backend doesn't provide one
       this.localVoteCount = this.expectedVoteCount;
       this.setVoteStatus(this.expectedVoteCount > 0 ? 'UP' : null, 'local-api-expected');
+    }
+
+    // Update vote limit status if available
+    if (result && typeof result === 'object' && 'voteLimitStatus' in result) {
+      console.log('📊 Vote limit status received from VoteOperationsService:', result.voteLimitStatus);
+      // Could update local vote limit displays here if needed
     }
 
     // Trigger success animation
