@@ -124,28 +124,32 @@ interface RatingGateViewModel {
               </mat-expansion-panel-header>
 
               <div class="instructions">
+                <p style="margin-bottom: 1rem; font-weight: 500; color: #333;">Analysieren Sie die vorgeschlagene Lösung objektiv. Orientierungshilfe:</p>
                 <div class="instruction-list">
                   <div class="instruction-item">
-                    <mat-icon class="instruction-bullet">analytics</mat-icon>
-                    <span>Analysieren Sie die vorgeschlagene Konstruktionslösung objektiv</span>
+                    <mat-icon class="instruction-bullet">support</mat-icon>
+                    <span>Ist das gewählte Tragsystem für die Anforderungen der Aufgabe an den Raum passend?</span>
                   </div>
                   <div class="instruction-item">
-                    <mat-icon class="instruction-bullet">architecture</mat-icon>
-                    <span>Bewerten Sie die Angemessenheit der Komplexität im Kontext</span>
+                    <mat-icon class="instruction-bullet">balance</mat-icon>
+                    <span>Wie gut sind die Lasten verteilt? Existieren Stellen, an denen das Tragwerk stark überdimensioniert ist?</span>
                   </div>
                   <div class="instruction-item">
-                    <mat-icon class="instruction-bullet">speed</mat-icon>
-                    <span>Berücksichtigen Sie Effizienz und Ressourcennutzung</span>
+                    <mat-icon class="instruction-bullet">tune</mat-icon>
+                    <span>Oder werden die Elemente in ihrer Ausformulierung an die Belastung angepasst?</span>
                   </div>
                   <div class="instruction-item">
-                    <mat-icon class="instruction-bullet">feedback</mat-icon>
-                    <span>Geben Sie konstruktives Feedback zur Optimierung</span>
+                    <mat-icon class="instruction-bullet">eco</mat-icon>
+                    <span>Wie bewerten Sie die Lösung in Bezug auf Effizienz und Ressourcenschonung?</span>
                   </div>
                   <div class="instruction-item">
-                    <mat-icon class="instruction-bullet">text_fields</mat-icon>
-                    <span>Nutzen Sie mindestens 10 Zeichen für eine aussagekräftige Bewertung</span>
+                    <mat-icon class="instruction-bullet">build</mat-icon>
+                    <span>Passt das Material geeignet für das gewählte Tragsystem.</span>
                   </div>
                 </div>
+                <p style="margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-left: 4px solid #2196f3; color: #555; font-size: 0.9rem; line-height: 1.4;">
+                  <strong>Hinweis:</strong> Nutzen Sie mindestens 50 Zeichen für Ihre Bewertung. Nach der Diskussion geben Sie über den dann erscheinenden Schieberegler Punkte zwischen 1-15. Das Kriterium geht zu 50 % in die Gesamtbewertung ein.
+                </p>
               </div>
             </mat-expansion-panel>
 

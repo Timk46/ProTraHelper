@@ -18,7 +18,7 @@ export class VersionInterceptor implements HttpInterceptor {
           const serverVersion = event.headers.get('X-App-Version');
           if (serverVersion && serverVersion !== version) {
             if (!this.snackBarIsActive) {
-              this.showReloadSnackbar();
+              // this.showReloadSnackbar();
               this.snackBarIsActive = true;
             }
           }
@@ -27,24 +27,24 @@ export class VersionInterceptor implements HttpInterceptor {
     );
   }
 
-  /**
-   * Displays a snackbar with an option to reload the application for a new version.
-   */
-  showReloadSnackbar() {
-    const snackBarRef = this.snackBar.open(
-      'Eine neue Version der Anwendung ist verfügbar!',
-      'Neu laden',
-      {
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-      },
-    );
+  // /**
+  //  * Displays a snackbar with an option to reload the application for a new version.
+  //  */
+  // showReloadSnackbar() {
+  //   const snackBarRef = this.snackBar.open(
+  //     'Eine neue Version der Anwendung ist verfügbar!',
+  //     'Neu laden',
+  //     {
+  //       horizontalPosition: 'center',
+  //       verticalPosition: 'bottom',
+  //     },
+  //   );
 
-    snackBarRef.onAction().subscribe(() => {
-      this.snackBarIsActive = false;
-      this.forceReload();
-    });
-  }
+  //   snackBarRef.onAction().subscribe(() => {
+  //     this.snackBarIsActive = false;
+  //     this.forceReload();
+  //   });
+  // }
 
   /**
    * Forces the browser to reload to the current page with a nocache parameter to avoid caching issues.

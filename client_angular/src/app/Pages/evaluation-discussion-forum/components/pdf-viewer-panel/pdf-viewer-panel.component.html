@@ -141,15 +141,15 @@
     <div class="pdf-content real-pdf" 
          *ngIf="hasRealPdf() && !isLoading && !hasError">
       
-      <iframe 
-        [src]="getRealPdfUrl()"
-        class="pdf-iframe"
-        [style.transform]="'scale(' + (zoomLevel / 100) + ')'"
-        frameborder="0">
-        <p>Your browser does not support PDFs. 
-           <a [href]="getRealPdfUrl()" target="_blank">Download the PDF</a>.
+      <object 
+        [data]="getRealPdfUrl()"
+        type="application/pdf"
+        class="pdf-object"
+        [style.transform]="'scale(' + (zoomLevel / 100) + ')'">
+        <p>PDF kann nicht angezeigt werden. 
+           <a [href]="pdfUrl" target="_blank">PDF herunterladen</a>.
         </p>
-      </iframe>
+      </object>
       
       <!-- Page Indicator for Real PDF -->
       <div class="page-indicator">

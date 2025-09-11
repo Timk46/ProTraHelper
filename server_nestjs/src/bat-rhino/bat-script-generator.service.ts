@@ -389,7 +389,7 @@ echo Starte Rhino...
 echo.
 
 REM Starte Rhino mit Befehlen direkt über Kommandozeile
-"%RHINO_PATH%" /nosplash /runscript="-Grasshopper B D W L W H D O C:\\Dev\\hefl\\files\\Grasshopper\\example.gh W  _MaxViewport _Enter"
+"%RHINO_PATH%" /nosplash /runscript="-Grasshopper B D W L W H D O C:\\Dev\\hefl\\files\\Grasshopper\\example2.gh W  _MaxViewport _Enter"
 
 REM Prüfe Exit-Code
 IF %ERRORLEVEL% NEQ 0 (

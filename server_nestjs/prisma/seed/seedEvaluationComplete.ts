@@ -69,7 +69,9 @@ export async function seedEvaluationComplete() {
       },
     });
 
-    console.log('✅ Test users created/verified (now includes 5 students + 1 lecturer for comprehensive voting tests)');
+    console.log(
+      '✅ Test users created/verified (now includes 5 students + 1 lecturer for comprehensive voting tests)',
+    );
 
     // 1.5. Create dedicated anonymous users for seed comments (non-colliding IDs)
     const seedAnonymousUser1 = await prisma.user.upsert({
@@ -90,7 +92,7 @@ export async function seedEvaluationComplete() {
       create: {
         email: 'seed.anonymous2@seed.local',
         firstname: 'Seed',
-        lastname: 'Anonymous2', 
+        lastname: 'Anonymous2',
         password: await bcrypt.hash('seed-only-user', 10),
         globalRole: GlobalRole.TEACHER,
       },
@@ -154,7 +156,8 @@ export async function seedEvaluationComplete() {
       create: {
         id: 1000,
         title: 'Peer-Review: Stabile Rahmenkonstruktionen WS2024',
-        description: 'Peer-Review Sitzung für eingereichte Entwürfe zu stabilen Rahmenkonstruktionen',
+        description:
+          'Peer-Review Sitzung für eingereichte Entwürfe zu stabilen Rahmenkonstruktionen',
         moduleId: testModule.id,
         createdById: testLecturer.id,
         startDate: new Date('2024-01-15'),
@@ -171,25 +174,25 @@ export async function seedEvaluationComplete() {
     const categories = [
       {
         name: 'Vollständigkeit',
-        displayName: 'Vollständigkeit',
+        displayName: 'Funktionalität',
         description: 'Vollständigkeit der Konstruktionselemente und Dokumentation',
         order: 1,
       },
       {
         name: 'Grafische Darstellungsqualität',
-        displayName: 'Grafische Darstellungsqualität',
+        displayName: 'Ästhetische Qualität',
         description: 'Qualität der technischen Zeichnungen und Visualisierungen',
         order: 2,
       },
       {
         name: 'Vergleichbarkeit',
-        displayName: 'Vergleichbarkeit',
+        displayName: 'Grafische Qualität',
         description: 'Vergleichbarkeit mit anderen Lösungsansätzen',
         order: 3,
       },
       {
         name: 'Komplexität',
-        displayName: 'Komplexität',
+        displayName: 'sonstiges',
         description: 'Angemessene Komplexität der Konstruktionslösung',
         order: 4,
       },
@@ -225,7 +228,8 @@ export async function seedEvaluationComplete() {
       create: {
         id: 'demo-submission-001',
         title: 'Entwurf "Stabile Rahmenkonstruktion"',
-        description: 'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
+        description:
+          'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
         authorId: testStudent.id,
         pdfFileId: pdfFile1.id,
         sessionId: evaluationSession.id,
@@ -241,7 +245,8 @@ export async function seedEvaluationComplete() {
       create: {
         id: 'demo-submission-002',
         title: 'Innovative Konstruktionslösung',
-        description: 'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
+        description:
+          'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
         authorId: testStudent2.id,
         pdfFileId: pdfFile2.id,
         sessionId: evaluationSession.id,
@@ -260,7 +265,8 @@ export async function seedEvaluationComplete() {
       {
         submissionId: submission1.id,
         categoryId: createdCategories[0].id, // Vollständigkeit
-        content: 'Ich vermisse die Angaben zu den Lastannahmen. Ohne diese ist schwer zu beurteilen, ob die Dimensionierung stimmt.',
+        content:
+          'Ich vermisse die Angaben zu den Lastannahmen. Ohne diese ist schwer zu beurteilen, ob die Dimensionierung stimmt.',
         userId: testStudent2.id,
         voteDetails: { userVotes: {} },
         upvotes: 3,
@@ -280,7 +286,8 @@ export async function seedEvaluationComplete() {
       {
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
-        content: 'Die Schnittdarstellung ist etwas unübersichtlich. Eine Explosionszeichnung wäre hilfreicher gewesen.',
+        content:
+          'Die Schnittdarstellung ist etwas unübersichtlich. Eine Explosionszeichnung wäre hilfreicher gewesen.',
         userId: testStudent3.id,
         voteDetails: { userVotes: {} },
         upvotes: 1,
@@ -290,7 +297,8 @@ export async function seedEvaluationComplete() {
       {
         submissionId: submission1.id,
         categoryId: createdCategories[2].id, // Vergleichbarkeit
-        content: 'Der Maßstab ist konsistent, aber die Legende könnte ausführlicher sein für bessere Vergleichbarkeit.',
+        content:
+          'Der Maßstab ist konsistent, aber die Legende könnte ausführlicher sein für bessere Vergleichbarkeit.',
         userId: testStudent4.id,
         voteDetails: { userVotes: {} },
         upvotes: 1,
@@ -300,7 +308,8 @@ export async function seedEvaluationComplete() {
       {
         submissionId: submission1.id,
         categoryId: createdCategories[3].id, // Komplexität
-        content: 'Die Lösung ist angemessen komplex für die Aufgabenstellung. Nicht zu einfach, aber auch nicht übertrieben.',
+        content:
+          'Die Lösung ist angemessen komplex für die Aufgabenstellung. Nicht zu einfach, aber auch nicht übertrieben.',
         userId: testLecturer.id,
         voteDetails: { userVotes: {} },
         upvotes: 2,
@@ -315,7 +324,9 @@ export async function seedEvaluationComplete() {
       });
     }
 
-    console.log('✅ Evaluation comments created (5 comments - one per student across different categories)');
+    console.log(
+      '✅ Evaluation comments created (5 comments - one per student across different categories)',
+    );
 
     // 9. Create evaluation ratings
     const ratingsData = [
@@ -366,15 +377,18 @@ export async function seedEvaluationComplete() {
     console.log(`👤 Test Student 3 ID: ${testStudent3.id} (Lisa Mueller)`);
     console.log(`👤 Test Student 4 ID: ${testStudent4.id} (Tom Weber)`);
     console.log(`👨‍🏫 Test Lecturer ID: ${testLecturer.id} (Prof. Dr. Lehmann)`);
-    console.log(`🎭 Seed Anonymous User IDs: ${seedAnonymousUser1.id}, ${seedAnonymousUser2.id}, ${seedAnonymousUser3.id}`);
+    console.log(
+      `🎭 Seed Anonymous User IDs: ${seedAnonymousUser1.id}, ${seedAnonymousUser2.id}, ${seedAnonymousUser3.id}`,
+    );
     console.log('\n🌐 Frontend Test URLs:');
     console.log(`http://localhost:4200/evaluation-forum/${submission1.id}`);
     console.log(`http://localhost:4200/evaluation-forum/${submission2.id}`);
     console.log('\n🔧 Use these submission IDs to test the evaluation forum!');
-    console.log('\n✅ Seed comments now use dedicated anonymous users - no collision with real user logins!');
+    console.log(
+      '\n✅ Seed comments now use dedicated anonymous users - no collision with real user logins!',
+    );
 
     console.log('\n✅ Comprehensive evaluation system seeding completed successfully!');
-
   } catch (error) {
     console.error('❌ Error during evaluation seeding:', error);
     throw error;
@@ -391,7 +405,7 @@ if (require.main === module) {
       console.log('🎉 Seeding completed successfully!');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch(error => {
       console.error('💥 Seeding failed:', error);
       process.exit(1);
     })

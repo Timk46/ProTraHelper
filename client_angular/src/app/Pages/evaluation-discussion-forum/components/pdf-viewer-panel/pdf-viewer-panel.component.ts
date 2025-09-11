@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 // Angular Material Imports
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 
 // DTOs
 import { EvaluationSubmissionDTO } from '@DTOs/index';
+import { FileService } from '../../../../Services/files/files.service';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-pdf-viewer-panel',
@@ -32,7 +35,7 @@ import { EvaluationSubmissionDTO } from '@DTOs/index';
   styleUrl: './pdf-viewer-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PdfViewerPanelComponent implements OnInit {
+export class PdfViewerPanelComponent implements OnInit, OnDestroy {
 
   // =============================================================================
   // INPUTS - DATA FROM PARENT (SMART COMPONENT)
@@ -40,6 +43,16 @@ export class PdfViewerPanelComponent implements OnInit {
 
   @Input() submission: EvaluationSubmissionDTO | null = null;
   @Input() pdfUrl: string | null = null;
+
+  // =============================================================================
+  // CONSTRUCTOR
+  // =============================================================================
+
+  constructor(
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef,
+    private fileService: FileService
+  ) {}
 
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT (SMART COMPONENT)
@@ -59,6 +72,12 @@ export class PdfViewerPanelComponent implements OnInit {
   hasError: boolean = false;
   errorMessage: string = '';
 
+  // Safe PDF URL for iframe/object
+  safePdfUrl: SafeResourceUrl | null = null;
+  
+  // Blob URL management
+  private currentBlobUrl: string | null = null;
+
   // Mock PDF data for demonstration
   mockPdfPages: string[] = [];
 
@@ -75,15 +94,27 @@ export class PdfViewerPanelComponent implements OnInit {
     console.log('🔎 PDF Viewer initialized with:', {
       submission: this.submission?.title,
       pdfUrl: this.pdfUrl,
-      hasSubmission: !!this.submission
+      hasSubmission: !!this.submission,
+      pdfFileId: this.submission?.pdfFileId,
+      pdfFile: !!this.submission?.pdfFile
     });
+
+    // Try to generate correct PDF URL
+    const generatedPdfUrl = this.generatePdfUrl();
     
-    if (this.pdfUrl) {
+    if (generatedPdfUrl) {
+      // Update the pdfUrl if we generated a better one
+      if (!this.pdfUrl || this.pdfUrl !== generatedPdfUrl) {
+        console.log('🔄 Updating pdfUrl from:', this.pdfUrl, 'to:', generatedPdfUrl);
+        this.pdfUrl = generatedPdfUrl;
+      }
       this.loadRealPdf();
     } else if (this.submission) {
+      console.log('📋 No PDF URL available, falling back to mock data');
       this.initializeMockPdfData();
       this.loadPdf();
     } else {
+      console.log('📭 No submission or PDF data available');
       this.showNoDocumentState();
     }
   }
@@ -208,10 +239,14 @@ export class PdfViewerPanelComponent implements OnInit {
     setTimeout(() => {
       if (this.pdfUrl || this.submission) {
         this.isLoading = false;
+        this.cdr.markForCheck(); // Trigger change detection for successful loading
+        console.log('✅ Mock PDF loading completed');
       } else {
         this.hasError = true;
         this.errorMessage = 'PDF-Dokument konnte nicht geladen werden';
         this.isLoading = false;
+        this.cdr.markForCheck(); // Trigger change detection for error state
+        console.log('❌ Mock PDF loading failed');
       }
     }, 1000);
   }
@@ -265,24 +300,83 @@ export class PdfViewerPanelComponent implements OnInit {
 
   downloadPdf(): void {
     this.downloadRequested.emit();
+    console.log('📥 Download PDF requested');
 
-    // Mock download functionality
-    if (this.pdfUrl) {
-      // In a real implementation, this would trigger an actual download
-      const link = document.createElement('a');
-      link.href = this.pdfUrl;
-      link.download = this.getFileName();
-      link.click();
+    // Try to get the best download URL
+    const downloadUrl = this.generatePdfUrl();
+    
+    if (!downloadUrl) {
+      console.error('❌ No download URL available');
+      return;
+    }
+
+    // Check if we have a uniqueIdentifier for FileService download
+    const uniqueIdentifier = this.submission?.pdfFile?.uniqueIdentifier;
+    
+    if (uniqueIdentifier) {
+      console.log('📥 Using FileService for download with uniqueIdentifier:', uniqueIdentifier);
+      this.downloadWithFileService(uniqueIdentifier);
     } else {
-      // Mock download for demonstration
-      const blob = new Blob(['Mock PDF Content'], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
+      console.log('📥 Using direct link download with URL:', downloadUrl);
+      this.downloadWithDirectLink(downloadUrl);
+    }
+  }
+
+  private downloadWithFileService(uniqueIdentifier: string): void {
+    this.fileService.downloadFile(uniqueIdentifier).subscribe({
+      next: (response) => {
+        console.log('✅ FileService download successful');
+        const blob = response.body;
+        if (blob) {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = this.getFileName();
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        }
+      },
+      error: (error) => {
+        console.error('❌ FileService download failed:', error);
+        // Fallback to direct link if FileService fails
+        const fallbackUrl = this.generatePdfUrl();
+        if (fallbackUrl) {
+          this.downloadWithDirectLink(fallbackUrl);
+        }
+      }
+    });
+  }
+
+  private downloadWithDirectLink(url: string): void {
+    try {
       const link = document.createElement('a');
       link.href = url;
       link.download = this.getFileName();
+      link.target = '_blank';
+      document.body.appendChild(link);
       link.click();
-      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+      console.log('✅ Direct link download initiated');
+    } catch (error) {
+      console.error('❌ Direct link download failed:', error);
+      // Final fallback: create mock PDF for demonstration
+      this.downloadMockPdf();
     }
+  }
+
+  private downloadMockPdf(): void {
+    console.log('📋 Creating mock PDF download');
+    const blob = new Blob(['Mock PDF Content - Real PDF not available'], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.getFileName();
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
   }
 
   private getFileName(): string {
@@ -352,18 +446,148 @@ export class PdfViewerPanelComponent implements OnInit {
   // NEW REAL PDF METHODS
   // =============================================================================
 
+  /**
+   * Generates the correct PDF URL based on submission data
+   * Priority: pdfUrl > pdfFile.uniqueIdentifier > pdfMetadata.downloadUrl
+   */
+  private generatePdfUrl(): string | null {
+    console.log('🔗 Generating PDF URL with data:', {
+      pdfUrl: this.pdfUrl,
+      pdfFile: this.submission?.pdfFile?.uniqueIdentifier,
+      pdfMetadata: this.submission?.pdfMetadata?.downloadUrl
+    });
+
+    // Priority 1: Direct pdfUrl input
+    if (this.pdfUrl) {
+      console.log('✅ Using direct pdfUrl:', this.pdfUrl);
+      return this.pdfUrl;
+    }
+
+    // Priority 2: Generate URL from pdfFile.uniqueIdentifier (correct approach)
+    if (this.submission?.pdfFile?.uniqueIdentifier) {
+      const generatedUrl = `${environment.server}/files/download/${this.submission.pdfFile.uniqueIdentifier}`;
+      console.log('✅ Generated URL from pdfFile.uniqueIdentifier:', generatedUrl);
+      return generatedUrl;
+    }
+
+    // Priority 3: Fallback to pdfMetadata.downloadUrl
+    if (this.submission?.pdfMetadata?.downloadUrl) {
+      console.log('⚠️ Using fallback pdfMetadata.downloadUrl:', this.submission.pdfMetadata.downloadUrl);
+      return this.submission.pdfMetadata.downloadUrl;
+    }
+
+    console.log('❌ No PDF URL could be generated');
+    return null;
+  }
+
   private loadRealPdf(): void {
     console.log('📄 Loading real PDF from URL:', this.pdfUrl);
     this.isLoading = true;
     this.hasError = false;
+
+    if (this.pdfUrl) {
+      try {
+        // Try direct URL approach first (for object tag)
+        this.safePdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.pdfUrl);
+        console.log('🔒 Created safe PDF URL for object tag');
+
+        // Set a timeout to check if direct approach works, otherwise use blob fallback
+        setTimeout(() => {
+          // Check if we should try blob fallback
+          const shouldTryBlobFallback = this.submission?.pdfFile?.uniqueIdentifier;
+          
+          if (shouldTryBlobFallback) {
+            console.log('🔄 Will try blob fallback if direct approach fails');
+            this.loadPdfAsBlob();
+          } else {
+            this.isLoading = false;
+            this.totalPages = 1; // Unknown page count for object
+            this.currentPage = 1;
+            this.cdr.markForCheck();
+            console.log('✅ PDF loading completed with direct URL:', this.pdfUrl);
+          }
+        }, 1000);
+      } catch (error) {
+        console.error('❌ Error creating safe PDF URL:', error);
+        this.tryBlobFallback();
+      }
+    } else {
+      console.error('❌ No PDF URL provided to loadRealPdf');
+      this.tryBlobFallback();
+    }
+  }
+
+  /**
+   * Load PDF as blob and create blob URL (robust fallback)
+   */
+  private loadPdfAsBlob(): void {
+    const uniqueIdentifier = this.submission?.pdfFile?.uniqueIdentifier;
     
-    // For real PDF viewing, we'll use an iframe approach
-    // In a production environment, you'd use PDF.js or similar
-    setTimeout(() => {
+    if (!uniqueIdentifier) {
+      console.error('❌ No uniqueIdentifier for blob loading');
+      this.showPdfLoadError('Keine PDF-Identifikation verfügbar');
+      return;
+    }
+
+    console.log('📥 Loading PDF as blob with uniqueIdentifier:', uniqueIdentifier);
+    this.isLoading = true;
+    this.hasError = false;
+
+    this.fileService.downloadFile(uniqueIdentifier).subscribe({
+      next: (response) => {
+        console.log('✅ Blob download successful');
+        const blob = response.body;
+        if (blob && blob.type === 'application/pdf') {
+          this.createBlobUrl(blob);
+        } else {
+          console.error('❌ Invalid blob type or empty blob');
+          this.showPdfLoadError('Ungültiges PDF-Format');
+        }
+      },
+      error: (error) => {
+        console.error('❌ Blob download failed:', error);
+        this.showPdfLoadError('Fehler beim Laden der PDF-Datei');
+      }
+    });
+  }
+
+  private createBlobUrl(blob: Blob): void {
+    try {
+      // Clean up previous blob URL
+      if (this.currentBlobUrl) {
+        window.URL.revokeObjectURL(this.currentBlobUrl);
+      }
+
+      // Create new blob URL
+      this.currentBlobUrl = window.URL.createObjectURL(blob);
+      this.safePdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.currentBlobUrl);
+      
       this.isLoading = false;
-      this.totalPages = 1; // Unknown page count for iframe
+      this.totalPages = 1; // Unknown page count for blob
       this.currentPage = 1;
-    }, 1000);
+      this.cdr.markForCheck();
+      
+      console.log('✅ Blob PDF URL created and ready for display');
+    } catch (error) {
+      console.error('❌ Error creating blob URL:', error);
+      this.showPdfLoadError('Fehler beim Erstellen der PDF-Anzeige');
+    }
+  }
+
+  private tryBlobFallback(): void {
+    console.log('🔄 Trying blob fallback approach');
+    if (this.submission?.pdfFile?.uniqueIdentifier) {
+      this.loadPdfAsBlob();
+    } else {
+      this.showPdfLoadError('Keine PDF-URL und keine Fallback-Option verfügbar');
+    }
+  }
+
+  private showPdfLoadError(message: string): void {
+    this.hasError = true;
+    this.errorMessage = message;
+    this.isLoading = false;
+    this.cdr.markForCheck();
   }
 
   private showNoDocumentState(): void {
@@ -371,13 +595,27 @@ export class PdfViewerPanelComponent implements OnInit {
     this.hasError = true;
     this.errorMessage = 'Kein PDF-Dokument verfügbar';
     this.isLoading = false;
+    this.cdr.markForCheck(); // Trigger change detection for no document state
   }
 
-  getRealPdfUrl(): string {
-    return this.pdfUrl || '';
+  getRealPdfUrl(): SafeResourceUrl | null {
+    return this.safePdfUrl;
   }
 
   hasRealPdf(): boolean {
     return !!this.pdfUrl;
+  }
+
+  // =============================================================================
+  // LIFECYCLE CLEANUP
+  // =============================================================================
+
+  ngOnDestroy(): void {
+    // Clean up blob URL to prevent memory leaks
+    if (this.currentBlobUrl) {
+      console.log('🧹 Cleaning up blob URL on component destroy');
+      window.URL.revokeObjectURL(this.currentBlobUrl);
+      this.currentBlobUrl = null;
+    }
   }
 }

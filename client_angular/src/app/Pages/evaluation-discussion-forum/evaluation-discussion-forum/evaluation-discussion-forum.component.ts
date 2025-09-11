@@ -2154,4 +2154,63 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       );
     }
   }
+
+  // =============================================================================
+  // PDF DOWNLOAD METHODS
+  // =============================================================================
+
+  /**
+   * Handles PDF download from the main header button
+   */
+  onDownloadPdf(): void {
+    console.log('📄 Download PDF requested');
+    
+    // Get current view model data
+    this.viewModel$.pipe(take(1)).subscribe(vm => {
+      if (vm.submission?.pdfMetadata?.downloadUrl) {
+        this.downloadPdfFile(vm.submission.pdfMetadata.downloadUrl, vm.submission.title);
+      } else {
+        console.error('❌ No PDF download URL available');
+        this.showSnackBar('PDF-Download nicht verfügbar', 'Schließen', 3000, true);
+      }
+    });
+  }
+
+  /**
+   * Downloads a PDF file programmatically
+   */
+  private downloadPdfFile(url: string, title: string): void {
+    try {
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = this.generateFilename(title);
+      link.target = '_blank';
+      
+      // Add to DOM, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log('✅ PDF download initiated for:', title);
+      this.showSnackBar('PDF-Download gestartet', 'OK', 2000, false);
+    } catch (error) {
+      console.error('❌ PDF download failed:', error);
+      this.showSnackBar('Fehler beim PDF-Download', 'Schließen', 3000, true);
+    }
+  }
+
+  /**
+   * Generates a clean filename for the PDF download
+   */
+  private generateFilename(title: string): string {
+    // Clean the title and create a valid filename
+    const cleanTitle = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\-_]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    
+    return `${cleanTitle || 'dokument'}.pdf`;
+  }
 }

@@ -72,15 +72,17 @@
         <div class="panel card">
           <div class="panel-header">
             <h3>Abgabe Dokument</h3>
-            <a
-              [href]="vm.submission?.pdfMetadata?.downloadUrl"
-              target="_blank"
+            <button
+              mat-button
+              color="primary"
+              (click)="onDownloadPdf()"
               class="download-btn"
               matTooltip="PDF herunterladen"
+              [disabled]="!vm.submission?.pdfMetadata?.downloadUrl"
             >
               <mat-icon>download</mat-icon>
               <span>PDF Herunterladen</span>
-            </a>
+            </button>
           </div>
           <div class="pdf-viewer-container">
             <app-pdf-viewer-panel

@@ -261,6 +261,25 @@
   gap: 16px;
   transform-origin: center center;
   transition: transform 0.2s ease;
+
+  // Real PDF iframe styles
+  &.real-pdf {
+    width: 100%;
+    height: 100%;
+    
+    .pdf-iframe,
+    .pdf-object {
+      width: 100%;
+      height: 600px;
+      min-height: 500px;
+      border: none;
+      background-color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-radius: 4px;
+      transform-origin: center center;
+      transition: transform 0.2s ease;
+    }
+  }
   
   .pdf-page-wrapper {
     background-color: white;
@@ -487,6 +506,12 @@
     padding: 10px;
   }
   
+  .pdf-content.real-pdf .pdf-iframe,
+  .pdf-content.real-pdf .pdf-object {
+    height: 450px;
+    min-height: 400px;
+  }
+  
   .pdf-content .pdf-page {
     width: 100%;
     max-width: 400px;
@@ -520,6 +545,12 @@
 }
 
 @media (max-width: 480px) {
+  .pdf-content.real-pdf .pdf-iframe,
+  .pdf-content.real-pdf .pdf-object {
+    height: 350px;
+    min-height: 300px;
+  }
+  
   .pdf-content .pdf-page {
     max-width: 320px;
     min-height: 453px;
