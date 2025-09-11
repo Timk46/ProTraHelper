@@ -1,7 +1,7 @@
 import { OnInit } from '@angular/core';
 import { Component, Input } from '@angular/core';
-import { ContentsForConceptDTO } from '@DTOs/content.dto';
-import { ContentDTO } from '@DTOs/content.dto';
+import { ContentsForConceptDTO } from '@DTOs/index';
+import { ContentDTO } from '@DTOs/index';
 
 @Component({
   selector: 'app-competencies',

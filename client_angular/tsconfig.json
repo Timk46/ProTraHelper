@@ -30,7 +30,7 @@
       "@DTOs/index": ["../shared/dtos/index.ts"],
       "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"]
     },
-    "types": ["node"]
+    "types": ["node", "jasmine"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

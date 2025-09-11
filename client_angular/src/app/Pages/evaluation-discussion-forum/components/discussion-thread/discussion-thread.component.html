@@ -1,11 +1,16 @@
 <!-- Discussion Thread Container -->
-<div class="discussion-thread-container" 
-     appPerformanceProfiling="discussion-thread"
-     [profilingOptions]="{trackMemory: true, trackDOMChanges: true, trackVisibility: true, sampleRate: 0.5}">
-
+<div
+  class="discussion-thread-container"
+  appPerformanceProfiling="discussion-thread"
+  [profilingOptions]="{
+    trackMemory: true,
+    trackDOMChanges: true,
+    trackVisibility: true,
+    sampleRate: 0.5,
+  }"
+>
   <!-- Discussion Controls -->
   <div class="discussion-controls" *ngIf="hasDiscussions() && hasAnyComments()">
-
     <div class="controls-left">
       <mat-icon class="discussion-icon">forum</mat-icon>
       <span class="discussion-title">Diskussion</span>
@@ -15,88 +20,88 @@
       <!-- Sort Options -->
       <div class="sort-controls">
         <span class="sort-label">Sortieren:</span>
-        <button mat-button
-                [class.active]="sortOrder === 'newest'"
-                (click)="onSortOrderChanged('newest')"
-                matTooltip="Neueste zuerst">
+        <button
+          mat-button
+          [class.active]="sortOrder === 'newest'"
+          (click)="onSortOrderChanged('newest')"
+          matTooltip="Neueste zuerst"
+        >
           <mat-icon>access_time</mat-icon>
           Neueste
         </button>
-        <button mat-button
-                [class.active]="sortOrder === 'mostVoted'"
-                (click)="onSortOrderChanged('mostVoted')"
-                matTooltip="Beste Bewertung zuerst">
+        <button
+          mat-button
+          [class.active]="sortOrder === 'mostVoted'"
+          (click)="onSortOrderChanged('mostVoted')"
+          matTooltip="Beste Bewertung zuerst"
+        >
           <mat-icon>thumb_up</mat-icon>
           Beliebteste
         </button>
       </div>
     </div>
-
   </div>
 
   <!-- Main Discussion Content -->
   <div class="discussion-content">
-
     <!-- Discussion Messages Area -->
     <div class="discussion-messages-area">
-
       <!-- DEBUG: Direct rendering without Virtual Scrolling -->
       <div *ngIf="hasDiscussions()" class="discussion-viewport-debug">
-
         <!-- Flattened Comment Items WITHOUT Virtual Scrolling -->
-        <div *ngFor="let item of flattenedComments; trackBy: trackByFlattenedComment"
-             class="virtual-item"
-             [ngSwitch]="item.type">
-
+        <div
+          *ngFor="let item of flattenedComments; trackBy: trackByFlattenedComment"
+          class="virtual-item"
+          [ngSwitch]="item.type"
+        >
           <!-- Discussion Header -->
-          <div *ngSwitchCase="'discussion-header'"
-               class="discussion-header-item">
-            <p><strong>DISCUSSION HEADER: {{ item.discussion?.id }}</strong></p>
+          <div *ngSwitchCase="'discussion-header'" class="discussion-header-item">
+            <p>
+              <strong>DISCUSSION HEADER: {{ item.discussion?.id }}</strong>
+            </p>
           </div>
 
           <!-- Individual Comment -->
-          <div *ngSwitchCase="'comment'"
-               class="comment-item-container"
-               [style.margin-left.px]="getCommentIndentation(item.depth)">
-
+          <!-- Only render the container div when we actually have content to show -->
+          <div
+            *ngSwitchCase="'comment'"
+            class="comment-item-container"
+            [style.margin-left.px]="getCommentIndentation(item.depth)"
+          >
             <app-comment-item
               [comment]="item.comment!"
               [anonymousUser]="anonymousUser"
               [canVote]="canVote && !isReadOnly"
-              [canVoteUp]="availableUpvotes > 0"
-              [canVoteDown]="availableDownvotes > 0"
-              [availableUpvotes]="availableUpvotes"
-              [availableDownvotes]="availableDownvotes"
+              [availableVotes]="availableVotes"
               [isVoting]="isCommentBeingVoted(item.comment!.id)"
               [depth]="item.depth"
               [isReadOnly]="isReadOnly"
               (voted)="onCommentVoted($event)"
               (replyRequested)="onReplyRequested($event)">
             </app-comment-item>
-
           </div>
 
           <!-- 🚀 PHASE 3: Reply Input Case -->
-          <div *ngSwitchCase="'comment-input'" 
-               class="reply-input-item-container"
-               [style.margin-left.px]="getCommentIndentation(item.depth)">
-            
+          <div
+            *ngSwitchCase="'comment-input'"
+            class="reply-input-item-container"
+            [style.margin-left.px]="getCommentIndentation(item.depth)"
+          >
             <app-comment-input
               [parentCommentId]="item.parentCommentId!"
               [depth]="item.depth"
               [isSubmitting]="isSubmittingComment"
               [placeholder]="'Antwort schreiben...'"
               [maxLength]="500"
-              (commentSubmitted)="onReplyInputSubmitted({commentId: item.parentCommentId!, content: $event})"
-              (cancelled)="onReplyInputCancelled(item.parentCommentId!)">
+              (commentSubmitted)="
+                onReplyInputSubmitted({ commentId: item.parentCommentId!, content: $event })
+              "
+              (cancelled)="onReplyInputCancelled(item.parentCommentId!)"
+            >
             </app-comment-input>
-            
           </div>
-
         </div>
-
       </div>
-
     </div>
 
     <!-- Input field removed - handled by action-area -->
@@ -115,7 +120,6 @@
       <p>Teilen Sie Ihre Gedanken zu dieser Bewertung mit.</p>
 
       <!-- Comment input removed - handled by action-area -->
-
     </div>
 
     <!-- Read-Only Mode Message -->
@@ -144,9 +148,7 @@
         </mat-card-content>
       </mat-card>
     </div>
-
   </div>
 
   <!-- Mobile actions removed - input handled by action-area -->
-
 </div>

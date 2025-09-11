@@ -1,13 +1,13 @@
 import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GraphStructureDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
+import { GraphStructureDTO, GraphConfigurationDTO } from '@DTOs/index';
 import { GraphTaskService } from '../services/graph-task.service';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { GraphQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
-import { questionType } from '@DTOs/question.dto';
+import { GraphQuestionDTO, QuestionDTO } from '@DTOs/index';
+import { questionType } from '@DTOs/index';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/index';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { structuresAreEqual } from '../utils';

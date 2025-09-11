@@ -1,7 +1,7 @@
-import { discussionDTO } from '@DTOs/discussion.dto';
+import { discussionDTO } from '@DTOs/index';
 import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { discussionFilterDTO } from '@DTOs/discussionFilter.dto';
+import { discussionFilterDTO } from '@DTOs/index';
 import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
 import { DiscussionDialogService } from 'src/app/Services/discussion/discussion-dialog.service';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';

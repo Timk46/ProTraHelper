@@ -11,20 +11,11 @@
     <span>+</span>
   </button>
   
-  <!-- Minus/Downvote Button -->
-  <button class="vote-btn minus"
-          [ngClass]="getDownvoteButtonClass()"
-          [disabled]="isDisabled()"
-          [matTooltip]="getDownvoteTooltip()"
-          [attr.aria-label]="getDownvoteAriaLabel()"
-          (click)="onDownvote()">
-    <span>-</span>
-  </button>
   
-  <!-- Vote Count Display (HTML Template Style) -->
+  <!-- Vote Count Display (Ranking System) -->
   <span class="vote-count" 
-        [matTooltip]="'Gesamtbewertungen: ' + getTotalVotes() + ' (' + upvotes + ' positiv, ' + downvotes + ' negativ)'">
-    {{ formatVoteCount(upvotes) }} 👍 {{ formatVoteCount(downvotes) }} 👎
+        [matTooltip]="'Bewertungen: ' + getTotalVotes()">
+    {{ formatVoteCount(upvotes) }} 👍
   </span>
   
   <!-- Voting Loading Indicator -->

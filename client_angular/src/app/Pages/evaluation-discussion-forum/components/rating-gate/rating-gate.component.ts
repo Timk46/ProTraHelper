@@ -16,9 +16,10 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { map, distinctUntilChanged, takeUntil, tap, filter, take } from 'rxjs/operators';
 
@@ -37,7 +38,6 @@ import {
   EvaluationRatingDTO,
 } from '@DTOs/index';
 import { BaseComponent } from '../../../../shared/base.component';
-import { VotingMechanismDialogComponent } from '../voting-mechanism-dialog/voting-mechanism-dialog.component';
 
 /**
  * Interface for rating gate view model
@@ -104,30 +104,9 @@ interface RatingGateViewModel {
       <!-- Initial Comment Required State -->
       <div class="initial-comment-required" *ngIf="!vm.isLoading && !vm.error && vm.requiresInitialComment">
         
-        <!-- Main Panel: "Schriftliche Bewertung erforderlich" -->
-        <mat-expansion-panel 
-          [(expanded)]="mainPanelExpanded"
-          (expandedChange)="onMainPanelExpansionChange($event)"
-          class="required-evaluation-panel">
-          
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon class="panel-icon">edit</mat-icon>
-              Schriftliche Bewertung erforderlich
-            </mat-panel-title>
-            <mat-panel-description>
-              Sie müssen zuerst einen Kommentar verfassen, um die anderen Diskussionsbeiträge zu sehen
-            </mat-panel-description>
-          </mat-expansion-panel-header>
+        <!-- Main content always visible -->
+        <div class="main-panel-content">
 
-          <div class="main-panel-content">
-            
-            <!-- Category Information -->
-            <div class="category-info">
-              <h4>{{ currentCategory.displayName }}</h4>
-              <p class="category-description">{{ currentCategory.description || 'Angemessene Komplexität der Konstruktionslösung' }}</p>
-            </div>
-            
             <!-- Instructions Panel -->
             <mat-expansion-panel
               [(expanded)]="instructionsExpanded"
@@ -201,8 +180,7 @@ interface RatingGateViewModel {
               </div>
             </mat-expansion-panel>
 
-          </div>
-        </mat-expansion-panel>
+        </div>
       </div>
 
       <!-- Discussion Access Granted State -->
@@ -211,78 +189,78 @@ interface RatingGateViewModel {
         *ngIf="!vm.isLoading && !vm.error && vm.hasCommented && vm.canAccessDiscussion"
       >
         <!-- Access Status Header -->
-        <div class="access-granted-header">
+        <!-- <div class="access-granted-header">
           <mat-icon class="success-icon">check_circle</mat-icon>
           <span class="access-text">
             Diskussion freigeschaltet durch Ihren Kommentar
-            <span class="rating-value" *ngIf="vm.ratingStatus?.rating !== null">
+            <span class="rating-value" *ngIf="vm.ratingStatus?.hasRated && vm.ratingStatus?.rating !== null && vm.ratingStatus?.rating !== undefined">
               - Numerische Bewertung: {{ vm.ratingStatus?.rating }}/10 Punkte
             </span>
           </span>
-        </div>
+        </div> -->
 
-        <!-- Collapsible Vote Limit Panel -->
-        <div class="available-ratings-panel" *ngIf="voteLimitDisplay$ | async as voteLimit"
-             [class.expanded]="isRatingsExpanded">
 
-          <!-- Compact Panel Header -->
-          <div class="panel-header" (click)="toggleRatingsPanel()">
-            <button
-              mat-icon-button
-              class="info-badge"
-              (click)="openVoteExplanationDialog(); $event.stopPropagation()"
-              matTooltip="💡 Wie funktioniert das Bewertungssystem? Klicken für Details!"
-              matTooltipPosition="left"
-              aria-label="Informationen zum Bewertungssystem anzeigen"
-            >
-              <mat-icon>help</mat-icon>
-            </button>
+        <!-- Collapsible Discussion Panel -->
+        <div class="discussion-panel"
+             [class.expanded]="isDiscussionExpanded"
+             *ngIf="hasDiscussions()">
 
-            <span class="panel-title">Verfügbare Bewertungen</span>
+          <!-- Discussion Panel Header -->
+          <div class="panel-header" (click)="toggleDiscussionPanel()">
+            <mat-icon class="discussion-icon">forum</mat-icon>
+            <span class="panel-title">Diskussionsbeiträge</span>
 
-            <span class="rating-count" [class.can-vote]="voteLimit.canVote" [class.no-votes]="!voteLimit.canVote">
-              {{ voteLimit.display }}
-            </span>
+            <div class="discussion-stats">
+              <mat-icon>comment</mat-icon>
+              <span>{{ getTotalCommentCount() }} {{ getTotalCommentCount() === 1 ? 'Kommentar' : 'Kommentare' }}</span>
+            </div>
 
-            <mat-icon class="expand-icon" [class.rotated]="isRatingsExpanded">
+            <mat-icon class="expand-icon" [class.rotated]="isDiscussionExpanded">
               expand_more
             </mat-icon>
           </div>
 
+          <!-- Collapsed Preview -->
+          <div class="collapsed-preview" *ngIf="!isDiscussionExpanded && getTopComment()">
+            <div class="preview-content">
+              <div class="top-comment">
+                <mat-icon>star</mat-icon>
+                <span class="preview-text">{{ getTopComment().content | slice:0:100 }}{{ getTopComment().content.length > 100 ? '...' : '' }}</span>
+                <span class="vote-count" *ngIf="getTopComment().voteStats?.upVotes > 0">+{{ getTopComment().voteStats.upVotes }}</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Expandable Panel Content -->
-          <div class="panel-content" *ngIf="isRatingsExpanded" [@slideToggle]="isRatingsExpanded">
-            <div class="vote-stats">
-              <div class="vote-count-display">
-                <div class="vote-progress-container">
-                  <div class="vote-progress-bar">
-                    <div class="vote-progress-fill" [style.width.%]="voteLimit.percentage"></div>
-                  </div>
-                  <span class="vote-percentage">{{ voteLimit.percentage.toFixed(0) }}%</span>
-                </div>
-              </div>
-              <div
-                class="vote-status"
-                [class.can-vote]="voteLimit.canVote"
-                [class.no-votes]="!voteLimit.canVote"
+          <div class="panel-content" *ngIf="isDiscussionExpanded" [@slideToggle]="isDiscussionExpanded">
+            <div class="discussion-content-wrapper">
+              <app-discussion-thread
+                [discussions]="discussions"
+                [anonymousUser]="anonymousUser"
+                [canComment]="canComment"
+                [canVote]="canVote"
+                [availableVotes]="availableVotes"
+                [isReadOnly]="isReadOnly"
+                [isSubmittingComment]="isSubmittingComment"
+                [isVotingComment]="isVotingComment"
+                [trackByFn]="trackByDiscussion"
+                (commentSubmitted)="onCommentSubmitted($event)"
+                (commentVoted)="onCommentVoted($event)"
+                (replySubmitted)="onReplySubmitted($event)"
               >
-                <mat-icon>{{ voteLimit.canVote ? 'thumb_up' : 'block' }}</mat-icon>
-                <span>{{
-                  voteLimit.canVote ? 'Bewertungen verfügbar' : 'Keine Bewertungen verfügbar'
-                }}</span>
-              </div>
+              </app-discussion-thread>
             </div>
           </div>
         </div>
 
-        <!-- Discussion Content -->
-        <div class="discussion-content">
+        <!-- Fallback Discussion Content (when no discussions exist) -->
+        <div class="discussion-content" *ngIf="!hasDiscussions()">
           <app-discussion-thread
             [discussions]="discussions"
             [anonymousUser]="anonymousUser"
             [canComment]="canComment"
             [canVote]="canVote"
-            [availableUpvotes]="availableUpvotes"
-            [availableDownvotes]="availableDownvotes"
+            [availableVotes]="availableVotes"
             [isReadOnly]="isReadOnly"
             [isSubmittingComment]="isSubmittingComment"
             [isVotingComment]="isVotingComment"
@@ -296,27 +274,94 @@ interface RatingGateViewModel {
 
         <!-- Rating Slider Section (After Discussion) -->
         <div class="rating-slider-section" *ngIf="vm.showRatingSlider">
-          <mat-card class="rating-slider-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>star_rate</mat-icon>
-                Numerische Bewertung
-              </mat-card-title>
-              <mat-card-subtitle>
-                Bewerten Sie "{{ currentCategory.displayName }}" mit 0-10 Punkten
-              </mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <app-rating-slider
-                [categoryId]="currentCategory.id"
-                [categoryName]="currentCategory.displayName"
-                [currentRating]="convertRatingStatusToDTO(vm.ratingStatus)"
-                [disabled]="false"
-                (ratingSubmitted)="onRatingSubmitted($event)"
-              >
-              </app-rating-slider>
-            </mat-card-content>
-          </mat-card>
+          <mat-expansion-panel
+            class="rating-expansion-panel"
+            [(expanded)]="isRatingSliderExpanded"
+            [class.has-rating]="vm.hasRated"
+            [class.glow-effect]="!vm.hasRated && !vm.isLoading"
+            hideToggle="false">
+
+            <!-- Panel Header -->
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <div class="rating-panel-title">
+                  <mat-icon class="rating-icon" [class.completed]="vm.hasRated">
+                    {{ vm.hasRated ? 'star' : 'star_border' }}
+                  </mat-icon>
+                  <span class="rating-label">Numerische Bewertung</span>
+                </div>
+              </mat-panel-title>
+              <mat-panel-description>
+                <div class="panel-description">
+                  <span class="category-description">
+                    {{ currentCategory.displayName }}
+                  </span>
+                  <div class="rating-status">
+                    <span *ngIf="vm.hasRated" class="score-badge">
+                      <strong>{{ vm.ratingStatus?.rating || 0 }}</strong>/15 Punkte
+                    </span>
+                    <span *ngIf="!vm.hasRated" class="pending-badge">
+                      Noch nicht bewertet
+                    </span>
+                    <mat-icon class="expand-icon">
+                      {{ isRatingSliderExpanded ? 'expand_less' : 'expand_more' }}
+                    </mat-icon>
+                  </div>
+                </div>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Panel Content -->
+            <div class="rating-panel-content">
+              <!-- Inhalt für noch nicht bewertete Kategorien oder Reset-Modus -->
+              <div *ngIf="!vm.hasRated || showRatingReset" class="rating-input-section">
+                <div class="rating-panel-header" *ngIf="showRatingReset">
+                  <h4>Bewertung für "{{ currentCategory.displayName }}" zurücksetzen</h4>
+                  <button mat-icon-button
+                          (click)="onCancelRatingReset()"
+                          matTooltip="Abbrechen und zur kompakten Ansicht zurückkehren"
+                          class="cancel-edit-btn">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+
+                <app-rating-slider
+                  [categoryId]="currentCategory.id"
+                  [categoryName]="currentCategory.displayName"
+                  [currentRating]="convertRatingStatusToDTO(vm.ratingStatus)"
+                  [disabled]="false"
+                  (ratingSubmitted)="onRatingSubmitted($event)"
+                  (ratingDeleted)="onRatingDeleted($event)"
+                >
+                </app-rating-slider>
+              </div>
+
+              <!-- Inhalt für bereits bewertete Kategorien -->
+              <div *ngIf="vm.hasRated && !showRatingReset" class="rating-details-section">
+                <div class="current-rating-display">
+                  <div class="rating-details">
+                    <p class="rating-text">
+                      Sie haben diese Kategorie mit
+                      <strong>{{ vm.ratingStatus?.rating || 0 }} von 15 Punkten</strong> bewertet.
+                    </p>
+                    <p class="rating-timestamp" *ngIf="vm.ratingStatus">
+                      Bewertet am {{ vm.ratingStatus.ratedAt | date:'dd.MM.yyyy HH:mm' }}
+                    </p>
+                  </div>
+
+                  <div class="rating-actions">
+                    <button mat-raised-button
+                            color="primary"
+                            (click)="onResetRatingSlider()"
+                            matTooltip="Bewertung zurücksetzen und Slider reaktivieren">
+                      <mat-icon>refresh</mat-icon>
+                      Zurücksetzen
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-expansion-panel>
         </div>
       </div>
     </div>
@@ -403,35 +448,182 @@ interface RatingGateViewModel {
         margin-top: 0.5rem;
       }
 
+      // Rating Slider Section Expansion Panel
       .rating-slider-section {
         margin-top: 2rem;
       }
 
-      .rating-slider-card {
-        border: 2px solid #4caf50;
-        background: #f8fff8;
+      .rating-slider-section .rating-expansion-panel {
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        background: #fff;
+        transition: all 0.3s ease;
+
+        // Always glow in synchronized GREEN when not rated (same timing as blue panels)
+        &:not(.has-rating) {
+          animation: synchronizedGreenGlow 2.5s ease-in-out infinite;
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+
+        // Additional rule for explicit glow-effect class - also GREEN
+        &.glow-effect {
+          animation: synchronizedGreenGlow 2.5s ease-in-out infinite;
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+
+        // Different styling when rating is completed (no glow)
+        &.has-rating {
+          animation: none;
+          border-color: #4caf50;
+          background: linear-gradient(135deg, #f8fff8 0%, #ffffff 100%);
+        }
+
+        .mat-expansion-panel-header {
+          padding: 0 16px;
+          height: 64px;
+          background: linear-gradient(135deg, #e8f5e8 0%, #f1f8e9 100%);
+          transition: all 0.3s ease;
+
+          &.mat-expanded {
+            background: linear-gradient(135deg, #c8e6c9 0%, #dcedc8 100%);
+          }
+        }
+
+        .rating-panel-title {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .rating-icon {
+          font-size: 1.5rem;
+          color: #4caf50;
+
+          &.completed {
+            color: #2e7d32;
+          }
+        }
+
+        .rating-label {
+          font-weight: 500;
+          color: #2e7d32;
+          font-size: 1rem;
+        }
+
+        .panel-description {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          flex: 1;
+        }
+
+        .category-description {
+          font-size: 0.85rem;
+          color: #555;
+        }
+
+        .rating-status {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+        }
+
+        .score-badge {
+          background: #c8e6c9;
+          color: #1b5e20;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+
+        .pending-badge {
+          background: #fff3e0;
+          color: #e65100;
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 0.8rem;
+          font-weight: 500;
+        }
+
+        .expand-icon {
+          color: #666;
+          transition: transform 0.3s ease;
+        }
+
+        .rating-panel-content {
+          padding: 16px;
+          background: #fff;
+        }
+
+        .rating-panel-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+          padding-bottom: 12px;
+          border-bottom: 1px solid #e0e0e0;
+
+          h4 {
+            margin: 0;
+            color: #333;
+            font-size: 1rem;
+          }
+
+          .cancel-edit-btn {
+            color: #666;
+
+            &:hover {
+              background-color: rgba(255, 0, 0, 0.1);
+              color: #d32f2f;
+            }
+          }
+        }
+
+        .rating-details-section {
+          .current-rating-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+          }
+
+          .rating-details {
+            flex: 1;
+
+            .rating-text {
+              margin: 0 0 0.5rem 0;
+              color: #333;
+              font-size: 0.95rem;
+            }
+
+            .rating-timestamp {
+              margin: 0;
+              color: #666;
+              font-size: 0.85rem;
+            }
+          }
+
+          .rating-actions {
+            display: flex;
+            gap: 0.5rem;
+
+            button {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-size: 0.9rem;
+
+              mat-icon {
+                font-size: 1.2rem;
+              }
+            }
+          }
+        }
       }
 
-      .rating-slider-card mat-card-header {
-        background: #4caf50;
-        color: white;
-        margin: -16px -16px 16px -16px;
-        padding: 16px;
-        border-radius: 4px 4px 0 0;
-      }
-
-      .rating-slider-card mat-card-title {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: white;
-        margin: 0;
-      }
-
-      .rating-slider-card mat-card-subtitle {
-        color: rgba(255, 255, 255, 0.8);
-        margin-top: 0.5rem;
-      }
 
       .access-granted-header {
         display: flex;
@@ -465,26 +657,52 @@ interface RatingGateViewModel {
         min-height: 400px;
       }
 
-      // Available Ratings Panel Styles with Green Glow
-      .available-ratings-panel {
+      // Synchronized blue glow keyframe animation for discussion panels
+      @keyframes synchronizedBlueGlow {
+        0%, 100% {
+          box-shadow: 0 0 5px rgba(33, 150, 243, 0.4), 0 0 10px rgba(33, 150, 243, 0.2);
+          border-color: rgba(33, 150, 243, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 15px rgba(33, 150, 243, 0.8), 0 0 25px rgba(33, 150, 243, 0.5);
+          border-color: rgba(33, 150, 243, 0.7);
+        }
+      }
+
+      // Synchronized green glow for rating panel (same timing as blue panels)
+      @keyframes synchronizedGreenGlow {
+        0%, 100% {
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 8px rgba(76, 175, 80, 0.4);
+          border-color: rgba(76, 175, 80, 0.4);
+        }
+        50% {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 20px rgba(76, 175, 80, 0.8);
+          border-color: rgba(76, 175, 80, 0.7);
+        }
+      }
+
+      // Discussion Panel Styles with Synchronized Blue Glow
+      .discussion-panel {
         margin: 1rem 0;
         border: 1px solid #e0e0e0;
-        border-radius: 12px;
+        border-radius: 8px;
         background: #fff;
         overflow: hidden;
         transition: all 0.3s ease;
         cursor: pointer;
 
-        // Green pulsing glow effect when collapsed
+        // Synchronized blue pulsing glow effect when collapsed
         &:not(.expanded) {
-          animation: greenPulseGlow 2s ease-in-out infinite;
-          border-color: rgba(76, 175, 80, 0.3);
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
-        // When expanded, remove animation
+        // When expanded, remove animation and allow full height
         &.expanded {
           animation: none;
           border-color: #e0e0e0;
+          max-height: none;
+          cursor: default;
 
           .expand-icon {
             transform: rotate(180deg);
@@ -492,153 +710,119 @@ interface RatingGateViewModel {
         }
 
         &:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-      }
-
-      // Green pulse glow keyframe animation
-      @keyframes greenPulseGlow {
-        0%, 100% {
-          box-shadow: 0 0 5px rgba(76, 175, 80, 0.4), 0 0 10px rgba(76, 175, 80, 0.2);
-          border-color: rgba(76, 175, 80, 0.3);
-        }
-        50% {
-          box-shadow: 0 0 15px rgba(76, 175, 80, 0.8), 0 0 25px rgba(76, 175, 80, 0.4);
-          border-color: rgba(76, 175, 80, 0.6);
-        }
-      }
-
-      .panel-header {
-        display: flex;
-        align-items: center;
-        padding: 12px 16px;
-        background: #fafafa;
-        border-bottom: 1px solid transparent;
-        transition: all 0.3s ease;
-
-        &:hover {
-          background: #f5f5f5;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
 
-        .available-ratings-panel.expanded & {
-          border-bottom-color: #e0e0e0;
-        }
-      }
-
-      .info-badge {
-        margin-right: 12px;
-        width: 36px;
-        height: 36px;
-
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-      }
-
-      .panel-title {
-        flex: 1;
-        font-weight: 500;
-        color: #333;
-        font-size: 14px;
-      }
-
-      .rating-count {
-        margin-right: 12px;
-        font-weight: 600;
-        padding: 4px 8px;
-        border-radius: 16px;
-        font-size: 12px;
-        transition: all 0.3s ease;
-
-        &.can-vote {
-          background: #e8f5e8;
-          color: #2e7d32;
-        }
-
-        &.no-votes {
-          background: #ffebee;
-          color: #c62828;
-        }
-      }
-
-      .expand-icon {
-        transition: transform 0.3s ease;
-        color: #666;
-
-        &.rotated {
-          transform: rotate(180deg);
-        }
-      }
-
-      .panel-content {
-        padding: 16px;
-        background: #fff;
-
-        .vote-stats {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .vote-count-display {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .vote-progress-container {
+        .panel-header {
           display: flex;
           align-items: center;
-          gap: 12px;
-        }
+          padding: 12px 16px;
+          background: #fafafa;
+          border-bottom: 1px solid transparent;
+          transition: all 0.3s ease;
+          cursor: pointer;
 
-        .vote-progress-bar {
-          flex: 1;
-          height: 8px;
-          background: #f0f0f0;
-          border-radius: 4px;
-          overflow: hidden;
-        }
-
-        .vote-progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #4caf50 0%, #66bb6a 100%);
-          transition: width 0.3s ease;
-        }
-
-        .vote-percentage {
-          font-weight: 600;
-          font-size: 12px;
-          color: #666;
-          min-width: 40px;
-          text-align: right;
-        }
-
-        .vote-status {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 12px;
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 500;
-
-          &.can-vote {
-            background: #e8f5e8;
-            color: #2e7d32;
+          &:hover {
+            background: #f5f5f5;
           }
 
-          &.no-votes {
-            background: #ffebee;
-            color: #c62828;
+          .discussion-panel.expanded & {
+            border-bottom-color: #e0e0e0;
           }
 
-          mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
+          .discussion-icon {
+            color: #1976d2;
+            margin-right: 12px;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+
+          .panel-title {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+          }
+
+          .discussion-stats {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 12px;
+            color: #666;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(25, 118, 210, 0.1);
+
+            mat-icon {
+              font-size: 16px;
+              width: 16px;
+              height: 16px;
+              color: #1976d2;
+            }
+          }
+
+          .expand-icon {
+            transition: transform 0.3s ease;
+            color: #666;
+
+            &.rotated {
+              transform: rotate(180deg);
+            }
+          }
+        }
+
+        .collapsed-preview {
+          padding: 8px 16px 12px 16px;
+          background: #f8f9fa;
+          border-top: 1px solid #e0e0e0;
+
+          .preview-content {
+            .top-comment {
+              display: flex;
+              align-items: flex-start;
+              gap: 8px;
+
+              mat-icon {
+                color: #ffc107;
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                margin-top: 2px;
+                flex-shrink: 0;
+              }
+
+              .preview-text {
+                flex: 1;
+                color: #555;
+                font-size: 13px;
+                font-style: italic;
+                line-height: 1.4;
+                margin-right: 8px;
+              }
+
+              .vote-count {
+                color: #4caf50;
+                font-weight: 600;
+                font-size: 12px;
+                background: rgba(76, 175, 80, 0.1);
+                padding: 2px 6px;
+                border-radius: 10px;
+                flex-shrink: 0;
+              }
+            }
+          }
+        }
+
+        .panel-content {
+          padding: 0;
+          background: #fff;
+
+          .discussion-content-wrapper {
+            // Remove any default margins/padding from discussion thread
+            padding: 16px;
           }
         }
       }
@@ -667,6 +851,49 @@ interface RatingGateViewModel {
             padding: 12px;
           }
         }
+
+        .discussion-panel {
+          margin: 0.5rem 0;
+
+          .panel-header {
+            padding: 10px 12px;
+
+            .panel-title {
+              font-size: 13px;
+            }
+
+            .discussion-stats {
+              font-size: 12px;
+              padding: 3px 6px;
+
+              mat-icon {
+                font-size: 14px;
+                width: 14px;
+                height: 14px;
+              }
+            }
+          }
+
+          .collapsed-preview {
+            padding: 8px 12px 10px 12px;
+
+            .top-comment {
+              .preview-text {
+                font-size: 12px;
+              }
+
+              .vote-count {
+                font-size: 11px;
+              }
+            }
+          }
+
+          .panel-content {
+            .discussion-content-wrapper {
+              padding: 12px;
+            }
+          }
+        }
       }
 
       // Required Evaluation Panel Styles (Main Panel)
@@ -678,10 +905,10 @@ interface RatingGateViewModel {
         background: #fff;
         transition: all 0.3s ease;
 
-        // Blue glow effect when collapsed
+        // Synchronized blue glow effect when collapsed
         &:not(.mat-expanded) {
-          animation: requiredEvaluationPulse 1.5s ease-in-out infinite;
-          border-color: #2196f3;
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
         // When expanded, remove the glow animation but keep blue border
@@ -724,36 +951,9 @@ interface RatingGateViewModel {
         }
       }
 
-      // Required Evaluation Panel Pulse Animation
-      @keyframes requiredEvaluationPulse {
-        0%, 100% {
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 8px rgba(33, 150, 243, 0.4);
-        }
-        50% {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 25px rgba(33, 150, 243, 0.8);
-        }
-      }
 
 
-      // Shared Panel Pulse Animation (used by main panel and comment input panel)
-      @keyframes mainPanelPulse {
-        0%, 100% {
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 5px rgba(33, 150, 243, 0.3);
-        }
-        50% {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 20px rgba(33, 150, 243, 0.6);
-        }
-      }
 
-      // Instructions Panel Pulse Animation (darker and 50% more intense)
-      @keyframes instructionsPanelPulse {
-        0%, 100% {
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 3px rgba(25, 118, 210, 0.4);
-        }
-        50% {
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 9px rgba(25, 118, 210, 0.7);
-        }
-      }
 
       // Nested Instructions Panel Styles
       .instructions-panel {
@@ -764,10 +964,10 @@ interface RatingGateViewModel {
         background: #fafafa;
         transition: all 0.3s ease;
 
-        // Blue glow animation when collapsed (darker and more intense)
+        // Synchronized blue glow animation when collapsed
         &:not(.mat-expanded) {
-          animation: instructionsPanelPulse 1s ease-in-out infinite;
-          border-color: #1976d2;
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
         // When expanded, remove animation
@@ -792,13 +992,13 @@ interface RatingGateViewModel {
 
         .instructions {
           padding: 12px 16px;
-          
+
           .instruction-list {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
           }
-          
+
           .instruction-item {
             display: flex;
             align-items: center;
@@ -806,11 +1006,11 @@ interface RatingGateViewModel {
             padding: 0.5rem;
             border-radius: 4px;
             transition: background 0.2s ease;
-            
+
             &:hover {
               background: rgba(33, 150, 243, 0.05);
             }
-            
+
             .instruction-bullet {
               color: #2196f3;
               font-size: 1.25rem;
@@ -818,7 +1018,7 @@ interface RatingGateViewModel {
               height: 1.25rem;
               flex-shrink: 0;
             }
-            
+
             span {
               color: #555;
               line-height: 1.4;
@@ -830,17 +1030,16 @@ interface RatingGateViewModel {
 
       // Nested Comment Input Panel Styles
       .comment-input-panel {
-        margin: 1rem 0 0.5rem 0;
-        border: 1px solid #bbdefb;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        //margin: 1rem 0 0.5rem 0;
+        //border: 1px solid #bbdefb;
+        //border-radius: 8px;
         background: #fff;
         transition: all 0.3s ease;
 
-        // Same glow effect as main panel when collapsed
+        // Synchronized blue glow effect when collapsed
         &:not(.mat-expanded) {
-          animation: mainPanelPulse 1s ease-in-out infinite;
-          border-color: #2196f3;
+          animation: synchronizedBlueGlow 2.5s ease-in-out infinite;
+          border-color: rgba(33, 150, 243, 0.3);
         }
 
         // When expanded, remove the glow animation but keep blue border
@@ -863,7 +1062,7 @@ interface RatingGateViewModel {
         }
 
         .comment-input-content {
-          padding: 20px 8px 8px 8px;
+          //padding: 20px 8px 8px 8px;
           // Styles will be handled by the comment-input component
         }
       }
@@ -919,14 +1118,9 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   @Input() canVote: boolean = false;
 
   /**
-   * Number of available upvotes
+   * Number of available votes (ranking system)
    */
-  @Input() availableUpvotes: number = 0;
-
-  /**
-   * Number of available downvotes
-   */
-  @Input() availableDownvotes: number = 0;
+  @Input() availableVotes: number = 0;
 
   /**
    * Whether the discussion is read-only
@@ -943,22 +1137,26 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   private isSubmittingInitialComment = false;
 
+
   /**
    * LocalStorage keys for remembering expansion states
    */
   private readonly EXPANSION_STORAGE_KEY = 'rating_gate_instructions_expanded';
-  private readonly MAIN_PANEL_STORAGE_KEY = 'rating_gate_required_evaluation_expanded';
   private readonly COMMENT_INPUT_STORAGE_KEY = 'rating_gate_comment_input_expanded';
-  private readonly RATINGS_PANEL_STORAGE_KEY = 'rating_gate_ratings_panel_expanded';
+  private readonly DISCUSSION_PANEL_STORAGE_KEY = 'rating_gate_discussion_panel_expanded';
 
   /**
    * State for expansion panels - loads from localStorage
-   * Main panel (required evaluation) defaults to collapsed
    */
   instructionsExpanded = this.loadExpansionState();
-  mainPanelExpanded = this.loadMainPanelStateCollapsed();
   commentInputExpanded = this.loadCommentInputState();
-  isRatingsExpanded = this.loadRatingsPanelState();
+  isDiscussionExpanded = this.loadDiscussionPanelState();
+
+  /**
+   * State for rating slider expansion panel
+   */
+  isRatingSliderExpanded = false;
+  showRatingReset = false;
 
 
   /**
@@ -975,6 +1173,11 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    * Emitted when a rating is successfully submitted
    */
   @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
+
+  /**
+   * Emitted when a rating is deleted/reset
+   */
+  @Output() ratingDeleted = new EventEmitter<{ categoryId: number }>();
 
   /**
    * Emitted when a comment is submitted
@@ -1004,24 +1207,11 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   readonly viewModel$: Observable<RatingGateViewModel>;
 
-  /**
-   * Observable for vote limit display data
-   */
-  readonly voteLimitDisplay$: Observable<{
-    display: string;
-    canVote: boolean;
-    percentage: number;
-  } | null>;
-
-  /**
-   * Observable for raw vote limit data (for dialog)
-   */
-  private currentVoteLimitStatus: VoteLimitStatusDTO | null = null;
 
   constructor(
     private readonly evaluationService: EvaluationDiscussionService,
     private readonly stateService: EvaluationStateService,
-    private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
   ) {
     super();
 
@@ -1088,39 +1278,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       takeUntil(this.destroy$),
     );
 
-    // Initialize vote limit display observable using raw vote status data
-    this.voteLimitDisplay$ = combineLatest([
-      this.stateService.activeCategory$,
-      this.stateService.voteLimitStatus$,
-    ]).pipe(
-      map(([activeCategory, voteLimitStatusMap]) => {
-        if (!activeCategory || !this.currentCategory) {
-          return null;
-        }
-
-        // Get vote limit status for current category
-        const voteLimitStatus = voteLimitStatusMap.get(this.currentCategory.id);
-        if (!voteLimitStatus) {
-          return null;
-        }
-
-        // Store raw data for dialog use
-        this.currentVoteLimitStatus = voteLimitStatus;
-
-        console.log('📊 Vote limit status updated:', voteLimitStatus);
-
-        // Transform for display
-        const usedVotes = voteLimitStatus.maxVotes - voteLimitStatus.remainingVotes;
-        return {
-          display: `${voteLimitStatus.remainingVotes}/${voteLimitStatus.maxVotes} verfügbar`,
-          canVote: voteLimitStatus.canVote,
-          percentage:
-            voteLimitStatus.maxVotes > 0 ? (usedVotes / voteLimitStatus.maxVotes) * 100 : 0,
-        };
-      }),
-      distinctUntilChanged(),
-      takeUntil(this.destroy$),
-    );
   }
 
   /**
@@ -1231,6 +1388,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    *
    * @description Called when the user submits a rating through the rating slider.
    * Now forwards to parent component which handles centralized state updates.
+   * Auto-collapses the rating panel after submission.
    *
    * @param {any} ratingEvent - The rating event from the rating slider
    */
@@ -1239,6 +1397,10 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       categoryId: this.currentCategory.id,
       rating: ratingEvent.rating || ratingEvent.score,
     });
+
+    // Auto-collapse the rating panel after submission
+    this.isRatingSliderExpanded = false;
+    this.showRatingReset = false;
 
     // Emit the rating submitted event to parent component
     // The parent will handle the centralized state update
@@ -1254,6 +1416,32 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
 
     // Note: Local state update is no longer needed since we use centralized state
     // The viewModel$ will automatically update when the state service is updated
+  }
+
+  /**
+   * Handles rating deletion events from the rating slider
+   *
+   * @description Called when user clicks the "Zurücksetzen" button to delete their rating.
+   * This will call the backend to delete the rating and update the local state.
+   *
+   * @param {any} deleteEvent - The delete event from the rating slider containing categoryId
+   */
+  onRatingDeleted(deleteEvent: any): void {
+    console.log('🗑️ Rating deletion requested in rating gate:', {
+      categoryId: this.currentCategory.id,
+      deleteEvent,
+    });
+
+    // Auto-collapse the rating panel after deletion
+    this.isRatingSliderExpanded = false;
+    this.showRatingReset = false;
+
+    // Emit rating deletion event to parent component for backend deletion
+    this.ratingDeleted.emit({
+      categoryId: this.currentCategory.id,
+    });
+
+    console.log('✅ Rating deletion event emitted to parent');
   }
 
   /**
@@ -1335,26 +1523,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     }
   }
 
-  /**
-   * Opens the vote explanation dialog
-   *
-   * @description Shows a comprehensive dialog explaining the voting system,
-   * including how voting works, point calculation, and current user status
-   */
-  openVoteExplanationDialog(): void {
-    this.dialog.open(VotingMechanismDialogComponent, {
-      width: '600px',
-      maxWidth: '90vw',
-      maxHeight: '80vh',
-      data: {
-        currentVotes: this.currentVoteLimitStatus?.remainingVotes || 0,
-        maxVotes: this.currentVoteLimitStatus?.maxVotes || 0,
-      },
-      panelClass: 'vote-explanation-dialog',
-      autoFocus: false,
-      restoreFocus: true,
-    });
-  }
 
   /**
    * Loads expansion state from localStorage
@@ -1387,21 +1555,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     }
   }
 
-  /**
-   * Loads main panel expansion state from localStorage
-   * Main panel defaults to collapsed (false) for required evaluation panel
-   *
-   * @returns boolean indicating if main panel should be expanded
-   */
-  private loadMainPanelStateCollapsed(): boolean {
-    try {
-      const stored = localStorage.getItem(this.MAIN_PANEL_STORAGE_KEY);
-      return stored ? stored === 'true' : false; // Default to collapsed for required evaluation panel
-    } catch (error) {
-      console.warn('Failed to load main panel expansion state from localStorage:', error);
-      return false; // Default to collapsed
-    }
-  }
 
   /**
    * Loads comment input panel expansion state from localStorage
@@ -1418,21 +1571,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     }
   }
 
-  /**
-   * Handles main panel expansion state changes and saves to localStorage
-   *
-   * @param expanded - Whether the main panel is expanded
-   */
-  onMainPanelExpansionChange(expanded: boolean): void {
-    this.mainPanelExpanded = expanded;
-
-    try {
-      localStorage.setItem(this.MAIN_PANEL_STORAGE_KEY, String(expanded));
-      console.log('📝 Main panel expansion state saved:', expanded);
-    } catch (error) {
-      console.warn('Failed to save main panel expansion state to localStorage:', error);
-    }
-  }
 
   /**
    * Handles comment input panel expansion state changes and saves to localStorage
@@ -1450,34 +1588,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     }
   }
 
-  /**
-   * Loads ratings panel expansion state from localStorage
-   *
-   * @returns boolean indicating if ratings panel should be expanded
-   */
-  private loadRatingsPanelState(): boolean {
-    try {
-      const stored = localStorage.getItem(this.RATINGS_PANEL_STORAGE_KEY);
-      return stored ? stored === 'true' : false; // Default to collapsed
-    } catch (error) {
-      console.warn('Failed to load ratings panel expansion state from localStorage:', error);
-      return false; // Default to collapsed
-    }
-  }
-
-  /**
-   * Toggles the ratings panel expanded state
-   */
-  toggleRatingsPanel(): void {
-    this.isRatingsExpanded = !this.isRatingsExpanded;
-
-    try {
-      localStorage.setItem(this.RATINGS_PANEL_STORAGE_KEY, String(this.isRatingsExpanded));
-      console.log('📝 Ratings panel expansion state saved:', this.isRatingsExpanded);
-    } catch (error) {
-      console.warn('Failed to save ratings panel expansion state to localStorage:', error);
-    }
-  }
 
   /**
    * Converts CategoryRatingStatus to EvaluationRatingDTO format for rating slider
@@ -1505,5 +1615,138 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     };
   }
 
+  /**
+   * Handles rating reset button click
+   *
+   * @description Deletes the user's rating from the database and updates the UI to allow re-rating
+   */
+  onResetRatingSlider(): void {
+    console.log('🔄 User clicked Zurücksetzen button - deleting rating for category:', this.currentCategory.id);
+    
+    // Delete the rating using the existing onRatingDeleted method which handles backend deletion
+    this.onRatingDeleted({ categoryId: this.currentCategory.id });
+    
+    // Set UI state to show the rating input again
+    this.showRatingReset = true;
+    this.isRatingSliderExpanded = true;
+    
+    // Show success message to inform user about the deletion
+    this.snackBar.open(
+      `Bewertung für "${this.currentCategory.displayName}" wurde zurückgesetzt. Sie können nun erneut bewerten.`,
+      'OK',
+      {
+        duration: 4000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass: ['success-snackbar']
+      }
+    );
+    
+    console.log('✅ Rating deletion initiated and UI updated for re-rating');
+  }
 
+  /**
+   * Handles cancel rating reset
+   *
+   * @description Closes reset mode and collapses the panel
+   */
+  onCancelRatingReset(): void {
+    this.showRatingReset = false;
+    this.isRatingSliderExpanded = false;
+  }
+
+
+  /**
+   * Loads discussion panel expansion state from localStorage
+   *
+   * @returns boolean indicating if discussion panel should be expanded
+   */
+  private loadDiscussionPanelState(): boolean {
+    try {
+      const stored = localStorage.getItem(this.DISCUSSION_PANEL_STORAGE_KEY);
+      return stored ? stored === 'true' : false; // Default to collapsed
+    } catch (error) {
+      console.warn('Failed to load discussion panel expansion state from localStorage:', error);
+      return false; // Default to collapsed
+    }
+  }
+
+  /**
+   * Toggles the discussion panel expanded state
+   */
+  toggleDiscussionPanel(): void {
+    this.isDiscussionExpanded = !this.isDiscussionExpanded;
+
+    try {
+      localStorage.setItem(this.DISCUSSION_PANEL_STORAGE_KEY, String(this.isDiscussionExpanded));
+      console.log('📝 Discussion panel expansion state saved:', this.isDiscussionExpanded);
+    } catch (error) {
+      console.warn('Failed to save discussion panel expansion state to localStorage:', error);
+    }
+  }
+
+  /**
+   * Checks if there are any discussions available
+   *
+   * @returns boolean indicating if discussions exist
+   */
+  hasDiscussions(): boolean {
+    return this.discussions && this.discussions.length > 0;
+  }
+
+  /**
+   * Gets the total count of comments across all discussions
+   *
+   * @returns number of total comments
+   */
+  getTotalCommentCount(): number {
+    if (!this.discussions || this.discussions.length === 0) {
+      return 0;
+    }
+
+    // Only count main comments, not their replies (filter out comments with parentId)
+    return this.discussions.reduce((total, discussion) => {
+      const commentsCount = discussion.comments ? discussion.comments.filter(c => !c.parentId).length : 0;
+      return total + commentsCount;
+    }, 0);
+  }
+
+  /**
+   * Gets the top-rated comment for preview display
+   *
+   * @returns the comment with highest upvotes or null
+   */
+  getTopComment(): any | null {
+    if (!this.discussions || this.discussions.length === 0) {
+      return null;
+    }
+
+    let topComment = null;
+    let maxUpvotes = 0; // Start at 0, only show comments with actual upvotes
+
+    this.discussions.forEach(discussion => {
+      if (discussion.comments) {
+        discussion.comments.forEach(comment => {
+          const upvotes = comment.voteStats?.upVotes || 0;
+          if (upvotes > maxUpvotes) {
+            maxUpvotes = upvotes;
+            topComment = comment;
+          }
+
+          // Check replies too
+          if (comment.replies) {
+            comment.replies.forEach(reply => {
+              const replyUpvotes = reply.voteStats?.upVotes || 0;
+              if (replyUpvotes > maxUpvotes) {
+                maxUpvotes = replyUpvotes;
+                topComment = reply;
+              }
+            });
+          }
+        });
+      }
+    });
+
+    return topComment;
+  }
 }

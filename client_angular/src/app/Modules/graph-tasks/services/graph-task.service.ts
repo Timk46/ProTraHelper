@@ -9,7 +9,7 @@ import {
   GraphNodeDTO,
   GraphEdgeDTO,
   GraphStructureSemanticDTO,
-} from '@DTOs/graphTask.dto';
+} from '@DTOs/index';
 import { calculateShapeCenter, downloadJSON, graphToSemantic } from '../utils';
 
 @Injectable({

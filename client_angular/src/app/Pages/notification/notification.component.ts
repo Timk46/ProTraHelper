@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatSnackBarRef, MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
-import { NotificationDTO } from '@DTOs//notification.dto';
+import { NotificationDTO } from '@DTOs/index';
 import { NotificationService } from 'src/app/Services/notification/notification.service';
 
 /**

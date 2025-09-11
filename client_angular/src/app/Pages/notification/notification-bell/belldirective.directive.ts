@@ -1,6 +1,6 @@
 import { ElementRef, OnChanges, Renderer2, SimpleChanges, Directive, Input } from '@angular/core';
-import { NotificationDTO } from '@DTOs/notification.dto';
-import { NotificationType } from '@DTOs/notificationType.enum';
+import { NotificationDTO } from '@DTOs/index';
+import { NotificationType } from '@DTOs/index';
 
 /**
  * Directive to apply custom styles to notification elements based on their properties.

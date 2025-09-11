@@ -20,6 +20,7 @@ import {
 import { globalRole } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
+import { EvaluationCommentService } from '../evaluation-comment/evaluation-comment.service';
 
 /**
  * Interface for Prisma rating with all relations
@@ -93,6 +94,7 @@ export class EvaluationRatingService {
     private readonly notificationService: NotificationService,
     private readonly cacheService: EvaluationCacheService,
     private readonly utilsService: EvaluationUtilsService,
+    private readonly commentService: EvaluationCommentService,
   ) {}
 
   async rate(ratingDto: CreateEvaluationRatingDTO, userId: number): Promise<EvaluationRatingDTO> {
@@ -173,12 +175,36 @@ export class EvaluationRatingService {
       },
     });
 
+    // Create comment from rating if comment text is provided
+    if (ratingDto.comment && ratingDto.comment.trim().length > 0) {
+      try {
+        await this.commentService.createCommentFromRating(
+          ratingDto.submissionId,
+          Number(ratingDto.categoryId),
+          userId,
+          ratingDto.comment.trim(),
+          ratingDto.score
+        );
+      } catch (error) {
+        // Log error but don't fail the rating operation
+        console.error('Failed to create comment from rating:', error);
+      }
+    }
+
     // Send notification to submission author
     await this.notificationService.notifyEvaluationRating(ratingDto.submissionId, userId);
 
     // Invalidate cache for this submission (both old and new patterns)
     this.cacheService.invalidateByPattern(`ratings:${ratingDto.submissionId}:.*`);
     this.cacheService.invalidateByPattern(`rating-status-batch:${ratingDto.submissionId}:.*`);
+    
+    // BUGFIX: Also invalidate the specific user's cache key to ensure immediate freshness
+    const specificCacheKey = this.utilsService.generateCacheKey(
+      'rating-status-batch',
+      ratingDto.submissionId,
+      userId.toString()
+    );
+    this.cacheService.delete(specificCacheKey);
 
     return this.mapToDTO(rating);
   }
@@ -236,10 +262,85 @@ export class EvaluationRatingService {
       },
     });
 
+    // Update comment from rating if comment text is provided
+    if (updateDto.comment && updateDto.comment.trim().length > 0) {
+      try {
+        await this.commentService.updateCommentFromRating(
+          rating.submissionId,
+          rating.categoryId,
+          userId,
+          updateDto.comment.trim(),
+          updateDto.score
+        );
+      } catch (error) {
+        // Log error but don't fail the rating operation
+        console.error('Failed to update comment from rating:', error);
+      }
+    }
+
     // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`ratings:${rating.submissionId}:.*`);
 
     return this.mapToDTO(rating);
+  }
+
+  /**
+   * Deletes a user's rating for a specific category and submission
+   *
+   * @description Removes an existing rating from the database and invalidates
+   * related cache entries. Used for the reset functionality in the frontend.
+   *
+   * @param {string} submissionId - The submission ID
+   * @param {number} categoryId - The category ID
+   * @param {number} userId - The user ID who owns the rating
+   * @returns {Promise<void>} Promise indicating deletion success
+   * @throws {NotFoundException} When rating doesn't exist
+   * @throws {ForbiddenException} When user doesn't own the rating
+   * @memberof EvaluationRatingService
+   */
+  async deleteUserRating(
+    submissionId: string,
+    categoryId: number,
+    userId: number,
+  ): Promise<void> {
+    // Find the existing rating
+    const existingRating = await this.prisma.evaluationRating.findUnique({
+      where: {
+        submissionId_categoryId_userId: {
+          submissionId,
+          categoryId,
+          userId,
+        },
+      },
+      select: { id: true, userId: true },
+    });
+
+    if (!existingRating) {
+      throw new NotFoundException(
+        `Rating for submission ${submissionId} and category ${categoryId} not found`,
+      );
+    }
+
+    if (existingRating.userId !== userId) {
+      throw new ForbiddenException('You can only delete your own ratings');
+    }
+
+    // Delete the rating
+    await this.prisma.evaluationRating.delete({
+      where: { id: existingRating.id },
+    });
+
+    // Invalidate cache for this submission (both old and new patterns)
+    this.cacheService.invalidateByPattern(`ratings:${submissionId}:.*`);
+    this.cacheService.invalidateByPattern(`rating-status-batch:${submissionId}:.*`);
+    
+    // Also invalidate the specific user's cache key to ensure immediate freshness
+    const specificCacheKey = this.utilsService.generateCacheKey(
+      'rating-status-batch',
+      submissionId,
+      userId.toString()
+    );
+    this.cacheService.delete(specificCacheKey);
   }
 
   async getSubmissionRatings(submissionId: string): Promise<EvaluationRatingDTO[]> {
@@ -675,8 +776,8 @@ export class EvaluationRatingService {
   }
 
   private validateRatingScore(score: number): void {
-    if (score < 0 || score > 10) {
-      throw new BadRequestException('Rating score must be between 0 and 10');
+    if (score < 0 || score > 15) {
+      throw new BadRequestException('Rating score must be between 0 and 15');
     }
   }
 

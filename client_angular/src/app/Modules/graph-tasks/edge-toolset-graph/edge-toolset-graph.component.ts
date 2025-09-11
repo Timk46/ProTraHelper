@@ -1,7 +1,7 @@
 import { ElementRef, OnInit } from '@angular/core';
 import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { IGraphEdge } from '../models/GraphEdge.interface';
-import { SizeDTO, PositionDTO } from '@DTOs/graphTask.dto';
+import { SizeDTO, PositionDTO } from '@DTOs/index';
 import { calculateLineCenter } from '../utils';
 
 @Component({

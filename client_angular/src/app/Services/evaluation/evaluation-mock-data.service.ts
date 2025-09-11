@@ -29,7 +29,7 @@ export class EvaluationMockDataService {
   // Local state for interactive demo
   private mockSubmissionSubject = new BehaviorSubject<EvaluationSubmissionDTO>(this.createMockSubmission());
   private mockCommentsSubject = new BehaviorSubject<Map<number, EvaluationCommentDTO[]>>(this.createMockCommentsMap());
-  private mockVoteLimitsSubject = new BehaviorSubject<Map<number, {plusVotes: number, minusVotes: number}>>(this.createMockVoteLimits());
+  private mockVoteLimitsSubject = new BehaviorSubject<Map<number, {availableVotes: number}>>(this.createMockVoteLimits());
   private mockRatingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>(this.createMockRatings());
 
   private nextCommentId = 20; // Start counter for new comments
@@ -126,7 +126,7 @@ export class EvaluationMockDataService {
     );
   }
 
-  getMockVoteLimits(): Observable<Map<number, {plusVotes: number, minusVotes: number}>> {
+  getMockVoteLimits(): Observable<Map<number, {availableVotes: number}>> {
     return this.mockVoteLimitsSubject.asObservable();
   }
 
@@ -215,9 +215,8 @@ export class EvaluationMockDataService {
 
     const comment = categoryComments[commentIndex];
 
-    // Simulate vote logic
+    // Simulate vote logic (Ranking System: UP votes only)
     let upvotes = comment.voteStats.upVotes;
-    let downvotes = comment.voteStats.downVotes;
     let userVote: VoteType = null;
 
     // Check current user vote (simulate)
@@ -225,36 +224,23 @@ export class EvaluationMockDataService {
 
     if (voteType === 'UP') {
       if (existingUserVote?.voteType === 'UP') {
-        // Remove upvote
+        // Remove upvote (toggle)
         upvotes--;
         userVote = null;
       } else {
-        if (existingUserVote?.voteType === 'DOWN') {
-          downvotes--;
-        }
+        // Add upvote
         upvotes++;
         userVote = 'UP';
       }
-    } else if (voteType === 'DOWN') {
-      if (existingUserVote?.voteType === 'DOWN') {
-        // Remove downvote
-        downvotes--;
-        userVote = null;
-      } else {
-        if (existingUserVote?.voteType === 'UP') {
-          upvotes--;
-        }
-        downvotes++;
-        userVote = 'DOWN';
-      }
     }
+    // Note: DOWN votes not supported in ranking system
 
-    // Update comment
+    // Update comment (Ranking System: only upvotes)
     comment.voteStats = {
       upVotes: upvotes,
-      downVotes: downvotes,
-      totalVotes: upvotes + downvotes,
-      score: upvotes - downvotes
+      downVotes: 0, // Always 0 in ranking system
+      totalVotes: upvotes,
+      score: upvotes // Score equals upvotes in ranking system
     };
 
     // Update votes array
@@ -286,15 +272,15 @@ export class EvaluationMockDataService {
     return of({
       commentId: commentId,
       upvotes: upvotes,
-      downvotes: downvotes,
+      downvotes: 0, // Always 0 in ranking system
       voteStats: {
         upVotes: upvotes,
-        downVotes: downvotes,
-        totalVotes: upvotes + downvotes,
-        score: upvotes - downvotes,
+        downVotes: 0, // Always 0 in ranking system
+        totalVotes: upvotes,
+        score: upvotes, // Score equals upvotes in ranking system
       },
       userVote: userVote,
-      netVotes: upvotes - downvotes
+      netVotes: upvotes // Net votes equals upvotes in ranking system
     });
   }
 
@@ -572,15 +558,15 @@ export class EvaluationMockDataService {
             id: "vote-005",
             commentId: "comment-005",
             userId: 4,
-            voteType: "DOWN",
+            voteType: "UP",
             createdAt: new Date('2024-01-15T12:45:00Z')
           }
         ],
         voteStats: {
-          upVotes: 0,
-          downVotes: 1,
+          upVotes: 1,
+          downVotes: 0,
           totalVotes: 1,
-          score: -1
+          score: 1
         },
 
         replies: [],
@@ -703,14 +689,14 @@ export class EvaluationMockDataService {
     ];
   }
 
-  private createMockVoteLimits(): Map<number, {plusVotes: number, minusVotes: number}> {
+  private createMockVoteLimits(): Map<number, {availableVotes: number}> {
     // Set all categories to full vote limits for comprehensive voting tests
-    // Each user gets 3 upvotes + 3 downvotes per category
+    // Each user gets 3 votes per category (Ranking System)
     return new Map([
-      [1, { plusVotes: 3, minusVotes: 3 }], // Vollständigkeit - full limits for testing
-      [2, { plusVotes: 3, minusVotes: 3 }], // Grafische Darstellung - full limits for testing
-      [3, { plusVotes: 3, minusVotes: 3 }], // Vergleichbarkeit - full limits for testing
-      [4, { plusVotes: 3, minusVotes: 3 }]  // Komplexität - full limits for testing
+      [1, { availableVotes: 3 }], // Vollständigkeit - full limits for testing
+      [2, { availableVotes: 3 }], // Grafische Darstellung - full limits for testing
+      [3, { availableVotes: 3 }], // Vergleichbarkeit - full limits for testing
+      [4, { availableVotes: 3 }]  // Komplexität - full limits for testing
     ]);
   }
 
@@ -757,10 +743,9 @@ export class EvaluationMockDataService {
 
     const change = isAddingVote ? -1 : 1;
 
+    // Ranking system: only UP votes affect available votes
     if (voteType === 'UP') {
-      categoryLimits.plusVotes = Math.max(0, Math.min(3, categoryLimits.plusVotes + change));
-    } else {
-      categoryLimits.minusVotes = Math.max(0, Math.min(3, categoryLimits.minusVotes + change));
+      categoryLimits.availableVotes = Math.max(0, Math.min(3, categoryLimits.availableVotes + change));
     }
 
     currentLimits.set(categoryId, categoryLimits);

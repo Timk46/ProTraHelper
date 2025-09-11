@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 
 import { McSliderTaskComponent } from './mc-slider-task.component';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { QuestionDTO, McQuestionDTO } from '@DTOs/question.dto';
+import { QuestionDTO, McQuestionDTO } from '@DTOs/index';
 import { TaskViewData } from '@DTOs/index';
 
 describe('McSliderTaskComponent', () => {

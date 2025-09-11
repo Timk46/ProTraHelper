@@ -34,8 +34,11 @@ describe('RatingGateComponent - Race Condition Prevention', () => {
 
   const mockAnonymousUser: AnonymousEvaluationUserDTO = {
     id: 999,
+    userId: 123,
     displayName: 'Anonymous User',
     submissionId: 'test-submission-001',
+    colorCode: '#2196F3',
+    createdAt: new Date('2023-01-01'),
   };
 
   const mockRatingStatus: CategoryRatingStatus = {
@@ -99,8 +102,7 @@ describe('RatingGateComponent - Race Condition Prevention', () => {
     component.discussions = [];
     component.canComment = false;
     component.canVote = false;
-    component.availableUpvotes = 0;
-    component.availableDownvotes = 0;
+    component.availableVotes = 0;
     component.isReadOnly = false;
     component.isSubmittingComment = false;
     component.isVotingComment = new Map();

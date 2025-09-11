@@ -1,4 +1,4 @@
-import { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/discussionCreation.dto';
+import { discussionCreationDTO, discussionNodeNamesDTO } from '@DTOs/index';
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { DiscussionCreationService } from 'src/app/Services/discussion/discussion-creation.service';

@@ -11,11 +11,11 @@ import { MarkdownService } from '../../services/markdown/markdown.service';
 import { environment } from 'src/environments/environment';
 import { FeedbackHintConfirmationDialogComponent } from './feedback-hint-confirmation-dialog/feedback-hint-confirmation-dialog.component';
 // TODO: Import FeedbackOutput and KcrOutput types/interfaces from shared DTOs
-// import { FeedbackOutput, KcrOutput } from '@DTOs/tutorKaiDtos/feedback-output.dto'; // Adjust path as needed
+// import { FeedbackOutput, KcrOutput } from '@DTOs/index'; // Adjust path as needed
 // TODO: Import EvaluateRequestDto type/interface from shared DTOs
-// import { EvaluateRequestDto } from '@DTOs/tutorKaiDtos/EvaluateRequest.dto'; // Adjust path as needed
+// import { EvaluateRequestDto } from '@DTOs/index'; // Adjust path as needed
 // TODO: Import CodeSubmissionResultDto type/interface from shared DTOs
-// import { CodeSubmissionResultDto } from '@DTOs/tutorKaiDtos/submission.dto'; // Adjust path as needed
+// import { CodeSubmissionResultDto } from '@DTOs/index'; // Adjust path as needed
 
 // Placeholder types/interfaces (replace with actual imports when available)
 interface KcrData {

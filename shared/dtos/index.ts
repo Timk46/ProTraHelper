@@ -27,6 +27,15 @@ export * from "./peer-review.dto";
 export * from "./peer-review-session.dto";
 export * from "./peer-submission.dto";
 
+// Version
+export * from "./version.dto";
+
+// Graph Tasks
+export * from "./graphTask.dto";
+
+// Code Game
+export * from "./codeGame.dto";
+
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";
 export * from "./tutorKaiDtos/submission.dto";
@@ -65,6 +74,7 @@ export * from "./phase-switch-schedule.dto";
 export * from "./evaluation-user-vote-response.dto";
 export * from './group-review-gate.dto';
 export * from './vote-limit-status.dto';
+export * from './vote-reset.dto';
 
 // Additional types and enums from evaluation DTOs
 export { EvaluationDiscussionDTO, VoteType } from "./evaluation-comment.dto";

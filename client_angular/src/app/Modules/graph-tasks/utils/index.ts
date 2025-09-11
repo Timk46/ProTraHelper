@@ -10,7 +10,7 @@ import {
   GraphEdgeDTO,
   GraphStructureSemanticDTO,
   GraphStructureDTO,
-} from '@DTOs/graphTask.dto';
+} from '@DTOs/index';
 
 export function structuresAreEqual(
   structure1: GraphStructureDTO,

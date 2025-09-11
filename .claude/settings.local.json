@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
       "Bash(npm run build:*)",
@@ -40,26 +39,17 @@
       "Bash(curl:*)",
       "Bash(npx prisma db execute:*)",
       "Bash(cmd /c:*)",
-      "mcp__puppeteer__puppeteer_connect_active_tab",
-      "mcp__puppeteer__puppeteer_navigate",
-      "mcp__puppeteer__puppeteer_screenshot",
-      "mcp__puppeteer__puppeteer_evaluate",
-      "Bash(npx prisma db seed:*)",
-      "Bash(npx prisma migrate reset:*)",
       "Bash(npm test:*)",
       "Bash(git checkout:*)",
-      "Bash(start chrome.exe:*)",
-      "Bash(\"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe\" --remote-debugging-port=9222 --user-data-dir=\"C:\\temp\\chrome-debug\" \"http://localhost:4202\")",
-      "Bash(ng serve:*)"
+      "Bash(/dev/null)",
+      "Bash(sed:*)",
+      "Bash(ng serve:*)",
+      "Bash(npx prisma migrate dev:*)"
     ],
     "deny": [],
     "additionalDirectories": [
       "C:\\c\\Dev\\hefl"
     ]
   },
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "browser-tools",
-    "puppeteer"
-  ]
+  "enableAllProjectMcpServers": true
 }

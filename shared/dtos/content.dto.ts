@@ -70,6 +70,10 @@ export interface ContentElementDTO {
   file?: FileDto;
   question?: taskViewDTO;
   isVisible?: boolean;
+
+  // MCSlider grouping properties (for client-side grouping only)
+  mcSliderGroupKey?: string;
+  mcSliderGroupSize?: number;
 }
 
 export interface ContentsForConceptDTO {

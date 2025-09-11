@@ -38,63 +38,89 @@
   </div>
 
   <!-- Voting Actions and Panel Controls -->
-  <div *ngIf="canVote" 
-       class="vote-actions"
+  <div class="vote-actions"
        role="toolbar"
        [attr.aria-label]="'Comment actions for comment by ' + cachedAuthorDisplayName"
        [attr.aria-controls]="'comment-content-' + comment.id">
-    <!-- Plus Vote Button - 🚀 PHASE 4: Enhanced with comprehensive ARIA labels -->
-    <button
-      class="vote-btn plus"
-      [ngClass]="{
-        voted: cachedUserVote === 'UP',
-        'disabled-limit': !canVoteUp && cachedUserVote !== 'UP',
-      }"
-      [disabled]="cachedIsCurrentUser || isVoting || (!canVoteUp && cachedUserVote !== 'UP')"
-      [matTooltip]="cachedUpvoteTooltip"
-      (click)="onVote('UP')"
-      type="button"
-      role="button"
-      [attr.aria-label]="cachedUpvoteTooltip"
-      [attr.aria-pressed]="cachedUserVote === 'UP'"
-      [attr.aria-describedby]="'vote-stats-' + comment.id"
-      [attr.data-vote-type]="'upvote'"
-      [attr.data-vote-state]="cachedUserVote === 'UP' ? 'active' : 'inactive'">
-      <span aria-hidden="true">+</span>
-    </button>
+    <!-- 🚨 STATE 1: User can vote (ownership confirmed as false) -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser === false" 
+         class="vote-controls"
+         role="group"
+         [attr.aria-label]="'Vote controls for comment by ' + cachedAuthorDisplayName">
+      
+      <!-- Minus Button (Remove Vote) - Always visible but disabled if no votes -->
+      <button
+        class="vote-btn minus"
+        [disabled]="getUserVoteCount() === 0 || isVoting"
+        [matTooltip]="getRemoveVoteTooltip()"
+        (click)="removeVote()"
+        type="button"
+        role="button"
+        [attr.aria-label]="'Remove one vote (current: ' + getUserVoteCount() + ' votes)'"
+        [attr.data-action]="'remove-vote'">
+        <mat-icon aria-hidden="true">remove</mat-icon>
+      </button>
+      
+      <!-- Vote Display -->
+      <span class="vote-display" 
+            [attr.aria-label]="getVoteDisplayAriaLabel()">
+        <span class="vote-status-text">{{ getVoteDisplayText() }}</span>
+      </span>
+      
+      <!-- Plus Button (Add Vote) - Disabled when vote limit reached but ALWAYS visible -->
+      <button
+        class="vote-btn plus"
+        [disabled]="!canAddMoreVotes() || isVoting"
+        [matTooltip]="getEnhancedUpvoteTooltip()"
+        (click)="addVote()"
+        type="button"
+        role="button"
+        [attr.aria-label]="'Add one vote (current: ' + getUserVoteCount() + ' votes)'"
+        [attr.data-action]="'add-vote'">
+        <mat-icon aria-hidden="true">add</mat-icon>
+      </button>
+    </div>
 
-    <!-- Minus Vote Button - 🚀 PHASE 4: Enhanced with comprehensive ARIA labels -->
-    <button
-      class="vote-btn minus"
-      [ngClass]="{
-        voted: cachedUserVote === 'DOWN',
-        'disabled-limit': !canVoteDown && cachedUserVote !== 'DOWN',
-      }"
-      [disabled]="cachedIsCurrentUser || isVoting || (!canVoteDown && cachedUserVote !== 'DOWN')"
-      [matTooltip]="cachedDownvoteTooltip"
-      (click)="onVote('DOWN')"
-      type="button"
-      role="button"
-      [attr.aria-label]="cachedDownvoteTooltip"
-      [attr.aria-pressed]="cachedUserVote === 'DOWN'"
-      [attr.aria-describedby]="'vote-stats-' + comment.id"
-      [attr.data-vote-type]="'downvote'"
-      [attr.data-vote-state]="cachedUserVote === 'DOWN' ? 'active' : 'inactive'">
-      <span aria-hidden="true">-</span>
-    </button>
+    <!-- 🚨 STATE 2: Own comment (ownership confirmed as true) -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser === true" 
+         class="vote-controls own-comment-state"
+         role="status"
+         aria-label="This is your own comment - voting not allowed">
+      <span class="own-comment-indicator">
+        <mat-icon>block</mat-icon>
+        <span>Eigener Kommentar - Keine Bewertung möglich</span>
+      </span>
+    </div>
 
-    <!-- Vote Counts -->
-    <span class="vote-count"
+    <!-- 🚨 STATE 3: Ownership unknown (loading/determining user) -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser === null"
+         class="vote-controls ownership-loading"
+         role="status"
+         aria-label="Determining comment ownership...">
+      <span class="loading-indicator">
+        <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
+        <span>Lade Voting-Status...</span>
+      </span>
+    </div>
+
+
+    <!-- Vote Counts - Only for top-level comments (depth = 0) -->
+    <span *ngIf="depth === 0" 
+          class="vote-count"
           [attr.id]="'vote-stats-' + comment.id"
           role="status"
-          [attr.aria-label]="'Vote statistics: ' + (comment.voteStats!.upVotes || 0) + ' upvotes and ' + (comment.voteStats!.downVotes || 0) + ' downvotes'"
+          [attr.aria-label]="getVoteStatsAriaLabel()"
           [attr.aria-live]="'polite'">
-      <span aria-hidden="true">{{ comment.voteStats!.upVotes || 0 }} 👍 {{ comment.voteStats!.downVotes || 0 }} 👎</span>
+      <span aria-hidden="true" class="vote-display">
+        <span class="vote-number">{{ getTotalVotes() }}</span>
+        <mat-icon class="thumbs-up-icon">thumb_up</mat-icon>
+        <span *ngIf="getUserVotes() > 0" class="user-votes-badge">+{{ getUserVotes() }}</span>
+      </span>
     </span>
 
     <!-- Reply Button - Only for top-level comments (depth = 0) -->
     <button
-      *ngIf="depth === 0 && canVote && !isReadOnly"
+      *ngIf="depth === 0 && !isReadOnly"
       class="reply-btn"
       [disabled]="isReadOnly"
       [matTooltip]="'Auf diesen Kommentar antworten'"

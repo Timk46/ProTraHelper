@@ -67,6 +67,7 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   protected isAdmin: boolean = false;
   protected editModeActive: boolean = false;
+  protected isArchitectureStudent: boolean = false;
 
   constructor(
     private readonly dialog: MatDialog,
@@ -85,6 +86,7 @@ export class ContentListComponent implements OnInit, OnChanges {
     this.userService.hasEditModeActive$.subscribe(hasEditModeActive => {
       this.editModeActive = hasEditModeActive;
     });
+    this.isArchitectureStudent = this.userService.isArchitectureStudent();
   }
 
   ngOnChanges() {
@@ -144,11 +146,6 @@ export class ContentListComponent implements OnInit, OnChanges {
     // Check if content has questions first (base requirement)
     if (!this.hasContentElementType(content, 'QUESTION')) {
       return false;
-    }
-
-    // For architecture students: only show for "Analyse Teil 1"
-    if (this.userService.isArchitectureStudent()) {
-      return content.name.toLowerCase().includes('analyse teil 1');
     }
 
     // For regular users: show for all content with questions (original behavior)

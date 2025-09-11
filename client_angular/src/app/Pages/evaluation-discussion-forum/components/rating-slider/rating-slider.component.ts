@@ -48,7 +48,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   @Input() categoryName: string = '';
   @Input() currentRating: EvaluationRatingDTO | null = null;
   @Input() minValue: number = 1;
-  @Input() maxValue: number = 10;
+  @Input() maxValue: number = 15;
   @Input() step: number = 1;
   @Input() disabled: boolean = false;
   @Input() showLabels: boolean = true;
@@ -62,6 +62,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
 
   @Output() ratingChanged = new EventEmitter<{ categoryId: number; score: number }>();
   @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
+  @Output() ratingDeleted = new EventEmitter<{ categoryId: number }>();
 
   // =============================================================================
   // COMPONENT STATE & VIEW CHILDREN
@@ -134,6 +135,12 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     });
     
     this.isModified = false;
+    
+    // For new ratings, allow immediate submission with default value
+    if (!this.currentRating) {
+      this.isModified = true;
+    }
+    
     this.hasUserInteracted = false; // Reset user interaction flag
     
     // Force change detection after initialization
@@ -180,30 +187,6 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   // EVENT HANDLERS
   // =============================================================================
 
-  /**
-   * Handles slider change events
-   * @param event - The input event from the slider
-   */
-  onSliderChange(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const value = Number(target.value);
-    this.hasUserInteracted = true; // Mark that user has manually interacted
-    
-    // Update current value immediately to prevent UI lag
-    this.currentValue = value;
-    
-    // Use setValue instead of patchValue for more consistent updates
-    this.ratingForm.get('rating')?.setValue(value, { emitEvent: false });
-    
-    // Manually trigger change detection
-    this.cdr.markForCheck();
-    
-    // Emit the change event manually
-    this.ratingChanged.emit({
-      categoryId: this.categoryId,
-      score: value
-    });
-  }
 
   onSubmitRating(): void {
     if (!this.disabled && this.isModified) {
@@ -216,7 +199,63 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
   }
 
   onResetRating(): void {
-    this.initializeRating();
+    // Emit deletion event to parent component
+    this.ratingDeleted.emit({
+      categoryId: this.categoryId
+    });
+    
+    // Reset local state to unrated
+    this.currentRating = null;
+    this.currentValue = Math.floor((this.minValue + this.maxValue) / 2);
+    this.isModified = true; // Allow immediate re-submission
+    this.hasUserInteracted = false;
+    
+    // Update form
+    this.ratingForm.get('rating')?.setValue(this.currentValue, { 
+      emitEvent: false,
+      onlySelf: true 
+    });
+    
+    // Force change detection
+    this.cdr.markForCheck();
+    
+    console.log('🗑️ Rating reset/deleted for category:', this.categoryId);
+  }
+
+  /**
+   * Resets the slider state to unrated condition
+   * 
+   * @description This method resets all local state variables to their initial
+   * unrated state, allowing the slider to be used for a fresh rating submission.
+   * Called externally after successful backend rating deletion.
+   * 
+   * @public
+   * @returns {void}
+   * @memberof RatingSliderComponent
+   */
+  public resetSliderState(): void {
+    console.log('🔄 Resetting slider state for category:', this.categoryId);
+    
+    // Reset all local state to unrated
+    this.currentRating = null;
+    this.currentValue = Math.floor((this.minValue + this.maxValue) / 2);
+    this.isModified = true; // Allow immediate re-submission
+    this.hasUserInteracted = false;
+    
+    // Update form control with reset value
+    this.ratingForm.get('rating')?.setValue(this.currentValue, { 
+      emitEvent: false,
+      onlySelf: true 
+    });
+    
+    // Force change detection to update UI
+    this.cdr.markForCheck();
+    
+    console.log('✅ Slider state reset completed:', {
+      categoryId: this.categoryId,
+      newValue: this.currentValue,
+      isModified: this.isModified
+    });
   }
 
   /**
@@ -242,7 +281,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     this.currentValue = value;
     
     // Force change detection for OnPush components
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
     
     console.log('📊 Quick rating completed:', { 
       selectedValue: value, 
@@ -263,13 +302,18 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
       1: 'Sehr schlecht',
       2: 'Schlecht',
       3: 'Mangelhaft',
-      4: 'Ausreichend',
-      5: 'Befriedigend',
-      6: 'Befriedigend+',
-      7: 'Gut',
-      8: 'Gut+',
-      9: 'Sehr gut',
-      10: 'Ausgezeichnet'
+      4: 'Mangelhaft+',
+      5: 'Ausreichend',
+      6: 'Ausreichend+',
+      7: 'Befriedigend',
+      8: 'Befriedigend+',
+      9: 'Gut',
+      10: 'Gut+',
+      11: 'Sehr gut',
+      12: 'Sehr gut+',
+      13: 'Ausgezeichnet',
+      14: 'Hervorragend',
+      15: 'Perfekt'
     };
 
     return descriptions[this.currentValue] || 'Unbewertet';
@@ -339,9 +383,10 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
 
   /**
    * Checks if the rating can be submitted
+   * Allows submission for new ratings (no currentRating) or modified ratings
    */
   canSubmit(): boolean {
-    return !this.disabled && this.isModified;
+    return !this.disabled && (this.isModified || !this.currentRating);
   }
 
   /**
@@ -362,10 +407,10 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
    */
   getQuickRatingOptions(): Array<{ value: number; label: string; icon: string }> {
     return [
-      { value: 2, label: 'Schlecht', icon: 'thumb_down' },
-      { value: 5, label: 'Mittel', icon: 'horizontal_rule' },
-      { value: 8, label: 'Gut', icon: 'thumb_up' },
-      { value: 10, label: 'Perfekt', icon: 'star' }
+      { value: 3, label: 'Schlecht', icon: 'thumb_down' },
+      { value: 8, label: 'Mittel', icon: 'horizontal_rule' },
+      { value: 12, label: 'Gut', icon: 'thumb_up' },
+      { value: 15, label: 'Perfekt', icon: 'star' }
     ];
   }
 
@@ -429,7 +474,7 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
    * Gets help text for the rating
    */
   getHelpText(): string {
-    return `Bewerten Sie die ${this.categoryName} auf einer Skala von ${this.minValue} bis ${this.maxValue}.`;
+    return ''; // Removed descriptive text as per user requirement
   }
 
   /**

@@ -86,8 +86,8 @@ export class ConceptOverviewComponent implements OnInit, OnDestroy {
     private readonly snackBar: MatSnackBar,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
-    // Hide discussion/edit buttons for architecture students
-    this.showDiscussionButtons = !this.userService.isArchitectureStudent();
+    // Show discussion/edit buttons for all users including architecture students
+    this.showDiscussionButtons = true;
 
     // subscribe to activeConceptNode changes in the graph and update the activeConceptNode and contentsForActiveConceptNode accordingly
     this.activeConceptNodeSubscription = this.graphCommunicationService.currentActiveNode.subscribe(

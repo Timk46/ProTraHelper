@@ -79,6 +79,7 @@ import { UserGroupService } from './lecturers-view/user-group/user-group.service
 import { UserGroupController } from './lecturers-view/user-group/user-group.controller';
 import { EvaluationDiscussionModule } from './evaluation-discussion/evaluation-discussion.module';
 import { GroupReviewSessionModule } from './lecturers-view/group-review-session/group-review-session.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 
 @Module({
@@ -103,6 +104,10 @@ import { GroupReviewSessionModule } from './lecturers-view/group-review-session/
     ContentLinkerModule,
     CodingQuestionGeneratorModule,
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // Default TTL in milliseconds
+      limit: 100, // Default global limit
+    }]),
 
     AdminModule, // Add this line
     HighlightConceptsModule,

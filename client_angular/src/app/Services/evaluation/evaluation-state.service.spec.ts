@@ -6,7 +6,7 @@ import { EvaluationStateService } from './evaluation-state.service';
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
 import { EvaluationMockDataService } from './evaluation-mock-data.service';
 import { UserService } from '../auth/user.service';
-import { CategoryRatingStatus } from '@DTOs/index';
+import { CategoryRatingStatus, EvaluationStatus, EvaluationPhase } from '@DTOs/index';
 
 describe('EvaluationStateService - Race Condition Prevention', () => {
   let service: EvaluationStateService;
@@ -17,22 +17,31 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
   const mockSubmission = {
     id: 'test-submission-001',
     title: 'Test Submission',
-    author: { id: 1, firstname: 'Test', lastname: 'User' },
+    description: 'Test description',
+    authorId: 1,
+    pdfFileId: 123,
     sessionId: 1,
-    phase: 'DISCUSSION' as const,
+    status: EvaluationStatus.SUBMITTED,
+    phase: EvaluationPhase.DISCUSSION,
+    submittedAt: new Date('2023-01-01'),
+    createdAt: new Date('2023-01-01'),
+    updatedAt: new Date('2023-01-01'),
   };
 
   const mockCategories = [
-    { id: 1, name: 'cat1', displayName: 'Category 1', order: 1 },
-    { id: 2, name: 'cat2', displayName: 'Category 2', order: 2 },
-    { id: 3, name: 'cat3', displayName: 'Category 3', order: 3 },
-    { id: 4, name: 'cat4', displayName: 'Komplexität', order: 4 },
+    { id: 1, name: 'cat1', displayName: 'Category 1', description: 'Test category 1', icon: 'check_circle', order: 1 },
+    { id: 2, name: 'cat2', displayName: 'Category 2', description: 'Test category 2', icon: 'palette', order: 2 },
+    { id: 3, name: 'cat3', displayName: 'Category 3', description: 'Test category 3', icon: 'compare', order: 3 },
+    { id: 4, name: 'cat4', displayName: 'Komplexität', description: 'Test complexity category', icon: 'settings', order: 4 },
   ];
 
   const mockAnonymousUser = {
     id: 999,
+    userId: 123,
     displayName: 'Anonymous User',
-    submissionId: 'test-submission-001'
+    submissionId: 'test-submission-001',
+    colorCode: '#2196F3',
+    createdAt: new Date('2023-01-01'),
   };
 
   const mockRatingStatuses: CategoryRatingStatus[] = [

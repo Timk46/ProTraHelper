@@ -38,8 +38,7 @@ export class VoteBoxComponent {
   // INPUTS - DATA FROM PARENT COMPONENT
   // =============================================================================
 
-  @Input() upvotes: number = 0;
-  @Input() downvotes: number = 0;
+  @Input() upvotes: number = 0; // Ranking system: only positive votes
   @Input() userVote: VoteType | null = null;
   @Input() canVote: boolean = true;
   @Input() isVoting: boolean = false;
@@ -67,15 +66,6 @@ export class VoteBoxComponent {
     this.voted.emit(newVote);
   }
 
-  onDownvote(): void {
-    if (!this.canVote || this.isVoting) {
-      return;
-    }
-
-    // Toggle downvote: if already downvoted, remove vote; otherwise downvote
-    const newVote: VoteType = this.userVote === 'DOWN' ? null : 'DOWN';
-    this.voted.emit(newVote);
-  }
 
   // =============================================================================
   // TEMPLATE HELPER METHODS
@@ -91,15 +81,6 @@ export class VoteBoxComponent {
     return '';
   }
 
-  /**
-   * Gets the downvote button state class (HTML Template Style)
-   */
-  getDownvoteButtonClass(): string {
-    if (this.userVote === 'DOWN') {
-      return 'voted';
-    }
-    return '';
-  }
 
   /**
    * Gets the upvote button color
@@ -108,12 +89,6 @@ export class VoteBoxComponent {
     return this.userVote === 'UP' ? 'primary' : '';
   }
 
-  /**
-   * Gets the downvote button color
-   */
-  getDownvoteButtonColor(): string {
-    return this.userVote === 'DOWN' ? 'warn' : '';
-  }
 
   /**
    * Gets the upvote icon name
@@ -122,12 +97,6 @@ export class VoteBoxComponent {
     return this.userVote === 'UP' ? 'thumb_up' : 'thumb_up_off_alt';
   }
 
-  /**
-   * Gets the downvote icon name
-   */
-  getDownvoteIcon(): string {
-    return this.userVote === 'DOWN' ? 'thumb_down' : 'thumb_down_off_alt';
-  }
 
   /**
    * Gets the upvote tooltip text
@@ -142,39 +111,26 @@ export class VoteBoxComponent {
     return 'Positiv bewerten';
   }
 
-  /**
-   * Gets the downvote tooltip text
-   */
-  getDownvoteTooltip(): string {
-    if (!this.canVote) {
-      return 'Bewertung nicht möglich';
-    }
-    if (this.userVote === 'DOWN') {
-      return 'Negative Bewertung entfernen';
-    }
-    return 'Negativ bewerten';
-  }
 
   /**
-   * Gets the net vote score
+   * Gets the vote score (ranking system: upvotes only)
    */
   getNetScore(): number {
-    return this.upvotes - this.downvotes;
+    return this.upvotes;
   }
 
   /**
-   * Gets the total vote count
+   * Gets the total vote count (ranking system: upvotes only)
    */
   getTotalVotes(): number {
-    return this.upvotes + this.downvotes;
+    return this.upvotes;
   }
 
   /**
-   * Gets the vote ratio (upvotes / total votes)
+   * Gets the vote ratio (ranking system: always 1 for positive votes)
    */
   getVoteRatio(): number {
-    const total = this.getTotalVotes();
-    return total > 0 ? this.upvotes / total : 0;
+    return this.upvotes > 0 ? 1 : 0;
   }
 
   /**
@@ -188,19 +144,11 @@ export class VoteBoxComponent {
    * Gets the accessibility label for upvote button
    */
   getUpvoteAriaLabel(): string {
-    const currentState = this.userVote === 'UP' ? 'Bereits positiv bewertet' : 'Nicht bewertet';
-    const action = this.userVote === 'UP' ? 'Entfernen' : 'Positiv bewerten';
-    return `${currentState}. ${action}. Aktuelle positive Bewertungen: ${this.upvotes}`;
+    const currentState = this.userVote === 'UP' ? 'Bereits bewertet' : 'Nicht bewertet';
+    const action = this.userVote === 'UP' ? 'Bewertung entfernen' : 'Bewerten';
+    return `${currentState}. ${action}. Aktuelle Bewertungen: ${this.upvotes}`;
   }
 
-  /**
-   * Gets the accessibility label for downvote button
-   */
-  getDownvoteAriaLabel(): string {
-    const currentState = this.userVote === 'DOWN' ? 'Bereits negativ bewertet' : 'Nicht bewertet';
-    const action = this.userVote === 'DOWN' ? 'Entfernen' : 'Negativ bewerten';
-    return `${currentState}. ${action}. Aktuelle negative Bewertungen: ${this.downvotes}`;
-  }
 
   /**
    * Gets the button size based on compact mode

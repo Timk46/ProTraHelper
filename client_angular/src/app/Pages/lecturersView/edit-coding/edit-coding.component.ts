@@ -4,8 +4,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../Services/question/question-data.service';
 import { EditCodeService } from './edit-coding.service';
-import { CodingQuestionInternal } from '@DTOs/question.dto';
-import { questionType } from '@DTOs/question.dto';
+import { CodingQuestionInternal } from '@DTOs/index';
+import { questionType } from '@DTOs/index';
 import {
   detailedQuestionDTO,
   CodeGeruestDto,

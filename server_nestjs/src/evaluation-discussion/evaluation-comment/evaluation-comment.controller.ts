@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await */
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
@@ -8,7 +8,9 @@ import {
   EvaluationCommentDTO, 
   UserVoteResponseDTO,
   VoteLimitStatusDTO,
-  VoteLimitResponseDTO 
+  VoteLimitResponseDTO,
+  ResetVotesDTO,
+  ResetVotesResponseDTO
 } from '@DTOs/index';
 import { CreateEvaluationCommentDTO, UpdateEvaluationCommentDTO } from '@DTOs/index';
 
@@ -25,9 +27,10 @@ export class EvaluationCommentController {
   async findBySubmission(
     @Query('submissionId') submissionId: string,
     @Query('categoryId') categoryId: string,
+    @GetUser() user?: User,
   ): Promise<EvaluationCommentDTO[]> {
-    console.log('🔍 findBySubmission controller call', submissionId, categoryId);
-    return this.evaluationCommentService.findBySubmission(submissionId, categoryId);
+    console.log('🔍 findBySubmission controller call', submissionId, categoryId, 'userId:', user?.id);
+    return this.evaluationCommentService.findBySubmission(submissionId, categoryId, user?.id);
   }
 
   @Post()
@@ -70,14 +73,53 @@ export class EvaluationCommentController {
     return { voteType };
   }
 
+  @Get(':id/user-vote-count')
+  @roles('ANY')
+  async getUserVoteCount(@Param('id') id: string, @GetUser() user: User): Promise<{ voteCount: number }> {
+    const voteCount = await this.evaluationCommentService.getUserVoteCount(id, user.id);
+    return { voteCount };
+  }
+
   @Post(':id/vote')
   @roles('ANY')
   async vote(
     @Param('id') id: string,
-    @Body() body: { voteType: 'UP' | 'DOWN' | null },
+    @Body() body: { voteType: 'UP' | null }, // Updated for ranking system
     @GetUser() user: User,
   ): Promise<VoteLimitResponseDTO> {
+    // 🚨 CRITICAL SECURITY: Controller-level self-voting prevention (defense in depth)
+    const comment = await this.evaluationCommentService.findOne(id);
+    if (comment.authorId === user.id) {
+      throw new BadRequestException('Users cannot vote on their own comments');
+    }
+
+    // Validate vote type for ranking system
+    if (body.voteType !== null && body.voteType !== 'UP') {
+      throw new BadRequestException('Only UP votes are allowed in the ranking system');
+    }
     return this.evaluationCommentService.voteWithLimitCheck(id, body.voteType, user.id);
+  }
+
+  @Delete('votes/reset')
+  @roles('ANY')
+  async resetVotes(
+    @Body() resetVotesDto: ResetVotesDTO,
+    @GetUser() user: User,
+  ): Promise<ResetVotesResponseDTO> {
+    const result = await this.evaluationCommentService.resetUserVotes(
+      user.id,
+      resetVotesDto.submissionId,
+      resetVotesDto.categoryId,
+      resetVotesDto.voteType
+    );
+
+    return {
+      success: result.success,
+      resetCount: result.resetCount,
+      voteLimitStatus: result.voteLimitStatus,
+      message: `Successfully reset ${result.resetCount} ${resetVotesDto.voteType.toLowerCase()} vote(s) in category ${resetVotesDto.categoryId}`,
+      affectedCommentIds: result.affectedCommentIds
+    };
   }
 
   @Put(':id')
@@ -98,7 +140,27 @@ export class EvaluationCommentController {
 
   @Get(':id')
   @roles('ANY')
-  async findOne(@Param('id') id: string): Promise<EvaluationCommentDTO> {
-    return this.evaluationCommentService.findOne(id);
+  async findOne(@Param('id') id: string, @GetUser() user?: User): Promise<EvaluationCommentDTO> {
+    return this.evaluationCommentService.findOne(id, user?.id);
+  }
+
+  @Get('comment-status/:submissionId')
+  @roles('ANY')
+  async getUserCommentStatus(
+    @Param('submissionId') submissionId: string,
+    @GetUser() user: User,
+  ): Promise<{ [categoryId: number]: boolean }> {
+    const commentStatusMap = await this.evaluationCommentService.getUserCommentStatusForAllCategories(
+      submissionId, 
+      user.id
+    );
+    
+    // Convert Map to plain object for JSON response
+    const result: { [categoryId: number]: boolean } = {};
+    commentStatusMap.forEach((hasCommented, categoryId) => {
+      result[categoryId] = hasCommented;
+    });
+    
+    return result;
   }
 }
