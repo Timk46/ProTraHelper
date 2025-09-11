@@ -33,7 +33,16 @@ export class FilesController {
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
-    const fileType = mimetype.split('/')[1];
+
+    // Extract file type from file extension for better handling of custom file types like .gh
+    let fileType = mimetype.split('/')[1];
+
+    // Override with file extension for specific file types
+    if (fileName.toLowerCase().endsWith('.gh')) {
+      fileType = 'gh';
+    } else if (fileName.toLowerCase().endsWith('.pdf')) {
+      fileType = 'pdf';
+    }
 
     return await this.filesService.uploadFile(buffer, fileName, fileType);
   }

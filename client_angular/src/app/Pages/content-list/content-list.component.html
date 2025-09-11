@@ -85,7 +85,6 @@
               matTooltip="Mindestens ein Inhalt wurde mit einem ? markiert."
               >help
             </mat-icon>
-
           </div>
         </mat-panel-description>
       </mat-expansion-panel-header>
@@ -107,8 +106,17 @@
 
         <!-- button bar -->
         <div class="content-list-element-introduction-buttons">
-          <button
+          <!-- <button
             *ngIf="shouldShowRhinoButton(content)"
+            mat-raised-button
+            class="rhino-button"
+            (click)="onRhinoBatDirectButtonClick($event)"
+          >
+            <mat-icon>flash_on</mat-icon>
+            Rhino
+          </button> -->
+          <button
+            *ngIf="hasContentElementType(content, 'RHINO')"
             mat-raised-button
             class="rhino-button"
             (click)="onRhinoBatDirectButtonClick($event)"

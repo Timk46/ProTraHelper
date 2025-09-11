@@ -89,9 +89,15 @@ export class AttachmentsTabComponent implements OnInit {
       this.fileService.uploadFile(file).subscribe(response => {
         // Assuming response has the fileId, e.g., response.id
         const fileId = response.id;
-        const fileType = file.type.includes('pdf')
-          ? contentElementType.PDF
-          : contentElementType.VIDEO;
+
+        let fileType: contentElementType;
+        if (file.type.includes('pdf')) {
+          fileType = contentElementType.PDF;
+        } else if (file.name.toLowerCase().endsWith('.gh')) {
+          fileType = contentElementType.RHINO;
+        } else {
+          fileType = contentElementType.VIDEO;
+        }
 
         const newAttachment: ContentElementDTO = {
           id: 0, // Will be set by backend

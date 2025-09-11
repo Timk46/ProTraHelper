@@ -950,6 +950,7 @@ enum contentElementType {
   CODE
   PDF
   QUESTION
+  RHINO
 }
 
 enum userConceptEventType {

@@ -169,16 +169,18 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   /**
    * Retrieves the attachments from the given content.
-   * Filters the content elements to include only those of type PDF or VIDEO and sorts them by position.
+   * Filters the content elements to include only those of type PDF, VIDEO, or RHINO and sorts them by position.
    *
    * @param content - The content object containing content elements.
-   * @returns An array of content elements that are either of type PDF or VIDEO, sorted by position.
+   * @returns An array of content elements that are either of type PDF, VIDEO, or RHINO, sorted by position.
    */
   getAttachments(content: ContentDTO): ContentElementDTO[] {
     return content.contentElements
       .filter(
         element =>
-          element.type === contentElementType.PDF || element.type === contentElementType.VIDEO,
+          element.type === contentElementType.PDF ||
+          element.type === contentElementType.VIDEO ||
+          element.type === contentElementType.RHINO,
       )
       .sort(
         (a, b) => (a.positionInSpecificContentView || 0) - (b.positionInSpecificContentView || 0),
