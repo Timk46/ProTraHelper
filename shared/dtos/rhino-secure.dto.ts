@@ -3,7 +3,7 @@
  * Diese DTOs enthalten Sicherheitsvalidierung für alle Rhino-Operationen
  */
 
-import { 
+/* import { 
   IsString, 
   IsOptional, 
   IsBoolean, 
@@ -16,34 +16,34 @@ import {
   IsIn,
   ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type } from 'class-transformer'; */
 
 /**
  * Secure DTO for Rhino file launch operations
  */
 export class SecureRhinoLaunchRequestDTO {
-  @IsString()
+  /*   @IsString()
   @IsNotEmpty()
   @MaxLength(500)
   @Matches(/^[a-zA-Z]:\\[\w\s\-\\\.]+\.(gh|3dm)$/i, {
     message: 'filePath must be a valid Windows path to a .gh or .3dm file'
-  })
+  }) */
   filePath!: string;
 
-  @IsOptional()
+  /*   @IsOptional()
   @IsString()
   @MaxLength(500)
   @Matches(/^[a-zA-Z]:\\[\w\s\-\\\.]+\.exe$/i, {
     message: 'rhinoPath must be a valid Windows path to an executable'
-  })
+  }) */
   rhinoPath?: string;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   showViewport?: boolean;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   batchMode?: boolean;
 }
 
@@ -51,26 +51,26 @@ export class SecureRhinoLaunchRequestDTO {
  * Secure DTO for Rhino window focus operations
  */
 export class SecureRhinoFocusRequestDTO {
-  @IsOptional()
+  /* @IsOptional()
   @IsNumber()
   @Min(1)
-  @Max(65535)
+  @Max(65535) */
   processId?: number;
 
-  @IsOptional()
+  /*   @IsOptional()
   @IsString()
   @MaxLength(200)
   @Matches(/^[\w\s\-\.]+$/, {
     message: 'windowTitle must contain only alphanumeric characters, spaces, hyphens, and dots'
-  })
+  }) */
   windowTitle?: string;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   bringToFront?: boolean;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   restoreIfMinimized?: boolean;
 }
 
@@ -78,34 +78,34 @@ export class SecureRhinoFocusRequestDTO {
  * Secure configuration for native focus operations
  */
 export class SecureNativeFocusConfigDTO {
-  @IsOptional()
+  /*   @IsOptional()
   @IsNumber()
   @Min(1)
-  @Max(10)
+  @Max(10) */
   maxAttempts?: number = 3;
 
-  @IsOptional()
+  /*   @IsOptional()
   @IsNumber()
   @Min(0)
-  @Max(5000)
+  @Max(5000) */
   attemptDelayMs?: number = 100;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   restoreIfMinimized?: boolean = true;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   bringToFront?: boolean = true;
 
-  @IsOptional()
+  /*   @IsOptional()
   @IsNumber()
   @Min(1000)
-  @Max(30000)
+  @Max(30000) */
   operationTimeoutMs?: number = 10000;
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   verboseLogging?: boolean = false;
 }
 
@@ -113,16 +113,16 @@ export class SecureNativeFocusConfigDTO {
  * Secure DTO for native window focus requests
  */
 export class SecureNativeFocusRequestDTO {
-  @IsString()
+  /*   @IsString()
   @IsNotEmpty()
   @Matches(/^(0x)?[0-9a-fA-F]+$|^\d+$/, {
     message: 'windowHandle must be a valid hexadecimal or decimal number'
-  })
+  }) */
   windowHandle!: string | number;
 
-  @IsOptional()
+  /*   @IsOptional()
   @ValidateNested()
-  @Type(() => SecureNativeFocusConfigDTO)
+  @Type(() => SecureNativeFocusConfigDTO) */
   config?: SecureNativeFocusConfigDTO;
 }
 
@@ -130,13 +130,13 @@ export class SecureNativeFocusRequestDTO {
  * Secure DTO for system configuration changes
  */
 export class SecureSystemConfigRequestDTO {
-  @IsBoolean()
-  @IsNotEmpty()
+  /*   @IsBoolean()
+  @IsNotEmpty() */
   enabled!: boolean;
 
-  @IsOptional()
+  /*   @IsOptional()
   @IsString()
-  @MaxLength(200)
+  @MaxLength(200) */
   reason?: string;
 }
 
@@ -144,20 +144,20 @@ export class SecureSystemConfigRequestDTO {
  * Secure DTO for debug operations (admin only)
  */
 export class SecureDebugRequestDTO {
-  @IsOptional()
+  /*   @IsOptional()
   @IsString()
   @MaxLength(100)
   @IsIn(['basic', 'detailed', 'full'], {
     message: 'debugLevel must be one of: basic, detailed, full'
-  })
-  debugLevel?: 'basic' | 'detailed' | 'full' = 'basic';
+  }) */
+  debugLevel?: "basic" | "detailed" | "full" = "basic";
 
-  @IsOptional()
-  @IsBoolean()
+  /*   @IsOptional()
+  @IsBoolean() */
   includeSystemInfo?: boolean = false;
-
+  /* 
   @IsOptional()
-  @IsBoolean()
+  @IsBoolean() */
   includePerformanceMetrics?: boolean = false;
 }
 
@@ -168,11 +168,11 @@ export class SecureRhinoResponseBaseDTO {
   success!: boolean;
   message!: string;
   timestamp!: string;
-  
-  @IsOptional()
+
+  //@IsOptional()
   requestId?: string;
-  
-  @IsOptional()
+
+  //@IsOptional()
   securityContext?: {
     userId: number;
     userRole: string;

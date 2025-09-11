@@ -1,6 +1,6 @@
 /**
  * DTO for vote limit status tracking
- * 
+ *
  * @description Provides information about available votes for a user
  * in a specific discussion thread/category
  */
@@ -43,8 +43,6 @@ export interface VoteLimitResponseDTO {
    * Number of votes the user has given to the specific comment
    * Used for frontend synchronization in multi-vote ranking system
    */
-  @IsOptional()
-  @IsNumber()
   userVoteCount?: number;
 }
 
