@@ -123,8 +123,8 @@ export class QuestionDataGroupReviewGateService {
     return Object.values(latestAnswersByUser).map(answer => ({
       submissionIdentifier:
         answer.userAnswer.user.firstname + ' ' + answer.userAnswer.user.lastname,
-      reviewPhase: 'lorem phase',
-      userStatus: 'lorem status',
+      reviewPhase: 'Diskussionsphase',
+      userStatus: 'Kommentar ausstehend',
     }));
   }
 }
