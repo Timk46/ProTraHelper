@@ -1138,3 +1138,30 @@ model GroupReviewGate {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
+
+// RHINO SECURITY AUDIT LOG
+model RhinoAuditLog {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  userEmail         String
+  operation         String   // launch, focus, info, debug, config, window_query
+  endpoint          String
+  parameters        String?  @db.Text // JSON string of request parameters
+  result            String   // success, error, rate_limited, unauthorized
+  errorMessage      String?  @db.Text
+  ipAddress         String
+  userAgent         String?  @db.Text
+  sessionId         String?
+  timestamp         DateTime @default(now())
+  responseTime      Int?     // milliseconds
+  securityRiskLevel String   @default("low") // low, medium, high
+  suspicious        Boolean  @default(false)
+  suspiciousReason  String?  @db.Text
+  
+  // Index for performance on common queries
+  @@index([userId, timestamp])
+  @@index([operation, timestamp])
+  @@index([suspicious, timestamp])
+  @@index([result, timestamp])
+  @@map("rhino_audit_logs")
+}

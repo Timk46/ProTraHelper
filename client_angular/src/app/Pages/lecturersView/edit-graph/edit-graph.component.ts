@@ -8,13 +8,13 @@ import {
   ValidatorFn,
 } from '@angular/forms';
 import { Validators } from '@angular/forms';
-import { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
-import { GraphEdgeDTO, GraphStructureSemanticDTO } from '@DTOs/graphTask.dto';
+import { GraphConfigurationDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/index';
+import { GraphEdgeDTO, GraphStructureSemanticDTO } from '@DTOs/index';
 import { GraphTaskService } from 'src/app/Modules/graph-tasks/services/graph-task.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { questionType } from '@DTOs/question.dto';
-import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
+import { questionType } from '@DTOs/index';
+import { detailedQuestionDTO } from '@DTOs/index';
 import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TinymceComponent } from '../../tinymce/tinymce.component';

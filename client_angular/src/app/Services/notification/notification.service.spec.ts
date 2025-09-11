@@ -6,8 +6,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { WebSocketService } from '../websocket/websocket.service';
 import { BehaviorSubject, of } from 'rxjs';
-import { NotificationDTO } from '@DTOs/notification.dto';
-import { NotificationType } from '@DTOs/notificationType.enum';
+import { NotificationDTO } from '@DTOs/index';
+import { NotificationType } from '@DTOs/index';
 import { environment } from 'src/environments/environment';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 

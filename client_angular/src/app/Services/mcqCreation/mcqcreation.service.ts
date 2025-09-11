@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs/internal/Observable';
 import { environment } from 'src/environments/environment';
-import { McqGenerationDTO } from '@DTOs/question.dto';
-import { OptionDTO } from '@DTOs/question.dto';
+import { McqGenerationDTO } from '@DTOs/index';
+import { OptionDTO } from '@DTOs/index';
 import { Answer, McqEvaluations } from './mcqcreation.types';
 import { McqEvaluation } from './mcqcreation.types';
 

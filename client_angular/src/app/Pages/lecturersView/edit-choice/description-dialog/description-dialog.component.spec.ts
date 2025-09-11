@@ -1,18 +1,18 @@
 import { ComponentFixture } from '@angular/core/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { McTaskCreationComponent } from './mc-task-creation.component';
+import { DescriptionDialogComponent } from './description-dialog.component';
 
-describe('McTaskCreationComponent', () => {
-  let component: McTaskCreationComponent;
-  let fixture: ComponentFixture<McTaskCreationComponent>;
+describe('DescriptionDialogComponent', () => {
+  let component: DescriptionDialogComponent;
+  let fixture: ComponentFixture<DescriptionDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [McTaskCreationComponent],
+      declarations: [DescriptionDialogComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(McTaskCreationComponent);
+    fixture = TestBed.createComponent(DescriptionDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

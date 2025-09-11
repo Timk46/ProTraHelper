@@ -36,27 +36,59 @@
     }
   }
 
-  // Modern card-style for current user's comments
+  // 🎯 Enhanced styling for current user's comments
   &.own-comment {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-left: 3px solid #0ea5e9;
+    background: linear-gradient(135deg, #f8faff 0%, #eef4ff 100%);
+    border-left: 4px solid #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    position: relative;
+    
+    // Subtle glow effect
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.05) 100%);
+      pointer-events: none;
+    }
 
-    .author-name {
-      color: #0c4a6e;
-      font-weight: 600;
+    .message-header {
+      .author-name {
+        color: #1e40af;
+        font-weight: 600;
+        
+        // Add "(Sie)" indicator
+        &::after {
+          content: " (Sie)";
+          font-weight: normal;
+          color: #64748b;
+          font-size: 0.9em;
+          margin-left: 4px;
+        }
+        
+        // Update the author badge color for own comments
+        &::before {
+          background: linear-gradient(135deg, #3b82f6, #1e40af);
+        }
+      }
     }
 
     .message-time {
-      color: #075985;
+      color: #475569;
     }
 
     .message-text {
       color: #0f172a;
+      font-weight: 500;
     }
 
     &:hover {
-      border-left-color: #0284c7;
-      box-shadow: 0 4px 8px rgba(14, 165, 233, 0.08);
+      border-left-color: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
       transform: translateY(-1px) scale(1.002);
       transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }

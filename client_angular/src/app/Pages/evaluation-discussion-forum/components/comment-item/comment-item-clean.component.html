@@ -1,0 +1,153 @@
+<!-- 🔧 HEFL Comment Item Clean Template - Dumb Component -->
+<div 
+  class="comment-item"
+  [class]="getDepthClass()"
+  [attr.data-comment-id]="comment.id"
+  role="article"
+  [attr.aria-label]="getAuthorTooltip()"
+>
+  <!-- Comment Header -->
+  <div class="comment-header">
+    <div class="author-info">
+      <div 
+        class="author-chip"
+        [style.background-color]="getAuthorColorCode()"
+        [matTooltip]="getAuthorTooltip()"
+      >
+        <span class="author-name">{{ cachedAuthorDisplayName }}</span>
+      </div>
+      
+      <span class="comment-time">{{ formattedTime }}</span>
+      
+      <!-- Current User Badge -->
+      <span 
+        *ngIf="cachedIsCurrentUser" 
+        class="current-user-badge"
+        matTooltip="Ihr Kommentar"
+      >
+        Sie
+      </span>
+    </div>
+
+    <!-- Vote Score -->
+    <div 
+      class="vote-score"
+      [matTooltip]="getVoteScoreTooltip()"
+      [attr.aria-label]="getVoteScoreTooltip()"
+    >
+      <mat-icon>thumb_up</mat-icon>
+      <span>{{ getVoteScore() }}</span>
+    </div>
+  </div>
+
+  <!-- Comment Content -->
+  <div class="comment-content">
+    <div 
+      class="content-text"
+      [innerHTML]="cachedDisplayContent"
+    ></div>
+    
+    <!-- Expand/Collapse Button -->
+    <button
+      *ngIf="shouldShowToggleButton()"
+      mat-button
+      class="toggle-content-btn"
+      (click)="onToggleContent()"
+      [attr.aria-label]="getToggleButtonText()"
+    >
+      {{ getToggleButtonText() }}
+    </button>
+  </div>
+
+  <!-- Comment Actions -->
+  <div class="comment-actions">
+    <!-- Vote Controls -->
+    <div class="vote-controls" *ngIf="!isReadOnly">
+      <!-- Add Vote Button (Race Condition Safe) -->
+      <button
+        mat-button
+        class="vote-btn add-vote-btn"
+        [class.voted]="userVoteCount > 0"
+        [class.debounced]="isVoteButtonDisabled()"
+        [disabled]="isVoteButtonDisabled()"
+        [matTooltip]="getUpvoteTooltip()"
+        (click)="addVote()"
+        [attr.aria-label]="getUpvoteTooltip()"
+      >
+        <mat-icon 
+          [class.voting-loading]="isVoting"
+          [style.color]="userVoteCount > 0 ? '#4caf50' : null"
+        >
+          {{ isVoting ? 'hourglass_empty' : 'thumb_up' }}
+        </mat-icon>
+        <span>Vote +</span>
+      </button>
+
+      <!-- Remove Vote Button (Race Condition Safe) -->
+      <button
+        *ngIf="userVoteCount > 0"
+        mat-button
+        class="vote-btn remove-vote-btn"
+        [class.debounced]="isRemoveVoteButtonDisabled()"
+        [disabled]="isRemoveVoteButtonDisabled()"
+        [matTooltip]="getRemoveVoteTooltip()"
+        (click)="removeVote()"
+        [attr.aria-label]="getRemoveVoteTooltip()"
+      >
+        <mat-icon [class.voting-loading]="isVoting">
+          {{ isVoting ? 'hourglass_empty' : 'thumb_down' }}
+        </mat-icon>
+        <span>Vote -</span>
+      </button>
+
+      <!-- Vote Display -->
+      <div 
+        class="vote-display"
+        [class.has-votes]="userVoteCount > 0"
+        [class.error]="error"
+        [matTooltip]="getVoteDisplayAriaLabel()"
+        [attr.aria-label]="getVoteDisplayAriaLabel()"
+      >
+        <span class="vote-text">{{ getVoteDisplayText() }}</span>
+        
+        <!-- Error Display -->
+        <div *ngIf="error" class="vote-error">
+          <mat-icon>error</mat-icon>
+          <span>{{ error }}</span>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <mat-spinner 
+          *ngIf="isVoting"
+          diameter="16"
+          class="vote-loading-spinner"
+        ></mat-spinner>
+      </div>
+    </div>
+
+    <!-- Reply Button -->
+    <button
+      *ngIf="!isReadOnly"
+      mat-button
+      class="reply-btn"
+      (click)="onReply()"
+      [attr.aria-label]="'Auf Kommentar antworten'"
+    >
+      <mat-icon>reply</mat-icon>
+      <span>Antworten</span>
+    </button>
+
+    <!-- Replies Toggle -->
+    <button
+      *ngIf="hasReplies()"
+      mat-button
+      class="replies-toggle-btn"
+      [class.expanded]="isPanelExpanded"
+      (click)="onTogglePanel()"
+      [attr.aria-label]="isPanelExpanded ? 'Antworten ausblenden' : 'Antworten anzeigen'"
+    >
+      <mat-icon>{{ isPanelExpanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+      <span>{{ getReplyCountText() }}</span>
+    </button>
+  </div>
+</div>

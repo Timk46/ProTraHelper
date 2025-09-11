@@ -42,13 +42,13 @@
        role="toolbar"
        [attr.aria-label]="'Comment actions for comment by ' + cachedAuthorDisplayName"
        [attr.aria-controls]="'comment-content-' + comment.id">
-    <!-- Vote Control Widget - Only for top-level comments (depth = 0) -->
-    <div *ngIf="depth === 0 && !cachedIsCurrentUser" 
+    <!-- 🚨 STATE 1: User can vote (ownership confirmed as false) -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser === false" 
          class="vote-controls"
          role="group"
          [attr.aria-label]="'Vote controls for comment by ' + cachedAuthorDisplayName">
       
-      <!-- Minus Button (Remove Vote) -->
+      <!-- Minus Button (Remove Vote) - Always visible but disabled if no votes -->
       <button
         class="vote-btn minus"
         [disabled]="getUserVoteCount() === 0 || isVoting"
@@ -61,28 +61,13 @@
         <mat-icon aria-hidden="true">remove</mat-icon>
       </button>
       
-      <!-- Vote Counter Display - Only show if user has voted -->
-      <span *ngIf="getUserVoteCount() > 0" 
-            class="vote-counter"
-            [attr.aria-label]="'You have given ' + getUserVoteCount() + ' votes to this comment'">
-        <span class="current-votes">{{ getUserVoteCount() }} vergeben</span>
+      <!-- Vote Display -->
+      <span class="vote-display" 
+            [attr.aria-label]="getVoteDisplayAriaLabel()">
+        <span class="vote-status-text">{{ getVoteDisplayText() }}</span>
       </span>
       
-      <!-- Vote hint for non-voted comments -->
-      <span *ngIf="getUserVoteCount() === 0 && canAddMoreVotes()" 
-            class="vote-hint"
-            [attr.aria-label]="'You can give unlimited votes to this comment'">
-        Unbegrenzt möglich
-      </span>
-      
-      <!-- 🚀 CRITICAL FIX: Fallback display when no votes available but votes might be given -->
-      <span *ngIf="getUserVoteCount() === 0 && !canAddMoreVotes()" 
-            class="vote-fallback"
-            [attr.aria-label]="'No more votes available - attempting to show actual vote count'">
-        <span class="fallback-text">{{ getFallbackVoteDisplay() }}</span>
-      </span>
-      
-      <!-- Plus Button (Add Vote) -->
+      <!-- Plus Button (Add Vote) - Disabled when vote limit reached but ALWAYS visible -->
       <button
         class="vote-btn plus"
         [disabled]="!canAddMoreVotes() || isVoting"
@@ -96,14 +81,25 @@
       </button>
     </div>
 
-    <!-- Disabled State Message for Own Comments -->
-    <div *ngIf="depth === 0 && cachedIsCurrentUser" 
-         class="vote-controls disabled"
+    <!-- 🚨 STATE 2: Own comment (ownership confirmed as true) -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser === true" 
+         class="vote-controls own-comment-state"
          role="status"
-         aria-label="You cannot vote on your own comments">
+         aria-label="This is your own comment - voting not allowed">
       <span class="own-comment-indicator">
-        <mat-icon>person</mat-icon>
-        <span>Eigener Kommentar</span>
+        <mat-icon>block</mat-icon>
+        <span>Eigener Kommentar - Keine Bewertung möglich</span>
+      </span>
+    </div>
+
+    <!-- 🚨 STATE 3: Ownership unknown (loading/determining user) -->
+    <div *ngIf="depth === 0 && cachedIsCurrentUser === null"
+         class="vote-controls ownership-loading"
+         role="status"
+         aria-label="Determining comment ownership...">
+      <span class="loading-indicator">
+        <mat-spinner diameter="16" strokeWidth="2"></mat-spinner>
+        <span>Lade Voting-Status...</span>
       </span>
     </div>
 

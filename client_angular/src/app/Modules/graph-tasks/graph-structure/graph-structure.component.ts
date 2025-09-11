@@ -20,7 +20,7 @@ import {
   PositionDTO,
   RectangleDTO,
   GraphConfigurationDTO,
-} from '@DTOs/graphTask.dto';
+} from '@DTOs/index';
 
 @Component({
   selector: 'app-graph-structure',

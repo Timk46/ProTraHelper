@@ -20,6 +20,7 @@ import {
 import { globalRole } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
+import { EvaluationCommentService } from '../evaluation-comment/evaluation-comment.service';
 
 /**
  * Interface for Prisma rating with all relations
@@ -93,6 +94,7 @@ export class EvaluationRatingService {
     private readonly notificationService: NotificationService,
     private readonly cacheService: EvaluationCacheService,
     private readonly utilsService: EvaluationUtilsService,
+    private readonly commentService: EvaluationCommentService,
   ) {}
 
   async rate(ratingDto: CreateEvaluationRatingDTO, userId: number): Promise<EvaluationRatingDTO> {
@@ -173,6 +175,22 @@ export class EvaluationRatingService {
       },
     });
 
+    // Create comment from rating if comment text is provided
+    if (ratingDto.comment && ratingDto.comment.trim().length > 0) {
+      try {
+        await this.commentService.createCommentFromRating(
+          ratingDto.submissionId,
+          Number(ratingDto.categoryId),
+          userId,
+          ratingDto.comment.trim(),
+          ratingDto.score
+        );
+      } catch (error) {
+        // Log error but don't fail the rating operation
+        console.error('Failed to create comment from rating:', error);
+      }
+    }
+
     // Send notification to submission author
     await this.notificationService.notifyEvaluationRating(ratingDto.submissionId, userId);
 
@@ -243,6 +261,22 @@ export class EvaluationRatingService {
         },
       },
     });
+
+    // Update comment from rating if comment text is provided
+    if (updateDto.comment && updateDto.comment.trim().length > 0) {
+      try {
+        await this.commentService.updateCommentFromRating(
+          rating.submissionId,
+          rating.categoryId,
+          userId,
+          updateDto.comment.trim(),
+          updateDto.score
+        );
+      } catch (error) {
+        // Log error but don't fail the rating operation
+        console.error('Failed to update comment from rating:', error);
+      }
+    }
 
     // Invalidate cache for this submission
     this.cacheService.invalidateByPattern(`ratings:${rating.submissionId}:.*`);

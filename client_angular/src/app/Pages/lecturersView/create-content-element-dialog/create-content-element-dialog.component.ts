@@ -2,8 +2,8 @@ import { OnInit, Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { trigger, state, style, animate, transition } from '@angular/animations';
-import { QuestionDTO } from '@DTOs/question.dto';
-import { questionType } from '@DTOs/question.dto';
+import { QuestionDTO } from '@DTOs/index';
+import { questionType } from '@DTOs/index';
 import { ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 

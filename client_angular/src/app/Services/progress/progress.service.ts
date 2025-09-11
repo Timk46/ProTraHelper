@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { GraphCommunicationService } from '../graph/graphCommunication.service';
 import { timer, from, Observable } from 'rxjs';
 import { concatMap, catchError } from 'rxjs/operators';
-import { ContentDTO, ContentElementDTO } from '@DTOs/content.dto';
-import { contentElementType } from '@DTOs/contentElementType.enum';
+import { ContentDTO, ContentElementDTO } from '@DTOs/index';
+import { contentElementType } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',

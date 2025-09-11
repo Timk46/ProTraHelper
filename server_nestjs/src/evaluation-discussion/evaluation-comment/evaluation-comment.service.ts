@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
 import type {
@@ -15,7 +15,7 @@ import type {
 } from '@DTOs/index';
 import { EvaluationCacheService } from '../shared/evaluation-cache.service';
 import { EvaluationUtilsService } from '../shared/evaluation-utils.service';
-import type { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 // =============================================================================
 // INTERNAL TYPES
@@ -32,6 +32,8 @@ interface VoteDetails {
 
 @Injectable()
 export class EvaluationCommentService {
+  private readonly logger = new Logger(EvaluationCommentService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
@@ -582,107 +584,233 @@ export class EvaluationCommentService {
    * @throws {NotFoundException} Wenn kein Kommentar mit der gegebenen ID gefunden wird.
    * @throws {BadRequestException} Wenn ein ungültiger voteType verwendet wird.
    */
+  /**
+   * Core vote operation with comprehensive error handling
+   * @param commentId Comment ID to vote on
+   * @param voteType Vote type ('UP' or null to remove)
+   * @param userId User ID performing the vote
+   * @returns Vote result with updated statistics
+   */
   async vote(commentId: string, voteType: 'UP' | null, userId: number) {
-    const comment = await this.prisma.evaluationComment.findUnique({
-      where: { id: commentId },
-    });
+    const voteId = `${commentId}-${userId}-${Date.now()}`;
+    this.logger.log(`🗳️ Processing core vote: ${voteId}`);
 
-    if (!comment) {
-      throw new NotFoundException(`Comment with ID ${commentId} not found`);
-    }
-
-    // Defensive programming: Ensure voteDetails structure exists
-    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { 
-      userVotes: {},
-      userVoteCounts: {}
-    };
-    const previousVote = voteDetails.userVotes[userId.toString()];
-
-    // Validate voteType for ranking system
-    if (voteType !== null && voteType !== 'UP') {
-      throw new BadRequestException(
-        `Invalid vote type. Only 'UP' votes are allowed in the ranking system.`
-      );
-    }
-
-    // Check vote limits - prevent exceeding maximum votes per user
-    if (voteType === 'UP' && !previousVote) {
-      const voteLimitStatus = await this.getVoteLimitStatus(
-        userId,
-        comment.submissionId,
-        comment.categoryId?.toString() || 'null'
-      );
+    try {
+      // Input validation
+      if (!commentId || typeof commentId !== 'string') {
+        throw new BadRequestException('Invalid comment ID provided');
+      }
       
-      if (!voteLimitStatus.canVote || voteLimitStatus.remainingVotes <= 0) {
-        throw new BadRequestException(
-          `Vote limit exceeded. You have used all ${voteLimitStatus.maxVotes} available votes for this category.`
+      if (!userId || typeof userId !== 'number' || userId <= 0) {
+        throw new BadRequestException('Invalid user ID provided');
+      }
+
+      // Fetch comment with comprehensive error handling
+      let comment;
+      try {
+        comment = await this.prisma.evaluationComment.findUnique({
+          where: { id: commentId },
+          select: {
+            id: true,
+            userId: true,
+            submissionId: true,
+            categoryId: true,
+            upvotes: true,
+            downvotes: true,
+            voteDetails: true,
+          },
+        });
+      } catch (dbError) {
+        this.logger.error(`❌ Database error fetching comment for vote ${voteId}:`, dbError);
+        throw new InternalServerErrorException('Database error while fetching comment for vote');
+      }
+
+      if (!comment) {
+        this.logger.warn(`⚠️ Comment not found for vote: ${commentId}`);
+        throw new NotFoundException(`Comment with ID ${commentId} not found`);
+      }
+
+      // 🚨 CRITICAL SECURITY: Prevent self-voting
+      if (comment.userId === userId) {
+        this.logger.warn(`🚫 Self-voting blocked in core vote: user ${userId} comment ${commentId}`);
+        throw new ForbiddenException(
+          'Users cannot vote on their own comments. Self-voting is not allowed.'
         );
       }
-    }
 
-    let newUpvotes = comment.upvotes;
-    let newDownvotes = comment.downvotes;
+      // Safely parse and validate vote details
+      let voteDetails: VoteDetails;
+      try {
+        voteDetails = (comment.voteDetails as unknown as VoteDetails) || { 
+          userVotes: {},
+          userVoteCounts: {}
+        };
+        
+        // Ensure structure integrity
+        if (!voteDetails.userVotes || typeof voteDetails.userVotes !== 'object') {
+          voteDetails.userVotes = {};
+        }
+        if (!voteDetails.userVoteCounts || typeof voteDetails.userVoteCounts !== 'object') {
+          voteDetails.userVoteCounts = {};
+        }
+      } catch (parseError) {
+        this.logger.error(`❌ Error parsing vote details for ${commentId}:`, parseError);
+        voteDetails = { userVotes: {}, userVoteCounts: {} };
+      }
 
-    // Use the new calculateVoteChanges method for multiple votes support
-    ({ newUpvotes, newDownvotes } = this.calculateVoteChanges(
-      voteType,
-      previousVote,
-      newUpvotes,
-      newDownvotes,
-      voteDetails,
-      userId,
-    ));
+      const previousVote = voteDetails.userVotes[userId.toString()];
 
-    // Keep the complete voteDetails structure
-    const updatedVoteDetails = voteDetails;
+      // Validate voteType for ranking system
+      if (voteType !== null && voteType !== 'UP') {
+        throw new BadRequestException(
+          `Invalid vote type '${voteType}'. Only 'UP' votes are allowed in the ranking system.`
+        );
+      }
 
-    const updatedComment = await this.prisma.evaluationComment.update({
-      where: { id: commentId },
-      data: {
+      // Check vote limits for new votes
+      if (voteType === 'UP' && !previousVote) {
+        try {
+          const voteLimitStatus = await this.getVoteLimitStatus(
+            userId,
+            comment.submissionId,
+            comment.categoryId?.toString() || 'null'
+          );
+          
+          if (!voteLimitStatus.canVote || voteLimitStatus.remainingVotes <= 0) {
+            this.logger.warn(`⚠️ Vote limit exceeded for user ${userId}`);
+            throw new BadRequestException(
+              `Vote limit exceeded. You have used all ${voteLimitStatus.maxVotes} available votes for this category.`
+            );
+          }
+        } catch (limitError) {
+          if (limitError instanceof BadRequestException) {
+            throw limitError;
+          }
+          this.logger.error(`❌ Error checking vote limits:`, limitError);
+          throw new InternalServerErrorException('Error validating vote limits');
+        }
+      }
+
+      let newUpvotes = comment.upvotes || 0;
+      let newDownvotes = comment.downvotes || 0;
+
+      // Calculate vote changes with error handling
+      try {
+        ({ newUpvotes, newDownvotes } = this.calculateVoteChanges(
+          voteType,
+          previousVote,
+          newUpvotes,
+          newDownvotes,
+          voteDetails,
+          userId,
+        ));
+      } catch (calculationError) {
+        this.logger.error(`❌ Error calculating vote changes:`, calculationError);
+        throw new InternalServerErrorException('Error calculating vote changes');
+      }
+
+      // Keep the complete voteDetails structure
+      const updatedVoteDetails = { ...voteDetails };
+
+      // 🔐 CRITICAL SECURITY: Use transaction for atomic vote update
+      let updatedComment;
+      try {
+        updatedComment = await this.prisma.$transaction(async (prisma) => {
+          return await prisma.evaluationComment.update({
+            where: { id: commentId },
+            data: {
+              upvotes: newUpvotes,
+              downvotes: newDownvotes,
+              voteDetails: updatedVoteDetails as unknown as Prisma.JsonValue,
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstname: true,
+                  lastname: true,
+                },
+              },
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                  displayName: true,
+                  description: true,
+                  icon: true,
+                  color: true,
+                  order: true,
+                },
+              },
+            },
+          });
+        }, {
+          isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+          maxWait: 5000, // 5 seconds max wait
+          timeout: 10000, // 10 seconds max transaction time
+        });
+      } catch (transactionError) {
+        this.logger.error(`❌ Transaction failed for vote ${voteId}:`, transactionError);
+        
+        // Handle specific Prisma errors
+        if (transactionError.code === 'P2034') {
+          throw new InternalServerErrorException('Transaction conflict - please retry');
+        }
+        if (transactionError.code === 'P2025') {
+          throw new NotFoundException('Comment no longer exists');
+        }
+        
+        throw new InternalServerErrorException(
+          `Database transaction failed: ${transactionError.message || 'Unknown error'}`
+        );
+      }
+
+      // Invalidate cache safely
+      try {
+        this.cacheService.invalidateByPattern(`comments:.*`);
+      } catch (cacheError) {
+        this.logger.warn(`⚠️ Cache invalidation failed for vote ${voteId}:`, cacheError);
+        // Don't fail the operation for cache errors
+      }
+
+      // Prepare safe return data
+      const safeUserVoteCount = updatedVoteDetails.userVoteCounts?.[userId.toString()] || 0;
+      const safeUserVote = updatedVoteDetails.userVotes[userId.toString()] || null;
+
+      this.logger.log(`✅ Core vote completed: ${voteId}`);
+      
+      // Return format consistent with VoteResultDTO structure
+      return {
+        commentId: commentId,
         upvotes: newUpvotes,
-        downvotes: newDownvotes,
-        voteDetails: updatedVoteDetails as unknown as Prisma.JsonValue,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstname: true,
-            lastname: true,
-          },
+        downvotes: 0, // Always 0 in ranking system
+        voteStats: {
+          upVotes: newUpvotes,
+          downVotes: 0, // Always 0 in ranking system
+          totalVotes: newUpvotes, // Only positive votes count
+          score: newUpvotes, // Score equals upvotes in ranking system
         },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            displayName: true,
-            description: true,
-            icon: true,
-            color: true,
-            order: true,
-          },
-        },
-      },
-    });
-
-    // Invalidate cache for this submission
-    this.cacheService.invalidateByPattern(`comments:.*`);
-
-    // Return format consistent with VoteResultDTO structure
-    return {
-      commentId: commentId,
-      upvotes: newUpvotes,
-      downvotes: 0, // Always 0 in ranking system
-      voteStats: {
-        upVotes: newUpvotes,
-        downVotes: 0, // Always 0 in ranking system
-        totalVotes: newUpvotes, // Only positive votes count
-        score: newUpvotes, // Score equals upvotes in ranking system
-      },
-      userVote: voteDetails.userVotes[userId.toString()] || null,
-      userVoteCount: voteDetails.userVoteCounts?.[userId.toString()] || 0,
-      netVotes: newUpvotes, // Equals upvotes in ranking system
-    };
+        userVote: safeUserVote,
+        userVoteCount: safeUserVoteCount,
+        netVotes: newUpvotes, // Equals upvotes in ranking system
+      };
+      
+    } catch (error) {
+      this.logger.error(`❌ Core vote operation failed: ${voteId}`, error);
+      
+      // Re-throw known exceptions
+      if (error instanceof NotFoundException || 
+          error instanceof ForbiddenException || 
+          error instanceof BadRequestException ||
+          error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      
+      // Wrap unexpected errors
+      throw new InternalServerErrorException(
+        `Unexpected error during vote: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
   }
 
   /**
@@ -1173,8 +1301,8 @@ export class EvaluationCommentService {
         const canVote = remainingVotes > 0;
         const displayText = `${remainingVotes}/${totalComments}`;
 
-        // Double the vote count - each user gets 2x the number of comments to vote on
-        const maxVotes = totalComments * 2;
+        // Fixed vote count - each user gets exactly 10 votes regardless of comment count
+        const maxVotes = 10;
         const adjustedRemainingVotes = Math.max(0, maxVotes - totalVotesUsed);
         const adjustedCanVote = adjustedRemainingVotes > 0;
         const adjustedDisplayText = `${adjustedRemainingVotes}/${maxVotes}`;
@@ -1229,83 +1357,179 @@ export class EvaluationCommentService {
    * @param userId - The user ID
    * @returns Promise containing vote result and updated limit status
    */
+  /**
+   * Vote with comprehensive error handling and limit checking
+   * @param commentId Comment ID to vote on
+   * @param voteType Vote type ('UP' or null to remove)
+   * @param userId User ID performing the vote
+   * @returns Promise with vote result and limit status
+   */
   async voteWithLimitCheck(
     commentId: string,
     voteType: 'UP' | null,
     userId: number
   ): Promise<VoteLimitResponseDTO> {
-    // Get comment to find submission and category
-    const comment = await this.prisma.evaluationComment.findUnique({
-      where: { id: commentId },
-      select: {
-        submissionId: true,
-        categoryId: true,
-        voteDetails: true,
+    const operationId = `vote-${commentId}-${userId}-${Date.now()}`;
+    this.logger.log(`🗳️ Starting vote operation ${operationId}: ${voteType || 'remove'} for comment ${commentId} by user ${userId}`);
+
+    try {
+      // Input validation
+      if (!commentId || typeof commentId !== 'string') {
+        this.logger.error(`❌ Invalid commentId: ${commentId}`);
+        throw new BadRequestException('Invalid comment ID provided');
       }
-    });
-
-    if (!comment) {
-      throw new NotFoundException(`Comment with ID ${commentId} not found`);
-    }
-
-    // Get current vote limit status
-    const currentStatus = await this.getVoteLimitStatus(
-      userId,
-      comment.submissionId,
-      comment.categoryId?.toString() || 'null'
-    );
-
-    // Check if user is trying to add a new vote but has no remaining votes
-    const voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {} };
-    const userVotes = voteDetails.userVotes || {};
-    const previousVote = userVotes[userId.toString()];
-    const isNewVote = !previousVote && voteType !== null;
-
-    if (isNewVote && !currentStatus.canVote) {
-      // For consistency, also return userVoteCount in error cases
-      const currentUserVoteCount = (voteDetails.userVoteCounts || {})[userId.toString()] || 0;
       
+      if (!userId || typeof userId !== 'number' || userId <= 0) {
+        this.logger.error(`❌ Invalid userId: ${userId}`);
+        throw new BadRequestException('Invalid user ID provided');
+      }
+      
+      if (voteType !== null && voteType !== 'UP') {
+        this.logger.error(`❌ Invalid voteType: ${voteType}`);
+        throw new BadRequestException('Invalid vote type. Only UP votes are allowed.');
+      }
+
+      // Get comment to find submission and category with error handling
+      let comment;
+      try {
+        comment = await this.prisma.evaluationComment.findUnique({
+          where: { id: commentId },
+          select: {
+            userId: true,
+            submissionId: true,
+            categoryId: true,
+            voteDetails: true,
+          }
+        });
+      } catch (dbError) {
+        this.logger.error(`❌ Database error fetching comment ${commentId}:`, dbError);
+        throw new InternalServerErrorException('Database error while fetching comment');
+      }
+
+      if (!comment) {
+        this.logger.warn(`⚠️ Comment not found: ${commentId}`);
+        throw new NotFoundException(`Comment with ID ${commentId} not found`);
+      }
+
+      // 🚨 CRITICAL SECURITY: Prevent self-voting (double-check in voteWithLimitCheck)
+      if (comment.userId === userId) {
+        this.logger.warn(`🚫 Self-voting attempt blocked: user ${userId} tried to vote on comment ${commentId}`);
+        throw new ForbiddenException(
+          'Users cannot vote on their own comments. Self-voting is not allowed.'
+        );
+      }
+
+      // Get current vote limit status with error handling
+      let currentStatus;
+      try {
+        currentStatus = await this.getVoteLimitStatus(
+          userId,
+          comment.submissionId,
+          comment.categoryId?.toString() || 'null'
+        );
+      } catch (limitError) {
+        this.logger.error(`❌ Error getting vote limit status:`, limitError);
+        throw new InternalServerErrorException('Error checking vote limits');
+      }
+
+      // Safely parse vote details
+      let voteDetails: VoteDetails;
+      try {
+        voteDetails = (comment.voteDetails as unknown as VoteDetails) || { userVotes: {}, userVoteCounts: {} };
+        if (!voteDetails.userVotes) voteDetails.userVotes = {};
+        if (!voteDetails.userVoteCounts) voteDetails.userVoteCounts = {};
+      } catch (parseError) {
+        this.logger.error(`❌ Error parsing vote details for comment ${commentId}:`, parseError);
+        voteDetails = { userVotes: {}, userVoteCounts: {} };
+      }
+
+      const userVotes = voteDetails.userVotes || {};
+      const previousVote = userVotes[userId.toString()];
+      const isNewVote = !previousVote && voteType !== null;
+
+      // Check vote limits
+      if (isNewVote && !currentStatus.canVote) {
+        const currentUserVoteCount = (voteDetails.userVoteCounts || {})[userId.toString()] || 0;
+        this.logger.warn(`⚠️ Vote limit exceeded for user ${userId} in category ${comment.categoryId}`);
+        
+        return {
+          success: false,
+          voteLimitStatus: currentStatus,
+          message: 'Vote limit reached. Cannot add more votes.',
+          userVoteCount: currentUserVoteCount,
+        };
+      }
+
+      // Proceed with the vote operation
+      let voteResult;
+      try {
+        voteResult = await this.vote(commentId, voteType, userId);
+        this.logger.log(`✅ Vote operation successful: ${operationId}`);
+      } catch (voteError) {
+        this.logger.error(`❌ Vote operation failed: ${operationId}`, voteError);
+        throw voteError; // Re-throw to maintain error details
+      }
+
+      // Update vote limit status
+      let updatedStatus;
+      try {
+        const isAddingVote = !previousVote && voteType !== null;
+        updatedStatus = await this.updateVoteLimitStatus(
+          userId,
+          comment.submissionId,
+          comment.categoryId?.toString() || 'null',
+          commentId,
+          isAddingVote
+        );
+      } catch (statusError) {
+        this.logger.error(`❌ Error updating vote limit status:`, statusError);
+        // Don't fail the entire operation for status update errors
+        updatedStatus = currentStatus;
+      }
+
+      // Get updated comment to calculate userVoteCount
+      let userVoteCount = 0;
+      try {
+        const updatedComment = await this.prisma.evaluationComment.findUnique({
+          where: { id: commentId },
+          select: { voteDetails: true }
+        });
+
+        if (updatedComment?.voteDetails) {
+          const updatedVoteDetails = (updatedComment.voteDetails as unknown as VoteDetails) || { userVotes: {}, userVoteCounts: {} };
+          const userVoteCounts = updatedVoteDetails.userVoteCounts || {};
+          userVoteCount = userVoteCounts[userId.toString()] || 0;
+        }
+      } catch (countError) {
+        this.logger.warn(`⚠️ Error calculating user vote count:`, countError);
+        // Use fallback from vote result if available
+        userVoteCount = voteResult?.userVoteCount || 0;
+      }
+
+      this.logger.log(`✅ Vote operation completed: ${operationId}`);
       return {
-        success: false,
-        voteLimitStatus: currentStatus,
-        message: 'Vote limit reached. Cannot add more votes.',
-        userVoteCount: currentUserVoteCount,
+        success: true,
+        voteLimitStatus: updatedStatus,
+        message: 'Vote successfully processed.',
+        userVoteCount: userVoteCount,
       };
+      
+    } catch (error) {
+      this.logger.error(`❌ Vote operation failed: ${operationId}`, error);
+      
+      // Re-throw known exceptions
+      if (error instanceof NotFoundException || 
+          error instanceof ForbiddenException || 
+          error instanceof BadRequestException ||
+          error instanceof InternalServerErrorException) {
+        throw error;
+      }
+      
+      // Wrap unexpected errors
+      throw new InternalServerErrorException(
+        `Unexpected error during vote operation: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
-
-    // Proceed with the vote
-    await this.vote(commentId, voteType, userId);
-
-    // Update vote limit status
-    const isAddingVote = !previousVote && voteType !== null;
-    const updatedStatus = await this.updateVoteLimitStatus(
-      userId,
-      comment.submissionId,
-      comment.categoryId?.toString() || 'null',
-      commentId,
-      isAddingVote
-    );
-
-    // Get updated comment to calculate userVoteCount for this specific comment
-    const updatedComment = await this.prisma.evaluationComment.findUnique({
-      where: { id: commentId },
-      select: { voteDetails: true }
-    });
-
-    // Calculate userVoteCount from the updated voteDetails
-    let userVoteCount = 0;
-    if (updatedComment?.voteDetails) {
-      const updatedVoteDetails = (updatedComment.voteDetails as unknown as VoteDetails) || { userVotes: {}, userVoteCounts: {} };
-      const userVoteCounts = updatedVoteDetails.userVoteCounts || {};
-      userVoteCount = userVoteCounts[userId.toString()] || 0;
-    }
-
-    return {
-      success: true,
-      voteLimitStatus: updatedStatus,
-      message: 'Vote successfully processed.',
-      userVoteCount: userVoteCount,
-    };
   }
 
   /**
@@ -1446,5 +1670,251 @@ export class EvaluationCommentService {
       return true;
     }
     return userVote === resetType; // Only 'UP' votes exist in ranking system
+  }
+
+  // =============================================================================
+  // RATING-TO-COMMENT INTEGRATION
+  // =============================================================================
+
+  /**
+   * Creates a comment automatically from a user's rating
+   * 
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param userId - The user ID who created the rating
+   * @param comment - The comment text from the rating
+   * @param score - The numeric score (for display purposes)
+   * @returns Promise containing the created comment DTO
+   */
+  async createCommentFromRating(
+    submissionId: string,
+    categoryId: number,
+    userId: number,
+    comment: string,
+    score: number
+  ): Promise<EvaluationCommentDTO> {
+    this.logger.log(`📝 Creating comment from rating: submission=${submissionId}, category=${categoryId}, user=${userId}`);
+
+    // Check if a rating comment already exists for this user/category/submission
+    const existingRatingComment = await this.prisma.evaluationComment.findFirst({
+      where: {
+        submissionId,
+        categoryId,
+        userId,
+        content: {
+          startsWith: '[Schriftliche Bewertung]'
+        }
+      }
+    });
+
+    if (existingRatingComment) {
+      this.logger.log(`✅ Rating comment already exists: ${existingRatingComment.id}`);
+      return this.mapCommentToDTO(existingRatingComment, userId);
+    }
+
+    // Generate anonymous display name
+    const anonymousDisplayName = await this.generateAnonymousName(submissionId, userId);
+    
+    // Format the comment content to indicate it's from a rating
+    const formattedContent = `[Schriftliche Bewertung] (${score}/10)\n\n${comment}`;
+
+    try {
+      const createdComment = await this.prisma.evaluationComment.create({
+        data: {
+          submissionId,
+          categoryId,
+          userId,
+          content: formattedContent,
+          parentId: null, // Rating comments are always top-level
+          anonymousDisplayName,
+          voteDetails: { userVotes: {} } as any, // Initialize empty vote tracking
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstname: true,
+              lastname: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              displayName: true,
+              description: true,
+              icon: true,
+              color: true,
+              order: true,
+            },
+          },
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstname: true,
+                  lastname: true,
+                },
+              },
+              category: true,
+              replies: true,
+            },
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      });
+
+      // Invalidate cache for this submission
+      this.cacheService.invalidateByPattern(`comments:${submissionId}:.*`);
+
+      this.logger.log(`✅ Rating comment created successfully: ${createdComment.id}`);
+      return this.mapCommentToDTO(createdComment, userId);
+
+    } catch (error) {
+      this.logger.error(`❌ Failed to create comment from rating:`, error);
+      throw new InternalServerErrorException('Failed to create comment from rating');
+    }
+  }
+
+  /**
+   * Updates an existing rating comment when the rating is modified
+   * 
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param userId - The user ID who owns the rating
+   * @param comment - The updated comment text
+   * @param score - The updated numeric score
+   * @returns Promise containing the updated comment DTO
+   */
+  async updateCommentFromRating(
+    submissionId: string,
+    categoryId: number,
+    userId: number,
+    comment: string,
+    score: number
+  ): Promise<EvaluationCommentDTO | null> {
+    this.logger.log(`📝 Updating rating comment: submission=${submissionId}, category=${categoryId}, user=${userId}`);
+
+    // Find the existing rating comment
+    const existingRatingComment = await this.prisma.evaluationComment.findFirst({
+      where: {
+        submissionId,
+        categoryId,
+        userId,
+        content: {
+          startsWith: '[Schriftliche Bewertung]'
+        }
+      }
+    });
+
+    if (!existingRatingComment) {
+      this.logger.warn(`⚠️ No existing rating comment found to update`);
+      return null;
+    }
+
+    // Format the updated content
+    const formattedContent = `[Schriftliche Bewertung] (${score}/10)\n\n${comment}`;
+
+    try {
+      const updatedComment = await this.prisma.evaluationComment.update({
+        where: { id: existingRatingComment.id },
+        data: {
+          content: formattedContent,
+          updatedAt: new Date(),
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstname: true,
+              lastname: true,
+            },
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              displayName: true,
+              description: true,
+              icon: true,
+              color: true,
+              order: true,
+            },
+          },
+          replies: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  firstname: true,
+                  lastname: true,
+                },
+              },
+              category: true,
+              replies: true,
+            },
+            orderBy: { createdAt: 'asc' },
+          },
+        },
+      });
+
+      // Invalidate cache for this submission
+      this.cacheService.invalidateByPattern(`comments:${submissionId}:.*`);
+
+      this.logger.log(`✅ Rating comment updated successfully: ${updatedComment.id}`);
+      return this.mapCommentToDTO(updatedComment, userId);
+
+    } catch (error) {
+      this.logger.error(`❌ Failed to update rating comment:`, error);
+      throw new InternalServerErrorException('Failed to update rating comment');
+    }
+  }
+
+  /**
+   * Gets comment status for all categories for a specific user and submission
+   * 
+   * @description This method checks all categories for a submission to determine
+   * which ones the user has already commented in. This is used to properly
+   * initialize the frontend comment status after page refreshes, including
+   * comments that were automatically created from ratings.
+   * 
+   * @param submissionId - The submission ID to check
+   * @param userId - The user ID to check  
+   * @returns Promise containing map of categoryId to boolean indicating if user has commented
+   * @memberof EvaluationCommentService
+   */
+  async getUserCommentStatusForAllCategories(
+    submissionId: string,
+    userId: number
+  ): Promise<Map<number, boolean>> {
+    this.logger.log(`🔍 Getting comment status for all categories: ${submissionId}, userId: ${userId}`);
+
+    try {
+      // Get all comments for this user and submission (including rating-generated comments)
+      const userComments = await this.prisma.evaluationComment.findMany({
+        where: {
+          submissionId,
+          userId
+        },
+        select: {
+          categoryId: true
+        },
+        distinct: ['categoryId']
+      });
+
+      // Create map of categoryId to hasCommented
+      const commentStatusMap = new Map<number, boolean>();
+      userComments.forEach(comment => {
+        commentStatusMap.set(comment.categoryId, true);
+      });
+
+      this.logger.log(`✅ Comment status retrieved: ${commentStatusMap.size} categories with comments`);
+      return commentStatusMap;
+
+    } catch (error) {
+      this.logger.error(`❌ Failed to get comment status for all categories:`, error);
+      throw new InternalServerErrorException('Failed to get comment status');
+    }
   }
 }

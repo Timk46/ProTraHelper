@@ -135,6 +135,12 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     });
     
     this.isModified = false;
+    
+    // For new ratings, allow immediate submission with default value
+    if (!this.currentRating) {
+      this.isModified = true;
+    }
+    
     this.hasUserInteracted = false; // Reset user interaction flag
     
     // Force change detection after initialization
@@ -377,9 +383,10 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
 
   /**
    * Checks if the rating can be submitted
+   * Allows submission for new ratings (no currentRating) or modified ratings
    */
   canSubmit(): boolean {
-    return !this.disabled && this.isModified;
+    return !this.disabled && (this.isModified || !this.currentRating);
   }
 
   /**

@@ -41,11 +41,13 @@ import {
 
 // Child Components
 import { CommentItemComponent } from '../comment-item/comment-item.component';
+import { CommentItemCleanComponent } from '../comment-item/comment-item-clean.component';
 import { CommentInputComponent } from '../comment-input/comment-input.component';
 
 // Services
 import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
 import { EvaluationPerformanceService } from '../../services/evaluation-performance.service';
+import { VoteQueueService } from '../../../../Services/evaluation/vote-queue.service';
 
 // Directives
 import { PerformanceProfilingDirective } from '../../directives/performance-profiling.directive';
@@ -64,6 +66,7 @@ import { PerformanceProfilingDirective } from '../../directives/performance-prof
     MatTooltipModule,
     ScrollingModule,
     CommentItemComponent,
+    CommentItemCleanComponent,
     CommentInputComponent,
     PerformanceProfilingDirective,
   ],
@@ -95,6 +98,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     private cdr: ChangeDetectorRef,
     private commentPanelStateService: CommentPanelStateService,
     private performanceService: EvaluationPerformanceService,
+    private voteQueueService: VoteQueueService,
     private elementRef: ElementRef,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
@@ -196,33 +200,135 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     this.setupResizeObserver();
   }
 
+  /**
+   * 🛠️ IMPROVED: Smart ngOnChanges with deep comparison to prevent unnecessary re-rendering
+   * Only rebuilds comment list when discussions data actually changed
+   */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['discussions'] || changes['sortOrder']) {
-      console.log('🔧 ngOnChanges triggered - processing flattened comments', {
+      const shouldReprocess = this.shouldReprocessDiscussions(changes);
+      
+      console.log('🔧 ngOnChanges triggered', {
         discussionsCount: this.discussions?.length || 0,
         sortOrder: this.sortOrder,
-        isFirstChange: changes['discussions']?.firstChange
+        isFirstChange: changes['discussions']?.firstChange,
+        shouldReprocess
       });
-      this.performanceService.markRenderStart('discussion-thread');
-      
-      // Force reprocessing by clearing cache
-      this.lastProcessedDiscussionsHash = '';
-      this.memoizedComments.clear(); // Clear memoization cache for fresh processing
-      this.processFlattenedComments();
-      this.cdr.markForCheck();
 
-      // Auto-scroll to bottom when new messages are added
-      if (changes['discussions'] && !changes['discussions'].firstChange) {
-        setTimeout(() => this.scrollToBottom(), 100);
+      if (shouldReprocess) {
+        console.log('✅ Reprocessing discussions - data actually changed');
+        this.performanceService.markRenderStart('discussion-thread');
+        
+        // Only clear cache when we actually need to reprocess
+        this.lastProcessedDiscussionsHash = '';
+        this.memoizedComments.clear(); 
+        this.processFlattenedComments();
+        this.cdr.markForCheck();
+
+        // Auto-scroll to bottom when new messages are added
+        if (changes['discussions'] && !changes['discussions'].firstChange) {
+          setTimeout(() => this.scrollToBottom(), 100);
+        }
+        
+        this.performanceService.markRenderEnd('discussion-thread');
+      } else {
+        console.log('🚀 Skipping reprocessing - discussions data unchanged (reference equality)');
+      }
+    }
+  }
+
+  /**
+   * 🛠️ ENHANCED: Determines if discussions should be reprocessed based on actual data changes
+   * Now includes deep vote count comparison to prevent unnecessary re-rendering during votes
+   */
+  private shouldReprocessDiscussions(changes: SimpleChanges): boolean {
+    // Always reprocess on first change
+    if (changes['discussions']?.firstChange) {
+      return true;
+    }
+
+    // Always reprocess when sort order changes
+    if (changes['sortOrder']) {
+      return true;
+    }
+
+    // Check if discussions reference actually changed
+    if (changes['discussions']) {
+      const prev = changes['discussions'].previousValue;
+      const curr = changes['discussions'].currentValue;
+      
+      // If references are the same, no need to reprocess
+      if (prev === curr) {
+        return false;
       }
       
-      // Force change detection for nested components
-      setTimeout(() => {
-        this.cdr.detectChanges();
-      }, 150);
-      
-      this.performanceService.markRenderEnd('discussion-thread');
+      // If array lengths are different, definitely reprocess
+      if (!prev || !curr || prev.length !== curr.length) {
+        return true;
+      }
+
+      // 🛠️ DEEP COMPARISON: Check for meaningful content changes
+      for (let i = 0; i < curr.length; i++) {
+        const prevDiscussion = prev[i];
+        const currDiscussion = curr[i];
+        
+        // Discussion ID changed - definitely reprocess
+        if (prevDiscussion?.id !== currDiscussion?.id) {
+          console.log('🔄 Discussion ID changed, reprocessing required');
+          return true;
+        }
+        
+        // Comment count changed - definitely reprocess
+        if (prevDiscussion?.comments?.length !== currDiscussion?.comments?.length) {
+          console.log('🔄 Comment count changed, reprocessing required');
+          return true;
+        }
+
+        // 🛠️ VOTE CHANGE DETECTION: Check if vote counts actually changed
+        const prevComments = prevDiscussion?.comments || [];
+        const currComments = currDiscussion?.comments || [];
+        
+        // If comment arrays have same length, check individual comments
+        if (prevComments.length === currComments.length) {
+          for (let j = 0; j < currComments.length; j++) {
+            const prevComment = prevComments[j];
+            const currComment = currComments[j];
+            
+            // Comment ID changed - reprocess needed
+            if (prevComment?.id !== currComment?.id) {
+              console.log('🔄 Comment ID changed, reprocessing required');
+              return true;
+            }
+            
+            // 🛠️ VOTE COUNT COMPARISON: Only reprocess if vote counts actually changed
+            if (prevComment?.voteStats?.upVotes !== currComment?.voteStats?.upVotes ||
+                prevComment?.voteStats?.downVotes !== currComment?.voteStats?.downVotes) {
+              console.log('🔄 Vote counts changed - but checking if this should trigger re-render...', {
+                commentId: currComment.id,
+                prevVotes: prevComment?.voteStats,
+                currVotes: currComment?.voteStats
+              });
+              
+              // 🛠️ CRITICAL: Only trigger re-render for vote changes if sort order is 'mostVoted'
+              // For other sort orders, vote changes shouldn't affect the order/display
+              if (this.sortOrder === 'mostVoted') {
+                console.log('✅ Vote change affects sort order, reprocessing required');
+                return true;
+              } else {
+                console.log('🚀 Vote change does not affect current sort order, skipping reprocess');
+                // Continue checking other comments/discussions
+              }
+            }
+          }
+        }
+      }
+
+      // If we reach here, no meaningful changes detected
+      console.log('🚀 No meaningful changes detected, skipping reprocess');
+      return false;
     }
+
+    return false;
   }
 
   ngDoCheck(): void {

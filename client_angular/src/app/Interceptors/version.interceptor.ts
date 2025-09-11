@@ -4,7 +4,7 @@ import { HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { version } from '@DTOs/version';
+import { version } from '@DTOs/index';
 
 @Injectable()
 export class VersionInterceptor implements HttpInterceptor {

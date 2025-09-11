@@ -27,6 +27,15 @@ export * from "./peer-review.dto";
 export * from "./peer-review-session.dto";
 export * from "./peer-submission.dto";
 
+// Version
+export * from "./version.dto";
+
+// Graph Tasks
+export * from "./graphTask.dto";
+
+// Code Game
+export * from "./codeGame.dto";
+
 //TutorKai DTOs
 export * from "./tutorKaiDtos/kiFeedback.dto";
 export * from "./tutorKaiDtos/submission.dto";

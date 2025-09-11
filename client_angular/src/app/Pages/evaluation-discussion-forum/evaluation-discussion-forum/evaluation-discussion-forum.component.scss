@@ -351,12 +351,21 @@ $warning-color: #e67e22;
   padding: 24px;
   box-shadow: $card-shadow;
   margin-bottom: 20px;
+  position: relative;
+
+  .header-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
 
   h1 {
     color: $text-primary;
     font-size: 24px;
-    margin: 0 0 8px 0;
+    margin: 0;
     font-weight: 600;
+    flex: 1;
   }
 
   .header-info {
@@ -383,6 +392,37 @@ $warning-color: #e67e22;
       &.evaluation {
         background: $success-color;
       }
+    }
+
+  }
+
+  .info-badge-prominent {
+    flex-shrink: 0;
+    margin-left: 16px;
+    width: 72px;
+    height: 72px;
+    background-color: rgba(33, 150, 243, 0.15) !important;
+    border: 2px solid rgba(33, 150, 243, 0.4);
+    transition: all 0.3s ease;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+
+    mat-icon {
+      font-size: 36px;
+      width: 36px;
+      height: 36px;
+      color: #1976d2 !important;
+    }
+
+    &:hover {
+      background-color: rgba(33, 150, 243, 0.25) !important;
+      border-color: rgba(33, 150, 243, 0.6);
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+    }
+
+    &.glow-effect {
+      animation: rating-glow 3s ease-in-out infinite;
     }
   }
 }
@@ -433,11 +473,14 @@ $warning-color: #e67e22;
     min-width: 0; /* Allow shrinking below content size */
     overflow: hidden;
     
-    // Special handling for discussion panel
+    // Special handling for discussion panel with flexbox layout
     &.card {
       .discussion-column & {
+        display: flex;
+        flex-direction: column;
         height: 650px; /* Fixed height like in HTML template */
         max-height: 650px;
+        overflow: hidden; /* Important: hidden, not auto! */
       }
     }
   }
@@ -499,7 +542,242 @@ $warning-color: #e67e22;
 }
 
 // =============================================================================
-// DISCUSSION PANEL
+// DISCUSSION HEADER PANEL
+// =============================================================================
+
+.discussion-header-panel {
+  flex-shrink: 0; // Prevent header panel from shrinking
+  margin-bottom: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+
+  .mat-expansion-panel-header {
+    padding: 20px 24px !important;
+    min-height: 70px !important;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e3f2fd 100%) !important;
+    border-bottom: 1px solid rgba(33, 150, 243, 0.1);
+    transition: all 0.3s ease !important;
+
+    &:hover:not(.mat-expanded) {
+      background: linear-gradient(135deg, #e8f1ff 0%, #d1e9fc 100%) !important;
+    }
+
+    .mat-expansion-panel-header-title {
+      flex: 1;
+      margin-right: 16px;
+
+      .discussion-icon {
+        color: #1976d2;
+        margin-right: 12px;
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .mat-expansion-panel-header-description {
+      flex: 0 0 auto;
+      max-width: none;
+
+      .vote-counter-compact {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+
+        .vote-icon {
+          font-size: 16px;
+        }
+
+        .vote-text {
+          font-size: 13px;
+          font-weight: 600;
+          color: #1976d2;
+        }
+
+        .vote-status-text {
+          font-size: 12px;
+          color: $text-secondary;
+
+          &.warning {
+            color: #e65100;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+
+    mat-action-row {
+      .info-badge {
+        width: 40px;
+        height: 40px;
+        background-color: rgba(33, 150, 243, 0.1) !important;
+        border: 1px solid rgba(33, 150, 243, 0.3);
+        transition: all 0.3s ease;
+        margin-left: 12px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+          color: #2196f3 !important;
+        }
+
+        &:hover {
+          background-color: rgba(33, 150, 243, 0.15) !important;
+          border-color: rgba(33, 150, 243, 0.5);
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+
+  .discussion-content {
+    padding: 0;
+    background: white;
+  }
+
+  &.glow-effect {
+    animation: rating-glow 3s ease-in-out infinite;
+    border: 2px solid $primary-color !important;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 12px;
+      background: linear-gradient(45deg, 
+                  rgba(52, 152, 219, 0.1), 
+                  rgba(52, 152, 219, 0.3));
+      animation: glow-rotation 4s linear infinite;
+      z-index: -1;
+    }
+  }
+}
+
+// =============================================================================
+// VOTE PROGRESS BAR STYLES
+// =============================================================================
+
+.vote-stats {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #fff8f5 0%, #fff3e0 100%);
+  border-bottom: 1px solid rgba(255, 193, 7, 0.2);
+  
+  .vote-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .vote-progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: rgba(255, 193, 7, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    
+    .vote-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff9800 0%, #f57c00 100%);
+      border-radius: 4px;
+      transition: width 0.4s ease-in-out;
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        animation: progress-shine 2s ease-in-out infinite;
+      }
+    }
+  }
+  
+  .vote-progress-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    
+    .votes-used {
+      font-weight: 600;
+      color: #e65100;
+    }
+    
+    .votes-total {
+      color: #757575;
+    }
+  }
+}
+
+@keyframes progress-shine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+// =============================================================================
+// RATING GATE SECTION STYLES
+// =============================================================================
+
+.rating-gate-section {
+  flex: 1;
+  min-height: 0; // Critical for flexbox!
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-top: 16px;
+  
+  // Scrollbar styling for rating gate section
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 4px;
+    
+    &:hover {
+      background: #95a5a6;
+    }
+  }
+  
+  &::-webkit-scrollbar-corner {
+    background: #f8f9fa;
+  }
+  
+  .action-area {
+    margin-top: 16px;
+  }
+}
+
+// =============================================================================
+// DISCUSSION PANEL (LEGACY)
 // =============================================================================
 
 .points-info {
@@ -546,6 +824,32 @@ $warning-color: #e67e22;
     &:hover {
       background: #95a5a6;
     }
+  }
+}
+
+// Panel scrollbar styling for discussion column
+.discussion-column .panel.card {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #bdc3c7;
+    border-radius: 4px;
+    border: 1px solid #f8f9fa;
+
+    &:hover {
+      background: #95a5a6;
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: #f8f9fa;
   }
 }
 

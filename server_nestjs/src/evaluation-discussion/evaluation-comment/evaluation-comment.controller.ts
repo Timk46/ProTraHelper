@@ -87,6 +87,12 @@ export class EvaluationCommentController {
     @Body() body: { voteType: 'UP' | null }, // Updated for ranking system
     @GetUser() user: User,
   ): Promise<VoteLimitResponseDTO> {
+    // 🚨 CRITICAL SECURITY: Controller-level self-voting prevention (defense in depth)
+    const comment = await this.evaluationCommentService.findOne(id);
+    if (comment.authorId === user.id) {
+      throw new BadRequestException('Users cannot vote on their own comments');
+    }
+
     // Validate vote type for ranking system
     if (body.voteType !== null && body.voteType !== 'UP') {
       throw new BadRequestException('Only UP votes are allowed in the ranking system');
@@ -136,5 +142,25 @@ export class EvaluationCommentController {
   @roles('ANY')
   async findOne(@Param('id') id: string, @GetUser() user?: User): Promise<EvaluationCommentDTO> {
     return this.evaluationCommentService.findOne(id, user?.id);
+  }
+
+  @Get('comment-status/:submissionId')
+  @roles('ANY')
+  async getUserCommentStatus(
+    @Param('submissionId') submissionId: string,
+    @GetUser() user: User,
+  ): Promise<{ [categoryId: number]: boolean }> {
+    const commentStatusMap = await this.evaluationCommentService.getUserCommentStatusForAllCategories(
+      submissionId, 
+      user.id
+    );
+    
+    // Convert Map to plain object for JSON response
+    const result: { [categoryId: number]: boolean } = {};
+    commentStatusMap.forEach((hasCommented, categoryId) => {
+      result[categoryId] = hasCommented;
+    });
+    
+    return result;
   }
 }

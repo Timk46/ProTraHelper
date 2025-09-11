@@ -8,11 +8,11 @@ import {
   MCOptionDTO,
   McqGenerationDTO,
   OptionDTO,
-} from '@DTOs/question.dto';
+} from '@DTOs/index';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable } from 'rxjs';
 import { of, switchMap, startWith, map, max } from 'rxjs';
-import { McQuestionOptionDTO } from '@DTOs/question.dto';
+import { McQuestionOptionDTO } from '@DTOs/index';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 import { MCScoreComponent } from './score/score.component';
 import { MatSnackBar } from '@angular/material/snack-bar';

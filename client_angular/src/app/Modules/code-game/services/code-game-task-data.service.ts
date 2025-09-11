@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { detailedQuestionDTO } from '@DTOs/detailedQuestion.dto';
-import { CodeGameEvaluationDTO } from '@DTOs/codeGame.dto';
-import { UserAnswerDataDTO } from '@DTOs/userAnswer.dto';
-import { userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { detailedQuestionDTO } from '@DTOs/index';
+import { CodeGameEvaluationDTO } from '@DTOs/index';
+import { UserAnswerDataDTO } from '@DTOs/index';
+import { userAnswerFeedbackDTO } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',

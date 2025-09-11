@@ -8,9 +8,9 @@ import {
   Optional,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/question.dto';
-import { McQuestionOptionDTO } from '@DTOs/question.dto';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/userAnswer.dto';
+import { MCOptionViewDTO, McQuestionDTO, QuestionDTO } from '@DTOs/index';
+import { McQuestionOptionDTO } from '@DTOs/index';
+import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';

@@ -1,5 +1,5 @@
-import { discussionDTO } from '@DTOs/discussion.dto';
-import { discussionMessageDTO } from '@DTOs/discussionMessage.dto';
+import { discussionDTO } from '@DTOs/index';
+import { discussionMessageDTO } from '@DTOs/index';
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import DOMPurify from 'dompurify';

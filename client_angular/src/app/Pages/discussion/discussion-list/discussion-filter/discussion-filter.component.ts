@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, OnChanges } from '@angular/core
 import {
   discussionFilterContentNodeDTO,
   discussionFilterDTO,
-} from '@DTOs/discussionFilter.dto';
+} from '@DTOs/index';
 import { DiscussionListService } from 'src/app/Services/discussion/discussion-list.service';
 
 @Component({

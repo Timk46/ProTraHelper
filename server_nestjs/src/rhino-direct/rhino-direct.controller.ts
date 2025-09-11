@@ -4,7 +4,7 @@
  * Nutzt Windows-Prozess-Ausführung und Registry-Erkennung
  */
 
-import { Controller, Post, Get, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpException, HttpStatus, UseGuards, Req, UsePipes, ValidationPipe } from '@nestjs/common';
 import { DirectRhinoLaunchResponse, SystemRhinoInfo } from './rhino-direct.service';
 import {
   RhinoDirectService,
@@ -15,23 +15,64 @@ import { RhinoFocusResponse, WindowInfo } from './rhino-window-manager.service';
 import { RhinoWindowManagerService, RhinoFocusRequest } from './rhino-window-manager.service';
 import { UnifiedRhinoFocusResponseDTO } from '@DTOs/rhino-window.dto';
 import { NativeFocusRequestDTO } from '@DTOs/rhino-window.dto';
+import { 
+  SecureRhinoLaunchRequestDTO,
+  SecureRhinoFocusRequestDTO,
+  SecureNativeFocusRequestDTO,
+  SecureSystemConfigRequestDTO,
+  SecureDebugRequestDTO
+} from '@DTOs/rhino-secure.dto';
+import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
+import { RolesGuard, roles } from '../auth/common/guards/roles.guard';
+import { RhinoThrottleGuard, RhinoThrottle, RhinoRateLimits } from './guards/rhino-throttle.guard';
+import { RhinoAuditService } from './services/rhino-audit.service';
+
+interface RequestWithUser {
+  user: {
+    id: number;
+    email: string;
+  };
+  ip?: string;
+  connection?: {
+    remoteAddress?: string;
+  };
+  headers: {
+    'user-agent'?: string;
+    [key: string]: any;
+  };
+}
 
 @Controller('api/rhinodirect')
+@UseGuards(JwtAuthGuard, RolesGuard, RhinoThrottleGuard)
+@UsePipes(new ValidationPipe({ 
+  transform: true, 
+  whitelist: true, 
+  forbidNonWhitelisted: true,
+  validateCustomDecorators: true
+}))
+@roles('STUDENT', 'ARCHSTUDENT', 'TEACHER', 'ADMIN')
 export class RhinoDirectController {
   constructor(
     private readonly rhinoDirectService: RhinoDirectService,
     private readonly rhinoWindowManagerService: RhinoWindowManagerService,
+    private readonly auditService: RhinoAuditService,
   ) {}
 
   /**
    * Startet Rhino direkt über Windows-Prozess
    */
   @Post('launch-direct')
+  @RhinoThrottle(RhinoRateLimits.LAUNCH)
   async launchRhinoDirect(
-    @Body() request: DirectRhinoLaunchRequest,
+    @Body() request: SecureRhinoLaunchRequestDTO,
+    @Req() req: RequestWithUser,
   ): Promise<DirectRhinoLaunchResponse> {
+    const startTime = Date.now();
+    const ipAddress = req.ip || req.connection?.remoteAddress || 'unknown';
+    const userAgent = req.headers['user-agent'];
+
     try {
-      console.log('🚀 Direct Rhino launch request received:', request);
+      console.log(`🚀 Direct Rhino launch request received from user ${req.user.id} (${req.user.email}):`, request);
 
       // Validierung der Eingabe
       if (!request.filePath) {
@@ -41,10 +82,35 @@ export class RhinoDirectController {
       // Führe Rhino-Start aus
       const result = await this.rhinoDirectService.launchRhino(request);
 
+      // Log successful operation
+      const responseTime = Date.now() - startTime;
+      await this.auditService.logSuccess(
+        req.user.id,
+        req.user.email,
+        'launch',
+        '/api/rhinodirect/launch-direct',
+        { filePath: request.filePath, rhinoPath: request.rhinoPath },
+        ipAddress,
+        responseTime,
+        userAgent
+      );
+
       console.log('✅ Direct Rhino launch result:', result);
       return result;
     } catch (error) {
       console.error('❌ Direct Rhino launch failed:', error);
+
+      // Log failed operation
+      await this.auditService.logError(
+        req.user.id,
+        req.user.email,
+        'launch',
+        '/api/rhinodirect/launch-direct',
+        { filePath: request.filePath },
+        error.message,
+        ipAddress,
+        userAgent
+      );
 
       if (error instanceof HttpException) {
         throw error;
@@ -61,6 +127,7 @@ export class RhinoDirectController {
    * Ermittelt verfügbare Rhino-Installationen
    */
   @Get('system-info')
+  @RhinoThrottle(RhinoRateLimits.INFO)
   async getSystemRhinoInfo(): Promise<SystemRhinoInfo> {
     try {
       console.log('🔍 System Rhino info request received');
@@ -113,7 +180,7 @@ export class RhinoDirectController {
    * Fokussiert ein Rhino-Fenster
    */
   @Post('focus-window')
-  async focusRhinoWindow(@Body() request: RhinoFocusRequest): Promise<RhinoFocusResponse> {
+  async focusRhinoWindow(@Body() request: SecureRhinoFocusRequestDTO): Promise<RhinoFocusResponse> {
     try {
       console.log('🎯 Focus Rhino window request received:', request);
 
@@ -185,11 +252,13 @@ export class RhinoDirectController {
    * Fokussiert ein Rhino-Fenster mit unified approach (native + PowerShell fallback)
    */
   @Post('focus-window-unified')
+  @RhinoThrottle(RhinoRateLimits.FOCUS)
   async focusRhinoWindowUnified(
-    @Body() request: RhinoFocusRequest,
+    @Body() request: SecureRhinoFocusRequestDTO,
+    @Req() req: RequestWithUser,
   ): Promise<UnifiedRhinoFocusResponseDTO> {
     try {
-      console.log('🎯 Unified Rhino window focus request received:', request);
+      console.log(`🎯 Unified Rhino window focus request received from user ${req.user.id} (${req.user.email}):`, request);
 
       const result = await this.rhinoWindowManagerService.focusRhinoWindowUnified(request);
 
@@ -213,10 +282,11 @@ export class RhinoDirectController {
    */
   @Post('focus-window-native')
   async focusRhinoWindowNative(
-    @Body() request: NativeFocusRequestDTO,
+    @Body() request: SecureNativeFocusRequestDTO,
+    @Req() req: RequestWithUser,
   ): Promise<UnifiedRhinoFocusResponseDTO> {
     try {
-      console.log('🚀 Native Rhino window focus request received:', request);
+      console.log(`🚀 Native Rhino window focus request received from user ${req.user.id} (${req.user.email}):`, request);
 
       const result = await this.rhinoWindowManagerService.focusRhinoWindowNative(
         request.windowHandle,
@@ -239,9 +309,12 @@ export class RhinoDirectController {
 
   /**
    * Aktiviert/Deaktiviert die native Implementierung als Standard
+   * Nur für Administratoren verfügbar
    */
   @Post('set-native-default')
-  async setNativeAsDefault(@Body() request: { enabled: boolean }): Promise<{
+  @roles('ADMIN')
+  @RhinoThrottle(RhinoRateLimits.CONFIG)
+  async setNativeAsDefault(@Body() request: SecureSystemConfigRequestDTO): Promise<{
     success: boolean;
     message: string;
     nativeEnabled: boolean;
@@ -321,9 +394,12 @@ export class RhinoDirectController {
 
   /**
    * Debug-Endpunkt für Live-Diagnostik der Rhino-Erkennung
+   * Nur für Administratoren verfügbar
    */
-  @Get('debug-rhino-detection')
-  async debugRhinoDetection(): Promise<any> {
+  @Post('debug-rhino-detection')
+  @roles('ADMIN')
+  @RhinoThrottle(RhinoRateLimits.DEBUG)
+  async debugRhinoDetection(@Body() request: SecureDebugRequestDTO = {}): Promise<any> {
     try {
       console.log('🔧 Debug Rhino detection request received');
 

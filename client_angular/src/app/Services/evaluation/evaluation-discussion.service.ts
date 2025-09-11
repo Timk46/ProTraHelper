@@ -355,6 +355,37 @@ export class EvaluationDiscussionService {
     );
   }
 
+  /**
+   * Gets user comment status for all categories for a specific submission
+   * 
+   * @description This method checks all categories to determine which ones
+   * the user has already commented in. This is used to properly initialize
+   * the frontend comment status after page refreshes, including comments
+   * that were automatically created from ratings.
+   * 
+   * @param submissionId - The submission ID to check
+   * @returns Observable containing map of categoryId to boolean indicating if user has commented
+   */
+  getUserCommentStatusForAllCategories(submissionId: string): Observable<{ [categoryId: number]: boolean }> {
+    const endpoint = `${this.apiUrls.comments}/comment-status/${submissionId}`;
+    console.log('🔍 Getting comment status for all categories:', {
+      endpoint,
+      submissionId
+    });
+    
+    return this.http.get<{ [categoryId: number]: boolean }>(endpoint).pipe(
+      tap(result => {
+        console.log('✅ Comment status retrieved:', {
+          submissionId,
+          categoriesWithComments: Object.keys(result).filter(key => result[+key]),
+          totalCategories: Object.keys(result).length
+        });
+      }),
+      retry(2),
+      catchError(this.handleError<{ [categoryId: number]: boolean }>('getUserCommentStatusForAllCategories'))
+    );
+  }
+
   // =============================================================================
   // ANONYMOUS USER MANAGEMENT
   // =============================================================================

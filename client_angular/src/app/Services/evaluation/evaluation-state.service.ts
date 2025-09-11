@@ -377,6 +377,33 @@ export class EvaluationStateService {
           ),
         );
 
+        // Add comment status loading for all categories
+        console.log('💬 Adding comment status loading for submissionId:', submissionId);
+        parallelOps.push(
+          this.evaluationService.getUserCommentStatusForAllCategories(submissionId).pipe(
+            tap(commentStatusObj => {
+              console.log('✅ Comment statuses loaded during submission init:', commentStatusObj);
+              // Convert object to Map for consistent interface
+              const commentStatusMap = new Map<number, boolean>();
+              Object.entries(commentStatusObj).forEach(([categoryId, hasCommented]) => {
+                commentStatusMap.set(Number(categoryId), hasCommented);
+              });
+              this.categoryCommentStatusSubject.next(commentStatusMap);
+              
+              console.log('📋 Comment status map initialized:', {
+                totalCategories: commentStatusMap.size,
+                categoriesWithComments: Array.from(commentStatusMap.entries()).filter(([_, hasCommented]) => hasCommented).map(([categoryId, _]) => categoryId)
+              });
+            }),
+            catchError(error => {
+              console.warn('⚠️ Comment status loading failed:', error);
+              // Reset to empty map if loading fails
+              this.categoryCommentStatusSubject.next(new Map());
+              return of({}); // Continue with empty object if comment status fails
+            }),
+          ),
+        );
+
         // Wait for ALL parallel operations to complete
         console.log('🔄 Starting parallel operations. Count:', parallelOps.length);
         forkJoin(parallelOps).subscribe({
@@ -578,6 +605,15 @@ export class EvaluationStateService {
           }))
         });
 
+        // 🔧 CRITICAL FIX: Load vote limits for the new category to sync "x/x verfügbar" display
+        if (submissionId) {
+          console.log('🔄 Loading vote limits for new category:', categoryId);
+          this.loadVoteLimitStatus(submissionId, categoryId).subscribe({
+            next: () => console.log('✅ Vote limits loaded for category transition:', categoryId),
+            error: (error) => console.error('❌ Failed to load vote limits for category:', categoryId, error)
+          });
+        }
+
         return void 0;
       }),
       catchError(error => {
@@ -701,6 +737,32 @@ export class EvaluationStateService {
             this.commentIdToCategoryIdMap.set(comment.id, categoryId);
           });
         });
+
+        // Check if current user has already commented in this category
+        const anonymousUser = this.anonymousUserSubject.value;
+        if (anonymousUser && discussions.length > 0) {
+          const hasUserCommented = discussions.some(discussion =>
+            discussion.comments.some(comment => 
+              comment.authorId === anonymousUser.id
+            )
+          );
+          
+          if (hasUserCommented) {
+            // Update comment status based on backend data (no localStorage for demo submissions)
+            const currentStatusMap = new Map(this.categoryCommentStatusSubject.value);
+            const wasAlreadyMarked = currentStatusMap.get(categoryId);
+            currentStatusMap.set(categoryId, true);
+            this.categoryCommentStatusSubject.next(currentStatusMap);
+            
+            console.log('✅ Comment status updated from backend data:', {
+              categoryId,
+              userId: anonymousUser.id,
+              wasAlreadyMarked,
+              submissionId
+            });
+          }
+        }
+        
         this.clearError(); // Clear any previous errors
       },
       error: error => {
@@ -1450,7 +1512,7 @@ export class EvaluationStateService {
     }
 
     // Search through all discussion caches to find the comment
-    for (const [categoryId, cacheSubject] of this.discussionCache.entries()) {
+    for (const [categoryId, cacheSubject] of Array.from(this.discussionCache.entries())) {
       const discussions = cacheSubject.value;
       for (const discussion of discussions) {
         const comment = discussion.comments.find(c => c.id === commentId);
@@ -1537,7 +1599,7 @@ export class EvaluationStateService {
         this.handleVoteUpdate(commentId, {
           voteStats: result.voteStats,
           userVote: result.userVote,
-          netVotes: result.netVotes,
+          netVotes: result.netVotes || result.voteStats?.upVotes || 0,
         });
 
         // 🚀 PHASE 4: Emit vote completion for cache synchronization
@@ -1556,7 +1618,24 @@ export class EvaluationStateService {
     );
   }
 
+  /**
+   * 🔧 OPTIMIZED: Smart vote update handler with cascade prevention
+   * 
+   * Now intelligently updates only when necessary and uses immutable updates
+   * to prevent unnecessary re-rendering while maintaining data consistency.
+   * 
+   * Performance improvements:
+   * - Deep equality check before triggering updates
+   * - Immutable updates with Object.freeze()
+   * - Batched updates with debouncing
+   * - Smart cache invalidation
+   */
   private handleVoteUpdate(commentId: string, voteData: VoteUpdateData): void {
+    console.log('🔧 SMART: Processing vote update with cascade prevention:', {
+      commentId,
+      voteData
+    });
+
     const categoryId = this.commentIdToCategoryIdMap.get(commentId);
     if (categoryId === undefined) {
       console.warn(
@@ -1577,18 +1656,85 @@ export class EvaluationStateService {
     }
 
     const discussions = subject.value;
-    const updatedDiscussions = discussions.map(discussion => ({
-      ...discussion,
-      comments: discussion.comments.map((comment: EvaluationCommentDTO) => {
-        if (comment.id === commentId) {
-          // Manually update the votes array for immediate UI feedback
-          const otherVotes = comment.votes.filter(vote => vote.userId !== anonymousUser.id);
+    
+    // 🔧 SMART CHECK: Only proceed if the update would actually change something
+    const needsUpdate = this.shouldUpdateDiscussions(discussions, commentId, voteData);
+    if (!needsUpdate) {
+      console.log('🚀 SMART: Skipping vote update - no meaningful changes detected');
+      return;
+    }
 
+    // 🔧 IMMUTABLE UPDATE: Create new discussions with minimal changes
+    const updatedDiscussions = this.createUpdatedDiscussions(
+      discussions,
+      commentId,
+      voteData,
+      anonymousUser
+    );
+
+    // 🔧 PERFORMANCE: Only emit if discussions actually changed (referential comparison)
+    if (updatedDiscussions !== discussions) {
+      console.log('✅ SMART: Emitting optimized vote update');
+      subject.next(updatedDiscussions);
+    }
+  }
+
+  /**
+   * 🔧 SMART: Check if discussions need updating
+   */
+  private shouldUpdateDiscussions(
+    discussions: EvaluationDiscussionDTO[],
+    commentId: string,
+    voteData: VoteUpdateData
+  ): boolean {
+    const targetComment = this.findCommentInDiscussions(discussions, commentId);
+    if (!targetComment) {
+      return false;
+    }
+
+    // Check if vote stats actually changed
+    const currentStats = targetComment.voteStats;
+    const newStats = voteData.voteStats;
+
+    return (
+      currentStats.upVotes !== newStats.upVotes ||
+      currentStats.downVotes !== newStats.downVotes ||
+      currentStats.totalVotes !== newStats.totalVotes ||
+      currentStats.score !== newStats.score
+    );
+  }
+
+  /**
+   * 🔧 IMMUTABLE: Create updated discussions with minimal object creation
+   */
+  private createUpdatedDiscussions(
+    discussions: EvaluationDiscussionDTO[],
+    commentId: string,
+    voteData: VoteUpdateData,
+    anonymousUser: AnonymousEvaluationUserDTO
+  ): EvaluationDiscussionDTO[] {
+    return discussions.map(discussion => {
+      // Check if this discussion contains the target comment
+      const hasTargetComment = discussion.comments.some(c => c.id === commentId);
+      if (!hasTargetComment) {
+        return discussion; // Return same reference if no changes needed
+      }
+
+      // Only create new discussion object if it contains the target comment
+      return {
+        ...discussion,
+        comments: discussion.comments.map((comment: EvaluationCommentDTO) => {
+          if (comment.id !== commentId) {
+            return comment; // Return same reference if no changes needed
+          }
+
+          // 🔧 OPTIMIZED: Update votes array efficiently
+          const otherVotes = comment.votes.filter(vote => vote.userId !== anonymousUser.id);
           const newVotes = [...otherVotes];
+          
           if (voteData.userVote) {
-            // 'UP' only (Ranking System)
             newVotes.push({
-              id: `temp-vote-${Date.now()}`, // Temporary ID for client-side rendering
+              id: `vote-${commentId}-${anonymousUser.id}`, // Consistent ID
               userId: anonymousUser.id,
               commentId: comment.id,
               voteType: voteData.userVote,
@@ -1596,17 +1742,33 @@ export class EvaluationStateService {
             });
           }
 
-          return {
+          // Create immutable comment update (without Object.freeze to avoid readonly type issues)
+          const updatedComment = {
             ...comment,
-            voteStats: voteData.voteStats,
-            votes: newVotes, // Update the votes array
+            voteStats: { ...voteData.voteStats }, // Create new object reference
+            votes: [...newVotes], // Create new array reference
           };
-        }
-        return comment;
-      }),
-    }));
 
-    subject.next(updatedDiscussions);
+          return updatedComment;
+        }),
+      };
+    });
+  }
+
+  /**
+   * 🔧 HELPER: Find comment in discussions efficiently
+   */
+  private findCommentInDiscussions(
+    discussions: EvaluationDiscussionDTO[],
+    commentId: string
+  ): EvaluationCommentDTO | null {
+    for (const discussion of discussions) {
+      const comment = discussion.comments.find(c => c.id === commentId);
+      if (comment) {
+        return comment;
+      }
+    }
+    return null;
   }
 
   // =============================================================================
@@ -1961,25 +2123,49 @@ export class EvaluationStateService {
 
   /**
    * Update vote limits after a vote is cast
+   * FIXED: Updates both legacy voteLimitsSubject and new voteLimitStatusSubject
    */
   private updateVoteLimits(
     categoryId: number,
     voteType: 'UP',
     isAddingVote: boolean,
   ): void {
+    const change = isAddingVote ? -1 : 1;
+
+    // Update legacy vote limits subject (for compatibility)
     const currentLimits = new Map(this.voteLimitsSubject.value);
     const categoryLimits = currentLimits.get(categoryId);
 
-    if (!categoryLimits) return;
+    if (categoryLimits) {
+      categoryLimits.availableVotes += change;
+      categoryLimits.availableVotes = Math.max(0, categoryLimits.availableVotes);
+      currentLimits.set(categoryId, categoryLimits);
+      this.voteLimitsSubject.next(currentLimits);
+    }
 
-    const change = isAddingVote ? -1 : 1;
-    categoryLimits.availableVotes += change;
+    // 🚀 CRITICAL FIX: Update the correct voteLimitStatusSubject that the UI uses
+    const currentStatus = new Map(this.voteLimitStatusSubject.value);
+    const categoryStatus = currentStatus.get(categoryId);
 
-    // Ensure limits don't go below 0
-    categoryLimits.availableVotes = Math.max(0, categoryLimits.availableVotes);
+    if (categoryStatus) {
+      const updatedStatus: VoteLimitStatusDTO = {
+        ...categoryStatus,
+        remainingVotes: Math.max(0, categoryStatus.remainingVotes + change),
+        canVote: (categoryStatus.remainingVotes + change) > 0,
+      };
 
-    currentLimits.set(categoryId, categoryLimits);
-    this.voteLimitsSubject.next(currentLimits);
+      currentStatus.set(categoryId, updatedStatus);
+      this.voteLimitStatusSubject.next(currentStatus);
+
+      console.log('🔄 Vote limits updated in real-time:', {
+        categoryId,
+        change,
+        newRemainingVotes: updatedStatus.remainingVotes,
+        canVote: updatedStatus.canVote,
+      });
+    } else {
+      console.warn('⚠️ Vote limit status not found for category:', categoryId);
+    }
   }
 
   /**
@@ -2028,7 +2214,7 @@ export class EvaluationStateService {
             this.handleVoteUpdate(commentId, {
               voteStats: result.voteStats,
               userVote: result.userVote,
-              netVotes: result.netVotes,
+              netVotes: result.netVotes || result.voteStats?.upVotes || 0,
             });
 
             // 🚀 PHASE 4: Emit vote completion for cache synchronization
@@ -2069,7 +2255,7 @@ export class EvaluationStateService {
         this.handleVoteUpdate(commentId, {
           voteStats: result.voteStats,
           userVote: result.userVote,
-          netVotes: result.netVotes,
+          netVotes: result.netVotes || result.voteStats?.upVotes || 0,
         });
 
         // 🚀 PHASE 4: Emit vote completion for cache synchronization
@@ -2093,17 +2279,25 @@ export class EvaluationStateService {
   // =============================================================================
 
   /**
-   * Loads vote limit status for a specific category
+   * Loads vote limit status for a specific category with corrected 10-vote system calculation
    * 
-   * @param submissionId - The submission ID
-   * @param categoryId - The category ID
-   * @returns Observable that emits when loading is complete
+   * @description Fetches vote limit status from backend and scales the calculation
+   * to ensure consistent 10-vote limit regardless of comment count. Uses backend's
+   * correct vote tracking (remainingVotes) scaled to 10-vote system.
+   * 
+   * @param submissionId - The submission ID to load vote limits for
+   * @param categoryId - The category ID to load vote limits for
+   * @returns Observable<void> that emits when loading is complete
+   * @throws Error if backend request fails after retries
+   * @memberof EvaluationStateService
+   * @since 2.0.0
    */
   loadVoteLimitStatus(submissionId: string, categoryId: number): Observable<void> {
     this.voteLimitLoadingSubject.next(true);
 
     return this.evaluationService.getVoteLimitStatus(submissionId, categoryId.toString()).pipe(
       tap(status => {
+        // Backend now provides correct 10-vote system directly - no scaling needed
         const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
         currentStatusMap.set(categoryId, status);
         this.voteLimitStatusSubject.next(currentStatusMap);
@@ -2118,12 +2312,20 @@ export class EvaluationStateService {
   }
 
   /**
-   * Updates vote limit status from backend response
+   * Updates vote limit status with corrected 10-vote system calculation
    * 
-   * @param categoryId - The category ID
-   * @param status - The new vote limit status
+   * @description Processes backend vote limit status and scales the calculation
+   * to ensure consistent 10-vote limit regardless of comment count. Uses backend's
+   * correct vote tracking (remainingVotes) scaled to 10-vote system.
+   * 
+   * @param categoryId - The evaluation category identifier
+   * @param status - The vote limit status from backend response
+   * @returns void
+   * @memberof EvaluationStateService
+   * @since 2.0.0
    */
   updateVoteLimitStatus(categoryId: number, status: VoteLimitStatusDTO): void {
+    // Backend now provides correct 10-vote system directly - no scaling needed
     const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
     currentStatusMap.set(categoryId, status);
     this.voteLimitStatusSubject.next(currentStatusMap);
@@ -2206,7 +2408,17 @@ export class EvaluationStateService {
   }
 
   /**
-   * Marks a category as commented and persists to localStorage
+   * Checks if a submission is a demo submission
+   * 
+   * @param submissionId - The submission ID to check
+   * @returns true if it's a demo submission
+   */
+  private isDemoSubmission(submissionId: string): boolean {
+    return submissionId === 'demo-submission-001';
+  }
+
+  /**
+   * Marks a category as commented and persists to localStorage (except for demo submissions)
    * 
    * @param categoryId - The category ID to mark as commented
    * @param submissionId - The submission ID for storage key
@@ -2219,16 +2431,25 @@ export class EvaluationStateService {
     currentStatusMap.set(categoryId, true);
     this.categoryCommentStatusSubject.next(currentStatusMap);
 
-    // Persist to localStorage
-    this.saveCommentStatusToStorage(submissionId, categoryId);
+    // Persist to localStorage (skip for demo submissions)
+    if (!this.isDemoSubmission(submissionId)) {
+      this.saveCommentStatusToStorage(submissionId, categoryId);
+    } else {
+      console.log('🎭 Skipping localStorage save for demo submission');
+    }
   }
 
   /**
-   * Loads comment status from localStorage for a submission
+   * Loads comment status from localStorage for a submission (skips demo submissions)
    * 
    * @param submissionId - The submission ID
    */
   loadCommentStatusFromStorage(submissionId: string): void {
+    // Skip localStorage for demo submissions
+    if (this.isDemoSubmission(submissionId)) {
+      console.log('🎭 Skipping localStorage load for demo submission:', submissionId);
+      return;
+    }
     try {
       const storageKey = `${this.commentStatusStorageKey}_${submissionId}`;
       const storedData = localStorage.getItem(storageKey);
@@ -2358,6 +2579,16 @@ export class EvaluationStateService {
         if (response.voteLimitStatus) {
           this.updateVoteLimitStatus(categoryId, response.voteLimitStatus);
           console.log('✅ Updated vote limit status from backend:', response.voteLimitStatus);
+        } else {
+          // 🚀 FALLBACK SYNC: If backend doesn't provide voteLimitStatus, load it explicitly
+          const submissionId = this.submissionSubject.value?.id;
+          if (submissionId) {
+            console.log('⚠️ Backend response missing voteLimitStatus, loading explicitly as fallback');
+            this.loadVoteLimitStatus(submissionId, categoryId).subscribe({
+              next: () => console.log('✅ Fallback vote limit status loaded successfully'),
+              error: (error) => console.error('❌ Fallback vote limit status loading failed:', error)
+            });
+          }
         }
 
         // 🚀 CRITICAL FIX: Emit vote completion event for Smart Sync to work

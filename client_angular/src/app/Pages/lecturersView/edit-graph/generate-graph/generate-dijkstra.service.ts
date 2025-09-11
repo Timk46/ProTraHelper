@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/graphTask.dto';
+import { GraphEdgeDTO, GraphNodeDTO, GraphStructureDTO } from '@DTOs/index';
 import { GenerateGraphService } from './generate-graph.service';
 
 export interface GenerateDijkstraConfiguration {

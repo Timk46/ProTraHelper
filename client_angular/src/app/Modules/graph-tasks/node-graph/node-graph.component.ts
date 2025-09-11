@@ -1,7 +1,7 @@
 import { CdkDragEnd, CdkDragMove, CdkDragStart } from '@angular/cdk/drag-drop';
 import { ElementRef, OnDestroy, OnInit } from '@angular/core';
 import { Component, Input, ViewChild } from '@angular/core';
-import { PositionDTO, GraphConfigurationDTO } from '@DTOs/graphTask.dto';
+import { PositionDTO, GraphConfigurationDTO } from '@DTOs/index';
 import { IGraphNode } from '../models/GraphNode.interface';
 import { GraphTaskService } from '../services/graph-task.service';
 import { IGraphNewEdge } from '../models/GraphNewEdge.interface';

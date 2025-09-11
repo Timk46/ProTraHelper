@@ -1,4 +1,4 @@
-import { PositionDTO, SizeDTO } from '@DTOs/graphTask.dto';
+import { PositionDTO, SizeDTO } from '@DTOs/index';
 
 export interface IGraphNode {
   nodeId: number;
