@@ -8,13 +8,17 @@ import {
   UploadedFile,
   UseInterceptors,
   Headers,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
 import { Response } from 'express';
 import * as fs from 'fs';
-import { Public } from '../public.decorator';
+import { filePrivacy } from '@DTOs/index';
+import { roles, RolesGuard } from '../auth/common/guards/roles.guard';
 
+@UseGuards(RolesGuard)
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
@@ -30,7 +34,7 @@ export class FilesController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadPublicFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
 
@@ -48,7 +52,7 @@ export class FilesController {
   }
 
   /**
-   * Download an existing file by its unique identifier.
+   * Download an existing public file by its unique identifier.
    *
    * GET /files/download/:uniqueIdentifier
    *
@@ -56,12 +60,16 @@ export class FilesController {
    * @param {Response} response - The Express response object
    * @returns {StreamableFile} The StreamableFile for downloading
    */
-  @Public()
+  @roles('ANY')
   @Get('download/:uniqueIdentifier')
   async downloadFile(
     @Param('uniqueIdentifier') uniqueIdentifier: string,
     @Res({ passthrough: true }) response: Response,
+    @Req() req: any,
   ): Promise<StreamableFile> {
+    if (!(await this.filesService.hasAccess(uniqueIdentifier, req.user))) {
+      throw new Error('File access denied');
+    }
     const file = await this.filesService.getFile(uniqueIdentifier);
     console.log('File to download:', file.type, file.type == 'PDF');
     // If the file is a PDF, set the content type to 'application/pdf' and content-Disposition Header to inline instead of attachment (to open the PDF in the browser instead of downloading it)
@@ -86,10 +94,11 @@ export class FilesController {
    * @param {Response} response - The Express response object
    * @returns {StreamableFile} The StreamableFile for downloading
    */
-  @Get('download/byName/:name')
+  /* @Get('download/byName/:name')
   async downloadFileByName(
     @Param('name') name: string,
     @Res({ passthrough: true }) response: Response,
+    @Req() req: any,
   ): Promise<StreamableFile> {
     const file = await this.filesService.getFileByName(name);
 
@@ -100,18 +109,22 @@ export class FilesController {
     });
 
     return this.filesService.downloadFileByName(name);
-  }
+  } */
 
   /**
-   * Retrieve an existing file by its unique identifier.
+   * Retrieve an existing public file by its unique identifier.
    *
    * GET /files/:uniqueIdentifier
    *
    * @param {string} uniqueIdentifier - The unique identifier of the file
    * @returns {Promise<FileDto>} The metadata of the retrieved file
    */
+  @roles('ANY')
   @Get(':uniqueIdentifier')
-  async getFile(@Param('uniqueIdentifier') uniqueIdentifier: string) {
+  async getFile(@Param('uniqueIdentifier') uniqueIdentifier: string, @Req() req: any) {
+    if (!(await this.filesService.hasAccess(uniqueIdentifier, req.user))) {
+      throw new Error('File access denied');
+    }
     return await this.filesService.getFile(uniqueIdentifier);
   }
 
@@ -125,13 +138,17 @@ export class FilesController {
    * @param range The range header from the request, specifying the part of the video to download.
    * @returns A StreamableFile object containing the video stream.
    */
-  @Public()
+  @roles('ANY')
   @Get('download/Video/:uniqueIdentifier')
   async downloadVideo(
     @Param('uniqueIdentifier') uniqueIdentifier: string, // Extracts the video's unique identifier from the URL.
     @Res({ passthrough: true }) response: Response, // Injects the response object for direct manipulation.
+    @Req() req: any,
     @Headers('range') range: string, // Extracts the 'Range' header from the request.
   ): Promise<StreamableFile> {
+    if (!(await this.filesService.hasAccess(uniqueIdentifier, req.user))) {
+      throw new Error('File access denied');
+    }
     // Retrieves the file based on the unique identifier.
     const file = await this.filesService.getFile(uniqueIdentifier);
     // Determines the file size for setting appropriate headers.
@@ -177,7 +194,7 @@ export class FilesController {
    * @param range - The 'Range' header from the request, used for partial file downloads.
    * @returns A StreamableFile object containing the video stream.
    */
-  @Public()
+  /* @Public()
   @Get('download/VideoByName/:name')
   async downloadVideoByName(
     @Param('name') name: string, // Extracts the video's unique identifier from the URL.
@@ -219,5 +236,5 @@ export class FilesController {
       const fileStream = fs.createReadStream(process.env.FILE_PATH + file.path);
       return new StreamableFile(fileStream);
     }
-  }
+  } */
 }

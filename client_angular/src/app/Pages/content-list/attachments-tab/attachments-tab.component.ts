@@ -1,6 +1,6 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Component, Input, OnInit } from '@angular/core';
-import { ContentElementDTO, contentElementType } from '@DTOs/index';
+import { ContentElementDTO, contentElementType, filePrivacy } from '@DTOs/index';
 import { ContentLinkerService } from 'src/app/Services/contentLinker/content-linker.service';
 import { FileService } from 'src/app/Services/files/files.service';
 

@@ -2,7 +2,7 @@
 import { FeedbackGenerationService } from '@/ai/feedback-generation/feedback-generation.service';
 import { ContentService } from '@/content/content.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/index';
+import { filePrivacy, UserAnswerDataDTO, userAnswerFeedbackDTO, UserFillinAnswerDTO } from '@DTOs/index';
 import {
   QuestionDTO,
   questionType,
@@ -1362,6 +1362,8 @@ export class QuestionDataService {
         Buffer.from(answerData.userUploadAnswer.file.file, 'base64'),
         answerData.userUploadAnswer.file.name,
         expectedFileType,
+        filePrivacy.RESTRICTED,
+        userId,
       );
 
       if (!uploadedFile) {
@@ -1371,8 +1373,8 @@ export class QuestionDataService {
       // Create UserUploadAnswer entry
       const uploadAnswer = await this.prisma.userUploadAnswer.create({
         data: {
-          userAnswerId: createdData.id,
-          fileId: uploadedFile.id,
+          userAnswer: { connect: { id: createdData.id } },
+          fileUpload: { connect: { id: uploadedFile.fileUploadId } },
         },
       });
 

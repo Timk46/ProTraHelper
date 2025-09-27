@@ -8,7 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class ProductionFilesService {
-  private readonly apiUrl = environment.server + '/production-files';
+  private readonly apiUrl = environment.server;
 
   constructor(private readonly httpClient: HttpClient) {}
 
@@ -22,7 +22,7 @@ export class ProductionFilesService {
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-    return this.httpClient.post(`${this.apiUrl}/upload`, formData);
+    return this.httpClient.post(`${this.apiUrl}/production-files/upload`, formData);
   }
 
   /**
@@ -31,8 +31,8 @@ export class ProductionFilesService {
    * @param uniqueIdentifier The unique identifier for the file to be downloaded.
    * @returns An Observable containing the server response, which includes the file as a Blob.
    */
-  downloadProductionFile(uniqueIdentifier: string): Observable<HttpResponse<Blob>> {
-    return this.httpClient.get(`${this.apiUrl}/download/${uniqueIdentifier}`, {
+  downloadProductionFile(fileUploadId: number): Observable<HttpResponse<Blob>> {
+    return this.httpClient.get(`${this.apiUrl}/production-files/download/${fileUploadId}`, {
       responseType: 'blob',
       observe: 'response',
     });

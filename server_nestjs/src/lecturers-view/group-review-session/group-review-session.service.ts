@@ -104,7 +104,7 @@ export class GroupReviewSessionService {
 
           const userUploads = await tx.userUploadAnswer.findMany({
             where: { userAnswer: { questionId: gate.linkedQuestionId } },
-            include: { userAnswer: { include: { user: true } }, file: true },
+            include: { userAnswer: { include: { user: true } }, fileUpload: { include: { file: true } } },
           });
 
           if (userUploads.length === 0) {
@@ -115,12 +115,13 @@ export class GroupReviewSessionService {
           }
 
           for (const upload of userUploads) {
+            console.log('CURRENT UPLOAD:', upload);
             await tx.evaluationSubmission.create({
               data: {
                 title: `Abgabe von ${upload.userAnswer.user.firstname}`,
-                description: `Eingereichte Datei: ${upload.file.name}`,
+                description: `Eingereichte Datei: ${upload.fileUpload.file.name}`,
                 authorId: upload.userAnswer.userId,
-                pdfFileId: upload.fileId,
+                pdfFileId: upload.fileUpload.id,
                 sessionId: session.id,
                 status: EvaluationStatus.SUBMITTED,
                 phase: EvaluationPhase.DISCUSSION,

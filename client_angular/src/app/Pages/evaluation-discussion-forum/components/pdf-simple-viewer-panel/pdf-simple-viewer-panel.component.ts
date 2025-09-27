@@ -1,46 +1,38 @@
-// NOTE: pdfjs-dist is throwing "Promise.withResolvers is not a function" in some scenarios.
-// This is a workaround. Only keep it if your environment really needs it.
-
-/*if (typeof Promise.withResolvers !== 'function') {
-  Promise.withResolvers = function <T>() {
-    let resolve!: (value: T | PromiseLike<T>) => void;
-    let reject!: (reason?: any) => void;
-    const promise = new Promise<T>((res, rej) => {
-      resolve = res;
-      reject = rej;
-    });
-    return { promise, resolve, reject };
-  };
-}*/
-
-import { OnInit, ElementRef, AfterViewInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import {
+  ChangeDetectorRef,
   Component,
+  ElementRef,
   Input,
-  ChangeDetectionStrategy,
-  ViewChild,
+  OnChanges,
+  OnDestroy,
   SecurityContext,
+  SimpleChanges,
+  ViewChild,
 } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { environment } from '../../../../../environments/environment';
 import * as pdfjsLib from 'pdfjs-dist';
-import { FileService } from '../../../../Services/files/files.service';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { NgIf } from '@angular/common';
+import { EvaluationSubmissionDTO } from '@DTOs/index';
+import { ProductionFilesService } from '../../../../Services/files/production-files.service';
 
 // Point pdfjs to the external (or local) worker file that matches the installed pdfjsLib version.
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.js`;
 
 @Component({
-  selector: 'app-pdfViewer',
-  templateUrl: './pdfViewer.component.html',
-  styleUrls: ['./pdfViewer.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-pdf-simple-viewer-panel',
+  standalone: true,
+  imports: [NgIf, MatProgressSpinner],
+  templateUrl: './pdf-simple-viewer-panel.component.html',
+  styleUrl: './pdf-simple-viewer-panel.component.scss',
 })
-export class PdfViewerComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() uniqueIdentifier: string = '';
+export class PdfSimpleViewerPanelComponent implements OnDestroy, OnChanges {
+  @Input() uploadFileId: number | undefined = undefined;
+  @Input() submission: EvaluationSubmissionDTO | null = null;
   @ViewChild('pdfViewer') pdfViewer!: ElementRef;
 
   pdfSrc: SafeUrl = '';
-  private objectUrl?: string; // for cleanup of created blob URLs
+  private objectUrl?: string;
 
   // Basic detection for iPad
   isIpad: boolean = /iPad|Macintosh/i.test(navigator.userAgent) && 'ontouchend' in document;
@@ -51,11 +43,18 @@ export class PdfViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private readonly sanitizer: DomSanitizer,
     private readonly cdr: ChangeDetectorRef,
-    private readonly fileService: FileService,
+    private readonly productionFilesService: ProductionFilesService,
   ) {}
 
   ngOnInit() {
-    this.pdfFromUniqueIdentifier(this.uniqueIdentifier);
+    //this.pdfFromFileUploadId(this.uploadFileId);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['uploadFileId'] && this.uploadFileId) {
+      console.log('VIEWER HERE:', this.uploadFileId);
+      this.pdfFromFileUploadId(this.uploadFileId);
+    }
   }
 
   ngOnDestroy(): void {
@@ -152,17 +151,20 @@ export class PdfViewerComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * @param {string} uniqueIdentifier - The unique identifier of the PDF file to load
-   * Fetches the PDF URL from your server and stores it in pdfSrc.
-   * If on iPad, starts rendering immediately.
+   * Loads a PDF file for viewing based on the provided file upload ID.
+   *
+   * Constructs a secure URL to the PDF file using the given `fileUploadId`,
+   * sanitizes the URL for safe usage in the application, and updates the
+   * component's PDF source. Triggers change detection to ensure the view is updated.
+   *
+   * @param fileUploadId - The unique identifier of the uploaded PDF file to display.
    */
-  pdfFromUniqueIdentifier(uniqueIdentifier: string) {
-    // Load via HttpClient (interceptors add auth headers), then render from Blob URL
+  pdfFromFileUploadId(fileUploadId: number) {
     this.isLoading = true;
     this.loadingProgress = 0;
     this.cdr.markForCheck();
 
-    this.fileService.downloadFile(uniqueIdentifier).subscribe({
+    this.productionFilesService.downloadProductionFile(fileUploadId).subscribe({
       next: response => {
         const blob = response.body;
         if (!blob) {
@@ -171,23 +173,21 @@ export class PdfViewerComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        // Clean up any previous object URL
+        // cleanup previous URL
         this.revokeObjectUrl();
         const url = URL.createObjectURL(blob);
         this.objectUrl = url;
         this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
 
         if (this.isIpad) {
-          // iPad: render pages using pdf.js
           this.loadPdfForIpad(this.pdfSrc);
         } else {
-          // Non-iPad: let the template viewer load the Blob URL
           this.isLoading = false;
         }
         this.cdr.markForCheck();
       },
       error: err => {
-        console.error('Error downloading PDF:', err);
+        console.error('Error downloading production PDF:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
       },

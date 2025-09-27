@@ -3,6 +3,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { filePrivacy } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +22,6 @@ export class FileService {
   uploadFile(file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-
     return this.httpClient.post(`${this.apiUrl}/upload`, formData);
   }
 

@@ -83,11 +83,18 @@
             </a>
           </div>
           <div class="pdf-viewer-container">
-            <app-pdf-viewer-panel
+            <!-- OLD -->
+            <!-- <app-pdf-viewer-panel
               [submission]="vm.submission"
               [pdfUrl]="vm.submission?.pdfMetadata?.downloadUrl || null"
             >
-            </app-pdf-viewer-panel>
+            </app-pdf-viewer-panel> -->
+            <app-pdf-simple-viewer-panel
+              [submission]="vm.submission"
+              [uploadFileId]="vm.submission?.pdfFileId"
+            >
+            </app-pdf-simple-viewer-panel>
+
           </div>
         </div>
       </div>

@@ -91,12 +91,15 @@ export class QuestionDataUploadService {
       select: {
         UserUploadAnswer: {
           select: {
-            file: {
+            fileUpload: {
               select: {
                 id: true,
-                name: true,
-                type: true,
-                path: true,
+                file: {
+                  select: {
+                    name: true,
+                    type: true,
+                  },
+                },
               },
             },
           },
@@ -108,8 +111,8 @@ export class QuestionDataUploadService {
       },
     });
     return uploads.map(upload => ({
-      fileName: upload.UserUploadAnswer[0]?.file.name || 'Namenlose Datei',
-      fileType: upload.UserUploadAnswer[0]?.file.type || 'Unbekannt',
+      fileName: upload.UserUploadAnswer[0]?.fileUpload.file.name || 'Namenlose Datei',
+      fileType: upload.UserUploadAnswer[0]?.fileUpload.file.type || 'Unbekannt',
       uploadedAt: upload.createdAt,
     }));
   }
@@ -208,11 +211,16 @@ export class QuestionDataUploadService {
         },
         UserUploadAnswer: {
           select: {
-            file: {
+            fileUpload: {
               select: {
-                uniqueIdentifier: true,
-                name: true,
-                updatedAt: true,
+                id: true,
+                file: {
+                  select: {
+                    uniqueIdentifier: true,
+                    name: true,
+                    updatedAt: true,
+                  },
+                },
               },
             },
           },
@@ -242,9 +250,9 @@ export class QuestionDataUploadService {
       questionTitle: answer.question.name,
       userId: answer.user.id,
       userMail: answer.user.email,
-      fileUniqueIdentifier: answer.UserUploadAnswer[0]?.file.uniqueIdentifier,
-      fileName: answer.UserUploadAnswer[0]?.file.name,
-      uploadDate: answer.UserUploadAnswer[0]?.file.updatedAt,
+      fileUniqueIdentifier: answer.UserUploadAnswer[0]?.fileUpload.file.uniqueIdentifier,
+      fileName: answer.UserUploadAnswer[0]?.fileUpload.file.name,
+      uploadDate: answer.UserUploadAnswer[0]?.fileUpload.file.updatedAt,
     }));
   }
 }

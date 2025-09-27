@@ -57,10 +57,14 @@ export class EvaluationSubmissionService {
         },
         pdfFile: {
           select: {
-            id: true,
-            name: true,
-            type: true,
-            // Remove path and other sensitive data
+            file: {
+              select: {
+                id: true,
+                name: true,
+                type: true,
+                // Remove path and other sensitive data
+              },
+            },
           },
         },
         session: {
@@ -141,9 +145,13 @@ export class EvaluationSubmissionService {
           },
           pdfFile: {
             select: {
-              id: true,
-              name: true,
-              type: true,
+              file: {
+                select: {
+                  id: true,
+                  name: true,
+                  type: true,
+                },
+              },
             },
           },
           _count: {
@@ -363,7 +371,11 @@ export class EvaluationSubmissionService {
     const submission = await this.prisma.evaluationSubmission.findUnique({
       where: { id },
       include: {
-        pdfFile: true,
+        pdfFile: {
+          include: {
+            file: true,
+          },
+        },
       },
     });
 
@@ -375,7 +387,7 @@ export class EvaluationSubmissionService {
       throw new NotFoundException(`PDF file for submission ${id} not found`);
     }
 
-    const filePath = join(process.cwd(), submission.pdfFile.path);
+    const filePath = join(process.cwd(), submission.pdfFile.file.path);
     return createReadStream(filePath);
   }
 

@@ -1,4 +1,4 @@
-import { StreamableFile } from '@nestjs/common';
+import { ParseIntPipe, StreamableFile } from '@nestjs/common';
 import {
   Controller,
   Get,
@@ -15,6 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductionFilesService } from './production-files.service';
 import { Response } from 'express';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
+import { filePrivacy } from '@DTOs/index';
 
 @UseGuards(RolesGuard)
 @Controller('production-files')
@@ -36,14 +37,14 @@ export class ProductionFilesController {
    */
   @roles('ANY')
   @Post('upload')
+  @Post('upload/:privacy')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadProductionFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+  async uploadProductionFile(@UploadedFile() file: Express.Multer.File, @Req() req: any, @Param('privacy') privacy: filePrivacy = filePrivacy.PRIVATE) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
     const fileType = mimetype.split('/')[1];
-    const userId = req.user.id;
 
-    return await this.productionFilesService.uploadProductionFile(buffer, fileName, fileType);
+    return await this.productionFilesService.uploadProductionFile(buffer, fileName, fileType, privacy, req.user.id);
   }
 
   /**
@@ -58,16 +59,22 @@ export class ProductionFilesController {
    * @returns {StreamableFile} The StreamableFile for downloading
    */
   @roles('ANY')
-  @Get('download/:uniqueIdentifier')
+  @Get('download/:fileUploadId')
   async downloadProductionFile(
-    @Param('uniqueIdentifier') uniqueIdentifier: string,
+    @Param('fileUploadId', ParseIntPipe) fileUploadId: number,
     @Req() req: any,
     @Res({ passthrough: true }) response: Response,
   ): Promise<StreamableFile> {
     const userId = req.user.id;
 
+    // check access
+    if (!(await this.productionFilesService.hasAccess(fileUploadId, req.user))) {
+      console.warn(`[Download] User ${userId} tried to access file without permission`);
+      throw new Error('You do not have permission to access this file');
+    }
+
     // Get file metadata first to set proper headers
-    const file = await this.productionFilesService.getProductionFile(uniqueIdentifier);
+    const file = (await this.productionFilesService.getProductionFile(fileUploadId)).file;
 
     // Map file extensions/types to proper MIME types
     const mimeTypeMap: Record<string, string> = {
@@ -111,7 +118,7 @@ export class ProductionFilesController {
     console.log(
       `[Download] User ${userId} downloaded file '${file.name}' (${file.uniqueIdentifier})`,
     );
-    return this.productionFilesService.downloadProductionFile(uniqueIdentifier);
+    return this.productionFilesService.downloadProductionFile(fileUploadId);
   }
 
   /**
@@ -122,9 +129,9 @@ export class ProductionFilesController {
    * @param {string} uniqueIdentifier - The unique identifier of the file
    * @returns {Promise<FileDto>} The metadata of the retrieved file
    */
-  @roles('ANY')
-  @Get(':uniqueIdentifier')
-  async getProductionFile(@Param('uniqueIdentifier') uniqueIdentifier: string) {
-    return await this.productionFilesService.getProductionFile(uniqueIdentifier);
-  }
+  /* @roles('ADMIN')
+  @Get(':fileUploadId')
+  async getProductionFile(@Param('fileUploadId', ParseIntPipe) fileUploadId: number) {
+    return await this.productionFilesService.getProductionFile(fileUploadId);
+  } */
 }

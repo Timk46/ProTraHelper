@@ -225,12 +225,19 @@ model ContentElement {
   QuestionCollectionLink QuestionCollectionLink[]
 }
 
+enum filePrivacy {
+  PRIVATE
+  PUBLIC
+  RESTRICTED
+}
+
 model File {
   id                   Int                   @id @default(autoincrement())
   uniqueIdentifier     String                @unique
   name                 String
   path                 String
   type                 String
+  privacy              filePrivacy           @default(PRIVATE)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
   questionId           Int?
@@ -241,10 +248,6 @@ model File {
   question             Question?             @relation(fields: [questionId], references: [id])
   TranscriptEmbeddings TranscriptEmbedding[]
   fileUploads          FileUpload[]
-  UserUploadAnswer     UserUploadAnswer[]
-
-  // EVALUATION SYSTEM RELATIONS
-  evaluationSubmissions EvaluationSubmission[]
 }
 
 model ContentView {
@@ -893,15 +896,19 @@ model MCSliderQuestion {
 }
 
 model FileUpload {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  fileId    Int
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               Int                @id @default(autoincrement())
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           Int
+  file             File               @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  fileId           Int
+  module           Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId         Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  UserUploadAnswer UserUploadAnswer[]
+
+  // EVALUATION SYSTEM RELATIONS
+  evaluationSubmissions EvaluationSubmission[]
 
   @@unique([userId, fileId, moduleId])
 }
@@ -923,8 +930,8 @@ model UserUploadAnswer {
   id           Int        @id @default(autoincrement())
   userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
   userAnswerId Int
-  file         File       @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  fileId       Int
+  fileUpload   FileUpload @relation(fields: [fileUploadId], references: [id], onDelete: Cascade)
+  fileUploadId Int
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
@@ -1030,7 +1037,7 @@ model EvaluationSubmission {
 
   // Relations
   author      User                @relation(fields: [authorId], references: [id])
-  pdfFile     File                @relation(fields: [pdfFileId], references: [id])
+  pdfFile     FileUpload          @relation(fields: [pdfFileId], references: [id])
   session     EvaluationSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   discussions Discussion[]        @relation("EvaluationDiscussions")
   ratings     EvaluationRating[]

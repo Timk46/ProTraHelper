@@ -62,6 +62,7 @@ import { RatingSliderComponent } from '../components/rating-slider/rating-slider
 import { RatingGateComponent } from '../components/rating-gate/rating-gate.component';
 import { VotingMechanismDialogComponent } from '../components/voting-mechanism-dialog/voting-mechanism-dialog.component';
 import { UserService } from 'src/app/Services/auth/user.service';
+import { PdfSimpleViewerPanelComponent } from '../components/pdf-simple-viewer-panel/pdf-simple-viewer-panel.component';
 
 // =============================================================================
 // MOCK DATA FOR DEVELOPMENT - ALL REMOVED
@@ -95,6 +96,7 @@ import { UserService } from 'src/app/Services/auth/user.service';
     MatExpansionModule,
     CategoryTabsComponent,
     PdfViewerPanelComponent,
+    PdfSimpleViewerPanelComponent,
     DiscussionThreadComponent,
     RatingSliderComponent,
     RatingGateComponent,
