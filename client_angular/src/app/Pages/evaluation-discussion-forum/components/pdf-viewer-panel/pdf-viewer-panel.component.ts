@@ -44,6 +44,12 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
   @Input() submission: EvaluationSubmissionDTO | null = null;
   @Input() pdfUrl: string | null = null;
 
+  // Navigation inputs
+  @Input() canNavigatePrevious: boolean = false;
+  @Input() canNavigateNext: boolean = false;
+  @Input() currentSubmissionTitle: string = '';
+  @Input() submissionPosition: string = ''; // e.g., "3 von 5"
+
   // =============================================================================
   // CONSTRUCTOR
   // =============================================================================
@@ -60,6 +66,10 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
 
   @Output() pageChanged = new EventEmitter<number>();
   @Output() downloadRequested = new EventEmitter<void>();
+
+  // Navigation outputs
+  @Output() navigateToPrevious = new EventEmitter<void>();
+  @Output() navigateToNext = new EventEmitter<void>();
 
   // =============================================================================
   // COMPONENT STATE
@@ -96,6 +106,10 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
       pdfUrl: this.pdfUrl,
       hasSubmission: !!this.submission,
       pdfFileId: this.submission?.pdfFileId,
+      canNavigatePrevious: this.canNavigatePrevious,
+      canNavigateNext: this.canNavigateNext,
+      submissionTitle: this.currentSubmissionTitle,
+      submissionPosition: this.submissionPosition,
       pdfFile: !!this.submission?.pdfFile
     });
 
@@ -440,6 +454,51 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
 
   onRetryLoad(): void {
     this.loadPdf();
+  }
+
+  // =============================================================================
+  // NAVIGATION METHODS
+  // =============================================================================
+
+  /**
+   * Handles navigation to previous submission
+   *
+   * @description Emits the navigateToPrevious event to notify parent component
+   * that user wants to navigate to the previous submission
+   * @memberof PdfViewerPanelComponent
+   */
+  onNavigateToPrevious(): void {
+    console.log('⬅️ PDF Viewer: Navigating to previous submission', {
+      currentSubmission: this.submission?.id,
+      canNavigatePrevious: this.canNavigatePrevious
+    });
+    this.navigateToPrevious.emit();
+  }
+
+  /**
+   * Handles navigation to next submission
+   *
+   * @description Emits the navigateToNext event to notify parent component
+   * that user wants to navigate to the next submission
+   * @memberof PdfViewerPanelComponent
+   */
+  onNavigateToNext(): void {
+    console.log('➡️ PDF Viewer: Navigating to next submission', {
+      currentSubmission: this.submission?.id,
+      canNavigateNext: this.canNavigateNext
+    });
+    this.navigateToNext.emit();
+  }
+
+  /**
+   * Gets the title to display in the navigation bar
+   *
+   * @description Returns the submission title with fallback to default text
+   * @returns string The title to display
+   * @memberof PdfViewerPanelComponent
+   */
+  getNavigationTitle(): string {
+    return this.currentSubmissionTitle || this.submission?.title || 'Abgabe Dokument';
   }
 
   // =============================================================================

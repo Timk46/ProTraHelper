@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { Observable, Subject, combineLatest, BehaviorSubject, of, interval } from 'rxjs';
-import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged, shareReplay } from 'rxjs/operators';
+import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged, shareReplay, finalize, tap } from 'rxjs/operators';
 
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
@@ -175,6 +175,16 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   public currentSubmissionId$ = this.navigationService.submissionId$;
   public currentCategoryId$ = this.navigationService.categoryId$;
   public highlightedCommentId$ = this.navigationService.commentId$;
+
+  // Submission navigation support
+  public submissionNavigationInfo$ = this.navigationService.navigationContext$.pipe(
+    map(() => {
+      const navInfo = this.navigationService.getSubmissionNavigationInfo();
+      console.log('🧭 Submission Navigation Info Updated:', navInfo);
+      return navInfo;
+    }),
+    shareReplay(1)
+  );
 
   // =============================================================================
   // COMPONENT STATE - REACTIVE STREAMS
@@ -422,11 +432,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           totalVotes: maxVotes, // Always based on comment count
         };
       }),
-      distinctUntilChanged((a, b) => 
-        a.canVote === b.canVote && 
-        a.availableVotes === b.availableVotes && 
-        a.totalVotes === b.totalVotes
-      ),
+      // 🚨 REMOVED distinctUntilChanged to ensure vote updates always propagate
+      tap(voteStatus => console.log('🗳️ Vote status update:', voteStatus)),
       shareReplay(1),
       takeUntil(this.destroy$) // 🔧 MEMORY SAFE: Prevent memory leak
     );
@@ -443,6 +450,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.setupEventHandling();
     this.setupDeepLinkingSupport();
     this.setupPerformanceMonitoring();
+    this.loadSubmissionList();
     
     // 🚀 SESSION VOTE TRACKING: Reset global session votes when forum is loaded/reloaded
     this.voteSessionService.resetSessionVotes();
@@ -908,8 +916,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
         // Set discussion panel expansion based on comment status
         this.stateService.hasCommentedInCategory$(categoryId).pipe(take(1)).subscribe(hasCommented => {
-          // Only expand discussion panel if user has commented in this category
-          this.isDiscussionHeaderExpanded = hasCommented;
+          // Keep discussion panel collapsed by default
+          this.isDiscussionHeaderExpanded = false;
           console.log(`🗨️ Discussion panel ${hasCommented ? 'expanded' : 'collapsed'} for category ${categoryId} (commented: ${hasCommented})`);
           this.cdr.markForCheck();
         });
@@ -996,22 +1004,20 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         }),
         takeUntil(this.destroy$)
       )
+      .pipe(
+        finalize(() => {
+          // Always reset loading state, regardless of success or error
+          this.isSubmittingComment$.next(false);
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: reply => {
           console.log('✅ Reply created successfully:', reply);
           this.showSnackBar('Antwort wurde erfolgreich erstellt', 'OK', 2000, false);
-
-          // Reset loading state
-          this.isSubmittingComment$.next(false);
-          this.cdr.markForCheck();
         },
         error: error => {
           console.error('❌ Failed to create reply:', error);
-
-          // Reset loading state
-          this.isSubmittingComment$.next(false);
-          this.cdr.markForCheck();
-
           // Show error message
           const message = error.message || 'Fehler beim Erstellen der Antwort';
           this.showSnackBar(message, 'Schließen', 5000, true);
@@ -1045,6 +1051,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           switchMap(activeCategory => this.mockDataService.addMockComment(activeCategory, content)),
           takeUntil(this.destroy$),
         )
+        .pipe(
+          finalize(() => {
+            // Always reset loading state and cleanup, regardless of success or error
+            this.isSubmittingComment$.next(false);
+            this.lastSubmittedContent = null;
+            this.cdr.markForCheck();
+          })
+        )
         .subscribe({
           next: comment => {
             console.log('✅ Mock comment added successfully:', comment);
@@ -1063,11 +1077,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             } else {
               this.showSnackBar('Kommentar wurde erfolgreich hinzugefügt', 'OK', 3000, false);
             }
-            this.cdr.markForCheck();
-
-            // Reset states
-            this.isSubmittingComment$.next(false);
-            this.lastSubmittedContent = null;
 
             // CRITICAL: Force change detection for OnPush components - multiple cycles
             setTimeout(() => {
@@ -1081,9 +1090,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           error: error => {
             console.error('❌ Mock comment submission failed:', error);
             this.showSnackBar('Fehler beim Hinzufügen des Kommentars 1', 'Schließen', 5000, true);
-            this.isSubmittingComment$.next(false);
-            this.lastSubmittedContent = null;
-            this.cdr.markForCheck();
           },
         });
     } else {
@@ -1097,6 +1103,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             this.stateService.addComment(this.submissionId!, activeCategory, content),
           ),
           takeUntil(this.destroy$),
+        )
+        .pipe(
+          finalize(() => {
+            // Always reset loading state and cleanup, regardless of success or error
+            this.isSubmittingComment$.next(false);
+            this.lastSubmittedContent = null;
+            this.cdr.markForCheck();
+          })
         )
         .subscribe({
           next: comment => {
@@ -1114,12 +1128,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               this.stateService.refreshDiscussions(this.submissionId);
             }
 
-            this.cdr.markForCheck();
-
-            // Reset states
-            this.isSubmittingComment$.next(false);
-            this.lastSubmittedContent = null;
-
             // Additional change detection cycle to ensure child components update
             setTimeout(() => {
               this.cdr.detectChanges();
@@ -1128,9 +1136,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           error: error => {
             console.error('❌ Comment submission failed:', error);
             this.showSnackBar('Fehler beim Hinzufügen des Kommentars', 'Schließen', 5000, true);
-            this.isSubmittingComment$.next(false);
-            this.lastSubmittedContent = null;
-            this.cdr.markForCheck();
           },
         });
     }
@@ -1178,6 +1183,18 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               2000,
               isRemoval // Rot für Entfernung, Grün für Hinzufügen
             );
+
+            // 🚨 CRITICAL FIX: Force refresh vote status to ensure UI updates
+            if (result.voteLimitStatus && this.submissionId) {
+              console.log('🔄 Forcing vote status refresh after successful vote');
+              this.stateService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe({
+                next: () => {
+                  console.log('✅ Vote status refreshed successfully');
+                  this.cdr.markForCheck(); // Force change detection
+                },
+                error: (error) => console.error('❌ Failed to refresh vote status:', error)
+              });
+            }
           },
           error: error => {
             console.error('❌ Vote failed:', error);
@@ -2212,5 +2229,101 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       .replace(/^-|-$/g, '');
     
     return `${cleanTitle || 'dokument'}.pdf`;
+  }
+
+  // =============================================================================
+  // SUBMISSION NAVIGATION METHODS
+  // =============================================================================
+
+  /**
+   * Loads the list of submissions for navigation
+   *
+   * @description Fetches all available submissions for the current user and initializes
+   * the navigation state for switching between submissions
+   * @memberof EvaluationDiscussionForumComponent
+   */
+  private loadSubmissionList(): void {
+    console.log('📋 Loading submission list for navigation');
+    
+    this.stateService.loadSubmissionList()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: submissions => {
+          console.log('✅ Submission list loaded:', submissions.length, 'submissions');
+          // Update current submission index if we have a current submission ID
+          if (this.submissionId) {
+            this.stateService.updateCurrentSubmissionIndex(this.submissionId);
+          }
+        },
+        error: error => {
+          console.error('❌ Failed to load submission list:', error);
+        }
+      });
+  }
+
+  /**
+   * Handles navigation to previous submission
+   *
+   * @description Navigates to the previous submission in the list while preserving
+   * the current category selection. Shows appropriate feedback messages to the user.
+   * @memberof EvaluationDiscussionForumComponent
+   */
+  onNavigateToPrevious(): void {
+    console.log('⬅️ Forum Component: Navigating to previous submission');
+    
+    this.activeCategory$.pipe(take(1)).subscribe(currentCategory => {
+      console.log('🎯 Current category for navigation:', currentCategory);
+      this.navigationService.navigateToAdjacentSubmission('previous', currentCategory)
+        .then(success => {
+          if (success) {
+            this.showInfoMessage('Zur vorherigen Abgabe navigiert', 'OK');
+          } else {
+            this.showWarningMessage('Keine vorherige Abgabe verfügbar', 'OK');
+          }
+        })
+        .catch(error => {
+          console.error('❌ Navigation failed:', error);
+          this.showErrorMessage('Fehler bei der Navigation', 'Schließen');
+        });
+    });
+  }
+
+  /**
+   * Handles navigation to next submission
+   *
+   * @description Navigates to the next submission in the list while preserving
+   * the current category selection. Shows appropriate feedback messages to the user.
+   * @memberof EvaluationDiscussionForumComponent
+   */
+  onNavigateToNext(): void {
+    console.log('➡️ Forum Component: Navigating to next submission');
+    
+    this.activeCategory$.pipe(take(1)).subscribe(currentCategory => {
+      console.log('🎯 Current category for navigation:', currentCategory);
+      this.navigationService.navigateToAdjacentSubmission('next', currentCategory)
+        .then(success => {
+          if (success) {
+            this.showInfoMessage('Zur nächsten Abgabe navigiert', 'OK');
+          } else {
+            this.showWarningMessage('Keine nächste Abgabe verfügbar', 'OK');
+          }
+        })
+        .catch(error => {
+          console.error('❌ Navigation failed:', error);
+          this.showErrorMessage('Fehler bei der Navigation', 'Schließen');
+        });
+    });
+  }
+
+  /**
+   * Gets navigation information for the current submission
+   *
+   * @description Returns an observable with navigation state including current position,
+   * total submissions, and whether previous/next navigation is available
+   * @returns Observable with submission navigation information
+   * @memberof EvaluationDiscussionForumComponent
+   */
+  getSubmissionNavigationInfo(): Observable<any> {
+    return this.submissionNavigationInfo$;
   }
 }

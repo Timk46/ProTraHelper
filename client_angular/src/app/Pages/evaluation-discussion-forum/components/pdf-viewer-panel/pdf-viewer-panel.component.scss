@@ -120,6 +120,55 @@
   }
 }
 
+// Submission Navigation Controls
+.submission-navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  margin-right: 16px;
+  
+  .nav-submission-button {
+    color: white;
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    
+    &:disabled {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    &:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  .submission-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 200px;
+    text-align: center;
+    
+    .submission-title {
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    
+    .submission-position {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+  }
+}
+
 // Action Controls
 .action-controls {
   display: flex;

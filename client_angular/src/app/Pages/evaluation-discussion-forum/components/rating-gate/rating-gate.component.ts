@@ -1139,7 +1139,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   /**
    * Local state for tracking initial comment submission
    */
-  private isSubmittingInitialComment = false;
 
 
   /**

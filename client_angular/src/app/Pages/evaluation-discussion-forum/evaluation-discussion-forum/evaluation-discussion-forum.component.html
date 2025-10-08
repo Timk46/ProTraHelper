@@ -88,6 +88,12 @@
             <app-pdf-viewer-panel
               [submission]="vm.submission"
               [pdfUrl]="vm.submission?.pdfMetadata?.downloadUrl || null"
+              [canNavigatePrevious]="(submissionNavigationInfo$ | async)?.canNavigatePrevious || false"
+              [canNavigateNext]="(submissionNavigationInfo$ | async)?.canNavigateNext || false"
+              [currentSubmissionTitle]="vm.submission?.title || ''"
+              [submissionPosition]="(submissionNavigationInfo$ | async)?.currentPosition && (submissionNavigationInfo$ | async)?.totalSubmissions ? ((submissionNavigationInfo$ | async)?.currentPosition + ' von ' + (submissionNavigationInfo$ | async)?.totalSubmissions) : ''"
+              (navigateToPrevious)="onNavigateToPrevious()"
+              (navigateToNext)="onNavigateToNext()"
             >
             </app-pdf-viewer-panel>
           </div>
@@ -100,7 +106,7 @@
           <!-- Discussion Header Panel - Only visible after commenting -->
           <mat-expansion-panel class="discussion-header-panel" 
             *ngIf="vm.isDiscussionPhase && (hasCommentedCurrentCategory$ | async)"
-            [class.glow-effect]="vm.isDiscussionPhase && !(hasCommentedCurrentCategory$ | async)"
+            [class.glow-effect]="vm.isDiscussionPhase && ((voteStatus$ | async)?.availableVotes || 0) > 0"
             [(expanded)]="isDiscussionHeaderExpanded">
             <mat-expansion-panel-header>
               <mat-panel-title>

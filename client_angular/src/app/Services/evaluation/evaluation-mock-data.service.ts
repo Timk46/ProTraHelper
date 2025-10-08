@@ -45,6 +45,24 @@ export class EvaluationMockDataService {
     return this.mockSubmissionSubject.asObservable();
   }
 
+  /**
+   * Gets the complete list of mock submissions for navigation testing
+   *
+   * @description Returns an array of 5 demo submissions (demo-submission-001 through 005)
+   * for testing the submission navigation feature
+   * @returns EvaluationSubmissionDTO[] Array of mock submissions
+   * @memberof EvaluationMockDataService
+   */
+  getMockSubmissionList(): EvaluationSubmissionDTO[] {
+    return [
+      this.createMockSubmission(),
+      this.createMockSubmission2(),
+      this.createMockSubmission3(),
+      this.createMockSubmission4(),
+      this.createMockSubmission5()
+    ];
+  }
+
   getMockCategories(): EvaluationCategoryDTO[] {
     return [
       EVALUATION_CATEGORIES.VOLLSTAENDIGKEIT,
@@ -348,10 +366,10 @@ export class EvaluationMockDataService {
 
       pdfFile: {
         id: 1,
-        name: "rahmenkonstruktion.pdf",
-        uniqueIdentifier: "rahmenkonstruktion.pdf",
-        path: "/uploads/demo-rahmenkonstruktion.pdf",
-        type: "pdf"
+        name: "TRAKO_EVAL.pdf",
+        uniqueIdentifier: "trako-eval-pdf",
+        path: "Grasshopper/TRAKO_EVAL.pdf",
+        type: "application/pdf"
       },
 
       session: {
@@ -368,8 +386,256 @@ export class EvaluationMockDataService {
 
       pdfMetadata: {
         pageCount: 8,
-        fileSize: 2450000,
-        downloadUrl: "/assets/demo-rahmenkonstruktion.pdf"
+        fileSize: 42760, // Tatsächliche Größe der TRAKO_EVAL.pdf (41.7KB)
+        downloadUrl: "/files/Grasshopper/TRAKO_EVAL.pdf"
+      },
+
+      _count: {
+        discussions: 4,
+        ratings: 0
+      }
+    };
+  }
+
+  /**
+   * Creates mock submission #2 for navigation testing
+   *
+   * @description Generates a mock submission with ID "demo-submission-002" for the bridge design project
+   * @returns EvaluationSubmissionDTO Mock submission object
+   * @memberof EvaluationMockDataService
+   */
+  private createMockSubmission2(): EvaluationSubmissionDTO {
+    return {
+      id: "demo-submission-002",
+      title: "Entwurf \"Brückenkonstruktion Stahlbeton\"",
+      description: "CAD-Entwurf einer modernen Stahlbetonbrücke mit optimierter Spannweite",
+      authorId: 2,
+      pdfFileId: 2,
+      sessionId: 1,
+      status: EvaluationStatus.IN_REVIEW,
+      phase: EvaluationPhase.DISCUSSION,
+      submittedAt: new Date('2024-01-15T11:00:00Z'),
+      createdAt: new Date('2024-01-15T10:30:00Z'),
+      updatedAt: new Date('2024-01-15T11:00:00Z'),
+
+      author: {
+        id: 2,
+        firstname: "Student B",
+        lastname: "(anonymisiert)",
+        email: "anonymized@example.com",
+        globalRole: "STUDENT" as any
+      },
+
+      pdfFile: {
+        id: 2,
+        name: "TRAKO_EVAL.pdf",
+        uniqueIdentifier: "trako-eval-pdf",
+        path: "Grasshopper/TRAKO_EVAL.pdf",
+        type: "application/pdf"
+      },
+
+      session: {
+        id: 1,
+        title: "CAD Konstruktionsaufgabe - Tragwerke",
+        description: "Bewertung von CAD-Entwürfen für Rahmenkonstruktionen",
+        startDate: new Date('2024-01-15T00:00:00Z'),
+        endDate: new Date('2024-01-25T23:59:59Z'),
+        moduleId: 1,
+        phase: EvaluationPhase.DISCUSSION,
+        isActive: true,
+        isAnonymous: true
+      },
+
+      pdfMetadata: {
+        pageCount: 8,
+        fileSize: 42760,
+        downloadUrl: "/files/Grasshopper/TRAKO_EVAL.pdf"
+      },
+
+      _count: {
+        discussions: 4,
+        ratings: 0
+      }
+    };
+  }
+
+  /**
+   * Creates mock submission #3 for navigation testing
+   *
+   * @description Generates a mock submission with ID "demo-submission-003" for the highrise foundation project
+   * @returns EvaluationSubmissionDTO Mock submission object
+   * @memberof EvaluationMockDataService
+   */
+  private createMockSubmission3(): EvaluationSubmissionDTO {
+    return {
+      id: "demo-submission-003",
+      title: "Entwurf \"Hochhaus-Fundamentierung\"",
+      description: "CAD-Entwurf einer Tiefgründung für ein 20-stöckiges Hochhaus",
+      authorId: 3,
+      pdfFileId: 3,
+      sessionId: 1,
+      status: EvaluationStatus.IN_REVIEW,
+      phase: EvaluationPhase.DISCUSSION,
+      submittedAt: new Date('2024-01-15T12:00:00Z'),
+      createdAt: new Date('2024-01-15T11:30:00Z'),
+      updatedAt: new Date('2024-01-15T12:00:00Z'),
+
+      author: {
+        id: 3,
+        firstname: "Student C",
+        lastname: "(anonymisiert)",
+        email: "anonymized@example.com",
+        globalRole: "STUDENT" as any
+      },
+
+      pdfFile: {
+        id: 3,
+        name: "TRAKO_EVAL.pdf",
+        uniqueIdentifier: "trako-eval-pdf",
+        path: "Grasshopper/TRAKO_EVAL.pdf",
+        type: "application/pdf"
+      },
+
+      session: {
+        id: 1,
+        title: "CAD Konstruktionsaufgabe - Tragwerke",
+        description: "Bewertung von CAD-Entwürfen für Rahmenkonstruktionen",
+        startDate: new Date('2024-01-15T00:00:00Z'),
+        endDate: new Date('2024-01-25T23:59:59Z'),
+        moduleId: 1,
+        phase: EvaluationPhase.DISCUSSION,
+        isActive: true,
+        isAnonymous: true
+      },
+
+      pdfMetadata: {
+        pageCount: 8,
+        fileSize: 42760,
+        downloadUrl: "/files/Grasshopper/TRAKO_EVAL.pdf"
+      },
+
+      _count: {
+        discussions: 4,
+        ratings: 0
+      }
+    };
+  }
+
+  /**
+   * Creates mock submission #4 for navigation testing
+   *
+   * @description Generates a mock submission with ID "demo-submission-004" for the sports hall roof project
+   * @returns EvaluationSubmissionDTO Mock submission object
+   * @memberof EvaluationMockDataService
+   */
+  private createMockSubmission4(): EvaluationSubmissionDTO {
+    return {
+      id: "demo-submission-004",
+      title: "Entwurf \"Dachkonstruktion Sporthalle\"",
+      description: "CAD-Entwurf einer weitspannenden Dachkonstruktion für eine moderne Sporthalle",
+      authorId: 4,
+      pdfFileId: 4,
+      sessionId: 1,
+      status: EvaluationStatus.IN_REVIEW,
+      phase: EvaluationPhase.DISCUSSION,
+      submittedAt: new Date('2024-01-15T13:00:00Z'),
+      createdAt: new Date('2024-01-15T12:30:00Z'),
+      updatedAt: new Date('2024-01-15T13:00:00Z'),
+
+      author: {
+        id: 4,
+        firstname: "Student D",
+        lastname: "(anonymisiert)",
+        email: "anonymized@example.com",
+        globalRole: "STUDENT" as any
+      },
+
+      pdfFile: {
+        id: 4,
+        name: "TRAKO_EVAL.pdf",
+        uniqueIdentifier: "trako-eval-pdf",
+        path: "Grasshopper/TRAKO_EVAL.pdf",
+        type: "application/pdf"
+      },
+
+      session: {
+        id: 1,
+        title: "CAD Konstruktionsaufgabe - Tragwerke",
+        description: "Bewertung von CAD-Entwürfen für Rahmenkonstruktionen",
+        startDate: new Date('2024-01-15T00:00:00Z'),
+        endDate: new Date('2024-01-25T23:59:59Z'),
+        moduleId: 1,
+        phase: EvaluationPhase.DISCUSSION,
+        isActive: true,
+        isAnonymous: true
+      },
+
+      pdfMetadata: {
+        pageCount: 8,
+        fileSize: 42760,
+        downloadUrl: "/files/Grasshopper/TRAKO_EVAL.pdf"
+      },
+
+      _count: {
+        discussions: 4,
+        ratings: 0
+      }
+    };
+  }
+
+  /**
+   * Creates mock submission #5 for navigation testing
+   *
+   * @description Generates a mock submission with ID "demo-submission-005" for the industrial steel hall project
+   * @returns EvaluationSubmissionDTO Mock submission object
+   * @memberof EvaluationMockDataService
+   */
+  private createMockSubmission5(): EvaluationSubmissionDTO {
+    return {
+      id: "demo-submission-005",
+      title: "Entwurf \"Industriehalle Stahl\"",
+      description: "CAD-Entwurf einer Stahlkonstruktion für eine moderne Fertigungshalle",
+      authorId: 5,
+      pdfFileId: 5,
+      sessionId: 1,
+      status: EvaluationStatus.IN_REVIEW,
+      phase: EvaluationPhase.DISCUSSION,
+      submittedAt: new Date('2024-01-15T14:00:00Z'),
+      createdAt: new Date('2024-01-15T13:30:00Z'),
+      updatedAt: new Date('2024-01-15T14:00:00Z'),
+
+      author: {
+        id: 5,
+        firstname: "Student E",
+        lastname: "(anonymisiert)",
+        email: "anonymized@example.com",
+        globalRole: "STUDENT" as any
+      },
+
+      pdfFile: {
+        id: 5,
+        name: "TRAKO_EVAL.pdf",
+        uniqueIdentifier: "trako-eval-pdf",
+        path: "Grasshopper/TRAKO_EVAL.pdf",
+        type: "application/pdf"
+      },
+
+      session: {
+        id: 1,
+        title: "CAD Konstruktionsaufgabe - Tragwerke",
+        description: "Bewertung von CAD-Entwürfen für Rahmenkonstruktionen",
+        startDate: new Date('2024-01-15T00:00:00Z'),
+        endDate: new Date('2024-01-25T23:59:59Z'),
+        moduleId: 1,
+        phase: EvaluationPhase.DISCUSSION,
+        isActive: true,
+        isAnonymous: true
+      },
+
+      pdfMetadata: {
+        pageCount: 8,
+        fileSize: 42760,
+        downloadUrl: "/files/Grasshopper/TRAKO_EVAL.pdf"
       },
 
       _count: {

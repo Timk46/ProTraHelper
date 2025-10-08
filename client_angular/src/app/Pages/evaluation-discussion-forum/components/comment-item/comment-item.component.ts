@@ -1010,7 +1010,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   /**
    * Checks if the comment author is the current user
    * Returns null if data is missing (unknown state)
-   * FIXED: Uses comment.authorId (number) instead of comment.author.id (string)
+   * ENHANCED: More robust comparison with detailed logging
    */
   isCurrentUser(): boolean | null {
     if (!this.anonymousUser || !this.comment) {
@@ -1022,20 +1022,34 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return null; // 🚨 RETURN NULL INSTEAD OF FALSE FOR UNKNOWN STATE
     }
 
-    // 🚨 CRITICAL FIX: Use comment.authorId (number) instead of comment.author.id (string)
-    const commentAuthorId = this.comment.authorId;
+    // 🚨 ENHANCED: More robust comparison with fallback to comment.author.id
+    const commentAuthorId = this.comment.authorId || this.comment.author?.id;
     const anonymousUserId = this.anonymousUser.id;
-    const isOwn = commentAuthorId === anonymousUserId;
+    
+    // Ensure both values are compared as numbers
+    const authorIdNum = Number(commentAuthorId);
+    const userIdNum = Number(anonymousUserId);
+    const isOwn = authorIdNum === userIdNum;
 
-    console.log('🎯 User ownership check (FIXED):', {
+    console.log('🎯 Enhanced user ownership check:', {
       commentId: this.comment.id,
       commentAuthorId,
       commentAuthorIdType: typeof commentAuthorId,
+      authorIdNum,
       anonymousUserId,
       anonymousUserIdType: typeof anonymousUserId,
+      userIdNum,
       isOwn,
       authorDisplayName: this.comment.author?.displayName
     });
+
+    // 🚨 BLOCKING VOTE: If this is the user's own comment, they cannot vote
+    if (isOwn) {
+      console.log('🚫 BLOCKING VOTE: User cannot vote on their own comment:', {
+        commentId: this.comment.id,
+        authorDisplayName: this.comment.author?.displayName
+      });
+    }
 
     return isOwn;
   }
