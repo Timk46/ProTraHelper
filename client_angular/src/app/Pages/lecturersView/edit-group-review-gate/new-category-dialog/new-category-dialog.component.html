@@ -1,0 +1,119 @@
+<h2 mat-dialog-title>Neue Kategorie erstellen</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="categoryForm" class="category-form">
+    <!-- Name und Anzeigename -->
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Interner Name *</mat-label>
+        <input matInput formControlName="name" placeholder="z.B. mathematics" />
+        <mat-hint>Wird für interne Zwecke verwendet (ohne Leerzeichen)</mat-hint>
+        <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
+          Interner Name ist erforderlich
+        </mat-error>
+        <mat-error *ngIf="categoryForm.get('name')?.hasError('minlength')">
+          Mindestens 2 Zeichen erforderlich
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Anzeigename *</mat-label>
+        <input matInput formControlName="displayName" placeholder="z.B. Mathematik" />
+        <mat-hint>Wird den Benutzern angezeigt</mat-hint>
+        <mat-error *ngIf="categoryForm.get('displayName')?.hasError('required')">
+          Anzeigename ist erforderlich
+        </mat-error>
+        <mat-error *ngIf="categoryForm.get('displayName')?.hasError('minlength')">
+          Mindestens 2 Zeichen erforderlich
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Beschreibungen -->
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label>Beschreibung</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="3"
+        placeholder="Detaillierte Beschreibung der Kategorie"
+      ></textarea>
+      <mat-hint>Ausführliche Beschreibung für administrative Zwecke</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field full-width">
+      <mat-label>Kurzbeschreibung</mat-label>
+      <input
+        matInput
+        formControlName="shortDescription"
+        placeholder="Kurze Beschreibung für Tooltips"
+      />
+      <mat-hint>Wird als Tooltip angezeigt (max. 100 Zeichen)</mat-hint>
+      <mat-error *ngIf="categoryForm.get('shortDescription')?.hasError('maxlength')">
+        Maximal 100 Zeichen erlaubt
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Icon-Auswahl -->
+    <div class="form-section">
+      <h3>Icon auswählen</h3>
+      <div class="icon-selection">
+        <div
+          *ngFor="let icon of availableIcons"
+          class="icon-option"
+          [class.selected]="categoryForm.get('icon')?.value === icon"
+          (click)="categoryForm.get('icon')?.setValue(icon)"
+        >
+          <mat-icon>{{ icon }}</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Farb-Auswahl -->
+    <div class="form-section">
+      <h3>Farbe auswählen</h3>
+      <div class="color-selection">
+        <div
+          *ngFor="let color of availableColors"
+          class="color-option"
+          [style.background-color]="color"
+          [class.selected]="categoryForm.get('color')?.value === color"
+          (click)="categoryForm.get('color')?.setValue(color)"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Vorschau -->
+    <div class="preview-section">
+      <h3>Vorschau</h3>
+      <div
+        class="category-preview"
+        [style.background-color]="categoryForm.get('color')?.value"
+        [style.color]="getContrastColor(categoryForm.get('color')?.value)"
+      >
+        <mat-icon *ngIf="categoryForm.get('icon')?.value">{{
+          categoryForm.get('icon')?.value
+        }}</mat-icon>
+        {{ categoryForm.get('displayName')?.value || 'Anzeigename' }}
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()" [disabled]="isSaving">Abbrechen</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSave()"
+    [disabled]="categoryForm.invalid || isSaving"
+  >
+    <mat-progress-spinner
+      *ngIf="isSaving"
+      diameter="20"
+      mode="indeterminate"
+    ></mat-progress-spinner>
+    <span *ngIf="!isSaving">Erstellen</span>
+    <span *ngIf="isSaving">Erstelle...</span>
+  </button>
+</mat-dialog-actions>

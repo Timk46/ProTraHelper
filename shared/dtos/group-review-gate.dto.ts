@@ -1,3 +1,5 @@
+import { EvaluationCategoryDTO } from "./evaluation-category.dto";
+
 export interface GroupReviewGateStatusDTO {
   gateId: number;
   gateName: string;
@@ -19,4 +21,9 @@ export interface CreateGroupReviewSessionsResultDTO {
   createdSessions: number;
   createdSubmissions: number;
   errors: string[];
+}
+
+export interface GroupReviewGateCategoriesDTO {
+  gateId?: number;
+  linkedCategoryIds: number[]; // Array of category IDs
 }

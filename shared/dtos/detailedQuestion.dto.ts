@@ -5,6 +5,7 @@ import {
 } from "./question.dto";
 import { GraphConfigurationDTO, GraphStructureDTO } from "./graphTask.dto";
 import { editorDataDTO, taskSettingsDTO } from "./umlearnDtos/dtos";
+import { GroupReviewGateCategoriesDTO } from "./group-review-gate.dto";
 
 export interface detailedQuestionDTO {
   id: number;
@@ -137,6 +138,7 @@ export interface detailedGroupReviewGateDTO {
   id?: number;
   questionId: number;
   linkedQuestionId: number;
+  linkedCategories?: GroupReviewGateCategoriesDTO
   textHTML?: string;
   createdAt?: Date;
   updatedAt?: Date;

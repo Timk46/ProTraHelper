@@ -18,6 +18,8 @@ import {
   UserUploadAnswerListItemDTO,
   GroupReviewStatusDTO,
   QuestionCollectionDto,
+  GroupReviewGateCategoriesDTO,
+  EvaluationCategoryDTO,
 } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
@@ -185,6 +187,20 @@ export class QuestionDataController {
   ): Promise<GroupReviewStatusDTO[]> {
     const userId = req.user.id;
     return this.qdGroupReviewGateService.getStatuses(questionId, userId);
+  }
+
+  @roles('ANY')
+  @Get('evalDiscussionCategories/all')
+  async getAllEvalDiscussionCategories(): Promise<EvaluationCategoryDTO[]> {
+    return this.qdGroupReviewGateService.getAllEvalDiscussionCategories();
+  }
+
+  @roles('LECTURER', 'ADMIN')
+  @Post('evalDiscussionCategories')
+  async createEvaluationCategory(
+    @Body() categoryData: Omit<EvaluationCategoryDTO, 'id'>,
+  ): Promise<EvaluationCategoryDTO> {
+    return this.qdGroupReviewGateService.createEvaluationCategory(categoryData);
   }
 
   /**

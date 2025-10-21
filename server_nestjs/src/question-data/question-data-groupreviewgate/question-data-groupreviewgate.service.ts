@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { detailedGroupReviewGateDTO, GroupReviewStatusDTO } from '@DTOs/detailedQuestion.dto';
+import { EvaluationCategoryDTO, GroupReviewGateCategoriesDTO } from '../../../../shared/dtos';
 
 @Injectable()
 export class QuestionDataGroupReviewGateService {
@@ -36,6 +37,10 @@ export class QuestionDataGroupReviewGateService {
       data: {
         linkedQuestionId: dto.linkedQuestionId,
         textHTML: dto.textHTML,
+        linkedCategories:
+          dto.linkedCategories && dto.linkedCategories.linkedCategoryIds.length > 0
+            ? JSON.stringify(dto.linkedCategories)
+            : undefined,
       },
     });
   }
@@ -127,4 +132,64 @@ export class QuestionDataGroupReviewGateService {
       userStatus: 'Kommentar ausstehend',
     }));
   }
+
+  async getAllEvalDiscussionCategories(): Promise<EvaluationCategoryDTO[] | null> {
+    const categories = await this.prisma.evaluationCategory.findMany();
+
+    if (!categories) {
+      return null;
+    }
+
+    return categories.map(category => ({
+      id: category.id,
+      name: category.name,
+      displayName: category.displayName || '',
+      description: category.description || '',
+      shortDescription: category.shortDescription || '',
+      icon: category.icon || '',
+      color: category.color || '',
+    }));
+  }
+
+  /**
+   * Creates a new evaluation category in the database.
+   *
+   * @param categoryData - The data for the new category (without id)
+   * @returns A promise that resolves to the created EvaluationCategoryDTO
+   */
+  async createEvaluationCategory(
+    categoryData: Omit<EvaluationCategoryDTO, 'id'>,
+  ): Promise<EvaluationCategoryDTO> {
+    const newCategory = await this.prisma.evaluationCategory.create({
+      data: {
+        name: categoryData.name,
+        displayName: categoryData.displayName,
+        description: categoryData.description,
+        shortDescription: categoryData.shortDescription,
+        icon: categoryData.icon,
+        color: categoryData.color,
+      },
+    });
+
+    return {
+      id: newCategory.id,
+      name: newCategory.name,
+      displayName: newCategory.displayName || '',
+      description: newCategory.description || '',
+      shortDescription: newCategory.shortDescription || '',
+      icon: newCategory.icon || '',
+      color: newCategory.color || '',
+    };
+  }
+
+  // Currently not used - handled in update method
+  /* async linkCategoriesToGroupReviewGate(gateId: number, data: GroupReviewGateCategoriesDTO): Promise<boolean> {
+    const update = await this.prisma.groupReviewGate.update({
+      where: { id: gateId },
+      data: {
+        linkedCategories: data.linkedCategoryIds.length > 0 ? JSON.stringify(data) : null,
+      },
+    });
+    return update ? true : false;
+  } */
 }

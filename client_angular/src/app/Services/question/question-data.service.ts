@@ -16,6 +16,8 @@ import {
   GroupReviewStatusDTO,
   QuestionCollectionDto,
   uploadQuestionUpload,
+  GroupReviewGateCategoriesDTO,
+  EvaluationCategoryDTO,
 } from '@DTOs/index';
 import { questionType } from '@DTOs/index';
 import { HttpClient } from '@angular/common/http';
@@ -188,6 +190,21 @@ export class QuestionDataService {
   getGroupReviewStatuses(questionId: number): Observable<GroupReviewStatusDTO[]> {
     return this.http.get<GroupReviewStatusDTO[]>(
       environment.server + `/question-data/groupReviewStatuses/${questionId}`,
+    );
+  }
+
+  getAllEvalDiscussionCategories(): Observable<EvaluationCategoryDTO[]> {
+    return this.http.get<EvaluationCategoryDTO[]>(
+      environment.server + `/question-data/evalDiscussionCategories/all`,
+    );
+  }
+
+  createEvaluationCategory(
+    categoryData: Omit<EvaluationCategoryDTO, 'id'>,
+  ): Observable<EvaluationCategoryDTO> {
+    return this.http.post<EvaluationCategoryDTO>(
+      environment.server + `/question-data/evalDiscussionCategories`,
+      categoryData,
     );
   }
 

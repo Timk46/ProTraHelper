@@ -46,6 +46,7 @@ import { GradingService } from './services/grading.service';
 import { SubjectManagementService } from './services/subject-management.service';
 import { EditGroupReviewGateComponent } from './edit-group-review-gate/edit-group-review-gate.component';
 import { EditCollectionComponent } from './edit-collection/edit-collection.component';
+import { NewCategoryDialogComponent } from './edit-group-review-gate/new-category-dialog/new-category-dialog.component';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import { EditCollectionComponent } from './edit-collection/edit-collection.compo
     CodeGameAddElementModalComponent,
     CodeGamePlayfieldEditorComponent,
     EditGroupReviewGateComponent,
+    NewCategoryDialogComponent,
     EditCollectionComponent,
   ],
   imports: [
