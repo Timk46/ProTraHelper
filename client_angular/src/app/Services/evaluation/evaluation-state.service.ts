@@ -63,7 +63,13 @@ export class EvaluationStateService {
 
   // Rating state
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
-  private ratingStatsCache = new Map<number, BehaviorSubject<RatingStatsDTO>>();
+  private ratingStatsCache = new LRUCache<number, BehaviorSubject<RatingStatsDTO>>(
+    20, // Max 20 categories with rating stats
+    (categoryId, subject) => {
+      subject.complete();
+      console.log(`🧹 LRU evicted rating stats cache for category ${categoryId}`);
+    }
+  );
 
   // Category-specific rating status management
   private categoryRatingStatusSubject = new BehaviorSubject<Map<number, CategoryRatingStatus>>(new Map());
@@ -1342,9 +1348,21 @@ export class EvaluationStateService {
   // VOTE STATUS MANAGEMENT - ARCHITECTURE REFACTOR
   // =============================================================================
 
-  // Comment-specific vote status cache
-  private commentVoteStatusCache = new Map<string, BehaviorSubject<VoteType | null>>();
-  private commentVoteLoadingCache = new Map<string, BehaviorSubject<boolean>>();
+  // Comment-specific vote status cache (LRU for memory management)
+  private commentVoteStatusCache = new LRUCache<string, BehaviorSubject<VoteType | null>>(
+    200, // Max 200 comments with vote status tracking
+    (commentId, subject) => {
+      subject.complete();
+      console.log(`🧹 LRU evicted vote status cache for comment ${commentId}`);
+    }
+  );
+  private commentVoteLoadingCache = new LRUCache<string, BehaviorSubject<boolean>>(
+    200, // Max 200 comments with loading state tracking
+    (commentId, subject) => {
+      subject.complete();
+      console.log(`🧹 LRU evicted vote loading cache for comment ${commentId}`);
+    }
+  );
 
   // =============================================================================
   // VOTING MANAGEMENT & CACHE SYNCHRONIZATION - 🚀 PHASE 4
