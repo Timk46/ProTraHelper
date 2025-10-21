@@ -21,7 +21,7 @@ async function main() {
   //await seedUmlearn();
   //await seedMCSlider();
   //await seedEvaluationCompleteFix();
-  await seedEvaluationComplete();
+  //await seedEvaluationComplete();
   //await seedEvaluationDemo();
 }
 
