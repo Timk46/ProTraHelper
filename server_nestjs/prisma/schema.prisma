@@ -717,7 +717,7 @@ model Discussion {
   isSolved         Boolean  @default(false)
 
   // EVALUATION SYSTEM EXTENSIONS
-  evaluationSubmissionId String?
+  evaluationSubmissionId Int?
   evaluationCategoryId   Int?
 
   author         anonymousUser   @relation(fields: [authorId], references: [id])
@@ -1024,7 +1024,7 @@ model EvaluationSession {
 }
 
 model EvaluationSubmission {
-  id          String           @id @default(cuid())
+  id          Int              @id @default(autoincrement())
   title       String
   description String?
   authorId    Int
@@ -1085,7 +1085,7 @@ model EvaluationSessionCategory {
 
 model EvaluationRating {
   id           Int      @id @default(autoincrement())
-  submissionId String
+  submissionId Int
   categoryId   Int
   userId       Int
   rating       Int      @db.SmallInt // 0-10 rating
@@ -1103,12 +1103,12 @@ model EvaluationRating {
 }
 
 model EvaluationComment {
-  id                    String                  @id @default(cuid())
-  submissionId          String
+  id                    Int                     @id @default(autoincrement())
+  submissionId          Int
   categoryId            Int
   userId                Int
   content               String                  @db.Text
-  parentId              String?
+  parentId              Int?
   anonymousDisplayName  String?
   createdAt             DateTime                @default(now())
   updatedAt             DateTime                @updatedAt
@@ -1124,7 +1124,7 @@ model EvaluationComment {
 
 model EvaluationCommentVote {
   id        Int               @id @default(autoincrement())
-  commentId String
+  commentId Int
   userId    Int
   voteCount Int // + for upvote, - for downvote; abs can be more than 1, eg +2 for double upvote or -3 for triple downvote
   createdAt DateTime          @default(now())
