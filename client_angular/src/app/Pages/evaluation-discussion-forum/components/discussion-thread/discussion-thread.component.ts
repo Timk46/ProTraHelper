@@ -664,12 +664,11 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
    *
    * @description
    * Generates a hash of the current discussions state for change detection.
-   * Memoization ensures we only compute the hash once per unique state,
-   * with automatic cache invalidation when dependencies change.
+   * Note: Not memoized because it depends on instance variables (activeReplyInputs, panelStates)
+   * that change frequently. Memoization would prevent detection of state changes.
    *
-   * Cache key includes: discussions array, sortOrder, panel states, reply states
+   * Includes: discussions array, sortOrder, panel states, reply states
    */
-  @Memoize({ maxSize: 10, debug: false })
   private generateDiscussionsHash(): string {
     const hashData = {
       discussionsLength: this.discussions.length,
