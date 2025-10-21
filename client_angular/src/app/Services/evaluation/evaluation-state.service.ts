@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, forkJoin, of, timer, retry } from 'rxjs';
+import { LRUCache } from '../../utils/lru-cache';
 import {
   map,
   distinctUntilChanged,
@@ -50,8 +51,15 @@ export class EvaluationStateService {
   private submissionListSubject = new BehaviorSubject<EvaluationSubmissionDTO[]>([]);
   private currentSubmissionIndexSubject = new BehaviorSubject<number>(-1);
 
-  // Discussion state by category (caching)
-  private discussionCache = new Map<number, BehaviorSubject<EvaluationDiscussionDTO[]>>();
+  // Discussion state by category (caching with LRU for memory management)
+  private discussionCache = new LRUCache<number, BehaviorSubject<EvaluationDiscussionDTO[]>>(
+    20, // Max 20 categories in cache
+    (categoryId, subject) => {
+      // Cleanup: Complete BehaviorSubject to prevent memory leaks
+      subject.complete();
+      console.log(`🧹 LRU evicted discussion cache for category ${categoryId}`);
+    }
+  );
 
   // Rating state
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
@@ -1534,7 +1542,7 @@ export class EvaluationStateService {
     }
 
     // Search through all discussion caches to find the comment
-    for (const [categoryId, cacheSubject] of Array.from(this.discussionCache.entries())) {
+    for (const [categoryId, cacheSubject] of this.discussionCache.entries()) {
       const discussions = cacheSubject.value;
       for (const discussion of discussions) {
         const comment = discussion.comments.find(c => c.id === commentId);
@@ -2055,6 +2063,7 @@ export class EvaluationStateService {
   // =============================================================================
 
   clearCache(): void {
+    // LRU cache .clear() will automatically invoke cleanup callbacks
     this.discussionCache.clear();
     this.ratingStatsCache.clear();
     this.commentIdToCategoryIdMap.clear();
