@@ -42,6 +42,11 @@
                 "glob": "**/*",
                 "input": "node_modules/tinymce",
                 "output": "/tinymce/"
+              },
+              {
+                "glob": "**/*",
+                "input": "files/Grasshopper",
+                "output": "/assets/grasshopper/"
               }
             ],
             "styles": [

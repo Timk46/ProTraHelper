@@ -697,5 +697,39 @@ export class EvaluationDiscussionService {
     };
   }
 
+  // =============================================================================
+  // SUBMISSION LIST MANAGEMENT FOR NAVIGATION
+  // =============================================================================
+
+  /**
+   * Gets all submissions for a user for navigation purposes
+   *
+   * @description Fetches all submissions belonging to a specific user from the backend API.
+   * Used for populating the submission navigation list in the evaluation forum.
+   * @param userId - The user ID (optional, defaults to current user)
+   * @returns Observable<EvaluationSubmissionDTO[]> List of user submissions
+   * @memberof EvaluationDiscussionService
+   */
+  getUserSubmissions(userId?: number): Observable<EvaluationSubmissionDTO[]> {
+    let url = `${this.apiUrls.submissions}`;
+    
+    if (userId) {
+      url += `?userId=${userId}`;
+    }
+
+    const requestKey = `getUserSubmissions-${userId || 'current'}`;
+
+    return this.withRetry(
+      this.http.get<EvaluationSubmissionDTO[]>(url),
+      { requestKey }
+    ).pipe(
+      tap(submissions => {
+        console.log('✅ Retrieved user submissions:', submissions.length, 'submissions');
+        submissions.forEach(s => console.log(`  - ${s.id}: ${s.title}`));
+      }),
+      catchError(this.handleError<EvaluationSubmissionDTO[]>('getUserSubmissions'))
+    );
+  }
+
   // All mock methods removed - using real backend APIs
 }

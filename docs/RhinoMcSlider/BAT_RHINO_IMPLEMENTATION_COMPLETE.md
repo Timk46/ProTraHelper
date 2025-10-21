@@ -9,7 +9,9 @@ Diese Implementierung bietet eine .bat-Skript-basierte Lösung für die Rhino-In
 ### Backend (NestJS)
 
 #### 1. DTOs (Data Transfer Objects)
+
 **Datei:** `shared/dtos/bat-rhino.dto.ts`
+
 - `BatScriptRequest`: Anfrage für Skript-Generierung
 - `BatExecutionResult`: Antwort mit Ergebnis und Download-URLs
 - `RhinoPathValidationResult`: Validierung von Rhino-Pfaden
@@ -17,9 +19,11 @@ Diese Implementierung bietet eine .bat-Skript-basierte Lösung für die Rhino-In
 - `BatScriptSetupStep`: Einzelne Setup-Schritte
 
 #### 2. Service Layer
+
 **Datei:** `server_nestjs/src/bat-rhino/bat-script-generator.service.ts`
 
 **Hauptfunktionen:**
+
 - `generateBatScript()`: Generiert personalisierte .bat-Skripte
 - `validateRhinoPath()`: Validiert Rhino-Installationspfade
 - `detectRhinoPath()`: Automatische Rhino-Erkennung
@@ -27,15 +31,18 @@ Diese Implementierung bietet eine .bat-Skript-basierte Lösung für die Rhino-In
 - `createSetupPackage()`: Erstellt komplette Setup-Pakete
 
 **Sicherheitsfeatures:**
+
 - Command validation und sanitization
 - Sichere Pfad-Behandlung
 - Benutzer-spezifische Verzeichnisse
 - Automatische Bereinigung alter Dateien
 
 #### 3. Controller Layer
+
 **Datei:** `server_nestjs/src/bat-rhino/bat-rhino.controller.ts`
 
 **API-Endpunkte:**
+
 - `POST /api/bat-rhino/generate-script`: Skript-Generierung
 - `POST /api/bat-rhino/validate-rhino-path`: Pfad-Validierung
 - `GET /api/bat-rhino/detect-rhino-path`: Auto-Erkennung
@@ -46,30 +53,37 @@ Diese Implementierung bietet eine .bat-Skript-basierte Lösung für die Rhino-In
 - `POST /api/bat-rhino/cleanup`: Dateien bereinigen
 
 #### 4. Modul-Integration
+
 **Datei:** `server_nestjs/src/bat-rhino/bat-rhino.module.ts`
+
 - Registriert Service und Controller
 - Integriert in `server_nestjs/src/app.module.ts`
 
 ### Frontend (Angular)
 
 #### 1. Component Integration
+
 **Datei:** `client_angular/src/app/Pages/content-list/content-list.component.ts`
 
 **Neue Methode:**
+
 ```typescript
 async onRhinoBatButtonClick(event: MouseEvent): Promise<void>
 ```
 
 **Funktionalität:**
+
 - Generiert .bat-Skript über Backend-API
 - Zeigt Loading-Indikatoren
 - Behandelt Erfolg und Fehler-Szenarien
 - Bietet Download-Links für generierte Dateien
 
 #### 2. UI Integration
+
 **Datei:** `client_angular/src/app/Pages/content-list/content-list.component.html`
 
 **Neuer Button:**
+
 ```html
 <mat-icon
   *ngIf="hasContentElementType(content, 'QUESTION')"
@@ -78,7 +92,8 @@ async onRhinoBatButtonClick(event: MouseEvent): Promise<void>
   (click)="onRhinoBatButtonClick($event)"
   [style.cursor]="'pointer'"
   [style.color]="'#FF9800'"
-  [style.margin-left]="'4px'">
+  [style.margin-left]="'4px'"
+>
   build
 </mat-icon>
 ```
@@ -86,6 +101,7 @@ async onRhinoBatButtonClick(event: MouseEvent): Promise<void>
 ## Funktionsweise
 
 ### 1. Skript-Generierung
+
 1. Benutzer klickt auf .bat-Button
 2. Frontend sendet Anfrage an Backend
 3. Backend generiert personalisiertes .bat-Skript
@@ -96,6 +112,7 @@ async onRhinoBatButtonClick(event: MouseEvent): Promise<void>
 ### 2. Generierte Dateien
 
 #### .bat-Skript Beispiel:
+
 ```batch
 @echo off
 SET RHINO_PATH="C:\Program Files\Rhino 8\System\Rhino.exe"
@@ -116,6 +133,7 @@ del rhino_commands.txt
 ```
 
 #### Registry-Datei Beispiel:
+
 ```registry
 Windows Registry Editor Version 5.00
 
@@ -128,15 +146,19 @@ Windows Registry Editor Version 5.00
 ```
 
 ### 3. Setup-Prozess
+
 1. **Registry-Datei herunterladen und ausführen**
+
    - Registriert URL-Protokoll `rhino-automation://`
    - Verknüpft mit personalisiertem .bat-Skript
 
 2. **.bat-Skript herunterladen** (optional)
+
    - Für manuelle Ausführung
    - Enthält spezifische Rhino-Befehle
 
 3. **Setup-Paket herunterladen**
+
    - Komplettes Paket mit Anweisungen
    - Alle notwendigen Dateien
 
@@ -147,11 +169,13 @@ Windows Registry Editor Version 5.00
 ## Rhino-Befehlssequenz
 
 Der generierte Befehl für Grasshopper:
+
 ```
 _-Grasshopper B D W L W H D O "C:\Dev\hefl\files\Grasshopper\example.gh" W H _MaxViewport _Enter
 ```
 
 **Befehlsaufschlüsselung:**
+
 - `_-Grasshopper`: Startet Grasshopper im Skript-Modus
 - `B D W L`: Batch mode, Display, Window, Load
 - `W H`: Window Hide - Minimiert Grasshopper-Fenster
@@ -164,6 +188,7 @@ _-Grasshopper B D W L W H D O "C:\Dev\hefl\files\Grasshopper\example.gh" W H _Ma
 ## Sicherheitsaspekte
 
 ### Backend-Sicherheit
+
 - **Command Validation**: Nur erlaubte Befehle werden akzeptiert
 - **Path Sanitization**: Sichere Pfad-Behandlung
 - **User Isolation**: Benutzer-spezifische Verzeichnisse
@@ -171,6 +196,7 @@ _-Grasshopper B D W L W H D O "C:\Dev\hefl\files\Grasshopper\example.gh" W H _Ma
 - **Input Validation**: Strenge Validierung aller Eingaben
 
 ### Frontend-Sicherheit
+
 - **Error Handling**: Robuste Fehlerbehandlung
 - **User Feedback**: Klare Status-Meldungen
 - **Download Validation**: Sichere Download-Behandlung
@@ -187,16 +213,19 @@ _-Grasshopper B D W L W H D O "C:\Dev\hefl\files\Grasshopper\example.gh" W H _Ma
 ## Installation und Setup
 
 ### Backend-Setup
+
 1. NestJS-Module sind bereits registriert
 2. API-Endpunkte sind verfügbar unter `/api/bat-rhino/`
 3. Temporäre Verzeichnisse werden automatisch erstellt
 
 ### Frontend-Setup
+
 1. Button ist in content-list-Komponente integriert
 2. Erscheint bei allen Inhalten mit Übungsaufgaben
 3. Verwendet Material Design Icons
 
 ### Benutzer-Setup
+
 1. Auf .bat-Button klicken
 2. Registry-Datei herunterladen und ausführen
 3. Optional: .bat-Skript für manuelle Nutzung herunterladen

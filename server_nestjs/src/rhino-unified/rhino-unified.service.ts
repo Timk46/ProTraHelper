@@ -246,7 +246,7 @@ export class RhinoUnifiedService {
     try {
       // Prepare bat script request
       const grasshopperFile =
-        request.grasshopperFilePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh';
+        request.grasshopperFilePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example2.gh';
 
       const batRequest: BatScriptRequest = {
         filePath: grasshopperFile,

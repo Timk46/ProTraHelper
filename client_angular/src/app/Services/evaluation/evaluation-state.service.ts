@@ -46,6 +46,10 @@ export class EvaluationStateService {
   private commentStatsSubject = new BehaviorSubject<CommentStatsDTO | null>(null);
   private anonymousUserSubject = new BehaviorSubject<AnonymousEvaluationUserDTO | null>(null);
 
+  // Submission list management for navigation
+  private submissionListSubject = new BehaviorSubject<EvaluationSubmissionDTO[]>([]);
+  private currentSubmissionIndexSubject = new BehaviorSubject<number>(-1);
+
   // Discussion state by category (caching)
   private discussionCache = new Map<number, BehaviorSubject<EvaluationDiscussionDTO[]>>();
 
@@ -197,6 +201,14 @@ export class EvaluationStateService {
   getUserId(): number | null {
     const anonymousUser = this.anonymousUserSubject.value;
     return anonymousUser ? anonymousUser.id : null;
+  }
+
+  get submissionList$(): Observable<EvaluationSubmissionDTO[]> {
+    return this.submissionListSubject.asObservable();
+  }
+
+  get currentSubmissionIndex$(): Observable<number> {
+    return this.currentSubmissionIndexSubject.asObservable();
   }
 
   /**
@@ -1093,6 +1105,16 @@ export class EvaluationStateService {
 
     return this.evaluationService.createComment(createCommentDto).pipe(
       map(comment => {
+        // 🚨 CRITICAL FIX: Ensure authorId is set to current anonymous user
+        if (!comment.authorId && anonymousUser) {
+          console.log('🔧 Setting authorId for new comment:', {
+            commentId: comment.id,
+            authorId: anonymousUser.id,
+            displayName: anonymousUser.displayName
+          });
+          comment.authorId = anonymousUser.id;
+        }
+        
         // Update local cache
         this.handleCommentAdded(submissionId, categoryId, comment);
         this.refreshCommentStats(submissionId);
@@ -2657,5 +2679,116 @@ export class EvaluationStateService {
         throw error;
       })
     );
+  }
+
+  // =============================================================================
+  // SUBMISSION LIST MANAGEMENT FOR NAVIGATION
+  // =============================================================================
+
+  /**
+   * Loads the list of user submissions for navigation purposes
+   *
+   * @description Fetches all submissions available for the current user to enable
+   * navigation between different submissions in the evaluation forum
+   * @param userId - The user ID (optional)
+   * @returns Observable<EvaluationSubmissionDTO[]> List of submissions
+   * @memberof EvaluationStateService
+   */
+  loadSubmissionList(userId?: number): Observable<EvaluationSubmissionDTO[]> {
+    console.log('📋 Loading submission list for navigation');
+    
+    if (this.isMockMode()) {
+      // Use mock data
+      const submissions = this.mockDataService.getMockSubmissionList();
+      this.submissionListSubject.next(submissions);
+      console.log('✅ Mock submission list loaded:', submissions.length, 'submissions');
+      return of(submissions);
+    } else {
+      // TODO: Implement real API call when available
+      // return this.evaluationService.getUserSubmissions(userId);
+      console.log('⚠️ Real API not yet implemented, using mock data as fallback');
+      const submissions = this.mockDataService.getMockSubmissionList();
+      this.submissionListSubject.next(submissions);
+      return of(submissions);
+    }
+  }
+
+  /**
+   * Gets adjacent submissions (previous and next) for navigation
+   *
+   * @description Calculates which submissions come before and after the current submission
+   * in the list for navigation button enablement
+   * @param currentSubmissionId - The current submission ID
+   * @returns Object with previous and next submission IDs
+   * @memberof EvaluationStateService
+   */
+  getAdjacentSubmissions(currentSubmissionId: string): { previous: string | null; next: string | null } {
+    const submissions = this.submissionListSubject.value;
+    const currentIndex = submissions.findIndex(s => s.id === currentSubmissionId);
+    
+    if (currentIndex === -1) {
+      console.warn('⚠️ Current submission not found in list:', currentSubmissionId);
+      return { previous: null, next: null };
+    }
+
+    const previous = currentIndex > 0 ? submissions[currentIndex - 1].id : null;
+    const next = currentIndex < submissions.length - 1 ? submissions[currentIndex + 1].id : null;
+
+    console.log('🧭 Adjacent submissions for', currentSubmissionId, ':', { previous, next });
+    return { previous, next };
+  }
+
+  /**
+   * Updates the current submission index for navigation tracking
+   *
+   * @description Finds and stores the index of the current submission in the list
+   * @param submissionId - The current submission ID
+   * @memberof EvaluationStateService
+   */
+  updateCurrentSubmissionIndex(submissionId: string): void {
+    const submissions = this.submissionListSubject.value;
+    const index = submissions.findIndex(s => s.id === submissionId);
+    this.currentSubmissionIndexSubject.next(index);
+    console.log('📍 Updated current submission index:', index, 'for', submissionId);
+  }
+
+  /**
+   * Checks if navigation is possible in the given direction
+   *
+   * @description Determines if the user can navigate to previous or next submission
+   * based on current position in the submission list
+   * @param direction - 'previous' or 'next'
+   * @param currentSubmissionId - The current submission ID
+   * @returns boolean indicating if navigation is possible
+   * @memberof EvaluationStateService
+   */
+  canNavigate(direction: 'previous' | 'next', currentSubmissionId: string): boolean {
+    const adjacent = this.getAdjacentSubmissions(currentSubmissionId);
+    return direction === 'previous' ? adjacent.previous !== null : adjacent.next !== null;
+  }
+
+  /**
+   * Gets the total number of submissions for display purposes
+   *
+   * @description Returns the count of all submissions in the current list
+   * @returns number of total submissions
+   * @memberof EvaluationStateService
+   */
+  getTotalSubmissions(): number {
+    return this.submissionListSubject.value.length;
+  }
+
+  /**
+   * Gets the current submission position (1-based) for display
+   *
+   * @description Calculates the position of a submission in the list for UI display (e.g., "3 von 5")
+   * @param submissionId - The submission ID
+   * @returns 1-based position or 0 if not found
+   * @memberof EvaluationStateService
+   */
+  getSubmissionPosition(submissionId: string): number {
+    const submissions = this.submissionListSubject.value;
+    const index = submissions.findIndex(s => s.id === submissionId);
+    return index === -1 ? 0 : index + 1;
   }
 }

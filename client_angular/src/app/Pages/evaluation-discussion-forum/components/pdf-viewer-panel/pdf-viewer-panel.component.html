@@ -96,6 +96,35 @@
     <!-- Spacer -->
     <span class="toolbar-spacer"></span>
     
+    <!-- Submission Navigation Controls -->
+    <div class="submission-navigation" *ngIf="submission">
+      
+      <!-- Previous Submission Button -->
+      <button mat-icon-button
+              [disabled]="!canNavigatePrevious"
+              (click)="onNavigateToPrevious()"
+              matTooltip="Vorherige Abgabe"
+              class="nav-submission-button">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <!-- Submission Title and Position -->
+      <div class="submission-info">
+        <span class="submission-title">{{ getNavigationTitle() }}</span>
+        <span class="submission-position" *ngIf="submissionPosition">{{ submissionPosition }}</span>
+      </div>
+
+      <!-- Next Submission Button -->
+      <button mat-icon-button
+              [disabled]="!canNavigateNext"
+              (click)="onNavigateToNext()"
+              matTooltip="Nächste Abgabe"
+              class="nav-submission-button">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+      
+    </div>
+
     <!-- Action Controls -->
     <div class="action-controls">
       
@@ -141,15 +170,15 @@
     <div class="pdf-content real-pdf" 
          *ngIf="hasRealPdf() && !isLoading && !hasError">
       
-      <iframe 
-        [src]="getRealPdfUrl()"
-        class="pdf-iframe"
-        [style.transform]="'scale(' + (zoomLevel / 100) + ')'"
-        frameborder="0">
-        <p>Your browser does not support PDFs. 
-           <a [href]="getRealPdfUrl()" target="_blank">Download the PDF</a>.
+      <object 
+        [data]="getRealPdfUrl()"
+        type="application/pdf"
+        class="pdf-object"
+        [style.transform]="'scale(' + (zoomLevel / 100) + ')'">
+        <p>PDF kann nicht angezeigt werden. 
+           <a [href]="pdfUrl" target="_blank">PDF herunterladen</a>.
         </p>
-      </iframe>
+      </object>
       
       <!-- Page Indicator for Real PDF -->
       <div class="page-indicator">

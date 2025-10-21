@@ -1302,7 +1302,7 @@ export const rhinoConfig = {
   typeMapping: {
     'MCSLIDER': process.env.MCSLIDER_GH_FILE || 'Rahmen.gh',
     'GRAPH': process.env.GRAPH_GH_FILE || 'Test.gh',
-    'UML': process.env.UML_GH_FILE || 'example.gh'
+    'UML': process.env.UML_GH_FILE || 'example2.gh'
   }
 };
 ```

@@ -14,7 +14,7 @@ export class RhinoIntegrationService {
   // Centralized configuration
   private readonly config = {
     grasshopperBasePath: path.join(process.cwd(), 'files', 'Grasshopper'),
-    defaultFile: 'example.gh',
+    defaultFile: 'example2.gh',
     questionTypeMapping: {
       MCSLIDER: 'Rahmen.gh',
       GRAPH: 'Test.gh',

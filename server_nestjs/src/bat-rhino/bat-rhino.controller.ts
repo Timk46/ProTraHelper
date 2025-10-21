@@ -22,11 +22,11 @@ export class BatRhinoController {
     this.logger.log(`Direct Rhino launch requested for file: ${request.filePath}`);
 
     try {
-      // Map frontend request to backend format
+      // Map frontend request to backend formatexample2
       const batRequest: BatScriptRequest = {
-        filePath: request.filePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh',
+        filePath: request.filePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example2.gh',
         command: `_-Grasshopper B D W L W H D O "${
-          request.filePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh'
+          request.filePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example2.gh'
         }" W _MaxViewport _Enter`,
         rhinoPath: request.rhinoPath,
         batchMode: request.batchMode !== false,

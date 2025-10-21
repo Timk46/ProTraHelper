@@ -219,9 +219,10 @@ export class RhinoAuditService {
       return acc;
     }, {} as Record<string, { userId: number; userEmail: string; count: number }>);
 
-    const topUsers: Array<{ userId: number; userEmail: string; count: number }> = Object.values(userCounts)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
+    const topUsers: Array<{ userId: number; userEmail: string; count: number }> = 
+      (Object.values(userCounts) as Array<{ userId: number; userEmail: string; count: number }>)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
 
     const recentErrors = logs
       .filter(log => log.result === 'error')

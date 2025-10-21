@@ -408,6 +408,150 @@ export class EvaluationNavigationService {
     }
   }
 
+  /**
+   * Navigates to an adjacent submission (previous or next)
+   *
+   * @description Main navigation method that switches between submissions while preserving
+   * the current category selection and updating the URL route
+   * @param direction - Navigation direction ('previous' or 'next')
+   * @param currentCategory - Current category to preserve (optional)
+   * @returns Promise<boolean> Navigation result (true if successful)
+   * @memberof EvaluationNavigationService
+   */
+  navigateToAdjacentSubmission(
+    direction: 'previous' | 'next',
+    currentCategory?: number
+  ): Promise<boolean> {
+    const currentContext = this.getCurrentContext();
+    const currentSubmissionId = currentContext.submissionId;
+    
+    if (!currentSubmissionId) {
+      console.warn('⚠️ Cannot navigate: No current submission ID');
+      return Promise.resolve(false);
+    }
+
+    // This would typically get adjacent submission ID from a service
+    // For now, we'll handle the navigation logic here based on demo submissions
+    const adjacentSubmissionId = this.getAdjacentSubmissionId(currentSubmissionId, direction);
+    
+    if (!adjacentSubmissionId) {
+      console.log(`🚫 Cannot navigate ${direction}: No ${direction} submission available`);
+      return Promise.resolve(false);
+    }
+
+    console.log(`🧭 Navigating ${direction} from ${currentSubmissionId} to ${adjacentSubmissionId}`);
+    
+    // Preserve current category in query params
+    const queryParams: Record<string, any> = {};
+    const categoryToPreserve = currentCategory || currentContext.categoryId;
+    if (categoryToPreserve) {
+      queryParams['category'] = categoryToPreserve.toString();
+    }
+
+    return this.navigateToSubmission(adjacentSubmissionId, categoryToPreserve || undefined, queryParams);
+  }
+
+  /**
+   * Gets submission navigation information for the current context
+   *
+   * @description Calculates and returns all navigation-related information including
+   * current position, total count, and whether previous/next navigation is possible
+   * @returns Navigation info with available directions and position data
+   * @memberof EvaluationNavigationService
+   */
+  getSubmissionNavigationInfo(): SubmissionNavigationInfo {
+    const currentContext = this.getCurrentContext();
+    const currentSubmissionId = currentContext.submissionId;
+    
+    if (!currentSubmissionId) {
+      return {
+        currentSubmissionId: null,
+        canNavigatePrevious: false,
+        canNavigateNext: false,
+        currentPosition: 0,
+        totalSubmissions: 0
+      };
+    }
+
+    // Get adjacent submissions (this would typically use a service)
+    const previousId = this.getAdjacentSubmissionId(currentSubmissionId, 'previous');
+    const nextId = this.getAdjacentSubmissionId(currentSubmissionId, 'next');
+    
+    // For demo purposes, calculate position based on submission ID pattern
+    const position = this.getSubmissionPosition(currentSubmissionId);
+    const total = this.getTotalDemoSubmissions();
+
+    return {
+      currentSubmissionId,
+      canNavigatePrevious: !!previousId,
+      canNavigateNext: !!nextId,
+      currentPosition: position,
+      totalSubmissions: total,
+      previousSubmissionId: previousId,
+      nextSubmissionId: nextId
+    };
+  }
+
+  // =============================================================================
+  // PRIVATE HELPER METHODS FOR SUBMISSION NAVIGATION
+  // =============================================================================
+
+  /**
+   * Gets the adjacent submission ID for navigation
+   *
+   * @description Calculates the previous or next submission ID based on the demo submission
+   * naming pattern. This is a temporary implementation for demo mode.
+   * @param currentId - Current submission ID
+   * @param direction - Navigation direction ('previous' or 'next')
+   * @returns Adjacent submission ID or null if out of bounds
+   * @memberof EvaluationNavigationService
+   */
+  private getAdjacentSubmissionId(currentId: string, direction: 'previous' | 'next'): string | null {
+    // Extract number from demo submission ID (e.g., "demo-submission-003" -> 3)
+    const match = currentId.match(/demo-submission-(\d+)/);
+    if (!match) {
+      console.warn('⚠️ Unknown submission ID format:', currentId);
+      return null;
+    }
+
+    const currentNumber = parseInt(match[1], 10);
+    const targetNumber = direction === 'previous' ? currentNumber - 1 : currentNumber + 1;
+    
+    // Check bounds (demo submissions 001-005)
+    if (targetNumber < 1 || targetNumber > 5) {
+      return null;
+    }
+
+    // Format with zero padding
+    const targetId = `demo-submission-${targetNumber.toString().padStart(3, '0')}`;
+    console.log(`🔍 Adjacent ${direction} submission:`, targetId);
+    return targetId;
+  }
+
+  /**
+   * Gets the position of a submission in the list (1-based)
+   *
+   * @description Extracts the position number from demo submission ID for display purposes
+   * @param submissionId - Submission ID in format "demo-submission-XXX"
+   * @returns Position (1-based) or 0 if not found
+   * @memberof EvaluationNavigationService
+   */
+  private getSubmissionPosition(submissionId: string): number {
+    const match = submissionId.match(/demo-submission-(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  /**
+   * Gets the total number of demo submissions
+   *
+   * @description Returns the hardcoded count of demo submissions available for navigation
+   * @returns Total number of submissions (currently 5)
+   * @memberof EvaluationNavigationService
+   */
+  private getTotalDemoSubmissions(): number {
+    return 5; // demo-submission-001 through demo-submission-005
+  }
+
   // =============================================================================
   // BROWSER INTEGRATION
   // =============================================================================
@@ -534,4 +678,14 @@ export interface PageMetadata {
   ogDescription?: string;
   ogUrl?: string;
   ogImage?: string;
+}
+
+export interface SubmissionNavigationInfo {
+  currentSubmissionId: string | null;
+  canNavigatePrevious: boolean;
+  canNavigateNext: boolean;
+  currentPosition: number;
+  totalSubmissions: number;
+  previousSubmissionId?: string | null;
+  nextSubmissionId?: string | null;
 }
