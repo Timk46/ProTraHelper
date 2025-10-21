@@ -36,7 +36,7 @@ describe('RatingGateComponent - Race Condition Prevention', () => {
     id: 999,
     userId: 123,
     displayName: 'Anonymous User',
-    submissionId: 'test-submission-001',
+    submissionId: 1001,
     colorCode: '#2196F3',
     createdAt: new Date('2023-01-01'),
   };
@@ -96,7 +96,7 @@ describe('RatingGateComponent - Race Condition Prevention', () => {
     component = fixture.componentInstance;
 
     // Setup component inputs
-    component.submissionId = 'test-submission-001';
+    component.submissionId = 1001;
     component.currentCategory = mockCategory;
     component.anonymousUser = mockAnonymousUser;
     component.discussions = [];

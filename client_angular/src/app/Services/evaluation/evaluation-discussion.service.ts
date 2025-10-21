@@ -37,6 +37,7 @@ import {
   PhaseSwitchRequestDTO,
   PhaseSwitchResponseDTO,
   UserVoteResponseDTO,
+  VoteCountResponseDTO,
   VoteLimitStatusDTO,
   VoteLimitResponseDTO,
   ResetVotesDTO,
@@ -333,7 +334,7 @@ export class EvaluationDiscussionService {
     return this.http
       .get<
         EvaluationCommentDTO[]
-      >(`${this.apiUrls.comments}?submissionId=${submissionId}&categoryId=${categoryId}`)
+      >(`${this.apiUrls.comments}/get/${submissionId}/${categoryId}`)
       .pipe(
         map(comments => {
           // Backend returns comments directly, but frontend expects discussion containers
@@ -363,7 +364,7 @@ export class EvaluationDiscussionService {
 
   createComment(comment: CreateEvaluationCommentDTO): Observable<EvaluationCommentDTO> {
     console.log('createComment in frontend:', comment);
-    return this.http.post<EvaluationCommentDTO>(`${this.apiUrls.comments}`, comment).pipe(
+    return this.http.post<EvaluationCommentDTO>(`${this.apiUrls.comments}/create`, comment).pipe(
       tap(newComment => {
         // Update local state for real-time updates
         this.commentsSubject.next([...this.commentsSubject.value, newComment]);
@@ -405,9 +406,16 @@ export class EvaluationDiscussionService {
    * @returns Observable<VoteType | null> - The user's vote or null
    */
   getUserVoteForComment(commentId: string): Observable<VoteType | null> {
+    // Use existing votes/get endpoint instead of non-existent user-vote endpoint
     return this.http
-      .get<UserVoteResponseDTO>(`${this.apiUrls.comments}/${commentId}/user-vote`)
-      .pipe(map(response => response.voteType));
+      .get<VoteCountResponseDTO>(`${this.apiUrls.comments}/votes/get/${commentId}`)
+      .pipe(
+        map(response => response.userVoteCount > 0 ? 'UP' : null),
+        catchError(error => {
+          console.warn('⚠️ getUserVoteForComment failed, returning null:', error);
+          return of(null);
+        })
+      );
   }
 
   /**
@@ -416,11 +424,14 @@ export class EvaluationDiscussionService {
    * @returns Observable containing user's vote count
    */
   getUserVoteCountForComment(commentId: string): Observable<number> {
-    const url = `${this.apiUrls.comments}/${commentId}/user-vote-count`;
-    return this.http.get<{ voteCount: number }>(url).pipe(
-      map(response => response.voteCount),
+    // Use existing votes/get endpoint instead of non-existent user-vote-count endpoint
+    return this.http.get<VoteCountResponseDTO>(`${this.apiUrls.comments}/votes/get/${commentId}`).pipe(
+      map(response => response.userVoteCount),
       retry(2),
-      catchError(this.handleError<number>('getUserVoteCountForComment'))
+      catchError(error => {
+        console.warn('⚠️ getUserVoteCountForComment failed, returning 0:', error);
+        return of(0);
+      })
     );
   }
 

@@ -4,14 +4,12 @@ import { take } from 'rxjs/operators';
 
 import { EvaluationStateService } from './evaluation-state.service';
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
-import { EvaluationMockDataService } from './evaluation-mock-data.service';
 import { UserService } from '../auth/user.service';
 import { CategoryRatingStatus, EvaluationStatus, EvaluationPhase } from '@DTOs/index';
 
 describe('EvaluationStateService - Race Condition Prevention', () => {
   let service: EvaluationStateService;
   let mockEvaluationService: jasmine.SpyObj<EvaluationDiscussionService>;
-  let mockMockDataService: jasmine.SpyObj<EvaluationMockDataService>;
   let mockUserService: jasmine.SpyObj<UserService>;
 
   const mockSubmission = {
@@ -100,28 +98,18 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
       'getUserRatingStatus'
     ]);
 
-    const mockDataServiceSpy = jasmine.createSpyObj('EvaluationMockDataService', [
-      'getMockSubmission',
-      'getMockCategories',
-      'getMockCommentStats',
-      'getMockAnonymousUser',
-      'getMockVoteLimits'
-    ]);
-
     const userServiceSpy = jasmine.createSpyObj('UserService', ['getTokenID']);
 
     TestBed.configureTestingModule({
       providers: [
         EvaluationStateService,
         { provide: EvaluationDiscussionService, useValue: evaluationServiceSpy },
-        { provide: EvaluationMockDataService, useValue: mockDataServiceSpy },
         { provide: UserService, useValue: userServiceSpy },
       ],
     });
 
     service = TestBed.inject(EvaluationStateService);
     mockEvaluationService = TestBed.inject(EvaluationDiscussionService) as jasmine.SpyObj<EvaluationDiscussionService>;
-    mockMockDataService = TestBed.inject(EvaluationMockDataService) as jasmine.SpyObj<EvaluationMockDataService>;
     mockUserService = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
 
     // Setup default mock returns
@@ -286,41 +274,6 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
         expect(mockEvaluationService.getUserRatingStatus).not.toHaveBeenCalled();
         done();
       });
-    });
-
-    it('should validate rating status freshness correctly', () => {
-      // Test cases for isValidRatingStatus private method
-      const service_any = service as any;
-
-      // Fresh status (2 minutes old)
-      const freshStatus: CategoryRatingStatus = {
-        categoryId: 1,
-        categoryName: 'cat1',
-        displayName: 'Category 1',
-        hasRated: true,
-        rating: 8,
-        ratedAt: new Date(),
-        lastUpdatedAt: new Date(Date.now() - 2 * 60 * 1000),
-        canAccessDiscussion: true,
-        isRequired: true,
-      };
-
-      // Stale status (10 minutes old)
-      const staleStatus: CategoryRatingStatus = {
-        ...freshStatus,
-        lastUpdatedAt: new Date(Date.now() - 10 * 60 * 1000),
-      };
-
-      // Invalid status (missing hasRated)
-      const invalidStatus = {
-        ...freshStatus,
-        hasRated: undefined,
-      } as any;
-
-      expect(service_any.isValidRatingStatus(freshStatus)).toBe(true);
-      expect(service_any.isValidRatingStatus(staleStatus)).toBe(false);
-      expect(service_any.isValidRatingStatus(invalidStatus)).toBe(false);
-      expect(service_any.isValidRatingStatus(null)).toBe(false);
     });
 
   });

@@ -1,16 +1,4 @@
 <div class="evaluation-forum-wrapper" *ngIf="viewModel$ | async as vm">
-  <!-- Demo Mode Banner - Only for pure mock mode (no submissionId) -->
-  <div class="demo-mode-banner" *ngIf="isPureMockMode()">
-    <mat-icon>preview</mat-icon>
-    <div class="banner-content">
-      <span class="banner-title">Demo-Modus</span>
-      <small class="banner-subtitle"
-        >Interaktive Beispieldaten zur Demonstration - Alle Aktionen werden nur lokal
-        gespeichert</small
-      >
-    </div>
-  </div>
-
   <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="vm.loading">
     <mat-spinner diameter="40"></mat-spinner>

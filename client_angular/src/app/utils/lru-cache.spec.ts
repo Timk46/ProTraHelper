@@ -6,7 +6,7 @@ describe('LRUCache', () => {
       const cache = new LRUCache<string, number>(10);
       expect(cache).toBeDefined();
       expect(cache.maxSize).toBe(10);
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
     });
 
     it('should throw error for invalid maxSize', () => {
@@ -35,7 +35,7 @@ describe('LRUCache', () => {
       cache.set('key1', 100);
       cache.set('key1', 200);
       expect(cache.get('key1')).toBe(200);
-      expect(cache.size()).toBe(1); // Size should not increase
+      expect(cache.size).toBe(1); // Size should not increase
     });
 
     it('should check if key exists', () => {
@@ -48,7 +48,7 @@ describe('LRUCache', () => {
       cache.set('key1', 100);
       expect(cache.delete('key1')).toBe(true);
       expect(cache.has('key1')).toBe(false);
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
     });
 
     it('should return false when deleting non-existent key', () => {
@@ -62,7 +62,7 @@ describe('LRUCache', () => {
 
       cache.clear();
 
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
       expect(cache.has('key1')).toBe(false);
       expect(cache.has('key2')).toBe(false);
       expect(cache.has('key3')).toBe(false);
@@ -89,12 +89,12 @@ describe('LRUCache', () => {
       cache.set('key3', 300);
 
       // Cache is at capacity (3/3)
-      expect(cache.size()).toBe(3);
+      expect(cache.size).toBe(3);
 
       // Adding 4th entry should evict key1 (least recently used)
       cache.set('key4', 400);
 
-      expect(cache.size()).toBe(3);
+      expect(cache.size).toBe(3);
       expect(cache.has('key1')).toBe(false);
       expect(cache.has('key2')).toBe(true);
       expect(cache.has('key3')).toBe(true);
@@ -152,7 +152,7 @@ describe('LRUCache', () => {
 
       expect(evictedKeys).toEqual(['key1', 'key2', 'key3']);
       expect(evictedValues).toEqual([100, 200, 300]);
-      expect(cache.size()).toBe(3);
+      expect(cache.size).toBe(3);
     });
   });
 
@@ -369,10 +369,10 @@ describe('LRUCache', () => {
       const cache = new LRUCache<string, number>(1);
 
       cache.set('key1', 100);
-      expect(cache.size()).toBe(1);
+      expect(cache.size).toBe(1);
 
       cache.set('key2', 200);
-      expect(cache.size()).toBe(1);
+      expect(cache.size).toBe(1);
       expect(cache.has('key1')).toBe(false);
       expect(cache.has('key2')).toBe(true);
     });
@@ -387,7 +387,7 @@ describe('LRUCache', () => {
 
       const stats = cache.getStatistics();
       expect(stats.hits).toBe(3);
-      expect(cache.size()).toBe(1);
+      expect(cache.size).toBe(1);
     });
 
     it('should handle setting same key-value multiple times', () => {
@@ -398,14 +398,14 @@ describe('LRUCache', () => {
       cache.set('key1', 100);
       cache.set('key1', 100);
 
-      expect(cache.size()).toBe(1);
+      expect(cache.size).toBe(1);
       expect(evictions.length).toBe(0); // No evictions
     });
 
     it('should handle empty cache operations', () => {
       const cache = new LRUCache<string, number>(5);
 
-      expect(cache.size()).toBe(0);
+      expect(cache.size).toBe(0);
       expect(cache.keys()).toEqual([]);
       expect(cache.values()).toEqual([]);
       expect(cache.entries()).toEqual([]);
@@ -421,7 +421,7 @@ describe('LRUCache', () => {
       cache.set('key2', 200);
       cache.set('key3', 300); // Should evict without error
 
-      expect(cache.size()).toBe(2);
+      expect(cache.size).toBe(2);
     });
   });
 
@@ -441,7 +441,7 @@ describe('LRUCache', () => {
 
       // Should complete in reasonable time (< 100ms)
       expect(duration).toBeLessThan(100);
-      expect(cache.size()).toBe(1000);
+      expect(cache.size).toBe(1000);
       expect(cache.getEvictionCount()).toBe(4000);
     });
 

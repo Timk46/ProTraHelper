@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, firstValueFrom, EMPTY } from 'rxjs';
 import { filter, takeUntil, catchError, tap } from 'rxjs/operators';
 import {
   VoteType,
@@ -13,6 +13,18 @@ import { EvaluationRealtimeService, VoteEvent } from './evaluation-realtime.serv
 import { EvaluationStateService } from './evaluation-state.service';
 
 /**
+ * Vote error codes for categorization
+ */
+export enum VoteErrorCode {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  VOTE_LIMIT_EXCEEDED = 'VOTE_LIMIT_EXCEEDED',
+  UNAUTHORIZED = 'UNAUTHORIZED',
+  TIMEOUT = 'TIMEOUT',
+  INVALID_OPERATION = 'INVALID_OPERATION',
+  UNKNOWN = 'UNKNOWN'
+}
+
+/**
  * Vote operation for queue management
  */
 interface VoteOperation {
@@ -22,6 +34,7 @@ interface VoteOperation {
   priority: number;
   retryCount: number;
   categoryId?: number;
+  submissionId?: number;
 }
 
 /**
@@ -31,7 +44,29 @@ export interface VoteError {
   commentId: number;
   error: string | null;
   timestamp: number;
-  code?: string;
+  code: VoteErrorCode;
+  retryCount?: number;
+  isRetryable: boolean;
+  httpStatus?: number;
+}
+
+/**
+ * Vote update data from real-time events
+ */
+interface VoteUpdateData {
+  commentId?: number | string;
+  totalVotes: number;
+  userVoteCount?: number;
+}
+
+/**
+ * Cache metrics for monitoring
+ */
+interface CacheMetrics {
+  hits: number;
+  misses: number;
+  evictions: number;
+  lastReset: number;
 }
 
 /**
@@ -67,6 +102,21 @@ export class VoteStateService implements OnDestroy {
   // =============================================================================
 
   /**
+   * Cache metrics for monitoring performance
+   */
+  private cacheMetrics: CacheMetrics = {
+    hits: 0,
+    misses: 0,
+    evictions: 0,
+    lastReset: Date.now()
+  };
+
+  /**
+   * Metrics logging frequency (every N operations)
+   */
+  private readonly METRICS_LOG_FREQUENCY = 100;
+
+  /**
    * LRU cache for user vote counts per comment
    * Max 200 comments - automatically evicts least recently used entries
    */
@@ -74,6 +124,7 @@ export class VoteStateService implements OnDestroy {
     200,
     (commentId: number, subject: BehaviorSubject<number>) => {
       subject.complete();
+      this.cacheMetrics.evictions++;
       console.log(`🧹 VoteStateService: LRU evicted vote cache for comment ${commentId}`);
     }
   );
@@ -126,6 +177,11 @@ export class VoteStateService implements OnDestroy {
    * Base delay for exponential backoff (ms)
    */
   private readonly RETRY_BASE_DELAY = 1000;
+
+  /**
+   * Batch size for concurrent vote processing
+   */
+  private readonly QUEUE_BATCH_SIZE = 5;
 
   // =============================================================================
   // ERROR HANDLING (Layer 3)
@@ -213,11 +269,17 @@ export class VoteStateService implements OnDestroy {
     let cached = this.voteCache.get(commentId);
 
     if (!cached) {
+      this.cacheMetrics.misses++;
       cached = new BehaviorSubject<number>(0);
       this.voteCache.set(commentId, cached);
 
-      console.log(`📊 VoteStateService: Vote count for ${commentId} not in cache, initializing`);
+      console.log(`📊 VoteStateService: Vote count for ${commentId} not in cache, initializing (cache miss)`);
+    } else {
+      this.cacheMetrics.hits++;
     }
+
+    // Log metrics periodically
+    this.logCacheMetricsIfNeeded();
 
     return cached.asObservable();
   }
@@ -363,7 +425,11 @@ export class VoteStateService implements OnDestroy {
   }
 
   /**
-   * Processes vote queue with retry logic
+   * Processes vote queue with retry logic and batching
+   *
+   * @description
+   * Processes queue in batches for better performance.
+   * Uses Promise.allSettled to process multiple operations concurrently.
    */
   private async processQueue(): Promise<void> {
     if (this.isProcessingQueue) {
@@ -372,20 +438,35 @@ export class VoteStateService implements OnDestroy {
     }
 
     this.isProcessingQueue = true;
-    console.log(`🔄 VoteStateService: Processing queue (${this.voteQueue.length} operations)`);
+    console.log(`🔄 VoteStateService: Processing queue (${this.voteQueue.length} operations) with batch size ${this.QUEUE_BATCH_SIZE}`);
 
-    while (this.voteQueue.length > 0) {
-      const operation = this.voteQueue.shift()!;
+    try {
+      while (this.voteQueue.length > 0) {
+        // Extract batch from queue
+        const batch = this.voteQueue.splice(0, this.QUEUE_BATCH_SIZE);
 
-      try {
-        await this.executeVoteOperation(operation);
-      } catch (error) {
-        await this.handleVoteOperationError(operation, error);
+        console.log(`📦 VoteStateService: Processing batch of ${batch.length} operations`);
+
+        // Process batch concurrently
+        const results = await Promise.allSettled(
+          batch.map(async (operation) => {
+            try {
+              await this.executeVoteOperation(operation);
+            } catch (error) {
+              await this.handleVoteOperationError(operation, error);
+            }
+          })
+        );
+
+        // Log batch results
+        const fulfilled = results.filter(r => r.status === 'fulfilled').length;
+        const rejected = results.filter(r => r.status === 'rejected').length;
+        console.log(`✅ VoteStateService: Batch completed - ${fulfilled} succeeded, ${rejected} failed`);
       }
+    } finally {
+      this.isProcessingQueue = false;
+      console.log('✅ VoteStateService: Queue processing completed');
     }
-
-    this.isProcessingQueue = false;
-    console.log('✅ VoteStateService: Queue processing completed');
   }
 
   /**
@@ -412,10 +493,9 @@ export class VoteStateService implements OnDestroy {
     }
 
     // Invalidate vote limit cache for category
-    if (operation.categoryId) {
-      // Get submissionId from evaluationStateService if available
-      // For now, we don't have it in the operation, so we skip cache invalidation
-      // This will be handled by real-time events
+    if (operation.categoryId && operation.submissionId) {
+      this.invalidateVoteLimitCache(operation.submissionId, operation.categoryId);
+      console.log(`🧹 VoteStateService: Invalidated vote limit cache for submission ${operation.submissionId}, category ${operation.categoryId}`);
     }
 
     console.log(`✅ VoteStateService: Vote executed successfully for ${operation.commentId}`);
@@ -427,11 +507,14 @@ export class VoteStateService implements OnDestroy {
   private async handleVoteOperationError(operation: VoteOperation, error: any): Promise<void> {
     console.error(`❌ VoteStateService: Vote operation failed for ${operation.commentId}:`, error);
 
-    if (operation.retryCount < this.MAX_RETRY_ATTEMPTS) {
+    const errorCode = this.categorizeError(error);
+    const isRetryable = this.isErrorRetryable(errorCode);
+
+    if (isRetryable && operation.retryCount < this.MAX_RETRY_ATTEMPTS) {
       // Calculate exponential backoff delay
       const delayMs = this.RETRY_BASE_DELAY * Math.pow(2, operation.retryCount);
 
-      console.warn(`🔄 VoteStateService: Retrying vote for ${operation.commentId} in ${delayMs}ms (attempt ${operation.retryCount + 1}/${this.MAX_RETRY_ATTEMPTS})`);
+      console.warn(`🔄 VoteStateService: Retrying vote for ${operation.commentId} in ${delayMs}ms (attempt ${operation.retryCount + 1}/${this.MAX_RETRY_ATTEMPTS}) - Error: ${errorCode}`);
 
       await this.delay(delayMs);
 
@@ -442,15 +525,100 @@ export class VoteStateService implements OnDestroy {
       // Re-queue operation
       this.enqueueOperation(operation);
     } else {
-      console.error(`❌ VoteStateService: Vote failed after ${this.MAX_RETRY_ATTEMPTS} retries for ${operation.commentId}`);
+      const reason = isRetryable
+        ? `after ${this.MAX_RETRY_ATTEMPTS} retries`
+        : 'error is not retryable';
+
+      console.error(`❌ VoteStateService: Vote failed ${reason} for ${operation.commentId} - Code: ${errorCode}`);
 
       // Emit error event
       this.errorState$.next({
         commentId: operation.commentId,
-        error: error?.message || 'Vote konnte nicht gespeichert werden',
+        error: this.getErrorMessage(error, errorCode),
         timestamp: Date.now(),
-        code: error?.code
+        code: errorCode,
+        retryCount: operation.retryCount,
+        isRetryable,
+        httpStatus: error?.status
       });
+    }
+  }
+
+  /**
+   * Categorizes error into specific error code
+   */
+  private categorizeError(error: any): VoteErrorCode {
+    // Check for specific error codes from backend
+    if (error?.code === 'VOTE_LIMIT_EXCEEDED' || error?.message?.includes('vote limit')) {
+      return VoteErrorCode.VOTE_LIMIT_EXCEEDED;
+    }
+
+    // Check HTTP status codes
+    if (error?.status === 401 || error?.status === 403) {
+      return VoteErrorCode.UNAUTHORIZED;
+    }
+
+    // Check for timeout errors
+    if (error?.name === 'TimeoutError' || error?.message?.includes('timeout')) {
+      return VoteErrorCode.TIMEOUT;
+    }
+
+    // Check for network errors
+    if (!navigator.onLine || error?.name === 'NetworkError' || error?.status === 0) {
+      return VoteErrorCode.NETWORK_ERROR;
+    }
+
+    // Check for invalid operations
+    if (error?.status === 400 || error?.status === 422) {
+      return VoteErrorCode.INVALID_OPERATION;
+    }
+
+    return VoteErrorCode.UNKNOWN;
+  }
+
+  /**
+   * Determines if error is retryable
+   */
+  private isErrorRetryable(errorCode: VoteErrorCode): boolean {
+    switch (errorCode) {
+      case VoteErrorCode.NETWORK_ERROR:
+      case VoteErrorCode.TIMEOUT:
+      case VoteErrorCode.UNKNOWN:
+        return true;
+
+      case VoteErrorCode.VOTE_LIMIT_EXCEEDED:
+      case VoteErrorCode.UNAUTHORIZED:
+      case VoteErrorCode.INVALID_OPERATION:
+        return false;
+
+      default:
+        return false;
+    }
+  }
+
+  /**
+   * Gets user-friendly error message
+   */
+  private getErrorMessage(error: any, errorCode: VoteErrorCode): string {
+    switch (errorCode) {
+      case VoteErrorCode.VOTE_LIMIT_EXCEEDED:
+        return 'Vote-Limit erreicht. Du hast keine Votes mehr verfügbar.';
+
+      case VoteErrorCode.UNAUTHORIZED:
+        return 'Nicht autorisiert. Bitte melde dich erneut an.';
+
+      case VoteErrorCode.TIMEOUT:
+        return 'Zeitüberschreitung. Bitte versuche es erneut.';
+
+      case VoteErrorCode.NETWORK_ERROR:
+        return 'Netzwerkfehler. Bitte überprüfe deine Internetverbindung.';
+
+      case VoteErrorCode.INVALID_OPERATION:
+        return 'Ungültige Operation. Bitte lade die Seite neu.';
+
+      case VoteErrorCode.UNKNOWN:
+      default:
+        return error?.message || 'Vote konnte nicht gespeichert werden.';
     }
   }
 
@@ -496,9 +664,9 @@ export class VoteStateService implements OnDestroy {
           console.log(`✅ VoteStateService: Rating stats loaded for ${key}`);
         }
       }),
-      catchError(error => {
+      catchError((error: unknown) => {
         console.error(`❌ VoteStateService: Failed to load rating stats for ${key}:`, error);
-        return [];
+        return EMPTY;
       })
     ).subscribe();
   }
@@ -520,9 +688,9 @@ export class VoteStateService implements OnDestroy {
           console.log(`✅ VoteStateService: Vote limit status loaded for ${key}`);
         }
       }),
-      catchError(error => {
+      catchError((error: unknown) => {
         console.error(`❌ VoteStateService: Failed to load vote limit status for ${key}:`, error);
-        return [];
+        return EMPTY;
       })
     ).subscribe();
   }
@@ -586,6 +754,24 @@ export class VoteStateService implements OnDestroy {
     return `limit-${submissionId}-${categoryId}`;
   }
 
+  /**
+   * Logs cache metrics if threshold reached
+   */
+  private logCacheMetricsIfNeeded(): void {
+    const total = this.cacheMetrics.hits + this.cacheMetrics.misses;
+
+    if (total > 0 && total % this.METRICS_LOG_FREQUENCY === 0) {
+      const hitRate = ((this.cacheMetrics.hits / total) * 100).toFixed(1);
+      const uptime = ((Date.now() - this.cacheMetrics.lastReset) / 1000).toFixed(0);
+
+      console.log(`📊 VoteStateService Cache Metrics:
+        Hit Rate: ${hitRate}% (${this.cacheMetrics.hits}/${total})
+        Evictions: ${this.cacheMetrics.evictions}
+        Uptime: ${uptime}s
+      `);
+    }
+  }
+
   // =============================================================================
   // LIFECYCLE
   // =============================================================================
@@ -611,13 +797,4 @@ export class VoteStateService implements OnDestroy {
 
     console.log('✅ VoteStateService: Cleanup completed');
   }
-}
-
-/**
- * Interface: Vote update data from real-time events
- */
-interface VoteUpdateData {
-  commentId?: number | string;
-  totalVotes: number;
-  userVoteCount?: number;
 }

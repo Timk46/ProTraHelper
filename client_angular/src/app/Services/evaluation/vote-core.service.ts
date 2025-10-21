@@ -50,6 +50,7 @@ export class VoteCoreService implements OnDestroy {
    * @param commentId - Comment identifier (number format, converted to string for API)
    * @param voteType - Vote type ('UP' to add vote, null to remove vote)
    * @returns Observable with vote result including limit status
+   * @throws Error if commentId is invalid (not a positive integer)
    *
    * @example
    * ```typescript
@@ -60,9 +61,11 @@ export class VoteCoreService implements OnDestroy {
    * ```
    */
   submitVote(commentId: number, voteType: VoteType): Observable<VoteLimitResponseDTO> {
+    this.validateCommentId(commentId);
+
     console.log(`🗳️ VoteCoreService: Submitting ${voteType || 'remove'} vote for comment ${commentId}`);
 
-    return this.evaluationDiscussionService.voteCommentWithLimits(String(commentId), voteType).pipe(
+    return this.evaluationDiscussionService.voteCommentWithLimits(commentId.toString(), voteType).pipe(
       takeUntil(this.destroy$)
     );
   }
@@ -80,6 +83,7 @@ export class VoteCoreService implements OnDestroy {
    * @param submissionId - Submission identifier
    * @param categoryId - Category identifier
    * @returns Observable with rating statistics
+   * @throws Error if submissionId or categoryId is invalid
    *
    * @example
    * ```typescript
@@ -90,9 +94,12 @@ export class VoteCoreService implements OnDestroy {
    * ```
    */
   loadRatingStats(submissionId: number, categoryId: number): Observable<RatingStatsDTO> {
+    this.validateId(submissionId, 'submissionId');
+    this.validateId(categoryId, 'categoryId');
+
     console.log(`📊 VoteCoreService: Loading rating stats for submission ${submissionId}, category ${categoryId}`);
 
-    return this.evaluationDiscussionService.getRatingStats(String(submissionId), String(categoryId)).pipe(
+    return this.evaluationDiscussionService.getRatingStats(submissionId.toString(), categoryId.toString()).pipe(
       takeUntil(this.destroy$)
     );
   }
@@ -109,6 +116,7 @@ export class VoteCoreService implements OnDestroy {
    * @param submissionId - Submission identifier
    * @param categoryId - Category identifier
    * @returns Observable with vote limit status
+   * @throws Error if submissionId or categoryId is invalid
    *
    * @example
    * ```typescript
@@ -119,11 +127,45 @@ export class VoteCoreService implements OnDestroy {
    * ```
    */
   loadVoteLimitStatus(submissionId: number, categoryId: number): Observable<VoteLimitStatusDTO> {
+    this.validateId(submissionId, 'submissionId');
+    this.validateId(categoryId, 'categoryId');
+
     console.log(`📊 VoteCoreService: Loading vote limit status for submission ${submissionId}, category ${categoryId}`);
 
-    return this.evaluationDiscussionService.getVoteLimitStatus(String(submissionId), String(categoryId)).pipe(
+    return this.evaluationDiscussionService.getVoteLimitStatus(submissionId.toString(), categoryId.toString()).pipe(
       takeUntil(this.destroy$)
     );
+  }
+
+  // =============================================================================
+  // VALIDATION HELPERS
+  // =============================================================================
+
+  /**
+   * Validates comment ID
+   *
+   * @param commentId - Comment identifier to validate
+   * @throws Error if commentId is not a positive integer
+   * @private
+   */
+  private validateCommentId(commentId: number): void {
+    if (!Number.isInteger(commentId) || commentId <= 0) {
+      throw new Error(`Invalid commentId: ${commentId}. Must be a positive integer.`);
+    }
+  }
+
+  /**
+   * Validates generic ID (submissionId, categoryId, etc.)
+   *
+   * @param id - Identifier to validate
+   * @param name - Name of the ID parameter for error messages
+   * @throws Error if id is not a positive integer
+   * @private
+   */
+  private validateId(id: number, name: string): void {
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new Error(`Invalid ${name}: ${id}. Must be a positive integer.`);
+    }
   }
 
   // =============================================================================

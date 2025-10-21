@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { of, Subject } from 'rxjs';
 import { VoteUIStateService } from './vote-ui-state.service';
-import { VoteStateService, VoteError } from './vote-state.service';
+import { VoteStateService, VoteError, VoteErrorCode } from './vote-state.service';
 
 describe('VoteUIStateService', () => {
   let service: VoteUIStateService;
@@ -325,12 +325,12 @@ describe('VoteUIStateService', () => {
 
   describe('Tooltip Methods', () => {
     it('should return correct upvote tooltip when can vote', () => {
-      const tooltip = service.getUpvoteTooltip('comment-123', true);
+      const tooltip = service.getUpvoteTooltip(123, true);
       expect(tooltip).toBe('Vote hinzufügen');
     });
 
     it('should return correct upvote tooltip when cannot vote', () => {
-      const tooltip = service.getUpvoteTooltip('comment-123', false);
+      const tooltip = service.getUpvoteTooltip(123, false);
       expect(tooltip).toBe('Keine Votes verfügbar');
     });
 
@@ -338,28 +338,28 @@ describe('VoteUIStateService', () => {
       mockVoteStateService.getVoteCount$.and.returnValue(of(5));
       mockVoteStateService.updateVoteCache.and.stub();
 
-      service.applyOptimisticUpdate('comment-123', 1);
+      service.applyOptimisticUpdate(123, 1);
 
       setTimeout(() => {
-        const tooltip = service.getUpvoteTooltip('comment-123', true);
+        const tooltip = service.getUpvoteTooltip(123, true);
         expect(tooltip).toBe('Vote wird gespeichert...');
         done();
       }, 10);
     });
 
     it('should return correct remove vote tooltip', () => {
-      expect(service.getRemoveVoteTooltip('comment-123', 0)).toBe('Keine Votes zum Entfernen');
-      expect(service.getRemoveVoteTooltip('comment-123', 5)).toBe('Vote entfernen');
+      expect(service.getRemoveVoteTooltip(123, 0)).toBe('Keine Votes zum Entfernen');
+      expect(service.getRemoveVoteTooltip(123, 5)).toBe('Vote entfernen');
     });
 
     it('should generate aria label with vote counts', () => {
-      const label = service.getVoteStatsAriaLabel('comment-123', 10, 2);
+      const label = service.getVoteStatsAriaLabel(123, 10, 2);
       expect(label).toContain('10 Votes insgesamt');
       expect(label).toContain('2 Votes von dir');
     });
 
     it('should generate aria label for single vote', () => {
-      const label = service.getVoteStatsAriaLabel('comment-123', 1, 1);
+      const label = service.getVoteStatsAriaLabel(123, 1, 1);
       expect(label).toContain('1 Vote insgesamt');
       expect(label).toContain('1 Vote von dir');
     });
@@ -375,88 +375,97 @@ describe('VoteUIStateService', () => {
       mockVoteStateService.updateVoteCache.and.stub();
 
       // Apply optimistic update
-      service.applyOptimisticUpdate('comment-123', 1);
+      service.applyOptimisticUpdate(123, 1);
       tick(10);
 
       // Emit error
       const error: VoteError = {
-        commentId: 'comment-123',
+        commentId: 123,
         error: 'Vote failed',
         timestamp: Date.now(),
-        code: 'NETWORK_ERROR'
+        code: VoteErrorCode.NETWORK_ERROR,
+        isRetryable: true
       };
 
       mockVoteErrors$.next(error);
       tick();
 
       // Should have reverted
-      expect(service.hasOptimisticUpdate('comment-123')).toBe(false);
-      expect(mockVoteStateService.updateVoteCache).toHaveBeenCalledWith('comment-123', 5);
+      expect(service.hasOptimisticUpdate(123)).toBe(false);
+      expect(mockVoteStateService.updateVoteCache).toHaveBeenCalledWith(123, 5);
     }));
 
     it('should clear loading state on error', fakeAsync(() => {
-      service.setVoting('comment-123', true);
+      service.setVoting(123, true);
       tick();
 
       const error: VoteError = {
-        commentId: 'comment-123',
+        commentId: 123,
         error: 'Vote failed',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        code: VoteErrorCode.TIMEOUT,
+        isRetryable: true
       };
 
       mockVoteErrors$.next(error);
       tick();
 
-      service.isVoting$('comment-123').subscribe(isVoting => {
+      service.isVoting$(123).subscribe(isVoting => {
         expect(isVoting).toBe(false);
       });
     }));
 
     it('should store error message', fakeAsync(() => {
       const error: VoteError = {
-        commentId: 'comment-123',
+        commentId: 123,
         error: 'Vote limit exceeded',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        code: VoteErrorCode.VOTE_LIMIT_EXCEEDED,
+        isRetryable: false
       };
 
       mockVoteErrors$.next(error);
       tick();
 
-      const errorMessage = service.getError('comment-123');
+      const errorMessage = service.getError(123);
       expect(errorMessage).toBe('Vote limit exceeded');
     }));
 
     it('should auto-clear error after 5 seconds', fakeAsync(() => {
       const error: VoteError = {
-        commentId: 'comment-123',
+        commentId: 123,
         error: 'Vote failed',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        code: VoteErrorCode.UNKNOWN,
+        isRetryable: true
       };
 
       mockVoteErrors$.next(error);
       tick();
 
-      expect(service.getError('comment-123')).toBeTruthy();
+      expect(service.getError(123)).toBeTruthy();
 
       // Wait 5 seconds
       tick(5000);
 
-      expect(service.getError('comment-123')).toBeNull();
+      expect(service.getError(123)).toBeNull();
     }));
 
     it('should clear error manually', fakeAsync(() => {
       const error: VoteError = {
-        commentId: 'comment-123',
+        commentId: 123,
         error: 'Vote failed',
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        code: VoteErrorCode.NETWORK_ERROR,
+        isRetryable: true
       };
 
       mockVoteErrors$.next(error);
       tick();
 
-      service.clearError('comment-123');
+      service.clearError(123);
 
-      expect(service.getError('comment-123')).toBeNull();
+      expect(service.getError(123)).toBeNull();
     }));
   });
 
@@ -467,31 +476,31 @@ describe('VoteUIStateService', () => {
   describe('Cleanup', () => {
     it('should cleanup stale debounce entries', fakeAsync(() => {
       // Add debounce entry
-      service.shouldDebounce('comment-old');
+      service.shouldDebounce(999);
 
       // Fast-forward past max age (5 minutes)
       tick(300000 + 60000); // Max age + cleanup interval
 
       const clickDebouncer = (service as any).clickDebouncer;
-      expect(clickDebouncer.has('comment-old')).toBe(false);
+      expect(clickDebouncer.has(999)).toBe(false);
     }));
 
     it('should auto-confirm old optimistic updates', fakeAsync(() => {
       mockVoteStateService.getVoteCount$.and.returnValue(of(5));
       mockVoteStateService.updateVoteCache.and.stub();
 
-      service.applyOptimisticUpdate('comment-123', 1);
+      service.applyOptimisticUpdate(123, 1);
       tick(10);
 
       // Fast-forward past max age (30 seconds)
       tick(30000 + 60000); // Max age + cleanup interval
 
-      expect(service.hasOptimisticUpdate('comment-123')).toBe(false);
+      expect(service.hasOptimisticUpdate(123)).toBe(false);
     }));
 
     it('should clear all data on destroy', () => {
-      service.setVoting('comment-1', true);
-      service.shouldDebounce('comment-2');
+      service.setVoting(1, true);
+      service.shouldDebounce(2);
 
       const loadingStates = (service as any).loadingStates;
       const clickDebouncer = (service as any).clickDebouncer;
@@ -526,19 +535,19 @@ describe('VoteUIStateService', () => {
 
       // Fill cache to max
       for (let i = 0; i < maxSize; i++) {
-        service.setVoting(`comment-${i}`, true);
+        service.setVoting(i, true);
       }
 
       // Access first comment to make it recently used
-      service.isVoting$('comment-0').subscribe();
+      service.isVoting$(0).subscribe();
 
       // Add one more - should evict comment-1
-      service.setVoting('comment-new', true);
+      service.setVoting(999, true);
 
       const loadingStates = (service as any).loadingStates;
-      expect(loadingStates.has('comment-0')).toBe(true); // Recently accessed
-      expect(loadingStates.has('comment-1')).toBe(false); // Evicted
-      expect(loadingStates.has('comment-new')).toBe(true); // Newly added
+      expect(loadingStates.has(0)).toBe(true); // Recently accessed
+      expect(loadingStates.has(1)).toBe(false); // Evicted
+      expect(loadingStates.has(999)).toBe(true); // Newly added
     });
   });
 });

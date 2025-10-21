@@ -28,6 +28,21 @@ import { VoteUIStateService, VoteButtonState } from './vote-ui-state.service';
 })
 export class LegacyVoteAdapter {
 
+  /**
+   * Tracks unique deprecation warnings to prevent spam
+   */
+  private deprecationWarnings = new Set<string>();
+
+  /**
+   * Maximum number of deprecation warnings to log
+   */
+  private readonly MAX_WARNINGS = 10;
+
+  /**
+   * Tracks method call counts for migration metrics
+   */
+  private usageMetrics = new Map<string, number>();
+
   constructor(
     private voteCoreService: VoteCoreService,
     private voteStateService: VoteStateService,
@@ -45,7 +60,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteStateService.getVoteCount$ instead
    */
   getCurrentVote$(commentId: number): Observable<number> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getCurrentVote$ - Use VoteStateService.getVoteCount$');
+    this.logDeprecation('getCurrentVote$', 'VoteStateService.getVoteCount$');
     return this.voteStateService.getVoteCount$(commentId);
   }
 
@@ -54,7 +69,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.isVoting$ instead
    */
   isVoting$(commentId: number): Observable<boolean> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.isVoting$ - Use VoteUIStateService.isVoting$');
+    this.logDeprecation('isVoting$', 'VoteUIStateService.isVoting$');
     return this.voteUIStateService.isVoting$(commentId);
   }
 
@@ -63,7 +78,7 @@ export class LegacyVoteAdapter {
    * @deprecated Session tracking moved to VoteSessionService (kept separate for now)
    */
   getSessionVotes(): number {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getSessionVotes - Use VoteSessionService directly');
+    this.logDeprecation('getSessionVotes', 'VoteSessionService directly');
     // Note: VoteSessionService is kept separate as it handles session-level state
     // This is NOT part of the consolidated vote services
     return 0; // Placeholder
@@ -78,7 +93,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteStateService.submitVote instead
    */
   async submitVote(commentId: number, voteType: VoteType, categoryId?: number): Promise<void> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.submitVote - Use VoteStateService.submitVote');
+    this.logDeprecation('submitVote', 'VoteStateService.submitVote');
     return this.voteStateService.submitVote(commentId, voteType, categoryId);
   }
 
@@ -87,7 +102,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteStateService.getRatingStats$ instead
    */
   getRatingStats$(submissionId: number, categoryId: number): Observable<RatingStatsDTO | null> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getRatingStats$ - Use VoteStateService.getRatingStats$');
+    this.logDeprecation('getRatingStats$', 'VoteStateService.getRatingStats$');
     return this.voteStateService.getRatingStats$(submissionId, categoryId);
   }
 
@@ -96,7 +111,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.canVote$ instead
    */
   canAddMoreVotes$(commentId: number): Observable<boolean> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.canAddMoreVotes$ - Use VoteUIStateService.canVote$');
+    this.logDeprecation('canAddMoreVotes$', 'VoteUIStateService.canVote$');
     return this.voteUIStateService.canVote$(commentId);
   }
 
@@ -105,7 +120,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteStateService.getVoteCount$ instead
    */
   getUserVoteCount$(commentId: number): Observable<number> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getUserVoteCount$ - Use VoteStateService.getVoteCount$');
+    this.logDeprecation('getUserVoteCount$', 'VoteStateService.getVoteCount$');
     return this.voteStateService.getVoteCount$(commentId);
   }
 
@@ -118,7 +133,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteStateService.submitVote (handles queue internally)
    */
   async enqueueVote(commentId: number, voteType: VoteType, categoryId?: number): Promise<void> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.enqueueVote - Use VoteStateService.submitVote');
+    this.logDeprecation('enqueueVote', 'VoteStateService.submitVote');
     return this.voteStateService.submitVote(commentId, voteType, categoryId);
   }
 
@@ -127,7 +142,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteStateService.getVoteCount$ instead
    */
   getLocalVoteCache$(commentId: number): Observable<number> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getLocalVoteCache$ - Use VoteStateService.getVoteCount$');
+    this.logDeprecation('getLocalVoteCache$', 'VoteStateService.getVoteCount$');
     return this.voteStateService.getVoteCount$(commentId);
   }
 
@@ -136,7 +151,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.isVoting$ instead
    */
   getLoadingState$(commentId: number): Observable<boolean> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getLoadingState$ - Use VoteUIStateService.isVoting$');
+    this.logDeprecation('getLoadingState$', 'VoteUIStateService.isVoting$');
     return this.voteUIStateService.isVoting$(commentId);
   }
 
@@ -145,7 +160,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.getError instead
    */
   getErrorState(commentId: number): string | null {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getErrorState - Use VoteUIStateService.getError');
+    this.logDeprecation('getErrorState', 'VoteUIStateService.getError');
     return this.voteUIStateService.getError(commentId);
   }
 
@@ -158,7 +173,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.shouldDebounce instead
    */
   shouldDebounce(commentId: number): boolean {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.shouldDebounce - Use VoteUIStateService.shouldDebounce');
+    this.logDeprecation('shouldDebounce', 'VoteUIStateService.shouldDebounce');
     return this.voteUIStateService.shouldDebounce(commentId);
   }
 
@@ -167,7 +182,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.getLastClickTime instead
    */
   getLastClickTime(commentId: number): number | null {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.getLastClickTime - Use VoteUIStateService.getLastClickTime');
+    this.logDeprecation('getLastClickTime', 'VoteUIStateService.getLastClickTime');
     return this.voteUIStateService.getLastClickTime(commentId);
   }
 
@@ -176,7 +191,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.shouldDebounce instead
    */
   shouldAllowClick(commentId: number): boolean {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.shouldAllowClick - Use VoteUIStateService.shouldDebounce');
+    this.logDeprecation('shouldAllowClick', 'VoteUIStateService.shouldDebounce');
     return !this.voteUIStateService.shouldDebounce(commentId);
   }
 
@@ -185,7 +200,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.setVoting instead
    */
   startOperation(commentId: number): boolean {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.startOperation - Use VoteUIStateService.setVoting');
+    this.logDeprecation('startOperation', 'VoteUIStateService.setVoting');
     // Check if already voting
     if (this.voteUIStateService.shouldDebounce(commentId)) {
       return false;
@@ -200,7 +215,7 @@ export class LegacyVoteAdapter {
    * @deprecated Use VoteUIStateService.isVoting$ instead
    */
   isButtonDisabled(commentId: number): boolean {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.isButtonDisabled - Use VoteUIStateService.isVoting$');
+    this.logDeprecation('isButtonDisabled', 'VoteUIStateService.isVoting$');
     return this.voteUIStateService.shouldDebounce(commentId);
   }
 
@@ -209,7 +224,7 @@ export class LegacyVoteAdapter {
    * @deprecated No longer needed with new architecture
    */
   resetCommentState(commentId: number): void {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.resetCommentState - No longer needed');
+    this.logDeprecation('resetCommentState', 'No longer needed');
     // Clear any pending voting state
     this.voteUIStateService.setVoting(commentId, false);
   }
@@ -225,7 +240,7 @@ export class LegacyVoteAdapter {
    * @returns Observable with complete button state
    */
   getVoteButtonState$(commentId: number): Observable<VoteButtonState> {
-    console.warn('[LEGACY] LegacyVoteAdapter.getVoteButtonState$ - Migrate to VoteUIStateService.getVoteButtonState');
+    this.logDeprecation('getVoteButtonState$', 'VoteUIStateService.getVoteButtonState');
     return this.voteUIStateService.getVoteButtonState(commentId);
   }
 
@@ -247,7 +262,7 @@ export class LegacyVoteAdapter {
     voteType: VoteType,
     categoryId?: number
   ): Promise<void> {
-    console.warn('[LEGACY] LegacyVoteAdapter.performVoteWithOptimisticUpdate - Migrate to direct service usage');
+    this.logDeprecation('performVoteWithOptimisticUpdate', 'direct service usage');
 
     // Check debounce
     if (this.voteUIStateService.shouldDebounce(commentId)) {
@@ -295,7 +310,7 @@ export class LegacyVoteAdapter {
     categoryId: number,
     anonymousUserId?: number
   ): Promise<VoteLimitResponseDTO> {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.performVoteOperation - Migrate to VoteStateService.submitVote');
+    this.logDeprecation('performVoteOperation', 'VoteStateService.submitVote');
 
     try {
       // Submit vote using new architecture
@@ -334,7 +349,7 @@ export class LegacyVoteAdapter {
    * No longer needed with new architecture
    */
   extractVoteCountFromResponse(voteResult: unknown): number | undefined {
-    console.warn('[DEPRECATED] LegacyVoteAdapter.extractVoteCountFromResponse - No longer needed with new services');
+    this.logDeprecation('extractVoteCountFromResponse', 'No longer needed with new services');
 
     try {
       if (!voteResult) {
@@ -354,6 +369,73 @@ export class LegacyVoteAdapter {
       console.error('❌ Error extracting vote count:', error);
       return undefined;
     }
+  }
+
+  // =============================================================================
+  // DEPRECATION TRACKING
+  // =============================================================================
+
+  /**
+   * Logs deprecation warning with deduplication
+   *
+   * @description
+   * Logs deprecation warning only once per method to prevent console spam.
+   * Tracks usage metrics for migration monitoring.
+   *
+   * @param methodName - Name of deprecated method
+   * @param replacement - Recommended replacement service/method
+   * @private
+   */
+  private logDeprecation(methodName: string, replacement: string): void {
+    const key = `${methodName}:${replacement}`;
+
+    // Track usage metrics
+    const currentCount = this.usageMetrics.get(methodName) || 0;
+    this.usageMetrics.set(methodName, currentCount + 1);
+
+    // Log warning only if not already logged and below max limit
+    if (this.deprecationWarnings.size < this.MAX_WARNINGS &&
+        !this.deprecationWarnings.has(key)) {
+      this.deprecationWarnings.add(key);
+      console.warn(`[DEPRECATED] ${methodName} - Use ${replacement}`);
+
+      // Log summary after reaching warning limit
+      if (this.deprecationWarnings.size === this.MAX_WARNINGS) {
+        console.warn('⚠️ LegacyVoteAdapter: Maximum deprecation warnings reached. Further warnings suppressed.');
+        console.warn('📊 Call logMigrationMetrics() to see usage statistics.');
+      }
+    }
+  }
+
+  /**
+   * Logs current usage metrics for migration tracking
+   *
+   * @description
+   * Displays how many times each deprecated method was called.
+   * Useful for identifying heavily-used methods that need migration priority.
+   *
+   * @public
+   */
+  logMigrationMetrics(): void {
+    if (this.usageMetrics.size === 0) {
+      console.log('📊 LegacyVoteAdapter: No deprecated methods have been called yet.');
+      return;
+    }
+
+    console.group('📊 LegacyVoteAdapter Usage Metrics');
+    console.log('Deprecated method calls since service initialization:');
+    console.log('');
+
+    const sortedMetrics = Array.from(this.usageMetrics.entries())
+      .sort((a, b) => b[1] - a[1]); // Sort by call count descending
+
+    sortedMetrics.forEach(([method, count]) => {
+      console.log(`  ${method}: ${count} calls`);
+    });
+
+    console.log('');
+    console.log(`Total deprecated calls: ${Array.from(this.usageMetrics.values()).reduce((a, b) => a + b, 0)}`);
+    console.groupEnd();
   }
 
   // =============================================================================

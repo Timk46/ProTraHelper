@@ -312,7 +312,7 @@ export class EvaluationNavigationService {
    */
   parseUrl(url: string): NavigationContext {
     try {
-      const urlObj = new URL(url);
+      const urlObj = new URL(url, window.location.origin);
       const pathSegments = urlObj.pathname.split('/').filter(Boolean);
       
       // Extract submission ID from path

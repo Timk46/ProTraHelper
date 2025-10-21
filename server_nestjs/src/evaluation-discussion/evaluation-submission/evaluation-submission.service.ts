@@ -531,6 +531,9 @@ export class EvaluationSubmissionService {
         session: {
           include: {
             categories: {
+              include: {
+                category: true,
+              },
               orderBy: { order: 'asc' },
             },
           },
@@ -712,6 +715,9 @@ export class EvaluationSubmissionService {
           },
         },
         categories: {
+          include: {
+            category: true,
+          },
           orderBy: { order: 'asc' },
         },
         _count: {

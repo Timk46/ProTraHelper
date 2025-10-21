@@ -157,7 +157,7 @@ export class LRUCache<K, V> {
    *
    * @returns Number of entries in the cache
    */
-  size(): number {
+  get size(): number {
     return this.cache.size;
   }
 

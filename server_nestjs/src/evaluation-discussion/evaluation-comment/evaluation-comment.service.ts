@@ -18,9 +18,10 @@ export class EvaluationCommentService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async create(createDto: CreateEvaluationCommentDTO, userId: number): Promise<boolean> {
+  async create(createDto: CreateEvaluationCommentDTO, userId: number): Promise<EvaluationCommentDTO> {
     try {
-      await this.prisma.evaluationComment.create({
+      // Create the comment
+      const createdComment = await this.prisma.evaluationComment.create({
         data: {
           content: createDto.content,
           userId: userId,
@@ -28,12 +29,28 @@ export class EvaluationCommentService {
           categoryId: createDto.categoryId,
           parentId: createDto.parentId || null,
         },
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstname: true,
+              lastname: true,
+            },
+          },
+          EvaluationCommentVote: true,
+          _count: {
+            select: {
+              replies: true,
+            },
+          },
+        },
       });
 
-      return true;
+      // Transform to DTO using existing mapper
+      return this.mapToCommentDTO(createdComment, userId);
     } catch (error) {
       console.error('Error creating evaluation comment:', error);
-      return false;
+      throw new Error('Failed to create comment');
     }
   }
 

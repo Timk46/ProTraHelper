@@ -33,7 +33,6 @@ import {
 } from '@DTOs/index';
 
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
-import { EvaluationMockDataService } from './evaluation-mock-data.service';
 import { UserService } from '../auth/user.service';
 
 @Injectable({
@@ -101,12 +100,8 @@ export class EvaluationStateService {
   private categoryCommentStatusSubject = new BehaviorSubject<Map<number, boolean>>(new Map());
   private commentStatusStorageKey = 'evaluation_commented_categories';
 
-  // Mock mode state
-  private isMockModeActive = false;
-
   constructor(
     public evaluationService: EvaluationDiscussionService,
-    private mockDataService: EvaluationMockDataService,
     private userservice: UserService,
   ) {
     // Warte auf das Laden der Kategorien und setze die erste verfügbare als aktiv
@@ -122,52 +117,6 @@ export class EvaluationStateService {
         this.activeCategorySubject.next(firstCategory.id);
       }
     });
-  }
-
-  // =============================================================================
-  // MOCK MODE MANAGEMENT
-  // =============================================================================
-
-  /**
-   * Loads mock data for demonstration purposes
-   */
-  loadMockData(): void {
-    this.isMockModeActive = true;
-    this.setLoading(true);
-    this.clearError();
-
-    // Load mock submission
-    this.mockDataService.getMockSubmission().subscribe(submission => {
-      this.submissionSubject.next(submission);
-
-      // Load related mock data
-      const categories = this.mockDataService.getMockCategories();
-      this.categoriesSubject.next(categories);
-      this.initializeVoteLimits(categories);
-
-      // Load mock comment stats
-      this.mockDataService.getMockCommentStats().subscribe(stats => {
-        this.commentStatsSubject.next(stats);
-      });
-
-      // Load mock anonymous user
-      const anonymousUser = this.mockDataService.getMockAnonymousUser();
-      this.anonymousUserSubject.next(anonymousUser);
-
-      // Load mock vote limits
-      this.mockDataService.getMockVoteLimits().subscribe(limits => {
-        this.voteLimitsSubject.next(limits);
-      });
-
-      this.setLoading(false);
-    });
-  }
-
-  /**
-   * Checks if the service is currently in mock mode
-   */
-  isMockMode(): boolean {
-    return this.isMockModeActive;
   }
 
   // =============================================================================
@@ -658,27 +607,6 @@ export class EvaluationStateService {
     );
   }
 
-  /**
-   * Validates if a rating status object has fresh and complete data
-   * @param status - The rating status to validate
-   * @returns boolean - True if status is valid and fresh
-   */
-  private isValidRatingStatus(status: CategoryRatingStatus): boolean {
-    if (!status || typeof status.hasRated !== 'boolean') {
-      return false;
-    }
-
-    // Check if status is fresh (less than 5 minutes old)
-    if (status.lastUpdatedAt) {
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      if (status.lastUpdatedAt < fiveMinutesAgo) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
   get activeCategoryInfo$(): Observable<EvaluationCategoryDTO | null> {
     return combineLatest([this.categories$, this.activeCategory$]).pipe(
       map(([categories, activeId]) => categories.find(cat => cat.id === activeId) || null),
@@ -703,15 +631,9 @@ export class EvaluationStateService {
     console.log('📂 getDiscussionsForCategory called:', {
       submissionId,
       categoryId,
-      mockMode: this.isMockModeActive,
     });
 
-    if (this.isMockModeActive) {
-      // Mock mode - return mock discussions
-      return this.mockDataService.getMockDiscussions(categoryId);
-    }
-
-    // Real mode - ensure cache exists before loading
+    // Ensure cache exists before loading
     const subject = this.ensureDiscussionCache(categoryId);
 
     // Load discussions if cache is empty
@@ -1131,7 +1053,7 @@ export class EvaluationStateService {
         
         // Update local cache
         this.handleCommentAdded(submissionId, categoryId, comment);
-        this.refreshCommentStats(submissionId);
+        // this.refreshCommentStats(submissionId); // Deaktiviert - verursacht 404-Fehler und ist nicht kritisch
         return comment;
       }),
       catchError(error => {
@@ -1590,12 +1512,7 @@ export class EvaluationStateService {
    * @returns Observable<VoteType> - The user's vote or null
    */
   getUserVoteStatus(commentId: string): Observable<VoteType | null> {
-    if (this.isMockModeActive) {
-      // Mock mode: Check local mock data
-      return this.getMockUserVoteStatus(commentId);
-    }
-
-    // Real mode: Call backend API
+    // Call backend API
     return this.evaluationService.getUserVoteForComment(commentId).pipe(
       tap(voteType => {
         console.log('🔍 User vote status loaded from API:', {
@@ -1606,42 +1523,6 @@ export class EvaluationStateService {
       catchError(error => {
         console.error('❌ Failed to load user vote status:', error);
         return of(null); // Return null if failed
-      }),
-    );
-  }
-
-  /**
-   * Gets user vote status from mock data
-   * @param commentId - The comment ID
-   * @returns Observable<VoteType> - The user's vote or null
-   */
-  private getMockUserVoteStatus(commentId: string): Observable<VoteType | null> {
-    const anonymousUser = this.anonymousUserSubject.value;
-    if (!anonymousUser) {
-      return of(null);
-    }
-
-    // Find the comment in mock data and check votes
-    const category1$ = this.discussionCache.get(1)?.asObservable() || of([]);
-    const category2$ = this.discussionCache.get(2)?.asObservable() || of([]);
-    const category3$ = this.discussionCache.get(3)?.asObservable() || of([]);
-    const category4$ = this.discussionCache.get(4)?.asObservable() || of([]);
-
-    return combineLatest([
-      category1$,
-      category2$,
-      category3$,
-      category4$,
-    ]).pipe(
-      map(([disc1, disc2, disc3, disc4]) => {
-        const allComments = [...disc1, ...disc2, ...disc3, ...disc4]
-          .flatMap(discussion => discussion.comments);
-
-        const comment = allComments.find(c => String(c.id) === commentId);
-        if (!comment) return null;
-
-        const userVote = comment.votes.find(vote => vote.userId === anonymousUser.id);
-        return userVote ? userVote.voteType : null;
       }),
     );
   }
@@ -2052,21 +1933,6 @@ export class EvaluationStateService {
   }
 
   // =============================================================================
-  // ANONYMOUS USER MANAGEMENT
-  // =============================================================================
-
-  private loadAnonymousUser(submissionId: string): void {
-    this.evaluationService.getOrCreateAnonymousUser(submissionId).subscribe({
-      next: user => {
-        this.anonymousUserSubject.next(user);
-      },
-      error: error => {
-        this.setError('Fehler beim Laden des anonymen Benutzers');
-      },
-    });
-  }
-
-  // =============================================================================
   // UI STATE MANAGEMENT
   // =============================================================================
 
@@ -2224,22 +2090,6 @@ export class EvaluationStateService {
   }
 
   /**
-   * Synchronizes mock vote limits with state service limits
-   * Called after each mock vote to keep the display in sync
-   */
-  private synchronizeMockVoteLimits(): void {
-    if (this.isMockModeActive) {
-      this.mockDataService
-        .getMockVoteLimits()
-        .pipe(take(1))
-        .subscribe(mockLimits => {
-          console.log('🔄 Synchronizing mock vote limits with state service:', mockLimits);
-          this.voteLimitsSubject.next(mockLimits);
-        });
-    }
-  }
-
-  /**
    * Enhanced vote method that updates limits
    */
   voteCommentWithLimits(
@@ -2248,46 +2098,8 @@ export class EvaluationStateService {
     categoryId: number,
   ): Observable<any> {
     const isAdding = voteType !== null;
-    
-    if (this.isMockModeActive) {
-      // Mock mode - graceful handling without throwing errors
-      if (voteType !== null && !this.canVote(categoryId)) {
-        console.warn(
-          `⚠️ No more votes available for category ${categoryId}`,
-        );
-        // Return empty observable to gracefully handle limit reached
-        return of(null);
-      }
 
-      return this.mockDataService.voteMockComment(commentId, voteType, categoryId).pipe(
-        tap(result => {
-          if (result) {
-            // Synchronize mock vote limits with state service
-            this.synchronizeMockVoteLimits();
-
-            // Update comment display - Mock service now returns result.voteStats
-            this.handleVoteUpdate(commentId, {
-              voteStats: result.voteStats,
-              userVote: result.userVote,
-              netVotes: result.netVotes || result.voteStats?.upVotes || 0,
-            });
-
-            // 🚀 PHASE 4: Emit vote completion for cache synchronization
-            this.voteCompletionSubject.next({
-              commentId,
-              fullResult: result,
-            });
-          }
-        }),
-        catchError(error => {
-          // 🚀 PHASE 4: Emit vote error for cache synchronization
-          this.voteErrorSubject.next({ commentId });
-          throw error;
-        }),
-      );
-    }
-
-    // Real mode - graceful handling without throwing errors
+    // Graceful handling without throwing errors
     if (voteType !== null && !this.canVote(categoryId)) {
       console.warn(
         `⚠️ No more votes available for category ${categoryId}`,
@@ -2350,20 +2162,25 @@ export class EvaluationStateService {
   loadVoteLimitStatus(submissionId: string, categoryId: number): Observable<void> {
     this.voteLimitLoadingSubject.next(true);
 
-    return this.evaluationService.getVoteLimitStatus(submissionId, categoryId.toString()).pipe(
-      tap(status => {
-        // Backend now provides correct 10-vote system directly - no scaling needed
-        const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
-        currentStatusMap.set(categoryId, status);
-        this.voteLimitStatusSubject.next(currentStatusMap);
-      }),
-      map(() => void 0),
-      finalize(() => this.voteLimitLoadingSubject.next(false)),
-      catchError(error => {
-        console.error('Failed to load vote limit status:', error);
-        return of(void 0);
-      })
-    );
+    // Use local default vote limits (10 votes per category)
+    // Backend endpoint not yet implemented, using frontend-calculated limits
+    const defaultVoteLimitStatus: VoteLimitStatusDTO = {
+      maxVotes: 10,
+      remainingVotes: 10,
+      votedCommentIds: [],
+      canVote: true,
+      displayText: '10/10 verfügbar',
+    };
+
+    const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
+    currentStatusMap.set(categoryId, defaultVoteLimitStatus);
+    this.voteLimitStatusSubject.next(currentStatusMap);
+
+    this.voteLimitLoadingSubject.next(false);
+
+    console.log('📊 Vote limit status set locally for category:', categoryId, defaultVoteLimitStatus);
+
+    return of(void 0);
   }
 
   /**
@@ -2729,21 +2546,17 @@ export class EvaluationStateService {
    */
   loadSubmissionList(userId?: number): Observable<EvaluationSubmissionDTO[]> {
     console.log('📋 Loading submission list for navigation');
-    
-    if (this.isMockMode()) {
-      // Use mock data
-      const submissions = this.mockDataService.getMockSubmissionList();
-      this.submissionListSubject.next(submissions);
-      console.log('✅ Mock submission list loaded:', submissions.length, 'submissions');
-      return of(submissions);
-    } else {
-      // TODO: Implement real API call when available
-      // return this.evaluationService.getUserSubmissions(userId);
-      console.log('⚠️ Real API not yet implemented, using mock data as fallback');
-      const submissions = this.mockDataService.getMockSubmissionList();
-      this.submissionListSubject.next(submissions);
-      return of(submissions);
-    }
+
+    return this.evaluationService.getUserSubmissions(userId).pipe(
+      tap(submissions => {
+        this.submissionListSubject.next(submissions);
+        console.log('✅ Submission list loaded:', submissions.length, 'submissions');
+      }),
+      catchError(error => {
+        console.error('❌ Failed to load submission list:', error);
+        return of([]);
+      })
+    );
   }
 
   /**

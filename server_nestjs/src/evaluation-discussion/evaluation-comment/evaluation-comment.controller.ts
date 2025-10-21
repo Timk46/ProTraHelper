@@ -34,7 +34,7 @@ export class EvaluationCommentController {
   // Comment create
   @Post('create')
   @roles('ANY')
-  async create(@Body() createDto: CreateEvaluationCommentDTO, @Req() req): Promise<boolean> {
+  async create(@Body() createDto: CreateEvaluationCommentDTO, @Req() req): Promise<EvaluationCommentDTO> {
     return this.evaluationCommentService.create(createDto, req.user.id);
   }
 

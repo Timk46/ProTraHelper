@@ -119,7 +119,14 @@ export class VoteUIStateService implements OnDestroy {
   // =============================================================================
 
   /**
-   * Tracks active errors per comment
+   * Reactive error state per comment
+   * Maps commentId to BehaviorSubject<string | null>
+   */
+  private errorState$ = new Map<number, BehaviorSubject<string | null>>();
+
+  /**
+   * Tracks active errors per comment (legacy support)
+   * @deprecated Use errorState$ for reactive error tracking
    */
   private activeErrors = new Map<number, string>();
 
@@ -496,7 +503,15 @@ export class VoteUIStateService implements OnDestroy {
   private handleVoteError(error: VoteError): void {
     console.error(`❌ VoteUIStateService: Vote error for ${error.commentId}:`, error.error);
 
-    // Store error
+    // Get or create error state subject
+    if (!this.errorState$.has(error.commentId)) {
+      this.errorState$.set(error.commentId, new BehaviorSubject<string | null>(null));
+    }
+
+    const errorSubject = this.errorState$.get(error.commentId)!;
+    errorSubject.next(error.error || 'Unknown error');
+
+    // Store error (legacy support)
     this.activeErrors.set(error.commentId, error.error || 'Unknown error');
 
     // Revert optimistic update
@@ -513,20 +528,36 @@ export class VoteUIStateService implements OnDestroy {
 
   /**
    * Gets observable for error state
+   *
+   * @description
+   * Returns reactive observable that emits true when error exists,
+   * false otherwise. Updates automatically when error state changes.
+   *
+   * @param commentId - Comment identifier
+   * @returns Observable<boolean> - true if error exists
    */
   private hasError$(commentId: number): Observable<boolean> {
-    return new Observable<boolean>(observer => {
-      const hasError = this.activeErrors.has(commentId);
-      observer.next(hasError);
-      observer.complete();
-    }).pipe(startWith(false));
+    if (!this.errorState$.has(commentId)) {
+      this.errorState$.set(commentId, new BehaviorSubject<string | null>(null));
+    }
+
+    return this.errorState$.get(commentId)!.pipe(
+      map(error => error !== null)
+    );
   }
 
   /**
    * Clears error for specific comment
    */
   clearError(commentId: number): void {
+    // Clear reactive state
+    if (this.errorState$.has(commentId)) {
+      this.errorState$.get(commentId)!.next(null);
+    }
+
+    // Clear legacy map
     this.activeErrors.delete(commentId);
+
     console.log(`🧹 VoteUIStateService: Cleared error for ${commentId}`);
   }
 
