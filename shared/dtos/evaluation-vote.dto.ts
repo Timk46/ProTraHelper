@@ -13,6 +13,11 @@ export interface EvaluationVoteDTO {
   user?: UserDTO;
 }
 
+export interface VoteCountResponseDTO {
+  foreignVoteCount: number;
+  userVoteCount: number; // Number of votes the user has given to this comment
+}
+
 export interface VoteResultDTO {
   commentId: number;
   upvotes: number;
