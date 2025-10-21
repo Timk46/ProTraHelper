@@ -25,7 +25,6 @@ import {
 import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
 import { RolesGuard, roles } from '../auth/common/guards/roles.guard';
 import { RhinoThrottleGuard, RhinoThrottle, RhinoRateLimits } from './guards/rhino-throttle.guard';
-import { RhinoAuditService } from './services/rhino-audit.service';
 
 interface RequestWithUser {
   user: {
@@ -55,7 +54,6 @@ export class RhinoDirectController {
   constructor(
     private readonly rhinoDirectService: RhinoDirectService,
     private readonly rhinoWindowManagerService: RhinoWindowManagerService,
-    private readonly auditService: RhinoAuditService,
   ) {}
 
   /**
@@ -84,33 +82,12 @@ export class RhinoDirectController {
 
       // Log successful operation
       const responseTime = Date.now() - startTime;
-      await this.auditService.logSuccess(
-        req.user.id,
-        req.user.email,
-        'launch',
-        '/api/rhinodirect/launch-direct',
-        { filePath: request.filePath, rhinoPath: request.rhinoPath },
-        ipAddress,
-        responseTime,
-        userAgent
-      );
+
 
       console.log('✅ Direct Rhino launch result:', result);
       return result;
     } catch (error) {
       console.error('❌ Direct Rhino launch failed:', error);
-
-      // Log failed operation
-      await this.auditService.logError(
-        req.user.id,
-        req.user.email,
-        'launch',
-        '/api/rhinodirect/launch-direct',
-        { filePath: request.filePath },
-        error.message,
-        ipAddress,
-        userAgent
-      );
 
       if (error instanceof HttpException) {
         throw error;

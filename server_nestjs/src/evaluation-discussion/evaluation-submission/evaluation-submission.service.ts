@@ -82,9 +82,14 @@ export class EvaluationSubmissionService {
             categories: {
               select: {
                 id: true,
-                name: true,
-                displayName: true,
                 order: true,
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    displayName: true,
+                  },
+                },
               },
               orderBy: { order: 'asc' },
             },
@@ -196,6 +201,9 @@ export class EvaluationSubmissionService {
           include: {
             module: true,
             categories: {
+              include: {
+                category: true,
+              },
               orderBy: { order: 'asc' },
             },
           },
@@ -276,6 +284,9 @@ export class EvaluationSubmissionService {
           include: {
             module: true,
             categories: {
+              include: {
+                category: true,
+              },
               orderBy: { order: 'asc' },
             },
           },
@@ -331,6 +342,9 @@ export class EvaluationSubmissionService {
           include: {
             module: true,
             categories: {
+              include: {
+                category: true,
+              },
               orderBy: { order: 'asc' },
             },
           },
@@ -559,10 +573,12 @@ export class EvaluationSubmissionService {
     let totalAvailable = 0;
     let totalUsed = 0;
 
-    const categories: CategoryStatsDTO[] = submission.session.categories.map(category => {
+    // Map through EvaluationSessionCategory (with nested category) to get stats
+    // Type assertion needed because TypeScript doesn't infer included relations automatically
+    const categories: CategoryStatsDTO[] = submission.session.categories.map((sessionCategory: any) => {
       // Use default limits since CommentLimit model is not yet in schema
       const availableComments = DEFAULT_COMMENTS_PER_CATEGORY;
-      const usedComments = discussionCountsMap.get(category.id) || 0;
+      const usedComments = discussionCountsMap.get(sessionCategory.categoryId) || 0;
       const isLimitReached = usedComments >= availableComments;
 
       totalAvailable += availableComments;
@@ -583,8 +599,8 @@ export class EvaluationSubmissionService {
       }
 
       return {
-        categoryId: category.id,
-        categoryName: category.displayName,
+        categoryId: sessionCategory.category.id,
+        categoryName: sessionCategory.category.displayName,
         availableComments,
         usedComments,
         isLimitReached,
@@ -731,7 +747,7 @@ export class EvaluationSubmissionService {
             globalRole: updatedSession.createdBy.globalRole as globalRole, // Cast Prisma enum to DTO enum
           }
         : undefined,
-      submissions: updatedSession.submissions.map(sub => ({
+    submissions: updatedSession.submissions.map(sub => ({
         ...sub,
         phase: updatedSession.phase as EvaluationPhase, // Use session phase for submissions
         status: sub.status as EvaluationStatus, // Cast Prisma enum to DTO enum
@@ -742,7 +758,17 @@ export class EvaluationSubmissionService {
             }
           : undefined,
       })),
-      categories: updatedSession.categories,
+      // Map EvaluationSessionCategory to EvaluationCategoryDTO
+      // Type assertion needed because TypeScript doesn't infer included relations automatically
+      categories: updatedSession.categories.map((sc: any) => ({
+        id: sc.category.id,
+        name: sc.category.name,
+        displayName: sc.category.displayName,
+        description: sc.category.description,
+        icon: sc.category.icon,
+        order: sc.order, // Order from junction table (session-specific)
+        color: sc.category.color,
+      })),
       _count: updatedSession._count,
     };
   }

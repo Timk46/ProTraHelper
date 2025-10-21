@@ -212,6 +212,9 @@ export class EvaluationSessionService {
    * ordered by their display order. Categories are used to organize discussions
    * and ratings into thematic groups.
    *
+   * Uses EvaluationSessionCategory junction table to access session-specific
+   * category ordering and configuration.
+   *
    * @param sessionId - The ID of the evaluation session
    * @returns Promise resolving to an array of evaluation categories
    * @throws NotFoundException if the session does not exist
@@ -226,19 +229,23 @@ export class EvaluationSessionService {
       throw new NotFoundException(`Evaluation session with ID ${sessionId} not found`);
     }
 
-    const categories = await this.prisma.evaluationCategory.findMany({
+    // Query via EvaluationSessionCategory junction table to get session-specific ordering
+    const sessionCategories = await this.prisma.evaluationSessionCategory.findMany({
       where: { sessionId },
+      include: {
+        category: true, // Include nested category details
+      },
       orderBy: { order: 'asc' },
     });
 
-    return categories.map(category => ({
-      id: category.id,
-      name: category.name,
-      displayName: category.displayName,
-      description: category.description,
-      icon: category.icon,
-      order: category.order,
-      color: category.color,
+    return sessionCategories.map(sc => ({
+      id: sc.category.id,
+      name: sc.category.name,
+      displayName: sc.category.displayName,
+      description: sc.category.description,
+      icon: sc.category.icon,
+      order: sc.order, // Order from junction table (session-specific)
+      color: sc.category.color,
     }));
   }
 
@@ -278,12 +285,31 @@ export class EvaluationSessionService {
       },
     ];
 
-    await this.prisma.evaluationCategory.createMany({
-      data: defaultCategories.map(cat => ({
-        sessionId,
-        ...cat,
-      })),
-    });
+    // Create or find existing categories, then link them to session via junction table
+    for (const categoryData of defaultCategories) {
+      // Find or create the category
+      const category = await this.prisma.evaluationCategory.upsert({
+        where: { name: categoryData.name },
+        create: {
+          name: categoryData.name,
+          displayName: categoryData.displayName,
+          description: categoryData.description,
+          icon: categoryData.icon,
+          color: categoryData.color,
+        },
+        update: {}, // Don't update existing categories
+      });
+
+      // Link category to session via EvaluationSessionCategory
+      await this.prisma.evaluationSessionCategory.create({
+        data: {
+          sessionId,
+          categoryId: category.id,
+          order: categoryData.order,
+          isActive: true,
+        },
+      });
+    }
   }
 
   private mapToDTO(session: any): EvaluationSessionDTO {
