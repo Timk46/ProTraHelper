@@ -152,11 +152,26 @@ export class EvaluationCommentService {
   }
 
   private mapToCommentDTO(comment: any, userId: number): EvaluationCommentDTO {
-    const voteCount = comment.EvaluationCommentVote.reduce((acc, vote) => {
-      return acc + (vote.userId === userId ? 0 : vote.voteCount);
-    }, 0);
+    // Calculate vote statistics for ranking system
+    const upVotes = comment.EvaluationCommentVote?.reduce((acc, vote) => {
+      return acc + (vote.voteType === 'UP' ? vote.voteCount : 0);
+    }, 0) || 0;
+
     const userVoteCount =
-      comment.EvaluationCommentVote.find(vote => vote.userId === userId)?.voteCount || 0;
+      comment.EvaluationCommentVote?.find(vote => vote.userId === userId)?.voteCount || 0;
+
+    // Map author information
+    const author = comment.user ? {
+      id: comment.user.id,
+      type: 'user' as const,
+      displayName: `${comment.user.firstname} ${comment.user.lastname}`,
+      firstname: comment.user.firstname,
+      lastname: comment.user.lastname,
+    } : {
+      id: comment.userId,
+      type: 'user' as const,
+      displayName: 'Unknown User',
+    };
 
     return {
       id: comment.id,
@@ -165,10 +180,19 @@ export class EvaluationCommentService {
       authorId: comment.userId,
       content: comment.content,
       parentId: comment.parentId,
-      voteCount,
-      userVoteCount,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
+      author,
+      votes: comment.EvaluationCommentVote || [],
+      voteStats: {
+        upVotes,
+        downVotes: 0, // Deprecated in ranking system
+        totalVotes: upVotes,
+        score: upVotes,
+      },
+      userVoteCount,
+      replies: [], // Will be populated by caller if needed
+      replyCount: comment._count?.replies || 0,
     };
   }
 
@@ -274,6 +298,77 @@ export class EvaluationCommentService {
       return true;
     } catch (error) {
       console.error('Error resetting user votes:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Creates a comment from a rating
+   * Used when users submit a rating with comment text
+   */
+  async createCommentFromRating(
+    submissionId: number,
+    categoryId: number,
+    userId: number,
+    content: string,
+    score: number
+  ): Promise<boolean> {
+    try {
+      await this.prisma.evaluationComment.create({
+        data: {
+          content: `[Rating: ${score}/10] ${content}`,
+          userId,
+          submissionId,
+          categoryId,
+          parentId: null,
+        },
+      });
+      return true;
+    } catch (error) {
+      console.error('Error creating comment from rating:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Updates an existing comment that was created from a rating
+   * Used when users update their rating with new comment text
+   */
+  async updateCommentFromRating(
+    submissionId: number,
+    categoryId: number,
+    userId: number,
+    content: string,
+    score: number
+  ): Promise<boolean> {
+    try {
+      // Find the user's comment in this category
+      const existingComment = await this.prisma.evaluationComment.findFirst({
+        where: {
+          submissionId,
+          categoryId,
+          userId,
+          content: {
+            startsWith: '[Rating:',
+          },
+        },
+      });
+
+      if (existingComment) {
+        await this.prisma.evaluationComment.update({
+          where: { id: existingComment.id },
+          data: {
+            content: `[Rating: ${score}/10] ${content}`,
+          },
+        });
+      } else {
+        // If no existing comment, create a new one
+        await this.createCommentFromRating(submissionId, categoryId, userId, content, score);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating comment from rating:', error);
       return false;
     }
   }

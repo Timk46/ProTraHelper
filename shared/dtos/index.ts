@@ -67,6 +67,7 @@ export * from "./evaluation-comment-create.dto";
 export * from "./evaluation-vote.dto";
 export * from "./evaluation-rating.dto";
 export * from "./evaluation-rating-create.dto";
+export * from "./vote-limit-status.dto";
 export * from "./comment-stats.dto";
 export * from "./anonymous-evaluation-user.dto";
 export * from "./phase-switch.dto";
