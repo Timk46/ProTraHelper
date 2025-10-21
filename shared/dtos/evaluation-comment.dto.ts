@@ -16,43 +16,17 @@ export interface AuthorDTO {
 }
 
 export interface EvaluationCommentDTO {
-  id: string;
-  submissionId: string;
-  categoryId: number | null;
-  authorId: number;
+  id: number;
+  submissionId: number;
+  categoryId: number;
+  authorId?: number;
+  authorNickname?: string; // For anonymous users
   content: string;
-  parentId?: string;
+  parentId?: number;
+  voteCount: number; // Total number of votes excluding user's votes
+  userVoteCount: number; // Number of votes the current user has given to this comment
   createdAt: Date;
   updatedAt: Date;
-  
-  // Display info
-  author: AuthorDTO;
-  category?: EvaluationCategoryDTO;
-  
-  // Voting data
-  votes: Array<{
-    id: string;
-    commentId: string;
-    userId: number;
-    voteType: VoteType;
-    createdAt: Date;
-  }>;
-  voteStats: {
-    upVotes: number;
-    downVotes: number; // @deprecated - kept for backward compatibility, always 0
-    totalVotes: number;
-    score: number; // Now equals upVotes in ranking system
-  };
-  
-  // Number of votes the current user has given to this comment (for ranking system)
-  userVoteCount?: number;
-  
-  // Threading
-  replies: EvaluationCommentDTO[];
-  replyCount: number;
-  
-  // Relations
-  submission?: EvaluationSubmissionDTO;
 }
 
 export interface EvaluationDiscussionDTO {
