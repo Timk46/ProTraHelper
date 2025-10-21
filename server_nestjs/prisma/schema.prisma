@@ -9,39 +9,41 @@ datasource db {
 }
 
 model User {
-  id                        Int                          @id @default(autoincrement())
-  email                     String                       @unique
-  firstname                 String
-  lastname                  String
-  password                  String
-  createdAt                 DateTime                     @default(now())
-  globalRole                GlobalRole                   @default(STUDENT)
-  currentconceptNodeId      Int?
-  hasAcceptedPrivacyPolicy  Boolean                      @default(false)
-  chatBotMessage            ChatBotMessage[]
-  chatSessions              ChatSession[]
-  codeSubmission            CodeSubmission[]
-  codeSubmissionFile        CodeSubmissionFile[]
-  EventLogs                 EventLog[]
-  fileUploads               FileUpload[]
-  updatedSettings           ModuleSetting[]
-  Notification              Notification[]
-  question                  Question[]
-  refreshTokens             RefreshToken[]
-  currentConcept            ConceptNode?                 @relation(fields: [currentconceptNodeId], references: [id])
-  userAnswer                UserAnswer[]
-  conceptUser               UserConcept[]
-  UserContentProgress       UserContentElementProgress[]
-  UserContentView           UserContentView[]
-  UserGroupMembership       UserGroupMembership[]
-  userMCAnswer              UserMCAnswer[]
-  userSubjects              UserSubject[]
-  Vote                      Vote[]
-  anonymousUser             anonymousUser[]
-  evaluationComments        EvaluationComment[]
-  evaluationRatings         EvaluationRating[]
+  id                       Int                          @id @default(autoincrement())
+  email                    String                       @unique
+  firstname                String
+  lastname                 String
+  password                 String
+  createdAt                DateTime                     @default(now())
+  globalRole               GlobalRole                   @default(STUDENT)
+  currentconceptNodeId     Int?
+  chatBotMessage           ChatBotMessage[]
+  chatSessions             ChatSession[]
+  codeSubmission           CodeSubmission[]
+  codeSubmissionFile       CodeSubmissionFile[]
+  EventLogs                EventLog[]
+  Notification             Notification[]
+  question                 Question[]
+  currentConcept           ConceptNode?                 @relation(fields: [currentconceptNodeId], references: [id])
+  userAnswer               UserAnswer[]
+  conceptUser              UserConcept[]
+  UserContentProgress      UserContentElementProgress[]
+  UserContentView          UserContentView[]
+  userMCAnswer             UserMCAnswer[]
+  Vote                     Vote[]
+  anonymousUser            anonymousUser[]
+  userSubjects             UserSubject[]
+  refreshTokens            RefreshToken[]
+  updatedSettings          ModuleSetting[]
+  hasAcceptedPrivacyPolicy Boolean                      @default(false)
+  fileUploads              FileUpload[]
+  UserGroupMembership      UserGroupMembership[]
+
+  // EVALUATION SYSTEM RELATIONS
   evaluationSessionsCreated EvaluationSession[]
   evaluationSubmissions     EvaluationSubmission[]
+  evaluationRatings         EvaluationRating[]
+  evaluationComments        EvaluationComment[]
 }
 
 model RefreshToken {
@@ -49,8 +51,8 @@ model RefreshToken {
   deviceId  String
   token     String   @unique
   userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, deviceId])
 }
@@ -59,8 +61,9 @@ model Module {
   id                      Int                       @id @default(autoincrement())
   name                    String                    @unique
   description             String
-  fileUploads             FileUpload[]
   goals                   ModuleConceptGoal[]
+  subjects                Subject[]                 @relation("ModuleToSubject")
+  settings                ModuleSetting[]
   ModuleHighlightConcepts ModuleHighlightConcepts[]
   fileUploads             FileUpload[]
 
@@ -81,8 +84,8 @@ model Subject {
   id           Int           @id @default(autoincrement())
   name         String        @unique
   description  String
-  userSubjects UserSubject[]
   modules      Module[]      @relation("ModuleToSubject")
+  userSubjects UserSubject[]
 }
 
 model UserSubject {
@@ -91,8 +94,8 @@ model UserSubject {
   subjectId           Int
   subjectSpecificRole String
   registeredForSL     Boolean @default(false)
-  subject             Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   user                User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject             Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([userId, subjectId])
 }
@@ -119,12 +122,12 @@ model ConceptNode {
   conceptGraph            ConceptGraph?
   Discussion              Discussion[]
   moduleGoals             ModuleConceptGoal[]
-  ModuleHighlightConcepts ModuleHighlightConcepts[]
   question                Question[]
   requiredBy              Requirement[]
   trainedBy               Training[]
   currentConceptFor       User[]
   userConcepts            UserConcept[]
+  ModuleHighlightConcepts ModuleHighlightConcepts[]
 }
 
 model ConceptFamily {
@@ -281,26 +284,6 @@ model Question {
   version              Int      @default(1)
   originId             Int?
   conceptNodeId        Int?
-  rhinoAutoFocus       Boolean  @default(true)
-  rhinoAutoLaunch      Boolean  @default(false)
-  rhinoEnabled         Boolean  @default(false)
-  rhinoGrasshopperFile String?
-  rhinoSettings        Json?
-  id                   Int      @id @default(autoincrement())
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  name                 String?
-  description          String?
-  score                Float?
-  type                 String
-  level                Int      @default(1)
-  mode                 String   @default("practise")
-  authorId             Int
-  text                 String
-  isApproved           Boolean  @default(false)
-  version              Int      @default(1)
-  originId             Int?
-  conceptNodeId        Int?
   // Rhino Integration Fields
   rhinoEnabled         Boolean  @default(false)
   rhinoGrasshopperFile String?
@@ -310,21 +293,12 @@ model Question {
 
   codingQuestion             CodingQuestion?
   codeGameQuestion           CodeGameQuestion?
-  codingQuestion             CodingQuestion?
   contentElement             ContentElement?
   files                      File[]
-  FillinQuestion             FillinQuestion?
-  FreeTextQuestion           FreeTextQuestion[]
   GraphQuestion              GraphQuestion?
-  GroupReviewGate            GroupReviewGate?
+  FreeTextQuestion           FreeTextQuestion[]
   mcQuestion                 MCQuestion[]
   mCSliderQuestion           MCSliderQuestion?
-  author                     User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  conceptNode                ConceptNode?        @relation(fields: [conceptNodeId], references: [id])
-  origin                     Question?           @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
-  question                   Question[]          @relation("VersionControl")
-  QuestionVersionAsQuestion  QuestionVersion[]   @relation("QuestionToQuestionVersion")
-  QuestionVersionAsSuccessor QuestionVersion[]   @relation("QuestionToSuccessorQuestionVersion")
   author                     User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
   conceptNode                ConceptNode?        @relation(fields: [conceptNodeId], references: [id])
   origin                     Question?           @relation("VersionControl", fields: [originId], references: [id], onDelete: Cascade)
@@ -407,13 +381,13 @@ model UserAnswer {
   questionId            Int
   userFreetextAnswer    String?
   userGraphAnswer       Json?
-  codeGameAnswer        CodeGameAnswer?
-  feedbacks             Feedback[]
   graphAIFeedbacks      GraphAIFeedback[]
+  feedbacks             Feedback[]
   question              Question               @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user                  User                   @relation(fields: [userId], references: [id])
   userMCOptionSelected  UserMCOptionSelected[]
   UserUmlQuestionAnswer UserUmlQuestionAnswer?
+  codeGameAnswer        CodeGameAnswer[]
   UserUploadAnswer      UserUploadAnswer[]
 }
 
@@ -479,8 +453,8 @@ model CodingQuestion {
   automatedTests      AutomatedTest[]
   codeGerueste        CodeGeruest[]
   codeSubmissions     CodeSubmission[]
-  question            Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
   modelSolutions      ModelSolution[]
+  question            Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model CodeGeruest {
@@ -526,8 +500,8 @@ model CodeSubmission {
   codingQuestion      CodingQuestion       @relation(fields: [codingQuestionId], references: [id], onDelete: Cascade)
   user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   CodeSubmissionFiles CodeSubmissionFile[]
-  generatedFeedbacks  GeneratedFeedback[]
   kiFeedback          KIFeedback[]
+  generatedFeedbacks  GeneratedFeedback[] // Relation to GeneratedFeedback
 }
 
 model CodeSubmissionFile {
@@ -553,12 +527,12 @@ model CodeGameQuestion {
   fileNameToRestrict              String?
   methodNameToRestrict            String?
   frequencyOfMethodNameToRestrict Int?
+  codeGameScaffolds               CodeGameScaffold[]
   gameFileName                    String
   game                            String
-  gameCellRestrictions            String?
-  theme                           String?            @default("dino")
+  gameCellRestrictions            String? // TODO: remove optional = "?"
+  theme                           String?            @default("dino") // TODO: remove optional = "?"
   question                        Question           @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  codeGameScaffolds               CodeGameScaffold[]
 }
 
 model CodeGameScaffold {
@@ -578,6 +552,8 @@ model CodeGameAnswer {
   updatedAt                         DateTime                 @updatedAt
   codeGameQuestionId                Int
   userAnswerId                      Int                      @unique
+  userAnswer                        UserAnswer               @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
+  codeGameScaffoldAnswers           CodeGameScaffoldAnswer[]
   codeGameExecutionResult           String
   codeSolutionRestriction           Boolean
   frequencyOfMethodEvaluationResult Boolean
@@ -590,8 +566,6 @@ model CodeGameAnswer {
   allWhiteListCellsVisited          Boolean
   executionSuccess                  Boolean?
   executionMessage                  String?
-  userAnswer                        UserAnswer               @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
-  codeGameScaffoldAnswers           CodeGameScaffoldAnswer[]
 }
 
 model CodeGameScaffoldAnswer {
@@ -606,7 +580,7 @@ model CodeGameScaffoldAnswer {
 model ModuleSetting {
   id        Int      @id @default(autoincrement())
   key       String
-  value     String
+  value     String   @db.Text // Using @db.Text for potentially large JSON strings
   moduleId  Int
   updatedAt DateTime @updatedAt
   updatedBy Int
@@ -619,28 +593,28 @@ model ModuleSetting {
 model ModuleHighlightConcepts {
   id            Int         @id @default(autoincrement())
   moduleId      Int
-  conceptNodeId Int
-  alias         String?
-  description   String?
-  pictureData   String?
-  position      Int?
-  isUnlocked    Boolean     @default(false)
-  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
   module        Module      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  conceptNodeId Int
+  conceptNode   ConceptNode @relation(fields: [conceptNodeId], references: [id], onDelete: Cascade)
+  alias         String? // Optional alias for the concept
+  description   String? // Optional description for the concept
+  pictureData   String? // Stores the picture data as a base64 string or URL
+  position      Int? // Optional position for ordering in the module
+  isUnlocked    Boolean     @default(false)
 
   @@unique([moduleId, conceptNodeId])
 }
 
 model FillinQuestion {
   id         Int      @id @default(autoincrement())
-  content    String
+  content    String // Stores sanitized HTML or structured JSON
   taskType   String
   table      Boolean
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   questionId Int      @unique
-  blanks     Blank[]
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  blanks     Blank[]
 }
 
 model Blank {
@@ -672,19 +646,19 @@ model KIFeedback {
 
 model GeneratedFeedback {
   id               String         @id @default(cuid())
-  spsContent       String
-  kmContent        String
-  kcContent        String
-  khContent        String
+  spsContent       String         @db.Text
+  kmContent        String         @db.Text
+  kcContent        String         @db.Text
+  khContent        String         @db.Text
   spsUsedAt        DateTime?
   kmUsedAt         DateTime?
   kcUsedAt         DateTime?
   khUsedAt         DateTime?
-  finalPrompt      String
-  codeSubmissionId Int
+  finalPrompt      String         @db.Text
+  codeSubmissionId Int // Foreign key to CodeSubmission
+  codeSubmission   CodeSubmission @relation(fields: [codeSubmissionId], references: [id], onDelete: Cascade)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  codeSubmission   CodeSubmission @relation(fields: [codeSubmissionId], references: [id], onDelete: Cascade)
 
   @@index([codeSubmissionId])
 }
@@ -694,29 +668,29 @@ model genTaskData {
   timestamp         DateTime @default(now())
   topic             String
   context           String
-  taskPrompt        String?
-  task              String
-  expectationPrompt String?
-  expectation       String
-  solutionPrompt    String?
-  solutionOne       String
-  solutionTwo       String?
-  solutionThree     String?
-  unitTestPrompt    String?
-  unitTestOne       String
-  unitTestTwo       String?
-  unitTestThree     String?
+  taskPrompt        String?  @db.Text
+  task              String   @db.Text
+  expectationPrompt String?  @db.Text
+  expectation       String   @db.Text
+  solutionPrompt    String?  @db.Text
+  solutionOne       String   @db.Text
+  solutionTwo       String?  @db.Text
+  solutionThree     String?  @db.Text
+  unitTestPrompt    String?  @db.Text
+  unitTestOne       String   @db.Text
+  unitTestTwo       String?  @db.Text
+  unitTestThree     String?  @db.Text
   errorIteration    Int
   isErrorAtEnd      Boolean
-  errorOne          String?
-  errorTwo          String?
-  errorThree        String?
+  errorOne          String?  @db.Text
+  errorTwo          String?  @db.Text
+  errorThree        String?  @db.Text
   juryOne           Json?
   juryTwo           Json?
   juryThree         Json?
-  codeFramework     String
-  runMethod         String?
-  runMethodInput    String?
+  codeFramework     String   @db.Text
+  runMethod         String?  @db.Text
+  runMethodInput    String?  @db.Text
   allTaskData       Json?
   judgeTask         Json?
 }
@@ -787,8 +761,8 @@ model ChatSession {
   title     String
   createdAt DateTime         @default(now())
   userId    Int
-  messages  ChatBotMessage[]
   user      User             @relation(fields: [userId], references: [id])
+  messages  ChatBotMessage[]
 }
 
 model ChatBotMessage {
@@ -798,12 +772,12 @@ model ChatBotMessage {
   createdAt       DateTime     @default(now())
   isBot           Boolean      @default(false)
   ratingByStudent Int?
-  usedChunks      String?
-  contextUrl      String?      @default("")
+  usedChunks      String?      @db.Text
+  contextUrl      String?      @default("") // Added field to store URL context
+  user            User?        @relation(fields: [userId], references: [id])
   userId          Int?
   sessionId       Int?
   session         ChatSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user            User?        @relation(fields: [userId], references: [id])
 }
 
 model UserContentElementProgress {
@@ -863,60 +837,54 @@ model Notification {
   @@index([discussionId])
 }
 
+//***************************** Begin Umlearn Tables
+
 model UmlEditorModel {
   id            Int                @id @default(autoincrement())
   model         String             @unique
   title         String
-  description   String
+  description   String             @db.Text
   EditorElement UmlEditorElement[]
 }
 
 model UmlEditorElement {
   id            Int            @id @default(autoincrement())
-  element       String         @unique
-  elementType   String
+  element       String         @unique //the unique element string
+  elementType   String //can be NODE or EDGE
   title         String
-  description   String
-  editorModelId Int
-  data          String
+  description   String         @db.Text
   editorModel   UmlEditorModel @relation(fields: [editorModelId], references: [id])
+  editorModelId Int
+  data          String //maybe the element definition and/or the style data
 }
 
 model UmlQuestion {
   id           Int      @id @default(autoincrement())
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   Int      @unique
   title        String?
-  text         String?
-  textHTML     String?
-  editorData   Json?
-  startData    Json?
-  dataImage    String?
-  taskSettings Json?
+  text         String?  @db.Text
+  textHTML     String?  @db.Text
+  editorData   Json? //editor content - teachers work
+  startData    Json? //optional data for the start of the task displayed in the editor
+  dataImage    String?  @db.Text //the image of the task
+  taskSettings Json? //siehe taskSettingsDTO
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model UserUmlQuestionAnswer {
   id           Int        @id @default(autoincrement())
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id])
   userAnswerId Int        @unique
-  attemptData  Json
+  attemptData  Json //editor content - students work
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id])
 }
 
 //***************************** End Umlearn Tables
 
 model MCSliderQuestion {
-  id               Int      @id @default(autoincrement())
-  questionId       Int      @unique
-  items            Json     @default("[]")
-  config           Json     @default("{}")
-  rhinoIntegration Json?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   id               Int      @id @default(autoincrement())
   questionId       Int      @unique
   items            Json     @default("[]")
@@ -947,19 +915,20 @@ model FileUpload {
 
 model UploadQuestion {
   id         Int      @id @default(autoincrement())
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int
   title      String
   text       String
-  textHTML   String?
+  textHTML   String?  @db.Text
   maxSize    Int
   fileType   String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model UserUploadAnswer {
   id           Int        @id @default(autoincrement())
+  userAnswer   UserAnswer @relation(fields: [userAnswerId], references: [id], onDelete: Cascade)
   userAnswerId Int
   fileUpload   FileUpload @relation(fields: [fileUploadId], references: [id], onDelete: Cascade)
   fileUploadId Int
@@ -1073,10 +1042,6 @@ model EvaluationSubmission {
   discussions Discussion[]        @relation("EvaluationDiscussions")
   ratings     EvaluationRating[]
   comments    EvaluationComment[]
-  ratings     EvaluationRating[]
-  author      User                @relation(fields: [authorId], references: [id])
-  pdfFile     File                @relation(fields: [pdfFileId], references: [id])
-  session     EvaluationSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@map("evaluation_submissions")
 }
@@ -1098,7 +1063,6 @@ model EvaluationCategory {
   discussions Discussion[]        @relation("CategoryDiscussions")
   ratings     EvaluationRating[]
   comments    EvaluationComment[]
-  ratings     EvaluationRating[]
 
   @@unique([sessionId, name])
   @@map("evaluation_categories")
@@ -1173,16 +1137,18 @@ model UserGroupMembership {
   groupId   Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  group     UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group     UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
 
   @@unique([userId, groupId])
 }
 
 model GroupReviewGate {
   id               Int      @id @default(autoincrement())
+  question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId       Int      @unique
   linkedQuestionId Int
+  textHTML         String?  @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }
