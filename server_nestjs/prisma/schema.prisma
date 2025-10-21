@@ -44,6 +44,7 @@ model User {
   evaluationSubmissions     EvaluationSubmission[]
   evaluationRatings         EvaluationRating[]
   evaluationComments        EvaluationComment[]
+  EvaluationCommentVote     EvaluationCommentVote[]
 }
 
 model RefreshToken {
@@ -1014,10 +1015,10 @@ model EvaluationSession {
   updatedAt   DateTime        @updatedAt
 
   // Relations
-  module      Module                 @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  createdBy   User                   @relation(fields: [createdById], references: [id])
+  module      Module                      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdBy   User                        @relation(fields: [createdById], references: [id])
   submissions EvaluationSubmission[]
-  categories  EvaluationCategory[]
+  categories  EvaluationSessionCategory[] // ← Many-to-Many über Junction Table
 
   @@map("evaluation_sessions")
 }
@@ -1047,25 +1048,39 @@ model EvaluationSubmission {
 }
 
 model EvaluationCategory {
-  id          Int      @id @default(autoincrement())
-  sessionId   Int
-  name        String
-  displayName String
-  description String?
-  icon        String?
-  color       String?
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id               Int      @id @default(autoincrement())
+  name             String   @unique
+  displayName      String
+  description      String?  @db.Text
+  shortDescription String?
+  icon             String?
+  color            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  // Relations
-  session     EvaluationSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  discussions Discussion[]        @relation("CategoryDiscussions")
+  sessions    EvaluationSessionCategory[]
+  discussions Discussion[]                @relation("CategoryDiscussions")
   ratings     EvaluationRating[]
   comments    EvaluationComment[]
 
-  @@unique([sessionId, name])
   @@map("evaluation_categories")
+}
+
+model EvaluationSessionCategory {
+  id         Int      @id @default(autoincrement())
+  sessionId  Int
+  categoryId Int
+  order      Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  session  EvaluationSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  category EvaluationCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, categoryId]) // Only one-of-a-kind categories per session
+  @@map("evaluation_session_categories")
 }
 
 model EvaluationRating {
@@ -1088,38 +1103,42 @@ model EvaluationRating {
 }
 
 model EvaluationComment {
-  id           String @id @default(cuid())
+  id           String  @id @default(cuid())
   submissionId String
   categoryId   Int
   userId       Int
-  content      String @db.Text
-
-  // Reply functionality - hierarchical comments
-  parentId String?
+  content      String  @db.Text
+  parentId     String?
 
   // Simplified voting system - store counts directly
-  upvotes   Int @default(0)
-  downvotes Int @default(0)
+  //upvotes   Int @default(0)
+  //downvotes Int @default(0)
 
-  // Vote tracking as JSON to avoid complex schema
-  voteDetails Json? // {userVotes: {userId: "UP"|"DOWN"}}
-
-  // Anonymous display name for this comment
-  anonymousDisplayName String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  submission EvaluationSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
-  category   EvaluationCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  user       User                 @relation(fields: [userId], references: [id])
-
-  // Self-referential relations for reply hierarchy
-  parent  EvaluationComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies EvaluationComment[] @relation("CommentReplies")
+  //voteDetails Json? // {userVotes: {userId: "UP"|"DOWN"}}
+  anonymousDisplayName  String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  submission            EvaluationSubmission    @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  category              EvaluationCategory      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user                  User                    @relation(fields: [userId], references: [id])
+  parent                EvaluationComment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies               EvaluationComment[]     @relation("CommentReplies")
+  EvaluationCommentVote EvaluationCommentVote[]
 
   @@map("evaluation_comments")
+}
+
+model EvaluationCommentVote {
+  id        Int               @id @default(autoincrement())
+  commentId String
+  userId    Int
+  voteCount Int // + for upvote, - for downvote; abs can be more than 1
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  comment   EvaluationComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId], name: "unique_evaluation_comment_vote")
 }
 
 model UserGroup {
@@ -1148,6 +1167,7 @@ model GroupReviewGate {
   question         Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId       Int      @unique
   linkedQuestionId Int
+  linkedCategories String?  @db.Text // JSON array of category IDs
   textHTML         String?  @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
