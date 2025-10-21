@@ -77,8 +77,8 @@ export class EvaluationMockDataService {
       map(commentsMap => {
         const comments = commentsMap.get(categoryId) || [];
         return [{
-          id: `discussion-${categoryId}-001`,
-          submissionId: "demo-submission-001",
+          id: 1000 + categoryId, // Numeric ID
+          submissionId: 1, // Numeric ID
           categoryId: categoryId,
           comments: comments,
           createdAt: new Date('2024-01-15T10:00:00Z'),
@@ -94,7 +94,7 @@ export class EvaluationMockDataService {
     return {
       id: 999, // Changed from string to number to match DTO
       userId: 999,
-      submissionId: "demo-submission-001",
+      submissionId: 1, // Numeric ID
       displayName: "Sie (Demo-Modus)",
       colorCode: "#4CAF50",
       createdAt: new Date('2024-01-15T10:00:00Z')
@@ -127,7 +127,7 @@ export class EvaluationMockDataService {
         const totalAvailable = categoryStats.reduce((sum, cat) => sum + cat.availableComments, 0);
 
         return {
-          submissionId: "demo-submission-001",
+          submissionId: 1, // Numeric ID
           totalAvailable: totalAvailable,
           totalUsed: totalUsed,
           categories: categoryStats,
@@ -167,7 +167,7 @@ export class EvaluationMockDataService {
         const userRating = categoryRatings.find(r => r.userId === 999);
 
         return {
-          submissionId: "demo-submission-001",
+          submissionId: 1, // Numeric ID
           categoryId: categoryId,
           averageScore: Math.round(averageScore * 10) / 10,
           totalRatings: categoryRatings.length,
@@ -185,8 +185,8 @@ export class EvaluationMockDataService {
 
   addMockComment(categoryId: number, content: string): Observable<EvaluationCommentDTO> {
     const newComment: EvaluationCommentDTO = {
-      id: `comment-${this.nextCommentId++}`,
-      submissionId: "demo-submission-001",
+      id: this.nextCommentId++, // Numeric ID
+      submissionId: 1, // Numeric ID
       categoryId: categoryId,
       authorId: 999,
       content: content.trim(),
@@ -194,7 +194,7 @@ export class EvaluationMockDataService {
       updatedAt: new Date(),
 
       author: {
-        id: "999",
+        id: 999, // Numeric ID
         type: "anonymous",
         displayName: "Sie (Demo-Modus)",
         colorCode: "#4CAF50"
@@ -226,7 +226,7 @@ export class EvaluationMockDataService {
     const currentComments = new Map(this.mockCommentsSubject.value);
     const categoryComments = currentComments.get(categoryId) || [];
 
-    const commentIndex = categoryComments.findIndex(c => c.id === commentId);
+    const commentIndex = categoryComments.findIndex(c => String(c.id) === commentId);
     if (commentIndex === -1) {
       throw new Error('Comment not found');
     }
@@ -271,8 +271,8 @@ export class EvaluationMockDataService {
       }
     } else if (userVote !== null) {
       comment.votes.push({
-        id: `vote-${this.nextVoteId++}`,
-        commentId: commentId,
+        id: this.nextVoteId++, // Numeric ID
+        commentId: Number(commentId), // Convert to number
         userId: 999,
         voteType: userVote,
         createdAt: new Date()
@@ -288,7 +288,7 @@ export class EvaluationMockDataService {
     this.updateVoteLimits(categoryId, voteType, userVote !== null);
 
     return of({
-      commentId: commentId,
+      commentId: Number(commentId), // Convert to number
       upvotes: upvotes,
       downvotes: 0, // Always 0 in ranking system
       voteStats: {
@@ -304,8 +304,8 @@ export class EvaluationMockDataService {
 
   rateMockCategory(categoryId: number, score: number): Observable<EvaluationRatingDTO> {
     const newRating: EvaluationRatingDTO = {
-      id: `rating-${categoryId}-999`,
-      submissionId: "demo-submission-001",
+      id: 100 + categoryId, // Numeric ID
+      submissionId: 1, // Numeric ID
       userId: 999,
       categoryId: categoryId,
       score: score,
@@ -344,7 +344,7 @@ export class EvaluationMockDataService {
 
   private createMockSubmission(): EvaluationSubmissionDTO {
     return {
-      id: "demo-submission-001",
+      id: 1, // Numeric ID
       title: "Entwurf \"Stabile Rahmenkonstruktion\"",
       description: "CAD-Entwurf einer tragfähigen Rahmenkonstruktion für industrielle Anwendungen",
       authorId: 1,
@@ -406,7 +406,7 @@ export class EvaluationMockDataService {
    */
   private createMockSubmission2(): EvaluationSubmissionDTO {
     return {
-      id: "demo-submission-002",
+      id: 2, // Numeric ID
       title: "Entwurf \"Brückenkonstruktion Stahlbeton\"",
       description: "CAD-Entwurf einer modernen Stahlbetonbrücke mit optimierter Spannweite",
       authorId: 2,
@@ -468,7 +468,7 @@ export class EvaluationMockDataService {
    */
   private createMockSubmission3(): EvaluationSubmissionDTO {
     return {
-      id: "demo-submission-003",
+      id: 3, // Numeric ID
       title: "Entwurf \"Hochhaus-Fundamentierung\"",
       description: "CAD-Entwurf einer Tiefgründung für ein 20-stöckiges Hochhaus",
       authorId: 3,
@@ -530,7 +530,7 @@ export class EvaluationMockDataService {
    */
   private createMockSubmission4(): EvaluationSubmissionDTO {
     return {
-      id: "demo-submission-004",
+      id: 4, // Numeric ID
       title: "Entwurf \"Dachkonstruktion Sporthalle\"",
       description: "CAD-Entwurf einer weitspannenden Dachkonstruktion für eine moderne Sporthalle",
       authorId: 4,
@@ -592,7 +592,7 @@ export class EvaluationMockDataService {
    */
   private createMockSubmission5(): EvaluationSubmissionDTO {
     return {
-      id: "demo-submission-005",
+      id: 5, // Numeric ID
       title: "Entwurf \"Industriehalle Stahl\"",
       description: "CAD-Entwurf einer Stahlkonstruktion für eine moderne Fertigungshalle",
       authorId: 5,
@@ -660,8 +660,8 @@ export class EvaluationMockDataService {
   private createVollstaendigkeitComments(): EvaluationCommentDTO[] {
     return [
       {
-        id: "comment-001",
-        submissionId: "demo-submission-001",
+        id: 1, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 1,
         authorId: 2,
         content: "Die Konstruktion wirkt sehr durchdacht. Alle wesentlichen Bauteile sind klar erkennbar und sinnvoll dimensioniert. Besonders die Materialwahl für die Hauptträger überzeugt.",
@@ -669,7 +669,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T11:30:00Z'),
 
         author: {
-          id: "anon-2",
+          id: 2, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer B",
           colorCode: "#2196F3"
@@ -677,15 +677,15 @@ export class EvaluationMockDataService {
 
         votes: [
           {
-            id: "vote-001",
-            commentId: "comment-001",
+            id: 1, // Numeric ID
+            commentId: 1, // Numeric ID
             userId: 3,
             voteType: "UP",
             createdAt: new Date('2024-01-15T11:45:00Z')
           },
           {
-            id: "vote-002",
-            commentId: "comment-001",
+            id: 2, // Numeric ID
+            commentId: 1, // Numeric ID
             userId: 4,
             voteType: "UP",
             createdAt: new Date('2024-01-15T12:00:00Z')
@@ -702,8 +702,8 @@ export class EvaluationMockDataService {
         replyCount: 0
       },
       {
-        id: "comment-002",
-        submissionId: "demo-submission-001",
+        id: 2, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 1,
         authorId: 3,
         content: "Mir fehlen einige Details bei den Verbindungselementen. Wie sollen die Träger miteinander verbunden werden? Schrauben, Schweißnähte oder andere Verbindungstechniken?",
@@ -711,7 +711,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T12:15:00Z'),
 
         author: {
-          id: "anon-3",
+          id: 3, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer C",
           colorCode: "#FF9800"
@@ -719,8 +719,8 @@ export class EvaluationMockDataService {
 
         votes: [
           {
-            id: "vote-003",
-            commentId: "comment-002",
+            id: 3, // Numeric ID
+            commentId: 2, // Numeric ID
             userId: 2,
             voteType: "UP",
             createdAt: new Date('2024-01-15T12:30:00Z')
@@ -737,8 +737,8 @@ export class EvaluationMockDataService {
         replyCount: 0
       },
       {
-        id: "comment-003",
-        submissionId: "demo-submission-001",
+        id: 3, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 1,
         authorId: 4,
         content: "Gute Materialangaben im Titel, aber die Dimensionierung der Träger sollte nochmals überprüft werden. Sind die gewählten Profile für die erwarteten Lasten ausreichend?",
@@ -746,7 +746,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T13:00:00Z'),
 
         author: {
-          id: "anon-4",
+          id: 4, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer D",
           colorCode: "#9C27B0"
@@ -769,8 +769,8 @@ export class EvaluationMockDataService {
   private createGrafischeComments(): EvaluationCommentDTO[] {
     return [
       {
-        id: "comment-004",
-        submissionId: "demo-submission-001",
+        id: 4, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 2,
         authorId: 2,
         content: "Sehr saubere technische Zeichnung! Die Bemaßung ist vollständig und korrekt dargestellt. Linienführung entspricht den Standards.",
@@ -778,7 +778,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T11:45:00Z'),
 
         author: {
-          id: "anon-2",
+          id: 2, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer B",
           colorCode: "#2196F3"
@@ -786,8 +786,8 @@ export class EvaluationMockDataService {
 
         votes: [
           {
-            id: "vote-004",
-            commentId: "comment-004",
+            id: 4, // Numeric ID
+            commentId: 4, // Numeric ID
             userId: 3,
             voteType: "UP",
             createdAt: new Date('2024-01-15T12:00:00Z')
@@ -804,8 +804,8 @@ export class EvaluationMockDataService {
         replyCount: 0
       },
       {
-        id: "comment-005",
-        submissionId: "demo-submission-001",
+        id: 5, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 2,
         authorId: 5,
         content: "Die gewählte Perspektive macht es teilweise schwer, alle Details zu erkennen. Zusätzliche Ansichten (Draufsicht, Seitenansicht) wären hilfreich gewesen.",
@@ -813,7 +813,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T12:30:00Z'),
 
         author: {
-          id: "anon-5",
+          id: 5, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer E",
           colorCode: "#00BCD4"
@@ -821,8 +821,8 @@ export class EvaluationMockDataService {
 
         votes: [
           {
-            id: "vote-005",
-            commentId: "comment-005",
+            id: 5, // Numeric ID
+            commentId: 5, // Numeric ID
             userId: 4,
             voteType: "UP",
             createdAt: new Date('2024-01-15T12:45:00Z')
@@ -844,8 +844,8 @@ export class EvaluationMockDataService {
   private createVergleichbarkeitComments(): EvaluationCommentDTO[] {
     return [
       {
-        id: "comment-006",
-        submissionId: "demo-submission-001",
+        id: 6, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 3,
         authorId: 3,
         content: "Standardisierte CAD-Symbole verwendet - das ist gut für Vergleiche mit anderen Entwürfen. Maßstab ist konsistent gewählt.",
@@ -853,7 +853,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T13:15:00Z'),
 
         author: {
-          id: "anon-3",
+          id: 3, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer C",
           colorCode: "#FF9800"
@@ -861,15 +861,15 @@ export class EvaluationMockDataService {
 
         votes: [
           {
-            id: "vote-006",
-            commentId: "comment-006",
+            id: 6, // Numeric ID
+            commentId: 6, // Numeric ID
             userId: 2,
             voteType: "UP",
             createdAt: new Date('2024-01-15T13:30:00Z')
           },
           {
-            id: "vote-007",
-            commentId: "comment-006",
+            id: 7, // Numeric ID
+            commentId: 6, // Numeric ID
             userId: 5,
             voteType: "UP",
             createdAt: new Date('2024-01-15T13:45:00Z')
@@ -891,8 +891,8 @@ export class EvaluationMockDataService {
   private createKomplexitaetComments(): EvaluationCommentDTO[] {
     return [
       {
-        id: "comment-007",
-        submissionId: "demo-submission-001",
+        id: 7, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 4,
         authorId: 4,
         content: "Angemessene Komplexität für die Aufgabenstellung. Die Lösung ist nicht übertrieben komplex, aber zeigt trotzdem technisches Verständnis.",
@@ -900,7 +900,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T14:00:00Z'),
 
         author: {
-          id: "anon-4",
+          id: 4, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer D",
           colorCode: "#9C27B0"
@@ -918,8 +918,8 @@ export class EvaluationMockDataService {
         replyCount: 0
       },
       {
-        id: "comment-008",
-        submissionId: "demo-submission-001",
+        id: 8, // Numeric ID
+        submissionId: 1, // Numeric ID
         categoryId: 4,
         authorId: 5,
         content: "Clevere Vereinfachung bei den Verbindungen. Die Lösung ist praxisgerecht und gut umsetzbar. Könnte aber noch weiter optimiert werden.",
@@ -927,7 +927,7 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T14:30:00Z'),
 
         author: {
-          id: "anon-5",
+          id: 5, // Numeric ID
           type: "anonymous",
           displayName: "Teilnehmer E",
           colorCode: "#00BCD4"
@@ -935,8 +935,8 @@ export class EvaluationMockDataService {
 
         votes: [
           {
-            id: "vote-008",
-            commentId: "comment-008",
+            id: 8, // Numeric ID
+            commentId: 8, // Numeric ID
             userId: 3,
             voteType: "UP",
             createdAt: new Date('2024-01-15T14:45:00Z')
@@ -970,8 +970,8 @@ export class EvaluationMockDataService {
     return [
       // Some existing ratings from other users to show in stats
       {
-        id: "rating-001",
-        submissionId: "demo-submission-001",
+        id: 1, // Numeric ID
+        submissionId: 1, // Numeric ID
         userId: 2,
         categoryId: 1,
         score: 7,
@@ -979,8 +979,8 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T15:00:00Z')
       },
       {
-        id: "rating-002",
-        submissionId: "demo-submission-001",
+        id: 2, // Numeric ID
+        submissionId: 1, // Numeric ID
         userId: 3,
         categoryId: 1,
         score: 8,
@@ -988,8 +988,8 @@ export class EvaluationMockDataService {
         updatedAt: new Date('2024-01-15T15:15:00Z')
       },
       {
-        id: "rating-003",
-        submissionId: "demo-submission-001",
+        id: 3, // Numeric ID
+        submissionId: 1, // Numeric ID
         userId: 2,
         categoryId: 2,
         score: 9,

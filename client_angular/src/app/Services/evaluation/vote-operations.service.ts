@@ -19,6 +19,28 @@ export interface VoteOperationError {
 /**
  * Service for handling complex vote operations and state management
  * Extracted from comment-item.component.ts to reduce component complexity
+ *
+ * @deprecated THIS SERVICE IS DEPRECATED AND WILL BE REMOVED.
+ * Migration deadline: 2 weeks from now.
+ *
+ * **Migration Path:**
+ * Replace this service with the new 3-service architecture:
+ * - VoteCoreService: HTTP operations
+ * - VoteStateService: State management (cache, queue, real-time)
+ * - VoteUIStateService: UI logic (debouncing, optimistic updates)
+ *
+ * **Example Migration:**
+ * ```typescript
+ * // BEFORE (deprecated):
+ * constructor(private voteOps: VoteOperationsService) {}
+ * await this.voteOps.performVoteOperation(comment, voteType, ...);
+ *
+ * // AFTER (new architecture):
+ * constructor(private voteState: VoteStateService) {}
+ * await this.voteState.submitVote(commentId, voteType, categoryId);
+ * ```
+ *
+ * See LegacyVoteAdapter for temporary compatibility layer.
  */
 @Injectable({
   providedIn: 'root'
@@ -29,7 +51,13 @@ export class VoteOperationsService {
     private evaluationService: EvaluationDiscussionService,
     private voteSessionService: VoteSessionService,
     private evaluationStateService: EvaluationStateService
-  ) {}
+  ) {
+    console.warn(
+      '⚠️ DEPRECATION WARNING: VoteOperationsService is deprecated and will be removed in 2 weeks.\n' +
+      'Migrate to new services: VoteCoreService, VoteStateService, VoteUIStateService\n' +
+      'See LegacyVoteAdapter for temporary compatibility.'
+    );
+  }
 
   /**
    * Performs vote operation with comprehensive error handling and validation
@@ -71,7 +99,7 @@ export class VoteOperationsService {
 
       // Perform the actual vote with error handling
       const result = await firstValueFrom(
-        this.evaluationService.voteCommentWithLimits(comment.id, voteType).pipe(
+        this.evaluationService.voteCommentWithLimits(String(comment.id), voteType).pipe(
           catchError(error => {
             console.error('❌ Vote operation failed:', error);
             

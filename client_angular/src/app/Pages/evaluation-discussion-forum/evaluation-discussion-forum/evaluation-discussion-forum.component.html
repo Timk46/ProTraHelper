@@ -188,10 +188,10 @@
           <div class="rating-gate-section" *ngIf="vm.isDiscussionPhase && vm.anonymousUser">
             <app-rating-gate
               *ngIf="vm.activeCategoryInfo"
-              [submissionId]="vm.submission?.id || ''"
+              [submissionId]="vm.submission?.id || 0"
               [currentCategory]="vm.activeCategoryInfo"
               [discussions]="vm.discussions"
-              [anonymousUser]="vm.anonymousUser"
+              [anonymousUser]="vm.anonymousUser" 
               [canComment]="vm.canComment"
               [canVote]="(voteStatus$ | async)?.canVote ?? false"
               [availableVotes]="(voteStatus$ | async)?.availableVotes ?? 0"

@@ -30,7 +30,7 @@ import { FormsModule } from '@angular/forms';
 import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
 import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
 import { VoteSessionService } from '../../../../Services/evaluation/vote-session.service';
-import { VoteOperationsService } from '../../../../Services/evaluation/vote-operations.service';
+import { LegacyVoteAdapter } from '../../../../Services/evaluation/legacy-vote.adapter';
 import { MatDialog } from '@angular/material/dialog';
 import { VoteLimitDialogComponent, VoteLimitDialogData } from '../vote-limit-dialog/vote-limit-dialog.component';
 
@@ -146,7 +146,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     private commentPanelStateService: CommentPanelStateService,
     private evaluationStateService: EvaluationStateService,
     private voteSessionService: VoteSessionService,
-    private voteOperationsService: VoteOperationsService,
+    private legacyVoteAdapter: LegacyVoteAdapter,
     private dialog: MatDialog,
   ) {}
 
@@ -363,7 +363,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this._userVoteLoadingState.next(true);
 
     this.evaluationStateService
-      .getUserVoteStatus(this.comment.id)
+      .getUserVoteStatus(this.comment.id.toString())
       .pipe(
         // 🚀 PHASE 5: Add retry mechanism with exponential backoff
         retry({ count: 2, delay: (error, retryCount) => timer(Math.pow(2, retryCount) * 1000) }),
@@ -469,7 +469,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Fallback to backend call only if local extraction yields 0
     this.evaluationStateService
       .evaluationService
-      .getUserVoteCountForComment(this.comment.id)
+      .getUserVoteCountForComment(this.comment.id.toString())
       .pipe(
         catchError((error) => {
           console.warn('⚠️ Backend getUserVoteCountForComment failed, using fallback:', error);
@@ -577,7 +577,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    */
   private initializePanelState(): void {
     // Subscribe to panel state changes for this comment
-    this.commentPanelStateService.getPanelState(this.comment.id)
+    this.commentPanelStateService.getPanelState(this.comment.id.toString())
       .pipe(takeUntil(this.destroy$))
       .subscribe(isExpanded => {
         this.isPanelExpanded = isExpanded;
@@ -585,7 +585,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       });
 
     // Set initial state (default to collapsed for comments with replies)
-    this.isPanelExpanded = this.commentPanelStateService.isPanelExpanded(this.comment.id);
+    this.isPanelExpanded = this.commentPanelStateService.isPanelExpanded(this.comment.id.toString());
   }
 
   // 🚀 PHASE 5: Old reply textarea helper methods removed - handled by separate reply-input component
@@ -601,7 +601,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
     this.triggerHapticFeedback('light');
 
-    const newState = this.commentPanelStateService.togglePanelState(this.comment.id);
+    const newState = this.commentPanelStateService.togglePanelState(this.comment.id.toString());
 
     console.log('🔄 Panel toggled:', {
       commentId: this.comment.id,
@@ -836,8 +836,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     });
 
     try {
-      // Use VoteOperationsService for consistent vote handling with limits
-      const result = await this.voteOperationsService.performVoteOperation(
+      // Use LegacyVoteAdapter for consistent vote handling with limits
+      const result = await this.legacyVoteAdapter.performVoteOperation(
         this.comment,
         voteType,
         this.comment.submissionId,
@@ -882,7 +882,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
 
     // Extract vote count from VoteLimitResponseDTO or fallback extraction
-    const backendVoteCount = this.voteOperationsService.extractVoteCountFromResponse(result);
+    const backendVoteCount = this.legacyVoteAdapter.extractVoteCountFromResponse(result);
 
     if (backendVoteCount !== undefined) {
       console.log('🔧 Synchronizing local vote count with VoteOperationsService result:', {
@@ -966,10 +966,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this.triggerHapticFeedback('medium');
 
     // 🚀 PHASE 5: Simplified - only emit event, reply input handled by parent
-    this.replyRequested.emit(this.comment.id);
+    this.replyRequested.emit(this.comment.id.toString());
 
     console.log('🎯 Reply requested:', {
-      commentId: this.comment.id,
+      commentId: this.comment.id.toString(),
     });
   }
 
@@ -1377,7 +1377,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       console.log('🔄 Final sync: Attempting backend call for accurate count');
       this.evaluationStateService
         .evaluationService
-        .getUserVoteCountForComment(this.comment.id)
+        .getUserVoteCountForComment(this.comment.id.toString())
         .pipe(
           catchError(() => of(0)),
           takeUntil(this.destroy$)

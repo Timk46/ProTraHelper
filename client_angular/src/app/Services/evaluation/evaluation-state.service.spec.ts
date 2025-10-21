@@ -15,7 +15,7 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
   let mockUserService: jasmine.SpyObj<UserService>;
 
   const mockSubmission = {
-    id: 'test-submission-001',
+    id: 1, // Numeric ID
     title: 'Test Submission',
     description: 'Test description',
     authorId: 1,
@@ -39,7 +39,7 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
     id: 999,
     userId: 123,
     displayName: 'Anonymous User',
-    submissionId: 'test-submission-001',
+    submissionId: 1, // Numeric ID
     colorCode: '#2196F3',
     createdAt: new Date('2023-01-01'),
   };

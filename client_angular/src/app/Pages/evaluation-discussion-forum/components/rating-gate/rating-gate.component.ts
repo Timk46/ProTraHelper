@@ -1094,7 +1094,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   /**
    * The submission ID being evaluated
    */
-  @Input() submissionId!: string;
+  @Input() submissionId!: number;
 
   /**
    * The current category being viewed
@@ -1327,7 +1327,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
 
           this.stateService.anonymousUser$.pipe(take(1)).subscribe(anonymousUser => {
             if (anonymousUser) {
-              this.stateService.refreshRatingStatus(this.submissionId!, anonymousUser.id);
+              this.stateService.refreshRatingStatus(this.submissionId.toString(), anonymousUser.id);
             } else {
               console.warn('⚠️ Cannot refresh rating status: Anonymous user not available');
             }
@@ -1357,7 +1357,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       if (this.submissionId && this.currentCategory) {
         this.stateService.anonymousUser$.pipe(take(1)).subscribe(anonymousUser => {
           if (anonymousUser) {
-            this.stateService.loadCategoryRatingStatus(this.submissionId, anonymousUser.id);
+            this.stateService.loadCategoryRatingStatus(this.submissionId.toString(), Number(anonymousUser.id));
           }
         });
       }
@@ -1464,7 +1464,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     // Mark this category as commented in the state service
     this.stateService.markCategoryAsCommented(
       this.currentCategory.id,
-      this.submissionId
+      this.submissionId.toString()
     );
 
     // Emit the comment to parent for actual submission
@@ -1521,7 +1521,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   onRetry(): void {
     if (this.submissionId) {
       console.log('🔄 Retrying rating status load from centralized service');
-      this.stateService.refreshRatingStatus(this.submissionId, this.currentCategory.id);
+      this.stateService.refreshRatingStatus(this.submissionId.toString(), this.currentCategory.id);
       this.errorSubject.next(null); // Clear local error state
     }
   }
@@ -1608,8 +1608,8 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
 
     // Create a minimal EvaluationRatingDTO-compatible object
     return {
-      id: `temp-${ratingStatus.categoryId}`, // Synthetic ID
-      submissionId: this.submissionId || '',
+      id: Number(`temp-${ratingStatus.categoryId}`), // Synthetic ID
+      submissionId: this.submissionId || 0,
       userId: 0, // Not needed for rating slider
       categoryId: ratingStatus.categoryId,
       score: ratingStatus.rating,

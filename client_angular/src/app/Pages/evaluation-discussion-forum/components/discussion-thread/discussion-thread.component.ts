@@ -47,7 +47,6 @@ import { CommentInputComponent } from '../comment-input/comment-input.component'
 // Services
 import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
 import { EvaluationPerformanceService } from '../../services/evaluation-performance.service';
-import { VoteQueueService } from '../../../../Services/evaluation/vote-queue.service';
 
 // Directives
 import { PerformanceProfilingDirective } from '../../directives/performance-profiling.directive';
@@ -98,7 +97,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     private cdr: ChangeDetectorRef,
     private commentPanelStateService: CommentPanelStateService,
     private performanceService: EvaluationPerformanceService,
-    private voteQueueService: VoteQueueService,
     private elementRef: ElementRef,
     @Inject(PLATFORM_ID) private platformId: Object,
   ) {}
@@ -441,8 +439,8 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   private expandFocusedComment(): void {
     const focusedComment = this.getFocusedComment();
     if (focusedComment?.comment) {
-      const currentState = this.commentPanelStateService.isPanelExpanded(focusedComment.comment.id);
-      this.commentPanelStateService.setPanelState(focusedComment.comment.id, !currentState);
+      const currentState = this.commentPanelStateService.isPanelExpanded(focusedComment.comment.id.toString());
+      this.commentPanelStateService.setPanelState(focusedComment.comment.id.toString(), !currentState);
     }
   }
 
@@ -450,7 +448,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     const focusedComment = this.getFocusedComment();
     if (focusedComment?.comment) {
       this.onCommentVoted({
-        commentId: focusedComment.comment.id,
+        commentId: focusedComment.comment.id.toString(),
         voteType: voteType
       });
     }
@@ -459,7 +457,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   private replyToFocusedComment(): void {
     const focusedComment = this.getFocusedComment();
     if (focusedComment?.comment) {
-      this.onReplyRequested(focusedComment.comment.id);
+      this.onReplyRequested(focusedComment.comment.id.toString());
     }
   }
 
@@ -635,7 +633,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       const sortedComments = this.sortComments(comments);
       const topLevelComments = sortedComments.filter(c => !c.parentId);
 
-      const flattenedComments = this.flattenCommentsFromBackendMemoized(topLevelComments, 0, discussion.id);
+      const flattenedComments = this.flattenCommentsFromBackendMemoized(topLevelComments, 0, discussion.id.toString());
       this.flattenedComments.push(...flattenedComments);
     });
 
@@ -774,10 +772,10 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
     comments.forEach(comment => {
       if (comment.parentId) {
-        if (!repliesMap.has(comment.parentId)) {
-          repliesMap.set(comment.parentId, []);
+        if (!repliesMap.has(comment.parentId.toString())) {
+          repliesMap.set(comment.parentId.toString(), []);
         }
-        repliesMap.get(comment.parentId)!.push(comment);
+        repliesMap.get(comment.parentId.toString())!.push(comment);
       }
     });
 
@@ -819,7 +817,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       const backendReplies = comment.replies || [];
       if (backendReplies.length > 0) {
         // Check if the panel for this comment is expanded
-        const isPanelExpanded = this.commentPanelStateService.isPanelExpanded(comment.id);
+        const isPanelExpanded = this.commentPanelStateService.isPanelExpanded(comment.id.toString());
 
         if (isPanelExpanded) {
           const flattenedReplies = this.flattenCommentsFromBackend(backendReplies, depth + 1);
@@ -836,7 +834,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       }
 
       // 🚀 PHASE 2: Add reply-input item if active for this comment
-      const isReplyActive = this.isReplyInputActive(comment.id);
+      const isReplyActive = this.isReplyInputActive(comment.id.toString());
       if (isReplyActive) {
         flattened.push({
           type: 'comment-input',
@@ -892,7 +890,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
     // Find the comment in the flattened list for legacy event
     const commentItem = this.flattenedComments.find(
-      item => item.type === 'comment' && item.comment?.id === commentId,
+      item => item.type === 'comment' && item.comment?.id === Number(commentId),
     );
 
     if (commentItem?.comment) {
@@ -1090,17 +1088,17 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
 
   trackByFlattenedComment(index: number, item: FlattenedComment): string {
     if (item.type === 'comment' && item.comment) {
-      return item.comment.id;
+      return item.comment.id.toString();
     } else if (item.type === 'discussion-header' && item.discussion) {
-      return `header-${item.discussion.id}`;
+      return `header-${item.discussion.id.toString()}`;
     } else if (item.type === 'comment-input' && item.discussion) {
-      return `input-${item.discussion.id}`;
+      return `input-${item.discussion.id.toString()}`;
     }
     return `item-${index}`;
   }
 
   trackByDiscussion(index: number, discussion: EvaluationDiscussionDTO): string {
-    return discussion.id;
+    return discussion.id.toString();
   }
 }
 
@@ -1115,6 +1113,6 @@ interface FlattenedComment {
   comment: EvaluationCommentDTO | null;
 
   // 🚀 PHASE 1: Reply-spezifische Properties
-  parentCommentId?: string; // Für reply-input: ID des Parent-Kommentars
+  parentCommentId?: number; // Für reply-input: ID des Parent-Kommentars
   isReplyInputActive?: boolean; // Ob der Reply-Input aktiv ist
 }

@@ -23,9 +23,9 @@ import {
 
 export interface RealtimeEvent {
   type: 'comment-added' | 'vote-changed' | 'phase-switched' | 'user-joined' | 'user-left';
-  submissionId: string;
+  submissionId: number;
   categoryId?: number;
-  commentId?: string;
+  commentId?: number;
   userId?: number;
   data?: any;
   timestamp: Date;
@@ -72,7 +72,7 @@ export class EvaluationRealtimeService implements OnDestroy {
   private connectedUsers$ = new BehaviorSubject<string[]>([]);
   
   // Event streams
-  private events$ = new Subject<RealtimeEvent>();
+  private events$ = new Subject<CommentEvent | VoteEvent | PhaseEvent | UserEvent | RealtimeEvent>();
   private connectionErrors$ = new Subject<Error>();
   
   // Reconnection strategy
@@ -101,7 +101,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * @param submissionId - The submission ID to subscribe to
    * @returns Observable<boolean> - Connection success status
    */
-  connectToSubmission(submissionId: string): Observable<boolean> {
+  connectToSubmission(submissionId: number): Observable<boolean> {
     console.log('🔌 Connecting to real-time updates for submission:', submissionId);
     
     if (this.socket?.connected) {
@@ -196,7 +196,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * @param submissionId - Optional filter by submission ID
    * @returns Observable<CommentEvent>
    */
-  subscribeToComments(submissionId?: string): Observable<CommentEvent> {
+  subscribeToComments(submissionId?: number): Observable<CommentEvent> {
     return this.events$.pipe(
       debounceTime(this.EVENT_DEBOUNCE_TIME),
       filter((event): event is CommentEvent => 
@@ -212,7 +212,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * @param commentId - Optional filter by comment ID
    * @returns Observable<VoteEvent>
    */
-  subscribeToVotes(commentId?: string): Observable<VoteEvent> {
+  subscribeToVotes(commentId?: number): Observable<VoteEvent> {
     return this.events$.pipe(
       debounceTime(this.EVENT_DEBOUNCE_TIME),
       filter((event): event is VoteEvent => 
@@ -228,7 +228,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * @param submissionId - Optional filter by submission ID
    * @returns Observable<PhaseEvent>
    */
-  subscribeToPhaseChanges(submissionId?: string): Observable<PhaseEvent> {
+  subscribeToPhaseChanges(submissionId?: number): Observable<PhaseEvent> {
     return this.events$.pipe(
       filter((event): event is PhaseEvent => 
         event.type === 'phase-switched' && 
@@ -243,7 +243,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * @param submissionId - Optional filter by submission ID
    * @returns Observable<UserEvent>
    */
-  subscribeToUserPresence(submissionId?: string): Observable<UserEvent> {
+  subscribeToUserPresence(submissionId?: number): Observable<UserEvent> {
     return this.events$.pipe(
       filter((event): event is UserEvent => 
         (event.type === 'user-joined' || event.type === 'user-left') &&
@@ -269,7 +269,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * Sets up WebSocket event handlers
    * @param submissionId - The submission ID
    */
-  private setupSocketEventHandlers(submissionId: string): void {
+  private setupSocketEventHandlers(submissionId: number): void {
     if (!this.socket) return;
 
     // Join submission room after connection
@@ -300,7 +300,7 @@ export class EvaluationRealtimeService implements OnDestroy {
         categoryId: data.categoryId,
         comment: data.comment,
         timestamp: new Date(data.timestamp)
-      });
+      } as CommentEvent);
     });
 
     this.socket.on('vote-changed', (data) => {
@@ -311,7 +311,7 @@ export class EvaluationRealtimeService implements OnDestroy {
         commentId: data.commentId,
         voteData: data.voteData,
         timestamp: new Date(data.timestamp)
-      });
+      } as VoteEvent);
     });
 
     this.socket.on('phase-switched', (data) => {
@@ -321,7 +321,7 @@ export class EvaluationRealtimeService implements OnDestroy {
         submissionId: data.submissionId,
         newPhase: data.newPhase,
         timestamp: new Date(data.timestamp)
-      });
+      } as PhaseEvent);
     });
 
     this.socket.on('user-joined', (data) => {
@@ -333,7 +333,7 @@ export class EvaluationRealtimeService implements OnDestroy {
         userId: data.userId,
         anonymousDisplayName: data.anonymousDisplayName,
         timestamp: new Date(data.timestamp)
-      });
+      } as UserEvent);
     });
 
     this.socket.on('user-left', (data) => {
@@ -345,7 +345,7 @@ export class EvaluationRealtimeService implements OnDestroy {
         userId: data.userId,
         anonymousDisplayName: data.anonymousDisplayName,
         timestamp: new Date(data.timestamp)
-      });
+      } as UserEvent);
     });
 
     // Heartbeat for connection health
@@ -364,7 +364,7 @@ export class EvaluationRealtimeService implements OnDestroy {
    * Joins the submission room for targeted updates
    * @param submissionId - The submission ID
    */
-  private joinSubmissionRoom(submissionId: string): void {
+  private joinSubmissionRoom(submissionId: number): void {
     if (!this.socket?.connected) return;
     
     console.log('🏠 Joining submission room:', submissionId);

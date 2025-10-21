@@ -73,7 +73,7 @@
               [anonymousUser]="anonymousUser"
               [canVote]="canVote && !isReadOnly"
               [availableVotes]="availableVotes"
-              [isVoting]="isCommentBeingVoted(item.comment!.id)"
+              [isVoting]="isCommentBeingVoted(item.comment!.id.toString())"
               [depth]="item.depth"
               [isReadOnly]="isReadOnly"
               (voted)="onCommentVoted($event)"
@@ -88,15 +88,15 @@
             [style.margin-left.px]="getCommentIndentation(item.depth)"
           >
             <app-comment-input
-              [parentCommentId]="item.parentCommentId!"
+              [parentCommentId]="item.parentCommentId!.toString()"
               [depth]="item.depth"
               [isSubmitting]="isSubmittingComment"
               [placeholder]="'Antwort schreiben...'"
               [maxLength]="500"
               (commentSubmitted)="
-                onReplyInputSubmitted({ commentId: item.parentCommentId!, content: $event })
+                onReplyInputSubmitted({ commentId: item.parentCommentId!.toString(), content: $event })
               "
-              (cancelled)="onReplyInputCancelled(item.parentCommentId!)"
+              (cancelled)="onReplyInputCancelled(item.parentCommentId!.toString())"
             >
             </app-comment-input>
           </div>

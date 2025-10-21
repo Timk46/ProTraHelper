@@ -21,7 +21,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 // Services (only UI-related services)
 import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
-import { VoteDebounceService } from '../../../../Services/evaluation/vote-debouncer.service';
+import { LegacyVoteAdapter } from '../../../../Services/evaluation/legacy-vote.adapter';
 
 // DTOs (type definitions - explicit for strict mode)
 export type VoteType = 'UP' | null;
@@ -142,7 +142,7 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private commentPanelStateService: CommentPanelStateService,
-    private voteDebouncer: VoteDebounceService
+    private legacyVoteAdapter: LegacyVoteAdapter
   ) {}
 
   // =============================================================================
@@ -183,8 +183,8 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     
-    // 🔧 CLEANUP: Reset vote debouncer state
-    this.voteDebouncer.resetCommentState(this.comment.id);
+    // 🔧 CLEANUP: Reset vote state
+    this.legacyVoteAdapter.resetCommentState(Number(this.comment.id));
   }
 
   // =============================================================================
@@ -206,7 +206,7 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
    */
   addVote(): void {
     // 🔧 RACE PREVENTION: Check debouncing first
-    if (!this.voteDebouncer.shouldAllowClick(this.comment.id)) {
+    if (!this.legacyVoteAdapter.shouldAllowClick(Number(this.comment.id))) {
       console.log('🚫 Vote blocked by debouncer');
       return;
     }
@@ -221,7 +221,7 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // 🔧 RACE PREVENTION: Try to start operation
-    if (!this.voteDebouncer.startOperation(this.comment.id)) {
+    if (!this.legacyVoteAdapter.startOperation(Number(this.comment.id))) {
       console.log('🚫 Vote blocked - operation already pending');
       return;
     }
@@ -243,7 +243,7 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
    */
   removeVote(): void {
     // 🔧 RACE PREVENTION: Check debouncing first
-    if (!this.voteDebouncer.shouldAllowClick(this.comment.id)) {
+    if (!this.legacyVoteAdapter.shouldAllowClick(Number(this.comment.id))) {
       console.log('🚫 Vote removal blocked by debouncer');
       return;
     }
@@ -258,7 +258,7 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     // 🔧 RACE PREVENTION: Try to start operation
-    if (!this.voteDebouncer.startOperation(this.comment.id)) {
+    if (!this.legacyVoteAdapter.startOperation(Number(this.comment.id))) {
       console.log('🚫 Vote removal blocked - operation already pending');
       return;
     }
@@ -350,9 +350,9 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
    * 🔧 RACE PREVENTION: Check if vote button should be disabled
    */
   isVoteButtonDisabled(): boolean {
-    return this.voteDebouncer.isButtonDisabled(this.comment.id) || 
-           this.isVoting || 
-           !this.canVote || 
+    return this.legacyVoteAdapter.isButtonDisabled(Number(this.comment.id)) ||
+           this.isVoting ||
+           !this.canVote ||
            this._cachedIsCurrentUser;
   }
 
@@ -360,9 +360,9 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
    * 🔧 RACE PREVENTION: Check if remove vote button should be disabled
    */
   isRemoveVoteButtonDisabled(): boolean {
-    return this.voteDebouncer.isButtonDisabled(this.comment.id) || 
-           this.isVoting || 
-           this.userVoteCount === 0 || 
+    return this.legacyVoteAdapter.isButtonDisabled(Number(this.comment.id)) ||
+           this.isVoting ||
+           this.userVoteCount === 0 ||
            this._cachedIsCurrentUser;
   }
 

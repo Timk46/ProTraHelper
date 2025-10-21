@@ -1441,11 +1441,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   trackByDiscussion(index: number, discussion: EvaluationDiscussionDTO): string {
-    return discussion.id;
+    return discussion.id.toString();
   }
 
   trackByComment(index: number, comment: EvaluationCommentDTO): string {
-    return comment.id;
+    return comment.id.toString();
   }
 
   // =============================================================================
@@ -1825,7 +1825,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   private createMockSubmission(): EvaluationSubmissionDTO {
     return {
-      id: 'demo-submission-001',
+      id: Number('demo-submission-001'),
       title: 'Entwurf "Stabile Rahmenkonstruktion"',
       description: 'CAD-Entwurf einer tragfähigen Rahmenkonstruktion für industrielle Anwendungen',
       authorId: 1,
@@ -1923,8 +1923,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     const comments = this.createMockComments(categoryId);
     return [
       {
-        id: `discussion-${categoryId}-001`,
-        submissionId: 'demo-submission-001',
+        id: Number(`discussion-${categoryId}-001`),
+        submissionId: Number('demo-submission-001'),
         categoryId: categoryId,
         comments: comments,
         createdAt: new Date('2024-01-15T10:00:00Z'),
@@ -1939,8 +1939,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     const commentSets: { [key: number]: EvaluationCommentDTO[] } = {
       1: [
         {
-          id: 'comment-001',
-          submissionId: 'demo-submission-001',
+          id: Number('comment-001'),
+          submissionId: Number('demo-submission-001'),
           categoryId: 1,
           authorId: 2,
           content:
@@ -1948,7 +1948,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           createdAt: new Date('2024-01-15T11:30:00Z'),
           updatedAt: new Date('2024-01-15T11:30:00Z'),
           author: {
-            id: 'anon-2',
+            id: Number('anon-2'),
             type: 'anonymous',
             displayName: 'Teilnehmer B',
             colorCode: '#2196F3',
@@ -1959,8 +1959,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           replyCount: 0,
         },
         {
-          id: 'comment-002',
-          submissionId: 'demo-submission-001',
+          id: Number('comment-002'),
+          submissionId: Number('demo-submission-001'),
           categoryId: 1,
           authorId: 3,
           content:
@@ -1968,7 +1968,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           createdAt: new Date('2024-01-15T12:15:00Z'),
           updatedAt: new Date('2024-01-15T12:15:00Z'),
           author: {
-            id: 'anon-3',
+            id: Number('anon-3'),
             type: 'anonymous',
             displayName: 'Teilnehmer C',
             colorCode: '#FF9800',
@@ -1981,8 +1981,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       ],
       2: [
         {
-          id: 'comment-003',
-          submissionId: 'demo-submission-001',
+          id: Number('comment-003'),
+          submissionId: Number('demo-submission-001'),
           categoryId: 2,
           authorId: 2,
           content:
@@ -1990,7 +1990,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           createdAt: new Date('2024-01-15T11:45:00Z'),
           updatedAt: new Date('2024-01-15T11:45:00Z'),
           author: {
-            id: 'anon-2',
+            id: Number('anon-2'),
             type: 'anonymous',
             displayName: 'Teilnehmer B',
             colorCode: '#2196F3',
@@ -2003,8 +2003,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       ],
       3: [
         {
-          id: 'comment-004',
-          submissionId: 'demo-submission-001',
+          id: Number('comment-004'),
+          submissionId: Number('demo-submission-001'),
           categoryId: 3,
           authorId: 3,
           content:
@@ -2012,7 +2012,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           createdAt: new Date('2024-01-15T13:15:00Z'),
           updatedAt: new Date('2024-01-15T13:15:00Z'),
           author: {
-            id: 'anon-3',
+            id: Number('anon-3'),
             type: 'anonymous',
             displayName: 'Teilnehmer C',
             colorCode: '#FF9800',
@@ -2025,8 +2025,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       ],
       4: [
         {
-          id: 'comment-005',
-          submissionId: 'demo-submission-001',
+          id: Number('comment-005'),
+          submissionId: Number('demo-submission-001'),
           categoryId: 4,
           authorId: 4,
           content:
@@ -2034,7 +2034,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           createdAt: new Date('2024-01-15T14:00:00Z'),
           updatedAt: new Date('2024-01-15T14:00:00Z'),
           author: {
-            id: 'anon-4',
+            id: Number('anon-4'),
             type: 'anonymous',
             displayName: 'Teilnehmer D',
             colorCode: '#9C27B0',
@@ -2064,7 +2064,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     }));
 
     return {
-      submissionId: 'demo-submission-001',
+      submissionId: Number('demo-submission-001'),
       totalAvailable: 8,
       totalUsed: 4,
       categories: categoryStats,
@@ -2083,7 +2083,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     return {
       id: 999,
       userId: 999,
-      submissionId: 'demo-submission-001',
+      submissionId: Number('demo-submission-001'),
       displayName: 'Sie (Demo-Modus)',
       colorCode: '#4CAF50',
       createdAt: new Date('2024-01-15T10:00:00Z'),
@@ -2142,8 +2142,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       if (!discussion) {
         // Create new discussion if not exists
         discussion = {
-          id: `discussion-${categoryId}-001`,
-          submissionId: 'demo-submission-001',
+          id: Number(`discussion-${categoryId}-001`),
+          submissionId: Number('demo-submission-001'),
           categoryId: categoryId,
           comments: [],
           createdAt: new Date(),

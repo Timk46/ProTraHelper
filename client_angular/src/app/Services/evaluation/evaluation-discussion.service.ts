@@ -14,8 +14,10 @@ import {
   debounceTime,
   throttleTime,
   distinctUntilChanged,
+  shareReplay,
 } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { LRUCache } from '../../utils/lru-cache';
 // Import all evaluation DTOs
 import {
   EvaluationSubmissionDTO,
@@ -56,8 +58,21 @@ export class EvaluationDiscussionService {
   private commentsSubject = new BehaviorSubject<EvaluationCommentDTO[]>([]);
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
 
-  // Performance optimization subjects
-  private pendingRequests = new Map<string, Observable<any>>();
+  // Performance optimization: LRU cache for pending requests (prevents duplicate HTTP calls)
+  private pendingRequests = new LRUCache<string, Observable<unknown>>(
+    50, // Max 50 concurrent pending requests
+    (key) => {
+      console.log(`🧹 EvaluationDiscussionService: LRU evicted pending request ${key}`);
+    }
+  );
+
+  // Performance optimization: LRU cache for GET request results (request-level caching)
+  private requestCache = new LRUCache<string, Observable<unknown>>(
+    100, // Max 100 cached GET requests
+    (key) => {
+      console.log(`🧹 EvaluationDiscussionService: LRU evicted cached request ${key}`);
+    }
+  );
 
   // Configuration for retry logic
   private readonly MAX_RETRY_ATTEMPTS = 3;
@@ -96,7 +111,7 @@ export class EvaluationDiscussionService {
     // Deduplication: Return existing request if already pending
     if (requestKey && this.pendingRequests.has(requestKey)) {
       console.log('🔄 Returning existing request for key:', requestKey);
-      return this.pendingRequests.get(requestKey)!;
+      return this.pendingRequests.get(requestKey)! as Observable<T>;
     }
 
     const requestWithRetry = request.pipe(
@@ -171,6 +186,70 @@ export class EvaluationDiscussionService {
     debounceTime: number = this.DEBOUNCE_TIME,
   ): Observable<T> {
     return timer(debounceTime).pipe(switchMap(() => requestFactory()));
+  }
+
+  /**
+   * Request-level caching for GET requests
+   *
+   * @description
+   * Implements request-level caching using LRU cache and shareReplay().
+   * Each unique cache key gets a single Observable chain that's shared across
+   * multiple subscribers, preventing duplicate HTTP requests.
+   *
+   * @param cacheKey - Unique key for this request (e.g., 'getRatingStats-123-5')
+   * @param requestFactory - Function that creates the HTTP request
+   * @param cacheDuration - Optional cache duration in ms (default: 5 minutes)
+   * @returns Cached observable with shareReplay
+   *
+   * @example
+   * ```typescript
+   * return this.withCache(
+   *   `getRatingStats-${submissionId}-${categoryId}`,
+   *   () => this.http.get<RatingStatsDTO>(`${url}`)
+   * );
+   * ```
+   */
+  private withCache<T>(
+    cacheKey: string,
+    requestFactory: () => Observable<T>,
+    cacheDuration: number = 300000 // 5 minutes default
+  ): Observable<T> {
+    // Check if we have a cached observable
+    if (this.requestCache.has(cacheKey)) {
+      console.log(`✅ Returning cached request for key: ${cacheKey}`);
+      return this.requestCache.get(cacheKey)! as Observable<T>;
+    }
+
+    console.log(`🆕 Creating new cached request for key: ${cacheKey}`);
+
+    // Create new observable with shareReplay
+    const cached$ = requestFactory().pipe(
+      shareReplay({
+        bufferSize: 1,
+        refCount: true, // Auto-cleanup when no subscribers
+      }),
+      tap({
+        next: () => {
+          // Set timeout to invalidate cache after duration
+          setTimeout(() => {
+            if (this.requestCache.has(cacheKey)) {
+              console.log(`⏰ Cache expired for key: ${cacheKey}`);
+              this.requestCache.delete(cacheKey);
+            }
+          }, cacheDuration);
+        },
+        error: () => {
+          // Remove from cache on error
+          console.log(`❌ Removing failed request from cache: ${cacheKey}`);
+          this.requestCache.delete(cacheKey);
+        }
+      })
+    );
+
+    // Store in cache
+    this.requestCache.set(cacheKey, cached$ as Observable<unknown>);
+
+    return cached$;
   }
 
   /**
@@ -266,9 +345,9 @@ export class EvaluationDiscussionService {
 
           // Create a single discussion container for this category
           const discussion: EvaluationDiscussionDTO = {
-            id: `discussion-${submissionId}-${categoryId}`,
-            submissionId,
-            categoryId: parseInt(categoryId),
+            id: Number(`discussion-${submissionId}-${categoryId}`),
+            submissionId: Number(submissionId),
+            categoryId: Number(categoryId),
             comments: comments,
             createdAt: new Date(),
             totalComments: comments.length,
@@ -428,8 +507,11 @@ export class EvaluationDiscussionService {
    * Corrected URL path to match backend implementation
    */
   getRatingStats(submissionId: string, categoryId: string): Observable<RatingStatsDTO> {
-    return this.http.get<RatingStatsDTO>(
-      `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/stats`,
+    return this.withCache(
+      `getRatingStats-${submissionId}-${categoryId}`,
+      () => this.http.get<RatingStatsDTO>(
+        `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/stats`,
+      )
     );
   }
 
@@ -534,7 +616,7 @@ export class EvaluationDiscussionService {
         // Update local ratings state by removing the deleted rating
         const currentRatings = this.ratingsSubject.value;
         const updatedRatings = currentRatings.filter(
-          rating => !(rating.categoryId === categoryId && rating.submissionId === submissionId)
+          rating => !(rating.categoryId === categoryId && rating.submissionId === Number(submissionId))
         );
         this.ratingsSubject.next(updatedRatings);
       }),
@@ -589,7 +671,7 @@ export class EvaluationDiscussionService {
       map(comments => ({
         type: 'comment-added',
         submissionId,
-        comments: comments.filter(c => c.submissionId === submissionId),
+        comments: comments.filter(c => c.submissionId === Number(submissionId)),
       })),
     );
   }
@@ -608,9 +690,13 @@ export class EvaluationDiscussionService {
   getVoteLimitStatus(submissionId: string, categoryId: string): Observable<VoteLimitStatusDTO> {
     const url = `${this.apiUrls.comments}/vote-limit/${submissionId}/${categoryId}`;
 
-    return this.http.get<VoteLimitStatusDTO>(url).pipe(
-      retry(2),
-      catchError(this.handleError<VoteLimitStatusDTO>('getVoteLimitStatus'))
+    return this.withCache(
+      `getVoteLimitStatus-${submissionId}-${categoryId}`,
+      () => this.http.get<VoteLimitStatusDTO>(url).pipe(
+        retry(2),
+        catchError(this.handleError<VoteLimitStatusDTO>('getVoteLimitStatus'))
+      ),
+      60000 // 1 minute cache (vote limits change frequently)
     );
   }
 
@@ -641,7 +727,7 @@ export class EvaluationDiscussionService {
    */
   resetVotes(submissionId: string, categoryId: number, voteType: 'UP' | 'ALL'): Observable<ResetVotesResponseDTO> {
     const url = `${this.apiUrls.comments}/votes/reset`;
-    const body: ResetVotesDTO = { submissionId, categoryId, voteType };
+    const body: ResetVotesDTO = { submissionId: Number(submissionId), categoryId, voteType };
 
     console.log('🔄 Resetting votes via frontend service:', { submissionId, categoryId, voteType });
 

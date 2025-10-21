@@ -384,7 +384,7 @@ export class EvaluationStateService {
         // Add rating status loading
         console.log('📊 Adding rating status loading for submissionId:', submissionId);
         parallelOps.push(
-          this.evaluationService.getUserRatingStatus(String(submissionId), userId).pipe(
+          this.evaluationService.getUserRatingStatus(submissionId, userId).pipe(
             tap(statuses => {
               console.log('✅ Rating statuses loaded during submission init:', statuses);
               // Convert array to Map for efficient lookups
@@ -543,7 +543,7 @@ export class EvaluationStateService {
     // Do NOT delete the cached status - this was causing the rating panel to reappear
     
     // Load rating status first, then transition atomically
-    return this.evaluationService.getUserRatingStatus(String(submissionId), anonymousUserId).pipe(
+    return this.evaluationService.getUserRatingStatus(submissionId, anonymousUserId).pipe(
       take(1),
       map(statuses => {
         // DEBUG: Backend API response verification
@@ -634,7 +634,7 @@ export class EvaluationStateService {
         // 🔧 CRITICAL FIX: Load vote limits for the new category to sync "x/x verfügbar" display
         if (submissionId) {
           console.log('🔄 Loading vote limits for new category:', categoryId);
-          this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
+          this.loadVoteLimitStatus(submissionId, categoryId).subscribe({
             next: () => console.log('✅ Vote limits loaded for category transition:', categoryId),
             error: (error) => console.error('❌ Failed to load vote limits for category:', categoryId, error)
           });
@@ -760,7 +760,7 @@ export class EvaluationStateService {
         // Populate comment-id to category-id map for quick lookups
         discussions.forEach(discussion => {
           discussion.comments.forEach(comment => {
-            this.commentIdToCategoryIdMap.set(String(comment.id), categoryId);
+            this.commentIdToCategoryIdMap.set(comment.id, categoryId);
           });
         });
 
@@ -816,7 +816,7 @@ export class EvaluationStateService {
     return combineLatest([this.submission$, this.activeCategory$]).pipe(
       map(([submission, categoryId]) => {
         if (!submission) return [];
-        return this.getDiscussionsForCategory(String(submission.id), categoryId);
+        return this.getDiscussionsForCategory(submission.id, categoryId);
       }),
       switchMap(discussions$ => discussions$),
       shareReplay(1),
@@ -851,7 +851,7 @@ export class EvaluationStateService {
 
     this.ratingStatusLoadingSubject.next(true);
 
-    this.evaluationService.getUserRatingStatus(String(submissionId), userId).pipe(
+    this.evaluationService.getUserRatingStatus(submissionId, userId).pipe(
       take(1),
       tap(statuses => {
         console.log('✅ Received rating statuses:', statuses);
@@ -1038,7 +1038,7 @@ export class EvaluationStateService {
           // This ensures both state containers stay synchronized
           const currentRatings = this.ratingsSubject.value;
           const updatedRatings = currentRatings.filter(
-            rating => !(rating.categoryId === categoryId && String(rating.submissionId) === submissionId)
+            rating => !(rating.categoryId === categoryId && rating.submissionId === submissionId)
           );
           this.ratingsSubject.next(updatedRatings);
 
@@ -1106,10 +1106,10 @@ export class EvaluationStateService {
     }
 
     const createCommentDto: CreateEvaluationCommentDTO = {
-      submissionId: Number(submissionId),
+      submissionId,
       categoryId: categoryId,
       content,
-      parentId: parentId ? Number(parentId) : undefined, // Include parentId for reply functionality
+      parentId, // Include parentId for reply functionality
     };
 
     console.log('✅ Anonymous user validated:', anonymousUser.displayName);
@@ -1205,8 +1205,8 @@ export class EvaluationStateService {
       if (!discussion) {
         console.log('🆕 Creating new discussion for category:', categoryId);
         discussion = {
-          id: Date.now(), // Generate unique numeric ID
-          submissionId: Number(submissionId),
+          id: `discussion-${submissionId}-${categoryId}`,
+          submissionId,
           categoryId: categoryId,
           comments: [],
           createdAt: new Date(),
@@ -1215,12 +1215,6 @@ export class EvaluationStateService {
           usedComments: 0,
         };
         updatedDiscussions.push(discussion);
-      }
-
-      // Type guard - should never be undefined after find/create logic above
-      if (!discussion) {
-        console.error('❌ Discussion is unexpectedly undefined');
-        return;
       }
 
       // Handle replies vs top-level comments differently
@@ -1258,7 +1252,7 @@ export class EvaluationStateService {
       discussion.usedComments = discussion.totalComments;
 
       // Add new comment to the lookup map
-      this.commentIdToCategoryIdMap.set(String(comment.id), categoryId);
+      this.commentIdToCategoryIdMap.set(comment.id, categoryId);
 
       console.log('✅ Comment processing complete:', {
         discussionId: discussion.id,
@@ -1569,7 +1563,7 @@ export class EvaluationStateService {
     for (const [categoryId, cacheSubject] of this.discussionCache.entries()) {
       const discussions = cacheSubject.value;
       for (const discussion of discussions) {
-        const comment = discussion.comments.find(c => String(c.id) === commentId);
+        const comment = discussion.comments.find(c => c.id === commentId);
         if (comment) {
           const userVote = comment.votes.find(vote => vote.userId === anonymousUser.id);
           return userVote ? userVote.voteType : null;
@@ -1637,7 +1631,7 @@ export class EvaluationStateService {
         const allComments = [...disc1, ...disc2, ...disc3, ...disc4]
           .flatMap(discussion => discussion.comments);
 
-        const comment = allComments.find(c => String(c.id) === commentId);
+        const comment = allComments.find(c => c.id === commentId);
         if (!comment) return null;
 
         const userVote = comment.votes.find(vote => vote.userId === anonymousUser.id);
@@ -1769,7 +1763,7 @@ export class EvaluationStateService {
   ): EvaluationDiscussionDTO[] {
     return discussions.map(discussion => {
       // Check if this discussion contains the target comment
-      const hasTargetComment = discussion.comments.some(c => String(c.id) === commentId);
+      const hasTargetComment = discussion.comments.some(c => c.id === commentId);
       if (!hasTargetComment) {
         return discussion; // Return same reference if no changes needed
       }
@@ -1778,7 +1772,7 @@ export class EvaluationStateService {
       return {
         ...discussion,
         comments: discussion.comments.map((comment: EvaluationCommentDTO) => {
-          if (String(comment.id) !== commentId) {
+          if (comment.id !== commentId) {
             return comment; // Return same reference if no changes needed
           }
 
@@ -1788,7 +1782,7 @@ export class EvaluationStateService {
           
           if (voteData.userVote) {
             newVotes.push({
-              id: Date.now() + Math.random(), // Generate unique numeric ID
+              id: `vote-${commentId}-${anonymousUser.id}`, // Consistent ID
               userId: anonymousUser.id,
               commentId: comment.id,
               voteType: voteData.userVote,
@@ -1817,7 +1811,7 @@ export class EvaluationStateService {
     commentId: string
   ): EvaluationCommentDTO | null {
     for (const discussion of discussions) {
-      const comment = discussion.comments.find(c => String(c.id) === commentId);
+      const comment = discussion.comments.find(c => c.id === commentId);
       if (comment) {
         return comment;
       }
@@ -1840,7 +1834,7 @@ export class EvaluationStateService {
 
     if (!this.ratingStatsCache.has(cacheKey)) {
       const subject = new BehaviorSubject<RatingStatsDTO>({
-        submissionId: Number(submissionId),
+        submissionId,
         categoryId: categoryId,
         averageScore: 0,
         totalRatings: 0,
@@ -1890,7 +1884,7 @@ export class EvaluationStateService {
     score: number,
   ): Observable<EvaluationRatingDTO> {
     const createRatingDto: CreateEvaluationRatingDTO = {
-      submissionId: Number(submissionId),
+      submissionId,
       categoryId: categoryId,
       score,
     };
@@ -1949,7 +1943,7 @@ export class EvaluationStateService {
     const ratingStatsSubject = this.ratingStatsCache.get(categoryId);
     if (ratingStatsSubject) {
       ratingStatsSubject.next({
-        submissionId: Number(submissionId),
+        submissionId,
         categoryId: categoryId,
         averageScore: 0,
         totalRatings: 0,
@@ -2639,7 +2633,7 @@ export class EvaluationStateService {
           const submissionId = this.submissionSubject.value?.id;
           if (submissionId) {
             console.log('⚠️ Backend response missing voteLimitStatus, loading explicitly as fallback');
-            this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
+            this.loadVoteLimitStatus(submissionId, categoryId).subscribe({
               next: () => console.log('✅ Fallback vote limit status loaded successfully'),
               error: (error) => console.error('❌ Fallback vote limit status loading failed:', error)
             });
@@ -2701,7 +2695,7 @@ export class EvaluationStateService {
         // Trigger vote limit status refresh for immediate UI update
         const anonymousUser = this.anonymousUserSubject.value;
         if (anonymousUser) {
-          this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
+          this.loadVoteLimitStatus(submissionId, categoryId).subscribe({
             next: () => console.log('🎯 Vote limit status refreshed after reset'),
             error: (error) => console.error('❌ Failed to refresh vote limit status:', error)
           });
@@ -2757,15 +2751,15 @@ export class EvaluationStateService {
    */
   getAdjacentSubmissions(currentSubmissionId: string): { previous: string | null; next: string | null } {
     const submissions = this.submissionListSubject.value;
-    const currentIndex = submissions.findIndex(s => String(s.id) === currentSubmissionId);
+    const currentIndex = submissions.findIndex(s => s.id === currentSubmissionId);
     
     if (currentIndex === -1) {
       console.warn('⚠️ Current submission not found in list:', currentSubmissionId);
       return { previous: null, next: null };
     }
 
-    const previous = currentIndex > 0 ? String(submissions[currentIndex - 1].id) : null;
-    const next = currentIndex < submissions.length - 1 ? String(submissions[currentIndex + 1].id) : null;
+    const previous = currentIndex > 0 ? submissions[currentIndex - 1].id : null;
+    const next = currentIndex < submissions.length - 1 ? submissions[currentIndex + 1].id : null;
 
     console.log('🧭 Adjacent submissions for', currentSubmissionId, ':', { previous, next });
     return { previous, next };
@@ -2780,7 +2774,7 @@ export class EvaluationStateService {
    */
   updateCurrentSubmissionIndex(submissionId: string): void {
     const submissions = this.submissionListSubject.value;
-    const index = submissions.findIndex(s => String(s.id) === submissionId);
+    const index = submissions.findIndex(s => s.id === submissionId);
     this.currentSubmissionIndexSubject.next(index);
     console.log('📍 Updated current submission index:', index, 'for', submissionId);
   }
@@ -2821,7 +2815,7 @@ export class EvaluationStateService {
    */
   getSubmissionPosition(submissionId: string): number {
     const submissions = this.submissionListSubject.value;
-    const index = submissions.findIndex(s => String(s.id) === submissionId);
+    const index = submissions.findIndex(s => s.id === submissionId);
     return index === -1 ? 0 : index + 1;
   }
 }

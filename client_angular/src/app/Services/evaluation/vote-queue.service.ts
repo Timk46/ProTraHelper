@@ -17,25 +17,50 @@ import {
 export type VoteType = 'UP' | null;
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
 import { VoteResultDTO } from '@DTOs/index';
+import { LRUCache } from '../../utils/lru-cache';
 
 /**
  * 🔧 HEFL Vote Queue Service
- * 
+ *
  * Architektur-konforme Lösung für Vote-Management mit:
  * - Optimistic Updates mit lokalem Cache
  * - Race Condition Prevention durch Operation Queuing
  * - Memory-sichere Observable-Pattern
  * - Debounced/Throttled Vote Operations
  * - Proper Error Handling mit Rollback
- * 
+ *
+ * @deprecated THIS SERVICE IS DEPRECATED AND WILL BE REMOVED.
+ * Migration deadline: 2 weeks from now.
+ *
+ * **Migration Path:**
+ * Replace this service with the new 3-service architecture:
+ * - VoteCoreService: HTTP operations
+ * - VoteStateService: State management (includes queue functionality)
+ * - VoteUIStateService: UI logic (debouncing, optimistic updates)
+ *
+ * **Example Migration:**
+ * ```typescript
+ * // BEFORE (deprecated):
+ * constructor(private voteQueue: VoteQueueService) {}
+ * this.voteQueue.queueVoteOperation(commentId, voteType);
+ * this.voteQueue.getLocalVoteCount$(commentId).subscribe(...);
+ *
+ * // AFTER (new architecture):
+ * constructor(private voteState: VoteStateService) {}
+ * await this.voteState.submitVote(commentId, voteType, categoryId);
+ * this.voteState.getVoteCount$(commentId).subscribe(...);
+ * ```
+ *
+ * See LegacyVoteAdapter for temporary compatibility layer.
+ *
  * @example
  * ```typescript
  * constructor(private voteQueue: VoteQueueService) {}
- * 
+ *
  * onVote(commentId: string, voteType: VoteType) {
  *   this.voteQueue.queueVoteOperation(commentId, voteType);
  * }
- * 
+ *
  * ngOnInit() {
  *   this.voteQueue.getLocalVoteCount$(commentId)
  *     .subscribe(count => this.updateUI(count));
@@ -48,21 +73,44 @@ import { VoteResultDTO } from '@DTOs/index';
 export class VoteQueueService {
   private destroy$ = new Subject<void>();
 
-  // 🔧 LOCAL CACHE: Vote counts per comment (commentId -> voteCount)
-  private localVoteCache = new Map<string, BehaviorSubject<number>>();
-  
+  // 🔧 LOCAL CACHE: Vote counts per comment (LRU for memory management)
+  private localVoteCache = new LRUCache<string, BehaviorSubject<number>>(
+    200, // Max 200 comments with vote tracking
+    (commentId, subject) => {
+      subject.complete();
+      console.log('🧹 VoteQueue: LRU evicted vote cache for comment', commentId);
+    }
+  );
+
   // 🔧 OPERATION QUEUE: Pending vote operations to prevent race conditions
   private voteOperationQueue$ = new Subject<VoteOperation>();
-  
-  // 🔧 LOADING STATE: Track ongoing operations per comment
-  private loadingState = new Map<string, BehaviorSubject<boolean>>();
-  
-  // 🔧 ERROR STATE: Track errors per comment for UI feedback
-  private errorState = new Map<string, BehaviorSubject<string | null>>();
+
+  // 🔧 LOADING STATE: Track ongoing operations per comment (LRU)
+  private loadingState = new LRUCache<string, BehaviorSubject<boolean>>(
+    200, // Max 200 comments with loading state
+    (commentId, subject) => {
+      subject.complete();
+      console.log('🧹 VoteQueue: LRU evicted loading state for comment', commentId);
+    }
+  );
+
+  // 🔧 ERROR STATE: Track errors per comment for UI feedback (LRU)
+  private errorState = new LRUCache<string, BehaviorSubject<string | null>>(
+    200, // Max 200 comments with error tracking
+    (commentId, subject) => {
+      subject.complete();
+      console.log('🧹 VoteQueue: LRU evicted error state for comment', commentId);
+    }
+  );
 
   constructor(
     private evaluationService: EvaluationDiscussionService
   ) {
+    console.warn(
+      '⚠️ DEPRECATION WARNING: VoteQueueService is deprecated and will be removed in 2 weeks.\n' +
+      'Migrate to new services: VoteCoreService, VoteStateService, VoteUIStateService\n' +
+      'See LegacyVoteAdapter for temporary compatibility.'
+    );
     this.setupVoteOperationProcessor();
   }
 
@@ -317,15 +365,11 @@ export class VoteQueueService {
    */
   ngOnDestroy(): void {
     console.log('🧹 VoteQueueService cleanup');
-    
+
     this.destroy$.next();
     this.destroy$.complete();
 
-    // Clean up all BehaviorSubjects
-    this.localVoteCache.forEach(subject => subject.complete());
-    this.loadingState.forEach(subject => subject.complete());
-    this.errorState.forEach(subject => subject.complete());
-    
+    // Clean up all BehaviorSubjects (LRU .clear() will call cleanup callbacks automatically)
     this.localVoteCache.clear();
     this.loadingState.clear();
     this.errorState.clear();

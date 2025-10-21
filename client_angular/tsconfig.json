@@ -28,7 +28,8 @@
     "paths": {
       // "@Interfaces/*" alias removed as per user request
       "@DTOs/index": ["../shared/dtos/index.ts"],
-      "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"]
+      "@UMLearnServices/*": ["./src/app/Modules/umlearn/services/*"],
+      "@utils/*": ["./src/app/utils/*"]
     },
     "types": ["node", "jasmine"]
   },
