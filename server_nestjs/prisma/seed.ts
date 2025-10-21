@@ -6,10 +6,7 @@ import { seedTranscriptsToConceptNodes } from './processTranscripts';
 import { seedUmlearn } from './seedUmlearnModelData';
 import { seedMCSlider } from './seed/seedMCSlider';
 import { seedTWL } from './seedTWl';
-import seedEvaluationCompleteFix from './seed/seedEvaluationCompleteFix';
-import { seedEvaluationDemo } from './seed/seedEvaluationDemo';
 import seedTraKoCombined from './seed/seedTraKoCombined';
-import seedEvaluationComplete from './seed/seedEvaluationComplete';
 const prisma = new PrismaClient();
 
 async function main() {

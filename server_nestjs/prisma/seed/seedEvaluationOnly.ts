@@ -156,7 +156,7 @@ export async function seedEvaluationOnly() {
       `👤 Student 1: ${evalStudent1.firstname} ${evalStudent1.lastname} (ID: ${evalStudent1.id})`,
     );
     console.log(
-      `� Student 2: ${evalStudent2.firstname} ${evalStudent2.lastname} (ID: ${evalStudent2.id})`,
+      `👤 Student 2: ${evalStudent2.firstname} ${evalStudent2.lastname} (ID: ${evalStudent2.id})`,
     );
     console.log(
       `👤 Student 3: ${evalStudent3.firstname} ${evalStudent3.lastname} (ID: ${evalStudent3.id})`,
@@ -171,7 +171,7 @@ export async function seedEvaluationOnly() {
     const testStudent2 = evalStudent2;
     const testStudent3 = evalStudent3;
 
-    // 2. Create PDF files for evaluation system
+    // 2. Create PDF files and FileUploads for evaluation system
     let pdfFile1 = await prisma.file.findFirst({
       where: { uniqueIdentifier: 'eval-pdf-001' },
     });
@@ -202,7 +202,40 @@ export async function seedEvaluationOnly() {
       });
     }
 
-    console.log('✅ Test PDF files created/verified');
+    // Create FileUpload entries (EvaluationSubmission.pdfFileId references FileUpload)
+    const pdfUpload1 = await prisma.fileUpload.upsert({
+      where: {
+        userId_fileId_moduleId: {
+          userId: evalStudent1.id,
+          fileId: pdfFile1.id,
+          moduleId: existingModule.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: evalStudent1.id,
+        fileId: pdfFile1.id,
+        moduleId: existingModule.id,
+      },
+    });
+
+    const pdfUpload2 = await prisma.fileUpload.upsert({
+      where: {
+        userId_fileId_moduleId: {
+          userId: evalStudent2.id,
+          fileId: pdfFile2.id,
+          moduleId: existingModule.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: evalStudent2.id,
+        fileId: pdfFile2.id,
+        moduleId: existingModule.id,
+      },
+    });
+
+    console.log('✅ Test PDF files and uploads created/verified');
 
     // 3. Create evaluation session
     const evaluationSession = await prisma.evaluationSession.upsert({
@@ -225,7 +258,7 @@ export async function seedEvaluationOnly() {
 
     console.log('✅ Evaluation session created/verified');
 
-    // 4. Create evaluation categories
+    // 4. Create evaluation categories (global) and link them to the session via junction table
     const categories = [
       {
         name: 'Vollständigkeit',
@@ -253,28 +286,45 @@ export async function seedEvaluationOnly() {
       },
     ];
 
-    const createdCategories = [];
+    const createdCategories: { id: number; name: string }[] = [];
     for (const categoryData of categories) {
+      // Global category by unique name
       const category = await prisma.evaluationCategory.upsert({
-        where: {
-          sessionId_name: {
-            sessionId: evaluationSession.id,
-            name: categoryData.name,
-          },
+        where: { name: categoryData.name },
+        update: {
+          displayName: categoryData.displayName,
+          description: categoryData.description,
         },
-        update: {},
         create: {
-          sessionId: evaluationSession.id,
           name: categoryData.name,
           displayName: categoryData.displayName,
           description: categoryData.description,
-          order: categoryData.order,
         },
       });
-      createdCategories.push(category);
+      createdCategories.push({ id: category.id, name: category.name });
+
+      // Link category to session with order via junction table
+      await prisma.evaluationSessionCategory.upsert({
+        where: {
+          sessionId_categoryId: {
+            sessionId: evaluationSession.id,
+            categoryId: category.id,
+          },
+        },
+        update: {
+          order: categoryData.order,
+          isActive: true,
+        },
+        create: {
+          sessionId: evaluationSession.id,
+          categoryId: category.id,
+          order: categoryData.order,
+          isActive: true,
+        },
+      });
     }
 
-    console.log('✅ Evaluation categories created/verified');
+    console.log('✅ Evaluation categories created/linked to session');
 
     // 5. Create evaluation submissions
     const submission1 = await prisma.evaluationSubmission.upsert({
@@ -286,7 +336,7 @@ export async function seedEvaluationOnly() {
         description:
           'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
         authorId: testStudent1.id,
-        pdfFileId: pdfFile1.id,
+        pdfFileId: pdfUpload1.id,
         sessionId: evaluationSession.id,
         status: EvaluationStatus.SUBMITTED,
         phase: EvaluationPhase.DISCUSSION,
@@ -303,7 +353,7 @@ export async function seedEvaluationOnly() {
         description:
           'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
         authorId: testStudent2.id,
-        pdfFileId: pdfFile2.id,
+        pdfFileId: pdfUpload2.id,
         sessionId: evaluationSession.id,
         status: EvaluationStatus.SUBMITTED,
         phase: EvaluationPhase.DISCUSSION,
@@ -322,9 +372,6 @@ export async function seedEvaluationOnly() {
         content:
           'Ich vermisse die Angaben zu den Lastannahmen. Ohne diese ist schwer zu beurteilen, ob die Dimensionierung stimmt.',
         userId: testStudent2.id,
-        voteDetails: { userVotes: {} },
-        upvotes: 3,
-        downvotes: 0,
         anonymousDisplayName: `Student ${testStudent2.firstname}`,
       },
       {
@@ -333,9 +380,6 @@ export async function seedEvaluationOnly() {
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
         content: 'Die Linienführung ist sehr sauber und professionell. Alle Maße sind gut lesbar.',
         userId: testStudent3.id,
-        voteDetails: { userVotes: {} },
-        upvotes: 2,
-        downvotes: 0,
         anonymousDisplayName: `Student ${testStudent3.firstname}`,
       },
       {
@@ -345,9 +389,6 @@ export async function seedEvaluationOnly() {
         content:
           'Die Schnittdarstellung ist etwas unübersichtlich. Eine Explosionszeichnung wäre hilfreicher gewesen.',
         userId: testStudent1.id,
-        voteDetails: { userVotes: {} },
-        upvotes: 1,
-        downvotes: 1,
         anonymousDisplayName: `Student ${testStudent1.firstname}`,
       },
       {
@@ -357,9 +398,6 @@ export async function seedEvaluationOnly() {
         content:
           'Der Maßstab ist konsistent, aber die Legende könnte ausführlicher sein für bessere Vergleichbarkeit.',
         userId: testLecturer.id,
-        voteDetails: { userVotes: {} },
-        upvotes: 1,
-        downvotes: 0,
         anonymousDisplayName: 'Dozent',
       },
       {
@@ -369,9 +407,6 @@ export async function seedEvaluationOnly() {
         content:
           'Die nachhaltige Materialwahl ist vorbildlich. Die Dokumentation der Materialauswahl könnte jedoch detaillierter sein.',
         userId: testLecturer.id,
-        voteDetails: { userVotes: {} },
-        upvotes: 2,
-        downvotes: 0,
         anonymousDisplayName: 'Dozent',
       },
     ];
@@ -389,9 +424,6 @@ export async function seedEvaluationOnly() {
             categoryId: commentData.categoryId,
             content: commentData.content,
             userId: commentData.userId,
-            voteDetails: commentData.voteDetails,
-            upvotes: commentData.upvotes,
-            downvotes: commentData.downvotes,
             anonymousDisplayName: commentData.anonymousDisplayName,
           },
         });
@@ -399,6 +431,67 @@ export async function seedEvaluationOnly() {
     }
 
     console.log('✅ Evaluation comments created (5 comments across both submissions)');
+
+    // 6b. Create comment votes using the new junction table EvaluationCommentVote
+    // We approximate previous upvote/downvote counts with unique voters
+    const votePlans: Array<{
+      commentId: string;
+      votes: Array<{ userId: number; voteCount: number }>;
+    }> = [
+      {
+        commentId: 'demo-comment-001',
+        votes: [
+          { userId: testStudent1.id, voteCount: 1 },
+          { userId: testStudent3.id, voteCount: 1 },
+          { userId: testLecturer.id, voteCount: 1 },
+        ],
+      },
+      {
+        commentId: 'demo-comment-002',
+        votes: [
+          { userId: testStudent1.id, voteCount: 1 },
+          { userId: testLecturer.id, voteCount: 1 },
+        ],
+      },
+      {
+        commentId: 'demo-comment-003',
+        votes: [
+          { userId: testLecturer.id, voteCount: 1 }, // upvote
+          { userId: testStudent3.id, voteCount: -1 }, // downvote
+        ],
+      },
+      {
+        commentId: 'demo-comment-004',
+        votes: [{ userId: testStudent1.id, voteCount: 1 }],
+      },
+      {
+        commentId: 'demo-comment-005',
+        votes: [
+          { userId: testStudent1.id, voteCount: 1 },
+          { userId: testStudent3.id, voteCount: 1 },
+        ],
+      },
+    ];
+
+    for (const vp of votePlans) {
+      for (const v of vp.votes) {
+        const existing = await prisma.evaluationCommentVote.findFirst({
+          where: { commentId: vp.commentId, userId: v.userId },
+        });
+        if (existing) {
+          await prisma.evaluationCommentVote.update({
+            where: { id: existing.id },
+            data: { voteCount: v.voteCount },
+          });
+        } else {
+          await prisma.evaluationCommentVote.create({
+            data: { commentId: vp.commentId, userId: v.userId, voteCount: v.voteCount },
+          });
+        }
+      }
+    }
+
+    console.log('✅ Evaluation comment votes created');
 
     // 7. Create evaluation ratings
     const ratingsData = [
@@ -487,6 +580,7 @@ export async function seedEvaluationOnly() {
       comments: commentsData.length,
       ratings: ratingsData.length,
       files: 2,
+      fileUploads: 2,
     };
 
     console.log('\n📊 Created Evaluation Data:');
@@ -496,6 +590,7 @@ export async function seedEvaluationOnly() {
     console.log(`• ${stats.comments} Evaluation Comments`);
     console.log(`• ${stats.ratings} Evaluation Ratings`);
     console.log(`• ${stats.files} PDF Files`);
+    console.log(`• ${stats.fileUploads} File Uploads (linked to submissions)`);
   } catch (error) {
     console.error('❌ Error during evaluation seeding:', error);
     throw error;
