@@ -2,19 +2,19 @@ import { UserDTO } from './user.dto';
 import { EvaluationCommentDTO, VoteType } from './evaluation-comment.dto';
 
 export interface EvaluationVoteDTO {
-  id: string;
-  commentId: string;
+  id: number;
+  commentId: number;
   userId: number;
   voteType: VoteType;
   createdAt: Date;
-  
+
   // Relations
   comment?: EvaluationCommentDTO;
   user?: UserDTO;
 }
 
 export interface VoteResultDTO {
-  commentId: string;
+  commentId: number;
   upvotes: number;
   downvotes: number; // @deprecated - kept for compatibility, always 0
   userVote: VoteType;
@@ -41,7 +41,7 @@ export interface VoteUpdateData {
 }
 
 export interface VoteRequestDTO {
-  commentId: string;
+  commentId: number;
   voteType: VoteType;
 }
 

@@ -36,7 +36,7 @@ export class EvaluationRatingController {
   async getSubmissionRatings(
     @Param('submissionId') submissionId: string,
   ): Promise<EvaluationRatingDTO[]> {
-    return this.evaluationRatingService.getSubmissionRatings(submissionId);
+    return this.evaluationRatingService.getSubmissionRatings(Number(submissionId));
   }
 
   @Get('category/:categoryId')
@@ -50,7 +50,7 @@ export class EvaluationRatingController {
   @Get('submission/:submissionId/summary')
   @roles('ANY')
   async getRatingSummary(@Param('submissionId') submissionId: string): Promise<any> {
-    return this.evaluationRatingService.getRatingSummary(submissionId);
+    return this.evaluationRatingService.getRatingSummary(Number(submissionId));
   }
 
   @Get('submission/:submissionId/user/:userId')
@@ -60,7 +60,7 @@ export class EvaluationRatingController {
     @Param('userId') userId: string,
   ): Promise<EvaluationRatingDTO[]> {
     console.log('getUserRatings', submissionId, 'userId', userId);
-    return this.evaluationRatingService.getUserRatings(submissionId, Number(userId));
+    return this.evaluationRatingService.getUserRatings(Number(submissionId), Number(userId));
   }
 
   @Get('submission/:submissionId/category/:categoryId/stats')
@@ -70,7 +70,7 @@ export class EvaluationRatingController {
     @Param('categoryId') categoryId: string,
   ): Promise<any> {
     console.log('getCategoryStats', submissionId, 'categoryId', categoryId);
-    return this.evaluationRatingService.getCategoryStats(submissionId, Number(categoryId));
+    return this.evaluationRatingService.getCategoryStats(Number(submissionId), Number(categoryId));
   }
 
   /**
@@ -96,7 +96,7 @@ export class EvaluationRatingController {
     const userId = req.user && req.user.id ? req.user.id : this.extractDemoUserId(submissionId);
 
     const hasRated = await this.evaluationRatingService.hasUserRatedCategory(
-      submissionId,
+      Number(submissionId),
       Number(categoryId),
       userId,
     );
@@ -122,13 +122,13 @@ export class EvaluationRatingController {
   ): Promise<CategoryRatingStatus[]> {
     // Handle authenticated users
     if (userId) {
-      return this.evaluationRatingService.getUserRatingStatus(submissionId, Number(userId));
+      return this.evaluationRatingService.getUserRatingStatus(Number(submissionId), Number(userId));
     }
 
     // Handle anonymous/demo scenarios - extract user ID from submission or use default
     // For demo submissions, use a consistent demo user ID
     const demoUserId = this.extractDemoUserId(submissionId);
-    return this.evaluationRatingService.getUserRatingStatus(submissionId, demoUserId);
+    return this.evaluationRatingService.getUserRatingStatus(Number(submissionId), demoUserId);
   }
 
   /**
@@ -163,13 +163,13 @@ export class EvaluationRatingController {
     @Req() req: any,
   ): Promise<{ success: boolean; message: string }> {
     const userId = req.user && req.user.id ? req.user.id : this.extractDemoUserId(submissionId);
-    
+
     await this.evaluationRatingService.deleteUserRating(
-      submissionId,
+      Number(submissionId),
       Number(categoryId),
       userId,
     );
-    
+
     return {
       success: true,
       message: 'Rating deleted successfully',

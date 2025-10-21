@@ -10,7 +10,7 @@ export class ResetVotesDTO {
   /**
    * The submission ID where votes should be reset
    */
-  submissionId!: string;
+  submissionId!: number;
 
   /**
    * The category ID where votes should be reset
@@ -53,5 +53,5 @@ export class ResetVotesResponseDTO {
   /**
    * Array of comment IDs that were affected by the reset
    */
-  affectedCommentIds?: string[];
+  affectedCommentIds?: number[];
 }

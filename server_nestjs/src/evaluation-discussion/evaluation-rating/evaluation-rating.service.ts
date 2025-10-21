@@ -30,7 +30,7 @@ import { EvaluationCommentService } from '../evaluation-comment/evaluation-comme
  */
 interface PrismaRatingWithRelations {
   id: number;
-  submissionId: string;
+  submissionId: number;
   categoryId: number;
   userId: number;
   rating: number;
@@ -38,7 +38,7 @@ interface PrismaRatingWithRelations {
   createdAt: Date;
   updatedAt: Date;
   submission?: {
-    id: string;
+    id: number;
     title: string;
     author: {
       id: number;
@@ -123,7 +123,7 @@ export class EvaluationRatingService {
 
     // Check if category exists
     const category = await this.prisma.evaluationCategory.findUnique({
-      where: { id: Number(ratingDto.categoryId) },
+      where: { id: ratingDto.categoryId },
     });
 
     if (!category) {
@@ -135,13 +135,13 @@ export class EvaluationRatingService {
       where: {
         submissionId_categoryId_userId: {
           submissionId: ratingDto.submissionId,
-          categoryId: Number(ratingDto.categoryId),
+          categoryId: ratingDto.categoryId,
           userId: userId,
         },
       },
       create: {
         submissionId: ratingDto.submissionId,
-        categoryId: Number(ratingDto.categoryId),
+        categoryId: ratingDto.categoryId,
         userId: userId,
         rating: ratingDto.score,
         comment: ratingDto.comment,
@@ -181,7 +181,7 @@ export class EvaluationRatingService {
       try {
         await this.commentService.createCommentFromRating(
           ratingDto.submissionId,
-          Number(ratingDto.categoryId),
+          ratingDto.categoryId,
           userId,
           ratingDto.comment.trim(),
           ratingDto.score
@@ -291,7 +291,7 @@ export class EvaluationRatingService {
    * @description Removes an existing rating from the database and invalidates
    * related cache entries. Used for the reset functionality in the frontend.
    *
-   * @param {string} submissionId - The submission ID
+   * @param {number} submissionId - The submission ID
    * @param {number} categoryId - The category ID
    * @param {number} userId - The user ID who owns the rating
    * @returns {Promise<void>} Promise indicating deletion success
@@ -300,7 +300,7 @@ export class EvaluationRatingService {
    * @memberof EvaluationRatingService
    */
   async deleteUserRating(
-    submissionId: string,
+    submissionId: number,
     categoryId: number,
     userId: number,
   ): Promise<void> {
@@ -344,7 +344,7 @@ export class EvaluationRatingService {
     this.cacheService.delete(specificCacheKey);
   }
 
-  async getSubmissionRatings(submissionId: string): Promise<EvaluationRatingDTO[]> {
+  async getSubmissionRatings(submissionId: number): Promise<EvaluationRatingDTO[]> {
     const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId, 'all');
 
     return this.cacheService.getOrSet(
@@ -418,8 +418,8 @@ export class EvaluationRatingService {
     return ratings.map(this.mapToDTO);
   }
 
-  async getRatingSummary(submissionId: string) {
-    const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId, 'summary');
+  async getRatingSummary(submissionId: number) {
+    const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId.toString(), 'summary');
 
     return this.cacheService.getOrSet(
       cacheKey,
@@ -473,11 +473,11 @@ export class EvaluationRatingService {
   /**
    * Retrieves all ratings for a given submission and user.
    *
-   * @param {string} submissionId - The ID of the submission.
+   * @param {number} submissionId - The ID of the submission.
    * @param {number} userId - The ID of the user.
    * @returns {Promise<EvaluationRatingDTO[]>} - Array of EvaluationRatingDTO objects.
    */
-  async getUserRatings(submissionId: string, userId: number): Promise<EvaluationRatingDTO[]> {
+  async getUserRatings(submissionId: number, userId: number): Promise<EvaluationRatingDTO[]> {
     const ratings = await this.prisma.evaluationRating.findMany({
       where: {
         submissionId,
@@ -495,7 +495,7 @@ export class EvaluationRatingService {
     // Map the results to the EvaluationRatingDTO structure
     return ratings.map(
       (rating): EvaluationRatingDTO => ({
-        id: rating.id.toString(),
+        id: rating.id,
         submissionId: rating.submissionId,
         userId: rating.userId,
         categoryId: rating.categoryId,
@@ -524,14 +524,14 @@ export class EvaluationRatingService {
    * @description This method determines if the user has already provided
    * a rating for the specified category, enabling access control for discussions
    *
-   * @param {string} submissionId - The submission ID to check
+   * @param {number} submissionId - The submission ID to check
    * @param {number} categoryId - The category ID to check
    * @param {number} userId - The user ID to check
    * @returns {Promise<boolean>} Promise indicating if user has rated the category
    * @memberof EvaluationRatingService
    */
   async hasUserRatedCategory(
-    submissionId: string,
+    submissionId: number,
     categoryId: number,
     userId: number,
   ): Promise<boolean> {
@@ -559,15 +559,15 @@ export class EvaluationRatingService {
    * indicating which categories the user has rated and which are still pending.
    * This is used to control access to discussion areas.
    *
-   * @param {string} submissionId - The submission ID to check
+   * @param {number} submissionId - The submission ID to check
    * @param {number} userId - The user ID to check
    * @returns {Promise<CategoryRatingStatus[]>} Promise containing rating status for all categories
    * @memberof EvaluationRatingService
    */
-  async getUserRatingStatus(submissionId: string, userId: number): Promise<CategoryRatingStatus[]> {
+  async getUserRatingStatus(submissionId: number, userId: number): Promise<CategoryRatingStatus[]> {
     const cacheKey = this.utilsService.generateCacheKey(
       'rating-status-batch',
-      submissionId,
+      submissionId.toString(),
       userId.toString(),
     );
 
@@ -586,20 +586,15 @@ export class EvaluationRatingService {
    * @description Uses a single JOIN query to fetch all necessary data atomically,
    * preventing race conditions between submission and rating queries.
    *
-   * @param {string} submissionId - The submission ID to check
+   * @param {number} submissionId - The submission ID to check
    * @param {number} userId - The user ID to check
    * @returns {Promise<CategoryRatingStatus[]>} Promise containing rating status for all categories
    * @memberof EvaluationRatingService
    */
   private async getUserRatingStatusBatch(
-    submissionId: string,
+    submissionId: number,
     userId: number,
   ): Promise<CategoryRatingStatus[]> {
-    // Handle demo submissions that may not exist in the database
-    if (this.isDemoSubmission(submissionId)) {
-      return this.getDemoRatingStatus(submissionId, userId);
-    }
-
     // OPTIMIZED: Single JOIN query to fetch submission, categories, and user ratings atomically
     const submissionWithRatings = await this.prisma.evaluationSubmission.findUnique({
       where: { id: submissionId },
@@ -655,10 +650,10 @@ export class EvaluationRatingService {
     });
   }
 
-  async getCategoryStats(submissionId: string, categoryId: number) {
+  async getCategoryStats(submissionId: number, categoryId: number) {
     const cacheKey = this.utilsService.generateCacheKey(
       'ratings',
-      submissionId,
+      submissionId.toString(),
       'category',
       categoryId.toString(),
     );
@@ -708,81 +703,6 @@ export class EvaluationRatingService {
     ); // 5 minutes cache
   }
 
-  /**
-   * Checks if a submission ID indicates a demo submission
-   *
-   * @description Demo submissions are used for testing and demonstration purposes
-   * and may not exist in the database but should still function properly
-   *
-   * @param {string} submissionId - The submission ID to check
-   * @returns {boolean} True if this is a demo submission
-   * @memberof EvaluationRatingService
-   */
-  private isDemoSubmission(submissionId: string): boolean {
-    return (
-      submissionId.includes('demo') ||
-      submissionId.includes('test') ||
-      submissionId.startsWith('demo-')
-    );
-  }
-
-  /**
-   * Provides demo rating status for demo submissions with proper persistence
-   *
-   * @description Creates rating status for demo submissions by checking actual
-   * stored ratings in the database, enabling proper testing with persistence
-   *
-   * @param {string} submissionId - The demo submission ID
-   * @param {number} userId - The user ID to check
-   * @returns {Promise<CategoryRatingStatus[]>} Promise containing demo rating status
-   * @memberof EvaluationRatingService
-   */
-  private async getDemoRatingStatus(
-    submissionId: string,
-    userId: number,
-  ): Promise<CategoryRatingStatus[]> {
-    // Create demo categories for testing
-    const demoCategories = [
-      { id: 1, name: 'functionality', displayName: 'Funktionalität' },
-      { id: 2, name: 'design', displayName: 'Design' },
-      { id: 3, name: 'usability', displayName: 'Benutzerfreundlichkeit' },
-      { id: 4, name: 'innovation', displayName: 'Innovation' },
-      { id: 5, name: 'documentation', displayName: 'Dokumentation' },
-    ];
-
-    // FIXED: Check for actual stored ratings for demo submissions
-    // Demo submissions should persist ratings like regular submissions
-    const userRatings = await this.prisma.evaluationRating.findMany({
-      where: {
-        submissionId,
-        userId,
-      },
-      select: {
-        categoryId: true,
-        rating: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    // Create a map for quick lookup of stored ratings
-    const ratingsMap = new Map(userRatings.map(rating => [rating.categoryId, rating]));
-
-    return demoCategories.map(category => {
-      const storedRating = ratingsMap.get(category.id);
-      return {
-        categoryId: category.id,
-        categoryName: category.name,
-        displayName: category.displayName,
-        hasRated: ratingsMap.has(category.id), // Check if rating exists in DB
-        rating: storedRating?.rating ?? null,
-        ratedAt: storedRating?.createdAt ?? null,
-        lastUpdatedAt: storedRating?.updatedAt ?? new Date(), // Always provide lastUpdatedAt for cache validation
-        canAccessDiscussion: ratingsMap.has(category.id), // Can access if rated
-        isRequired: true, // All categories require rating
-      };
-    });
-  }
 
   private validateRatingScore(score: number): void {
     if (score < 0 || score > 15) {
@@ -802,7 +722,7 @@ export class EvaluationRatingService {
    */
   private mapToDTO(rating: PrismaRatingWithRelations): EvaluationRatingDTO {
     return {
-      id: rating.id.toString(),
+      id: rating.id,
       submissionId: rating.submissionId,
       userId: rating.userId,
       categoryId: rating.categoryId,

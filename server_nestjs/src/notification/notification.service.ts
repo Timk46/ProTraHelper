@@ -331,7 +331,7 @@ export class NotificationService {
    * @param {string} submissionId
    * @param {number} commenterId
    */
-  async notifyEvaluationComment(submissionId: string, commenterId: number): Promise<void> {
+  async notifyEvaluationComment(submissionId: number, commenterId: number): Promise<void> {
     try {
       const submission = await this.prisma.evaluationSubmission.findUnique({
         where: { id: submissionId },
@@ -359,7 +359,7 @@ export class NotificationService {
    * @param {string} submissionId
    * @param {number} raterId
    */
-  async notifyEvaluationRating(submissionId: string, raterId: number): Promise<void> {
+  async notifyEvaluationRating(submissionId: number, raterId: number): Promise<void> {
     try {
       const submission = await this.prisma.evaluationSubmission.findUnique({
         where: { id: submissionId },

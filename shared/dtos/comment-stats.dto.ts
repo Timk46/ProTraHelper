@@ -15,7 +15,7 @@ export interface CategoryStatsDTO {
 }
 
 export interface CommentStatsDTO {
-  submissionId: string;
+  submissionId: number;
   totalAvailable: number;
   totalUsed: number;
   
@@ -37,8 +37,8 @@ export interface CommentStatsDTO {
 }
 
 export interface CommentLimitDTO {
-  id: string;
-  submissionId: string;
+  id: number;
+  submissionId: number;
   userId: number;
   categoryId: number;
   availableCount: number;

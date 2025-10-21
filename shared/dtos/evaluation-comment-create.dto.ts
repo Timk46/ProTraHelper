@@ -1,8 +1,8 @@
 export interface CreateEvaluationCommentDTO {
-  submissionId: string;
+  submissionId: number;
   categoryId?: number;
   content: string;
-  parentId?: string; // For replies
+  parentId?: number; // For replies
 }
 
 export interface UpdateEvaluationCommentDTO {

@@ -10,6 +10,7 @@ import {
   UseGuards,
   Req,
   Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
@@ -41,7 +42,7 @@ export class EvaluationSubmissionController {
 
   @Get(':id/pdf')
   @roles('ANY')
-  async getPdf(@Param('id') id: string, @Res() res: Response): Promise<void> {
+  async getPdf(@Param('id', ParseIntPipe) id: number, @Res() res: Response): Promise<void> {
     const fileStream = await this.evaluationSubmissionService.getPdfStream(id);
     res.set({
       'Content-Type': 'application/pdf',
@@ -52,7 +53,7 @@ export class EvaluationSubmissionController {
 
   @Get(':id/discussions')
   @roles('ANY')
-  async getDiscussions(@Param('id') id: string, @Query('categoryId') categoryId?: string) {
+  async getDiscussions(@Param('id', ParseIntPipe) id: number, @Query('categoryId') categoryId?: string) {
     return this.evaluationSubmissionService.getDiscussions(
       id,
       categoryId ? Number(categoryId) : undefined,
@@ -61,13 +62,13 @@ export class EvaluationSubmissionController {
 
   @Get(':id/stats')
   @roles('ANY')
-  async getStats(@Param('id') id: string) {
+  async getStats(@Param('id', ParseIntPipe) id: number) {
     return this.evaluationSubmissionService.getStats(id);
   }
 
   @Get(':id/anonymous-user')
   @roles('ANY')
-  async getAnonymousUser(@Param('id') id: string, @Req() req: any) {
+  async getAnonymousUser(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
     return this.evaluationSubmissionService.getAnonymousUser(id, req.user.id);
   }
 
@@ -88,7 +89,7 @@ export class EvaluationSubmissionController {
    */
   @Get(':id/comment-stats')
   @roles('ANY')
-  async getCommentStats(@Param('id') id: string, @Req() req: any): Promise<CommentStatsDTO> {
+  async getCommentStats(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<CommentStatsDTO> {
     return this.evaluationSubmissionService.getCommentStats(id, req.user.id);
   }
 
@@ -111,7 +112,7 @@ export class EvaluationSubmissionController {
   @Post(':id/switch-phase')
   @roles('TEACHER', 'ADMIN')
   async switchPhase(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() body: { phase: 'DISCUSSION' | 'EVALUATION' },
   ): Promise<EvaluationSessionDTO> {
     return this.evaluationSubmissionService.switchPhase(id, body.phase);
@@ -120,7 +121,7 @@ export class EvaluationSubmissionController {
   @Put(':id')
   @roles('STUDENT', 'TEACHER', 'ADMIN')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateEvaluationSubmissionDTO,
     @Req() req: any,
   ): Promise<EvaluationSubmissionDTO> {
@@ -129,13 +130,13 @@ export class EvaluationSubmissionController {
 
   @Delete(':id')
   @roles('STUDENT', 'TEACHER', 'ADMIN')
-  async remove(@Param('id') id: string, @Req() req: any): Promise<void> {
+  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<void> {
     return this.evaluationSubmissionService.remove(id, req.user.id);
   }
 
   @Get(':id')
   @roles('ANY')
-  async findOne(@Param('id') id: string): Promise<EvaluationSubmissionDTO> {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<EvaluationSubmissionDTO> {
     return this.evaluationSubmissionService.findOne(id);
   }
 }

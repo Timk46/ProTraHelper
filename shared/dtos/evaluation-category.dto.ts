@@ -4,8 +4,8 @@ export interface EvaluationCategoryDTO {
   displayName: string;
   description: string;
   icon: string; // Material Icons: 'check_circle' | 'palette' | 'compare' | 'settings'
-  order: number;
-  
+  order?: number; // Optional: order is session-specific (stored in EvaluationSessionCategory)
+
   // Additional metadata
   color?: string; // Color code for UI theming
   shortDescription?: string; // For tooltips

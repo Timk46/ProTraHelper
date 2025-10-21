@@ -3,14 +3,14 @@ import { EvaluationSubmissionDTO } from './evaluation-submission.dto';
 import { EvaluationCategoryDTO } from './evaluation-category.dto';
 
 export interface EvaluationRatingDTO {
-  id: string;
-  submissionId: string;
+  id: number;
+  submissionId: number;
   userId: number;
   categoryId: number;
   score: number; // 0-10 points
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Relations
   submission?: EvaluationSubmissionDTO;
   user?: UserDTO;
@@ -21,7 +21,7 @@ export interface EvaluationRatingDTO {
 // to avoid duplicate exports
 
 export interface RatingStatsDTO {
-  submissionId: string;
+  submissionId: number;
   categoryId: number;
   
   // Statistics
@@ -38,7 +38,7 @@ export interface RatingStatsDTO {
 }
 
 export interface RatingSubmissionResultDTO {
-  submissionId: string;
+  submissionId: number;
   isCompleted: boolean;
   
   // Category ratings

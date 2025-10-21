@@ -1,5 +1,5 @@
 export interface CreateEvaluationRatingDTO {
-  submissionId: string;
+  submissionId: number;
   categoryId: number;
   score: number; // 0-10
   comment?: string;

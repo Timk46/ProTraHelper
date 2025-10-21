@@ -6,7 +6,7 @@ import { EvaluationCategoryDTO } from './evaluation-category.dto';
 export type VoteType = 'UP' | null;
 
 export interface AuthorDTO {
-  id: string;
+  id: number;
   type: 'user' | 'anonymous';
   displayName: string;
   firstname?: string;
@@ -16,12 +16,12 @@ export interface AuthorDTO {
 }
 
 export interface EvaluationCommentDTO {
-  id: string;
-  submissionId: string;
+  id: number;
+  submissionId: number;
   categoryId: number | null;
   authorId: number;
   content: string;
-  parentId?: string;
+  parentId?: number;
   createdAt: Date;
   updatedAt: Date;
   
@@ -31,8 +31,8 @@ export interface EvaluationCommentDTO {
   
   // Voting data
   votes: Array<{
-    id: string;
-    commentId: string;
+    id: number;
+    commentId: number;
     userId: number;
     voteType: VoteType;
     createdAt: Date;
@@ -56,28 +56,28 @@ export interface EvaluationCommentDTO {
 }
 
 export interface EvaluationDiscussionDTO {
-  id: string;
-  submissionId: string;
+  id: number;
+  submissionId: number;
   categoryId: number;
   comments: EvaluationCommentDTO[];
   createdAt: Date;
-  
+
   // Statistics
   totalComments: number;
   availableComments: number;
   usedComments: number;
-  
+
   // Relations
   submission?: EvaluationSubmissionDTO;
   category?: EvaluationCategoryDTO;
 }
 
 export interface CreateCommentDTO {
-  submissionId: string;
+  submissionId: number;
   categoryId?: number;
   content: string;
-  parentId?: string;
-  anonymousUserId?: string;
+  parentId?: number;
+  anonymousUserId?: number;
 }
 
 export interface UpdateCommentDTO {

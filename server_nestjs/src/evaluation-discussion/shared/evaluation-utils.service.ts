@@ -151,11 +151,11 @@ export class EvaluationUtilsService {
   /**
    * Calculate comment reply tree depth
    */
-  calculateReplyDepth(comments: { id: string; parentId?: string }[]): Record<string, number> {
-    const depths: Record<string, number> = {};
-    const visited = new Set<string>();
+  calculateReplyDepth(comments: { id: number; parentId?: number }[]): Record<number, number> {
+    const depths: Record<number, number> = {};
+    const visited = new Set<number>();
 
-    const calculateDepth = (commentId: string): number => {
+    const calculateDepth = (commentId: number): number => {
       if (visited.has(commentId)) return 0; // Prevent infinite loops
       visited.add(commentId);
 

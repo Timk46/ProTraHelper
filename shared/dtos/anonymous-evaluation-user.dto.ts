@@ -5,7 +5,7 @@ import { EvaluationCommentDTO } from './evaluation-comment.dto';
 export interface AnonymousEvaluationUserDTO {
   id: number;
   userId: number;
-  submissionId: string;
+  submissionId: number;
   displayName: string;
   colorCode: string;
   createdAt: Date;
@@ -17,7 +17,7 @@ export interface AnonymousEvaluationUserDTO {
 }
 
 export interface CreateAnonymousUserDTO {
-  submissionId: string;
+  submissionId: number;
   // Optional: Allow custom display name
   displayName?: string;
 }

@@ -184,7 +184,7 @@ export class EvaluationSubmissionService {
     };
   }
 
-  async findOne(id: string): Promise<EvaluationSubmissionDTO> {
+  async findOne(id: number): Promise<EvaluationSubmissionDTO> {
     const submission = await this.prisma.evaluationSubmission.findUnique({
       where: { id },
       include: {
@@ -307,7 +307,7 @@ export class EvaluationSubmissionService {
   }
 
   async update(
-    id: string,
+    id: number,
     updateDto: UpdateEvaluationSubmissionDTO,
     userId: number,
   ): Promise<EvaluationSubmissionDTO> {
@@ -361,7 +361,7 @@ export class EvaluationSubmissionService {
     return this.mapToDTO(submission);
   }
 
-  async remove(id: string, userId: number): Promise<void> {
+  async remove(id: number, userId: number): Promise<void> {
     // Check ownership
     const existing = await this.prisma.evaluationSubmission.findUnique({
       where: { id },
@@ -381,7 +381,7 @@ export class EvaluationSubmissionService {
     });
   }
 
-  async getPdfStream(id: string) {
+  async getPdfStream(id: number) {
     const submission = await this.prisma.evaluationSubmission.findUnique({
       where: { id },
       include: {
@@ -405,7 +405,7 @@ export class EvaluationSubmissionService {
     return createReadStream(filePath);
   }
 
-  async getDiscussions(submissionId: string, categoryId?: number) {
+  async getDiscussions(submissionId: number, categoryId?: number) {
     const discussions = await this.prisma.discussion.findMany({
       where: {
         evaluationSubmissionId: submissionId,
@@ -421,7 +421,7 @@ export class EvaluationSubmissionService {
     return discussions;
   }
 
-  async getStats(submissionId: string) {
+  async getStats(submissionId: number) {
     const stats = await this.prisma.evaluationSubmission.findUnique({
       where: { id: submissionId },
       select: {
@@ -474,7 +474,7 @@ export class EvaluationSubmissionService {
     };
   }
 
-  async getAnonymousUser(submissionId: string, userId: number) {
+  async getAnonymousUser(submissionId: number, userId: number) {
     // Debug logging only in development
     if (process.env.NODE_ENV !== 'production') {
       console.log('🔍 getAnonymousUser called:', { submissionId, userId });
@@ -523,7 +523,7 @@ export class EvaluationSubmissionService {
    * @returns Promise resolving to detailed comment statistics
    * @throws NotFoundException if the submission does not exist
    */
-  async getCommentStats(submissionId: string, userId: number): Promise<CommentStatsDTO> {
+  async getCommentStats(submissionId: number, userId: number): Promise<CommentStatsDTO> {
     // First verify the submission exists
     const submission = await this.prisma.evaluationSubmission.findUnique({
       where: { id: submissionId },
@@ -561,8 +561,8 @@ export class EvaluationSubmissionService {
       },
     });
 
-    const discussionCountsMap = new Map(
-      discussionCounts.map(count => [count.evaluationCategoryId, count._count.id]),
+    const discussionCountsMap = new Map<number, number>(
+      discussionCounts.map(count => [count.evaluationCategoryId ?? 0, count._count.id]),
     );
 
     // Default limits per category (could be configurable)
@@ -650,7 +650,7 @@ export class EvaluationSubmissionService {
    * @throws ForbiddenException if user lacks permission
    */
   async switchPhase(
-    submissionId: string,
+    submissionId: number,
     phase: 'DISCUSSION' | 'EVALUATION',
   ): Promise<EvaluationSessionDTO> {
     // First get the submission to find the associated session
@@ -773,7 +773,7 @@ export class EvaluationSubmissionService {
     };
   }
 
-  private async createAnonymousUser(submissionId: string, userId: number) {
+  private async createAnonymousUser(submissionId: number, userId: number) {
     // Generate consistent anonymous name based on userId for deterministic results
     const anonymousNames = [
       'Teilnehmer',

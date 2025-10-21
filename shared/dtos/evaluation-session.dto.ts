@@ -21,7 +21,7 @@ export interface EvaluationSessionDTO {
   module?: ModuleDTO;
   createdBy?: UserDTO;
   submissions?: EvaluationSubmissionDTO[];
-  categories?: EvaluationCategoryDTO[];
+   categories?: EvaluationCategoryDTO[];
   
   // Counts
   _count?: {

@@ -16,7 +16,7 @@ export enum EvaluationPhase {
 }
 
 export interface EvaluationSubmissionDTO {
-  id: string;
+  id: number;
   title: string;
   description?: string;
   authorId: number;

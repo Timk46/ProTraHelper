@@ -327,46 +327,59 @@ export async function seedEvaluationOnly() {
     console.log('✅ Evaluation categories created/linked to session');
 
     // 5. Create evaluation submissions
-    const submission1 = await prisma.evaluationSubmission.upsert({
-      where: { id: 'demo-submission-001' },
-      update: {},
-      create: {
-        id: 'demo-submission-001',
+    let submission1 = await prisma.evaluationSubmission.findFirst({
+      where: {
         title: 'Entwurf "Stabile Rahmenkonstruktion"',
-        description:
-          'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
-        authorId: testStudent1.id,
-        pdfFileId: pdfUpload1.id,
         sessionId: evaluationSession.id,
-        status: EvaluationStatus.SUBMITTED,
-        phase: EvaluationPhase.DISCUSSION,
-        submittedAt: new Date('2024-01-20'),
+        authorId: testStudent1.id,
       },
     });
 
-    const submission2 = await prisma.evaluationSubmission.upsert({
-      where: { id: 'demo-submission-002' },
-      update: {},
-      create: {
-        id: 'demo-submission-002',
+    if (!submission1) {
+      submission1 = await prisma.evaluationSubmission.create({
+        data: {
+          title: 'Entwurf "Stabile Rahmenkonstruktion"',
+          description:
+            'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
+          authorId: testStudent1.id,
+          pdfFileId: pdfUpload1.id,
+          sessionId: evaluationSession.id,
+          status: EvaluationStatus.SUBMITTED,
+          phase: EvaluationPhase.DISCUSSION,
+          submittedAt: new Date('2024-01-20'),
+        },
+      });
+    }
+
+    let submission2 = await prisma.evaluationSubmission.findFirst({
+      where: {
         title: 'Innovative Konstruktionslösung',
-        description:
-          'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
-        authorId: testStudent2.id,
-        pdfFileId: pdfUpload2.id,
         sessionId: evaluationSession.id,
-        status: EvaluationStatus.SUBMITTED,
-        phase: EvaluationPhase.DISCUSSION,
-        submittedAt: new Date('2024-01-22'),
+        authorId: testStudent2.id,
       },
     });
+
+    if (!submission2) {
+      submission2 = await prisma.evaluationSubmission.create({
+        data: {
+          title: 'Innovative Konstruktionslösung',
+          description:
+            'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
+          authorId: testStudent2.id,
+          pdfFileId: pdfUpload2.id,
+          sessionId: evaluationSession.id,
+          status: EvaluationStatus.SUBMITTED,
+          phase: EvaluationPhase.DISCUSSION,
+          submittedAt: new Date('2024-01-22'),
+        },
+      });
+    }
 
     console.log('✅ Evaluation submissions created/verified');
 
     // 6. Create evaluation comments with realistic names based on actual users
     const commentsData = [
       {
-        id: 'demo-comment-001',
         submissionId: submission1.id,
         categoryId: createdCategories[0].id, // Vollständigkeit
         content:
@@ -375,7 +388,6 @@ export async function seedEvaluationOnly() {
         anonymousDisplayName: `Student ${testStudent2.firstname}`,
       },
       {
-        id: 'demo-comment-002',
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
         content: 'Die Linienführung ist sehr sauber und professionell. Alle Maße sind gut lesbar.',
@@ -383,7 +395,6 @@ export async function seedEvaluationOnly() {
         anonymousDisplayName: `Student ${testStudent3.firstname}`,
       },
       {
-        id: 'demo-comment-003',
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
         content:
@@ -392,7 +403,6 @@ export async function seedEvaluationOnly() {
         anonymousDisplayName: `Student ${testStudent1.firstname}`,
       },
       {
-        id: 'demo-comment-004',
         submissionId: submission1.id,
         categoryId: createdCategories[2].id, // Vergleichbarkeit
         content:
@@ -401,7 +411,6 @@ export async function seedEvaluationOnly() {
         anonymousDisplayName: 'Dozent',
       },
       {
-        id: 'demo-comment-005',
         submissionId: submission2.id,
         categoryId: createdCategories[3].id, // Komplexität
         content:
@@ -411,15 +420,20 @@ export async function seedEvaluationOnly() {
       },
     ];
 
+    const createdComments = [];
     for (const commentData of commentsData) {
-      const existingComment = await prisma.evaluationComment.findUnique({
-        where: { id: commentData.id },
+      let existingComment = await prisma.evaluationComment.findFirst({
+        where: {
+          submissionId: commentData.submissionId,
+          categoryId: commentData.categoryId,
+          userId: commentData.userId,
+          content: commentData.content,
+        },
       });
 
       if (!existingComment) {
-        await prisma.evaluationComment.create({
+        existingComment = await prisma.evaluationComment.create({
           data: {
-            id: commentData.id,
             submissionId: commentData.submissionId,
             categoryId: commentData.categoryId,
             content: commentData.content,
@@ -428,6 +442,7 @@ export async function seedEvaluationOnly() {
           },
         });
       }
+      createdComments.push(existingComment);
     }
 
     console.log('✅ Evaluation comments created (5 comments across both submissions)');
@@ -435,11 +450,11 @@ export async function seedEvaluationOnly() {
     // 6b. Create comment votes using the new junction table EvaluationCommentVote
     // We approximate previous upvote/downvote counts with unique voters
     const votePlans: Array<{
-      commentId: string;
+      commentId: number;
       votes: Array<{ userId: number; voteCount: number }>;
     }> = [
       {
-        commentId: 'demo-comment-001',
+        commentId: createdComments[0].id, // First comment (Vollständigkeit)
         votes: [
           { userId: testStudent1.id, voteCount: 1 },
           { userId: testStudent3.id, voteCount: 1 },
@@ -447,25 +462,25 @@ export async function seedEvaluationOnly() {
         ],
       },
       {
-        commentId: 'demo-comment-002',
+        commentId: createdComments[1].id, // Second comment (Grafische Darstellungsqualität 1)
         votes: [
           { userId: testStudent1.id, voteCount: 1 },
           { userId: testLecturer.id, voteCount: 1 },
         ],
       },
       {
-        commentId: 'demo-comment-003',
+        commentId: createdComments[2].id, // Third comment (Grafische Darstellungsqualität 2)
         votes: [
           { userId: testLecturer.id, voteCount: 1 }, // upvote
           { userId: testStudent3.id, voteCount: -1 }, // downvote
         ],
       },
       {
-        commentId: 'demo-comment-004',
+        commentId: createdComments[3].id, // Fourth comment (Vergleichbarkeit)
         votes: [{ userId: testStudent1.id, voteCount: 1 }],
       },
       {
-        commentId: 'demo-comment-005',
+        commentId: createdComments[4].id, // Fifth comment (Komplexität)
         votes: [
           { userId: testStudent1.id, voteCount: 1 },
           { userId: testStudent3.id, voteCount: 1 },
