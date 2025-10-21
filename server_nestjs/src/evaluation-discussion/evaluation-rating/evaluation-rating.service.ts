@@ -53,7 +53,8 @@ interface PrismaRatingWithRelations {
     description: string | null;
     icon: string | null;
     color: string | null;
-    order: number;
+    // Removed 'order' field - not present in EvaluationCategory schema
+    // Order is session-specific and stored in EvaluationSessionCategory junction table
   };
   user?: {
     id: number;
@@ -374,7 +375,9 @@ export class EvaluationRatingService {
               },
             },
           },
-          orderBy: [{ category: { order: 'asc' } }, { createdAt: 'desc' }],
+          // Order by categoryId instead of category.order (which doesn't exist in schema)
+          // Category order is session-specific via EvaluationSessionCategory junction table
+          orderBy: [{ categoryId: 'asc' }, { createdAt: 'desc' }],
         });
 
         return ratings.map(this.mapToDTO);
@@ -483,8 +486,9 @@ export class EvaluationRatingService {
       include: {
         category: true,
       },
+      // Order by categoryId instead of category.order (which doesn't exist in schema)
       orderBy: {
-        category: { order: 'asc' },
+        categoryId: 'asc',
       },
     });
 
@@ -506,7 +510,8 @@ export class EvaluationRatingService {
           description: rating.category.description,
           icon: rating.category.icon,
           ...(rating.category.color && { color: rating.category.color }),
-          order: rating.category.order,
+          // order field removed - not present in EvaluationCategory schema
+          // Order is session-specific via EvaluationSessionCategory junction table
         },
         // submission and user can be included if available, otherwise omitted
       }),
@@ -602,6 +607,9 @@ export class EvaluationRatingService {
         session: {
           include: {
             categories: {
+              include: {
+                category: true, // Include nested category to access name, displayName, etc.
+              },
               orderBy: { order: 'asc' },
             },
           },
@@ -628,14 +636,15 @@ export class EvaluationRatingService {
     );
 
     // Build status for each category with atomic data consistency
-    return submissionWithRatings.session.categories.map(category => {
-      const categoryRating = ratingsMap.get(category.id);
-      const hasRated = ratingsMap.has(category.id);
+    // Navigate through EvaluationSessionCategory to access nested category details
+    return submissionWithRatings.session.categories.map(sessionCategory => {
+      const categoryRating = ratingsMap.get(sessionCategory.categoryId);
+      const hasRated = ratingsMap.has(sessionCategory.categoryId);
 
       return {
-        categoryId: category.id,
-        categoryName: category.name,
-        displayName: category.displayName,
+        categoryId: sessionCategory.category.id,
+        categoryName: sessionCategory.category.name,
+        displayName: sessionCategory.category.displayName,
         hasRated,
         rating: categoryRating?.rating ?? null,
         ratedAt: categoryRating?.createdAt ?? null,
@@ -840,7 +849,8 @@ export class EvaluationRatingService {
             description: rating.category.description ?? '',
             icon: rating.category.icon ?? '',
             color: rating.category.color ?? undefined,
-            order: rating.category.order,
+            // order field removed - not present in EvaluationCategory schema
+            // Order is session-specific via EvaluationSessionCategory junction table
           }
         : undefined,
     };
