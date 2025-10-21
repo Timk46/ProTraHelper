@@ -102,6 +102,30 @@ export class GroupReviewSessionService {
           });
           results.createdSessions++;
 
+          // Link categories defined in the gate
+          if (gate.linkedCategories) {
+            try {
+              const parsedObject = JSON.parse(gate.linkedCategories);
+              const categoryIds = parsedObject.linkedCategoryIds;
+
+              if (Array.isArray(categoryIds) && categoryIds.length > 0) {
+                const categoryLinks = categoryIds.map((catId, index) => ({
+                  sessionId: session.id,
+                  categoryId: Number(catId),
+                  order: index,
+                }));
+
+                await tx.evaluationSessionCategory.createMany({
+                  data: categoryLinks,
+                });
+                this.logger.log(`Linked ${categoryLinks.length} categories to session ${session.id}.`);
+              }
+            } catch (jsonError) {
+              this.logger.error(`Failed to parse linkedCategories for gate ${gateId}. Invalid JSON: ${gate.linkedCategories}`, jsonError.stack);
+            }
+          }
+
+
           const userUploads = await tx.userUploadAnswer.findMany({
             where: { userAnswer: { questionId: gate.linkedQuestionId } },
             include: { userAnswer: { include: { user: true } }, fileUpload: { include: { file: true } } },
