@@ -17,9 +17,6 @@ async function main() {
   //await seedTranscriptsToConceptNodes();
   //await seedUmlearn();
   //await seedMCSlider();
-  //await seedEvaluationCompleteFix();
-  //await seedEvaluationComplete();
-  //await seedEvaluationDemo();
 }
 
 main()

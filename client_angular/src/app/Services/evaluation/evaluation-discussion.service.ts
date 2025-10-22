@@ -377,9 +377,10 @@ export class EvaluationDiscussionService {
    * Corrected parameter name to match backend expectation
    */
   voteComment(commentId: string, voteType: VoteType): Observable<VoteResultDTO> {
-    const request = this.http.post<VoteResultDTO>(`${this.apiUrls.comments}/${commentId}/vote`, {
-      voteType,
-    });
+    const request = this.http.post<VoteResultDTO>(
+      `${this.apiUrls.comments}/votes/vote/${commentId}`,
+      { isUpvote: voteType === 'UP' }
+    );
 
     return this.withRetry(request, {
       requestKey: `vote-${commentId}-${voteType}-${Date.now()}`, // Include timestamp to prevent caching votes
@@ -694,20 +695,32 @@ export class EvaluationDiscussionService {
   /**
    * Gets the vote limit status for a user in a specific submission and category
    *
+   * @description Fetches current vote usage from backend.
+   * Returns category-wide vote limit information (10 votes total per category).
+   *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
-   * @returns Observable containing vote limit status
+   * @returns Observable containing vote limit status from backend
    */
   getVoteLimitStatus(submissionId: string, categoryId: string): Observable<VoteLimitStatusDTO> {
     const url = `${this.apiUrls.comments}/vote-limit/${submissionId}/${categoryId}`;
 
-    return this.withCache(
-      `getVoteLimitStatus-${submissionId}-${categoryId}`,
-      () => this.http.get<VoteLimitStatusDTO>(url).pipe(
-        retry(2),
-        catchError(this.handleError<VoteLimitStatusDTO>('getVoteLimitStatus'))
-      ),
-      60000 // 1 minute cache (vote limits change frequently)
+    return this.http.get<VoteLimitStatusDTO>(url).pipe(
+      tap(status => {
+        console.log('📊 Vote limit status received from backend:', { submissionId, categoryId, status });
+      }),
+      retry(2),
+      catchError(error => {
+        console.error('❌ Failed to load vote limit status, using defaults:', error);
+        // Fallback to defaults if backend fails
+        return of({
+          maxVotes: 10,
+          remainingVotes: 10,
+          votedCommentIds: [],
+          canVote: true,
+          displayText: '10/10 verfügbar',
+        });
+      })
     );
   }
 
@@ -719,8 +732,8 @@ export class EvaluationDiscussionService {
    * @returns Observable containing vote result and updated limit status
    */
   voteCommentWithLimits(commentId: string, voteType: 'UP' | null): Observable<VoteLimitResponseDTO> {
-    const url = `${this.apiUrls.comments}/${commentId}/vote`;
-    const body = { voteType };
+    const url = `${this.apiUrls.comments}/votes/vote/${commentId}`;
+    const body = { isUpvote: voteType === 'UP' };
 
     return this.http.post<VoteLimitResponseDTO>(url, body).pipe(
       retry(2),

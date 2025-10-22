@@ -32,6 +32,8 @@ import { EvaluationGlobalStateService } from './evaluation-global-state.service'
   providedIn: 'root'
 })
 export class EvaluationNavigationService {
+  // Static flag to prevent console spam from navigation warnings
+  private static hasLoggedNavigationWarning = false;
 
   private navigationStateSubject = new BehaviorSubject<NavigationContext>({
     submissionId: null,
@@ -477,9 +479,9 @@ export class EvaluationNavigationService {
     const previousId = this.getAdjacentSubmissionId(currentSubmissionId, 'previous');
     const nextId = this.getAdjacentSubmissionId(currentSubmissionId, 'next');
     
-    // For demo purposes, calculate position based on submission ID pattern
+    // Position and total require backend submission list
     const position = this.getSubmissionPosition(currentSubmissionId);
-    const total = this.getTotalDemoSubmissions();
+    const total = this.getTotalSubmissions();
 
     return {
       currentSubmissionId,
@@ -499,57 +501,83 @@ export class EvaluationNavigationService {
   /**
    * Gets the adjacent submission ID for navigation
    *
-   * @description Calculates the previous or next submission ID based on the demo submission
-   * naming pattern. This is a temporary implementation for demo mode.
+   * @description TODO: Integrate with backend submission list service.
+   * Required implementation:
+   * 1. Inject EvaluationSubmissionService
+   * 2. Call submissionService.getSubmissionList() to get ordered submission IDs
+   * 3. Find currentId in list using Array.indexOf()
+   * 4. Return submissions[index + offset] where offset = direction === 'next' ? 1 : -1
+   * 5. Validate bounds and return null if out of range
+   *
+   * @example
+   * ```typescript
+   * const submissions = await this.submissionService.getSubmissionList();
+   * const currentIndex = submissions.findIndex(s => s.id === currentId);
+   * if (currentIndex === -1) return null;
+   *
+   * const offset = direction === 'next' ? 1 : -1;
+   * const adjacentIndex = currentIndex + offset;
+   *
+   * return (adjacentIndex >= 0 && adjacentIndex < submissions.length)
+   *   ? submissions[adjacentIndex].id
+   *   : null;
+   * ```
+   *
    * @param currentId - Current submission ID
    * @param direction - Navigation direction ('previous' or 'next')
-   * @returns Adjacent submission ID or null if out of bounds
+   * @returns Adjacent submission ID or null if unavailable or not implemented
    * @memberof EvaluationNavigationService
+   * @todo Backend API integration required - Track in GitHub issue
    */
   private getAdjacentSubmissionId(currentId: string, direction: 'previous' | 'next'): string | null {
-    // Extract number from demo submission ID (e.g., "demo-submission-003" -> 3)
-    const match = currentId.match(/demo-submission-(\d+)/);
-    if (!match) {
-      console.warn('⚠️ Unknown submission ID format:', currentId);
-      return null;
+    if (!EvaluationNavigationService.hasLoggedNavigationWarning) {
+      console.warn(
+        '⚠️ [NOT IMPLEMENTED] Submission navigation requires backend API integration.',
+        'See JSDoc for implementation guide.'
+      );
+      EvaluationNavigationService.hasLoggedNavigationWarning = true;
     }
-
-    const currentNumber = parseInt(match[1], 10);
-    const targetNumber = direction === 'previous' ? currentNumber - 1 : currentNumber + 1;
-    
-    // Check bounds (demo submissions 001-005)
-    if (targetNumber < 1 || targetNumber > 5) {
-      return null;
-    }
-
-    // Format with zero padding
-    const targetId = `demo-submission-${targetNumber.toString().padStart(3, '0')}`;
-    console.log(`🔍 Adjacent ${direction} submission:`, targetId);
-    return targetId;
+    return null;
   }
 
   /**
    * Gets the position of a submission in the list (1-based)
    *
-   * @description Extracts the position number from demo submission ID for display purposes
-   * @param submissionId - Submission ID in format "demo-submission-XXX"
-   * @returns Position (1-based) or 0 if not found
+   * @description TODO: Integrate with backend submission list service.
+   *
+   * @example
+   * ```typescript
+   * const submissions = await this.submissionService.getSubmissionList();
+   * const index = submissions.findIndex(s => s.id === submissionId);
+   * return index !== -1 ? index + 1 : 0; // 1-based position
+   * ```
+   *
+   * @param submissionId - Submission ID
+   * @returns Position (1-based) or 0 if not found or not implemented
    * @memberof EvaluationNavigationService
+   * @todo Backend API integration required - Track in GitHub issue
    */
   private getSubmissionPosition(submissionId: string): number {
-    const match = submissionId.match(/demo-submission-(\d+)/);
-    return match ? parseInt(match[1], 10) : 0;
+    return 0;
   }
 
   /**
-   * Gets the total number of demo submissions
+   * Gets the total number of submissions
    *
-   * @description Returns the hardcoded count of demo submissions available for navigation
-   * @returns Total number of submissions (currently 5)
+   * @description TODO: Integrate with backend submission list service.
+   *
+   * @example
+   * ```typescript
+   * const submissions = await this.submissionService.getSubmissionList();
+   * return submissions.length;
+   * ```
+   *
+   * @returns Total number of submissions, or 0 if not implemented
    * @memberof EvaluationNavigationService
+   * @todo Backend API integration required - Track in GitHub issue
    */
-  private getTotalDemoSubmissions(): number {
-    return 5; // demo-submission-001 through demo-submission-005
+  private getTotalSubmissions(): number {
+    return 0;
   }
 
   // =============================================================================

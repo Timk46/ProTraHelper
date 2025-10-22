@@ -457,8 +457,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.setupEventHandling();
     this.setupDeepLinkingSupport();
     this.setupPerformanceMonitoring();
-    this.loadSubmissionList();
-    
+    // this.loadSubmissionList(); // FIXME: Disabled - requires backend API integration
+
     // 🚀 SESSION VOTE TRACKING: Reset global session votes when forum is loaded/reloaded
     this.voteSessionService.resetSessionVotes();
     console.log('🔄 Global session votes reset on forum initialization');
@@ -1802,22 +1802,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @memberof EvaluationDiscussionForumComponent
    */
   private loadSubmissionList(): void {
-    console.log('📋 Loading submission list for navigation');
-    
-    this.stateService.loadSubmissionList()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: submissions => {
-          console.log('✅ Submission list loaded:', submissions.length, 'submissions');
-          // Update current submission index if we have a current submission ID
-          if (this.submissionId) {
-            this.stateService.updateCurrentSubmissionIndex(this.submissionId);
-          }
-        },
-        error: error => {
-          console.error('❌ Failed to load submission list:', error);
-        }
-      });
+    // FIXME: Submission navigation requires backend API integration
+    // See EvaluationNavigationService for implementation notes
+    console.warn('⚠️ loadSubmissionList() is deprecated - submission navigation not implemented');
   }
 
   /**

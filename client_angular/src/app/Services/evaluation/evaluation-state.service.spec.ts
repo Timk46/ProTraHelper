@@ -157,7 +157,7 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
         // Assert: Verify atomic transition completed correctly
         expect(transitionLoadingStates).toEqual([false, true, false]); // Initial -> Loading -> Completed
         expect(categoryStates[categoryStates.length - 1]).toBe(1); // Final state is category 1
-        expect(mockEvaluationService.getUserRatingStatus).toHaveBeenCalledWith('test-submission-001', 999);
+        expect(mockEvaluationService.getUserRatingStatus).toHaveBeenCalledWith('1', 999);
         
         // Verify rating status was updated atomically
         const finalRatingStatus = ratingStatusStates[ratingStatusStates.length - 1];
