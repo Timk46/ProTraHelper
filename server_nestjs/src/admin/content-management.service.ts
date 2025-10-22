@@ -120,6 +120,12 @@ export class ContentManagementService {
           version: true,
           originId: true,
           conceptNodeId: true,
+          // Rhino integration fields
+          rhinoEnabled: true,
+          rhinoGrasshopperFile: true,
+          rhinoSettings: true,
+          rhinoAutoLaunch: true,
+          rhinoAutoFocus: true,
           // Exclude authorId as it will be set during import
         },
       }),
@@ -148,7 +154,12 @@ export class ContentManagementService {
         },
       }),
       this.prisma.umlEditorElement.findMany(),
-      this.prisma.file.findMany(),
+      // Export only non-user files (exclude file uploads by individual users)
+      this.prisma.file.findMany({
+        where: {
+          fileUploads: { none: {} },
+        },
+      }),
     ]);
 
     console.log('Export completed successfully');
@@ -204,6 +215,14 @@ export class ContentManagementService {
   async importContent(data: any) {
     const { version, data: content } = data;
 
+    // Resolve admin user once for setting ownership on imported records (author, updatedBy, etc.)
+    const adminUser = await this.prisma.user.findFirst({
+      where: { globalRole: 'ADMIN' },
+    });
+    if (!adminUser) {
+      throw new Error('No admin user found in the system. Please create an admin user first.');
+    }
+
     // Phase 1: Database cleanup in separate transaction
     await this.prisma.$transaction(
       async prisma => {
@@ -211,7 +230,11 @@ export class ContentManagementService {
         // Clear existing data in reverse order of dependencies
         console.log('Clearing user data and feedback...');
         // First clear chats and notifications
-        await Promise.all([prisma.chatBotMessage.deleteMany(), prisma.notification.deleteMany()]);
+        await Promise.all([
+          prisma.chatBotMessage.deleteMany(),
+          prisma.notification.deleteMany(),
+          prisma.chatSession.deleteMany(),
+        ]);
 
         // Then clear discussion-related data
         await Promise.all([
@@ -245,6 +268,26 @@ export class ContentManagementService {
           prisma.kIFeedback.deleteMany(),
           prisma.userMCOptionSelected.deleteMany(),
           prisma.userMCAnswer.deleteMany(),
+        ]);
+
+        // Evaluation system data (personal assessments and interactions)
+        await Promise.all([
+          prisma.evaluationCommentVote.deleteMany(),
+          prisma.evaluationComment.deleteMany(),
+          prisma.evaluationRating.deleteMany(),
+        ]);
+        await Promise.all([
+          prisma.evaluationSubmission.deleteMany(),
+          prisma.evaluationSessionCategory.deleteMany(),
+          prisma.evaluationSession.deleteMany(),
+          prisma.evaluationCategory.deleteMany(),
+        ]);
+
+        // Misc user-related data
+        await Promise.all([
+          prisma.eventLog.deleteMany(),
+          prisma.refreshToken.deleteMany(),
+          prisma.fileUpload.deleteMany(),
         ]);
 
         // Finally clear user answers and references
@@ -314,6 +357,7 @@ export class ContentManagementService {
           prisma.umlEditorElement.deleteMany(),
           prisma.umlEditorModel.deleteMany(),
           prisma.module.deleteMany(),
+          prisma.transcriptEmbedding.deleteMany(),
           prisma.file.deleteMany(),
         ]);
 
@@ -352,7 +396,13 @@ export class ContentManagementService {
 
         // Import module settings (don't depend on other entities)
         if (content.moduleSettings && content.moduleSettings.length > 0) {
-          await prisma.moduleSetting.createMany({ data: content.moduleSettings });
+          // Ensure updatedBy references a valid user in this environment
+          await prisma.moduleSetting.createMany({
+            data: content.moduleSettings.map(ms => ({
+              ...ms,
+              updatedBy: adminUser.id,
+            })),
+          });
         }
       },
       { timeout: 60000 },
@@ -440,10 +490,6 @@ export class ContentManagementService {
           },
         });
 
-        if (!adminUser) {
-          throw new Error('No admin user found in the system. Please create an admin user first.');
-        }
-
         console.log('Using admin user with ID:', adminUser.id, 'as question author');
 
         // Import UML editor models first (independent entities)
@@ -470,9 +516,10 @@ export class ContentManagementService {
         });
 
         console.log('Importing question types...');
+        // Respect FK constraints: create versions first, then MCQuestion, then other question-type tables
+        await prisma.questionVersion.createMany({ data: content.questionVersions });
+        await prisma.mCQuestion.createMany({ data: content.mcQuestions });
         await Promise.all([
-          prisma.questionVersion.createMany({ data: content.questionVersions }),
-          prisma.mCQuestion.createMany({ data: content.mcQuestions }),
           prisma.mCOption.createMany({ data: content.mcOptions }),
           prisma.freeTextQuestion.createMany({ data: content.freeTextQuestions }),
           prisma.graphQuestion.createMany({ data: content.graphQuestions }),
@@ -630,8 +677,9 @@ export class ContentManagementService {
     for (const table of tablesToReset) {
       try {
         console.log(`Resetting sequence for table: ${table}`);
-        await this.prisma
-          .$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 1), true);`);
+        await this.prisma.$executeRawUnsafe(
+          `SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 1), true);`,
+        );
       } catch (e) {
         console.error(`Could not reset sequence for table ${table}:`, e.message);
       }

@@ -92,6 +92,8 @@ export class EditGroupReviewGateComponent {
             this.detailedQuestionData = data;
             console.log(this.detailedQuestionData);
             this.setContent();
+            console.log('All categories:', this.allCategories);
+            console.log('Selected Categories:', this.selectedCategories);
           } else {
             this.snackBar.open(
               'ACHTUNG: Bei den vorhandenen Daten handelt es sich nicht um eine Gruppenbewertungsaufgabe!',
@@ -117,7 +119,9 @@ export class EditGroupReviewGateComponent {
       // Lade bereits verlinkte Kategorien
       if (this.detailedQuestionData.groupReviewGate?.linkedCategories) {
         const linkedCategoriesData = this.detailedQuestionData.groupReviewGate.linkedCategories;
+        console.log('Linked Categories Data:', linkedCategoriesData);
         if (linkedCategoriesData && linkedCategoriesData.linkedCategoryIds) {
+          console.log('Linked Category IDs:', linkedCategoriesData.linkedCategoryIds);
           this.selectedCategories = this.allCategories.filter(cat =>
             linkedCategoriesData.linkedCategoryIds.includes(cat.id),
           );
