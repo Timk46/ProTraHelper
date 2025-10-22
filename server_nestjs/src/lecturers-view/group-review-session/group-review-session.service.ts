@@ -91,6 +91,7 @@ export class GroupReviewSessionService {
 
           const session = await tx.evaluationSession.create({
             data: {
+              groupReviewGateId: gate.id,
               title: `${dto.sessionTitle} - ${gate.question.name}`,
               description: `Peer-Review-Session für die Aufgabe "${gate.question.name}".`,
               startDate: new Date(),
@@ -125,10 +126,32 @@ export class GroupReviewSessionService {
             }
           }
 
-
-          const userUploads = await tx.userUploadAnswer.findMany({
-            where: { userAnswer: { questionId: gate.linkedQuestionId } },
-            include: { userAnswer: { include: { user: true } }, fileUpload: { include: { file: true } } },
+          // Create submissions for newest uploads to the linked question
+          const userUploads = await tx.user.findMany({
+            where: {
+              userAnswer: {
+                some: {
+                  questionId: gate.linkedQuestionId
+                }
+              }
+            },
+            include: {
+              userAnswer: {
+                where: {
+                  questionId: gate.linkedQuestionId,
+                  NOT: {
+                    UserUploadAnswer: { none: {} }
+                  }
+                },
+                include: {
+                  UserUploadAnswer: true,
+                },
+                orderBy: {
+                  createdAt: 'desc'
+                },
+                take: 1
+              },
+            }
           });
 
           if (userUploads.length === 0) {
@@ -138,18 +161,18 @@ export class GroupReviewSessionService {
             return;
           }
 
-          for (const upload of userUploads) {
-            console.log('CURRENT UPLOAD:', upload);
+          for (const user of userUploads) {
+            console.log('CURRENT UPLOAD:', user);
             await tx.evaluationSubmission.create({
               data: {
-                title: `Abgabe von ${upload.userAnswer.user.firstname}`,
-                description: `Eingereichte Datei: ${upload.fileUpload.file.name}`,
-                authorId: upload.userAnswer.userId,
-                pdfFileId: upload.fileUpload.id,
+                title: `Abgabe von einem Benutzer`,
+                description: `Diese Abgabe ist von der Gruppe zu bewerten.`,
+                authorId: user.id,
+                pdfFileId: user.userAnswer[0].UserUploadAnswer[0].fileUploadId,
                 sessionId: session.id,
                 status: EvaluationStatus.SUBMITTED,
                 phase: EvaluationPhase.DISCUSSION,
-                submittedAt: upload.createdAt,
+                submittedAt: user.userAnswer[0].UserUploadAnswer[0].createdAt,
               },
             });
             results.createdSubmissions++;
