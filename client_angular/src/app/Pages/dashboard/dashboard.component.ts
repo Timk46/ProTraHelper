@@ -44,7 +44,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    console.log('🔍 [Dashboard] ngOnInit() - Component initializing...');
 
     // Ensure WebSocket connection is established
     this.notificationService.initializeWebSocket();
@@ -71,7 +70,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('🔍 [Dashboard] Component destroying...');
     // Unsubscribe from all subscriptions to avoid memory leaks
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }

@@ -558,7 +558,6 @@ export class ContentListComponent implements OnInit, OnChanges {
   async onRhinoBatDirectButtonClick(event: MouseEvent): Promise<void> {
     event.stopPropagation();
 
-    console.log('⚡ Direct Bat-Rhino button clicked - executing Rhino directly');
 
     const exampleFilePath = 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh';
     const fileName = 'example.gh';
@@ -573,7 +572,6 @@ export class ContentListComponent implements OnInit, OnChanges {
       // Create request using the service helper method
       const request = this.batRhinoService.createGrasshopperRequest(exampleFilePath);
 
-      console.log('⚡ Sending direct execution request:', request);
 
       // Execute Rhino directly
       const response = await this.batRhinoService.executeDirectly(request).toPromise();
@@ -581,7 +579,6 @@ export class ContentListComponent implements OnInit, OnChanges {
       loadingSnackBar.dismiss();
 
       if (response?.success) {
-        console.log('✅ Direct Rhino execution successful:', response);
 
         // Show success message
         this.snackBar.open(

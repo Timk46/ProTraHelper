@@ -68,7 +68,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
    */
   ngOnInit(): void {
     if (!this.componentName) {
-      console.warn('⚠️ Performance profiling directive requires componentName input');
       return;
     }
 
@@ -84,7 +83,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
     // Mark component initialization
     this.performanceService.markComponentInit(this.componentName, this.performanceStartTime);
 
-    console.log(`🎯 Started profiling component: ${this.componentName}`);
   }
 
   /**
@@ -100,7 +98,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
     // Mark initial render completion
     if (this.performanceStartTime) {
       const initTime = performance.now() - this.performanceStartTime;
-      console.log(`✅ Component ${this.componentName} initialized in ${initTime.toFixed(2)}ms`);
     }
   }
 
@@ -187,7 +184,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
         
         // Log significant DOM changes
         if (mutations.length > 10) {
-          console.log(`🔄 Large DOM change detected in ${this.componentName}: ${mutations.length} mutations`);
         }
       });
 
@@ -248,7 +244,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
   private onComponentVisible(): void {
     // Start more frequent profiling when component is visible
     if (this.profilingOptions.trackVisibility) {
-      console.log(`🎯 Component ${this.componentName} is now visible - increasing profiling frequency`);
     }
   }
 
@@ -258,7 +253,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
   private onComponentHidden(): void {
     // Reduce profiling frequency when component is hidden
     if (this.profilingOptions.trackVisibility) {
-      console.log(`🎯 Component ${this.componentName} is now hidden - reducing profiling frequency`);
     }
   }
 
@@ -275,11 +269,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
   trackEvent(eventType: string, data?: any): void {
     const timestamp = performance.now();
     
-    console.log(`📊 Performance event in ${this.componentName}:`, {
-      type: eventType,
-      timestamp,
-      data
-    });
 
     // Mark performance event
     performance.mark(`${this.componentName}-${eventType}-${timestamp}`);
@@ -447,7 +436,6 @@ export function ProfileComponent(componentName?: string) {
 
       constructor(...args: any[]) {
         super(...args);
-        console.log(`🎯 Component ${this.__performanceProfiler.componentName} constructor completed in ${(performance.now() - this.__performanceProfiler.startTime).toFixed(2)}ms`);
       }
     };
   };

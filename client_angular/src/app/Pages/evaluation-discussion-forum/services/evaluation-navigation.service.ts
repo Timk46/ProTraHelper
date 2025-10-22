@@ -209,7 +209,6 @@ export class EvaluationNavigationService {
    * @param paramNames - Names of parameters to clear
    */
   clearQueryParams(paramNames: string[]): void {
-    console.log('🧹 Clearing query params:', paramNames);
     
     const currentParams = this.getCurrentQueryParams();
     paramNames.forEach(param => {
@@ -428,7 +427,6 @@ export class EvaluationNavigationService {
     const currentSubmissionId = currentContext.submissionId;
     
     if (!currentSubmissionId) {
-      console.warn('⚠️ Cannot navigate: No current submission ID');
       return Promise.resolve(false);
     }
 

@@ -1241,19 +1241,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
         const requiresInitialComment = !hasCommented;
         const showRatingSlider = hasCommented; // Show slider after commenting
 
-        console.log('🔄 NEW Rating Gate ViewModel Update:', {
-          currentCategoryId: this.currentCategory?.id,
-          currentCategoryName: this.currentCategory?.displayName,
-          hasCommented,
-          hasRated: ratingStatus?.hasRated || false,
-          canAccessDiscussion,
-          requiresInitialComment,
-          showRatingSlider,
-          rating: ratingStatus?.rating,
-          isLoading,
-          error: error ? 'Error present' : 'No error',
-          timestamp: new Date().toISOString(),
-        });
 
         return {
           hasCommented,
@@ -1310,18 +1297,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       const previousCategory = changes['currentCategory'].previousValue;
       const currentCategory = changes['currentCategory'].currentValue;
 
-      console.log('📋 Rating Gate Category Transition:', {
-        from: {
-          id: previousCategory?.id,
-          name: previousCategory?.displayName,
-        },
-        to: {
-          id: currentCategory?.id,
-          name: currentCategory?.displayName,
-        },
-        timestamp: new Date().toISOString(),
-        submissionId: this.submissionId,
-      });
 
       // Clear any local errors when category changes
       this.errorSubject.next(null);
@@ -1333,24 +1308,14 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
         const hasStatus = currentStatusMap.has(currentCategory.id);
 
         if (!hasStatus) {
-          console.log('🔄 Category has no cached status, refreshing:', {
-            categoryId: currentCategory.id,
-            submissionId: this.submissionId,
-          });
 
           this.stateService.anonymousUser$.pipe(take(1)).subscribe(anonymousUser => {
             if (anonymousUser) {
               this.stateService.refreshRatingStatus(this.submissionId.toString(), anonymousUser.id);
             } else {
-              console.warn('⚠️ Cannot refresh rating status: Anonymous user not available');
             }
           });
         } else {
-          console.log('✅ Category already has cached status, skipping refresh:', {
-            categoryId: currentCategory.id,
-            hasRated: currentStatusMap.get(currentCategory.id)?.hasRated,
-            rating: currentStatusMap.get(currentCategory.id)?.rating,
-          });
         }
       }
     }
@@ -1385,7 +1350,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   ngOnInit(): void {
     // Rating status is now loaded centrally by the state service
     // The viewModel$ will automatically reflect the current status
-    console.log('🎯 Rating gate initialized - using centralized rating status');
   }
 
   /**
@@ -1409,10 +1373,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    * @param {any} ratingEvent - The rating event from the rating slider
    */
   onRatingSubmitted(ratingEvent: any): void {
-    console.log('📊 Rating submitted in rating gate:', {
-      categoryId: this.currentCategory.id,
-      rating: ratingEvent.rating || ratingEvent.score,
-    });
 
     // Auto-collapse the rating panel after submission
     this.isRatingSliderExpanded = false;
@@ -1457,7 +1417,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       categoryId: this.currentCategory.id,
     });
 
-    console.log('✅ Rating deletion event emitted to parent');
   }
 
   /**
@@ -1533,7 +1492,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   onRetry(): void {
     if (this.submissionId) {
-      console.log('🔄 Retrying rating status load from centralized service');
       this.stateService.refreshRatingStatus(this.submissionId.toString(), this.currentCategory.id);
       this.errorSubject.next(null); // Clear local error state
     }
@@ -1637,7 +1595,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    * @description Deletes the user's rating from the database and updates the UI to allow re-rating
    */
   onResetRatingSlider(): void {
-    console.log('🔄 User clicked Zurücksetzen button - deleting rating for category:', this.currentCategory.id);
     
     // Delete the rating using the existing onRatingDeleted method which handles backend deletion
     this.onRatingDeleted({ categoryId: this.currentCategory.id });
@@ -1658,7 +1615,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       }
     );
     
-    console.log('✅ Rating deletion initiated and UI updated for re-rating');
   }
 
   /**

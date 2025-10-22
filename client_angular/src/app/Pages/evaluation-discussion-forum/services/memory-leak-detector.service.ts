@@ -133,7 +133,6 @@ export class MemoryLeakDetectorService {
     // Track component in WeakMap for GC detection
     this.weakMap.set(componentInstance, { componentName, registrationTime: Date.now() });
 
-    console.log(`🔍 Registered component for leak detection: ${componentName}`);
     this.updateLeakDetectionReport();
   }
 
@@ -154,7 +153,6 @@ export class MemoryLeakDetectorService {
       // Check for memory leaks
       this.checkComponentMemoryLeak(componentName);
       
-      console.log(`✅ Unregistered component: ${componentName}`);
     }
 
     // Clean up after a delay to allow for leak detection
@@ -242,7 +240,6 @@ export class MemoryLeakDetectorService {
     componentTrackers.push(tracker);
     this.subscriptionRegistry.set(componentName, componentTrackers);
 
-    console.log(`📊 Registered subscription: ${componentName}.${subscriptionName}`);
   }
 
   // =============================================================================
@@ -278,7 +275,6 @@ export class MemoryLeakDetectorService {
       };
 
       this.reportMemoryLeak(leak);
-      console.warn(`🚨 Subscription leak detected in ${componentName}:`, activeSubscriptions);
     }
   }
 
@@ -317,7 +313,6 @@ export class MemoryLeakDetectorService {
       };
 
       this.reportMemoryLeak(leak);
-      console.warn(`🚨 Memory leak detected in ${componentName}: +${this.formatBytes(memoryDelta)}`);
     }
   }
 
@@ -457,7 +452,6 @@ export class MemoryLeakDetectorService {
         this.performLeakDetectionScan();
       }, 10000); // Check every 10 seconds
 
-      console.log('🔍 Memory leak monitoring initialized');
     }
   }
 
@@ -545,7 +539,6 @@ export class MemoryLeakDetectorService {
     if (leak.severity === 'critical') {
       console.error('🚨 CRITICAL MEMORY LEAK:', leak);
     } else {
-      console.warn('⚠️ Memory leak detected:', leak);
     }
   }
 
@@ -662,7 +655,6 @@ export class MemoryLeakDetectorService {
    * Forces a leak detection scan
    */
   forceScan(): void {
-    console.log('🔍 Forcing leak detection scan...');
     this.performLeakDetectionScan();
   }
 
@@ -671,7 +663,6 @@ export class MemoryLeakDetectorService {
    */
   clearLeaks(): void {
     this.updateLeakDetectionReport([]);
-    console.log('🧹 Cleared all detected leaks');
   }
 
   // =============================================================================

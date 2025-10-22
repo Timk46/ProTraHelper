@@ -94,7 +94,6 @@ export class WebpackBundleIntegrationService {
       };
 
       this.bundleReportSubject.next(report);
-      console.log('✅ Bundle report generated:', report);
       
       return report;
     } catch (error) {

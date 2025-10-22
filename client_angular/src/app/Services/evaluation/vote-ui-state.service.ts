@@ -110,7 +110,6 @@ export class VoteUIStateService implements OnDestroy {
     200,
     (commentId: number, subject: BehaviorSubject<boolean>) => {
       subject.complete();
-      console.log(`🧹 VoteUIStateService: LRU evicted loading state for ${commentId}`);
     }
   );
 
@@ -265,7 +264,6 @@ export class VoteUIStateService implements OnDestroy {
    */
   confirmOptimisticUpdate(commentId: number): void {
     this.optimisticUpdates.delete(commentId);
-    console.log(`✅ VoteUIStateService: Confirmed optimistic update for ${commentId}`);
   }
 
   /**
@@ -558,7 +556,6 @@ export class VoteUIStateService implements OnDestroy {
     // Clear legacy map
     this.activeErrors.delete(commentId);
 
-    console.log(`🧹 VoteUIStateService: Cleared error for ${commentId}`);
   }
 
   /**
@@ -580,7 +577,6 @@ export class VoteUIStateService implements OnDestroy {
       this.cleanupStaleEntries();
     }, this.CLEANUP_FREQUENCY);
 
-    console.log('🧹 VoteUIStateService: Cleanup timer started');
   }
 
   /**
@@ -607,7 +603,6 @@ export class VoteUIStateService implements OnDestroy {
     }
 
     if (cleaned > 0) {
-      console.log(`🧹 VoteUIStateService: Cleaned ${cleaned} stale entries (debounce: ${this.clickDebouncer.size}, optimistic: ${this.optimisticUpdates.size})`);
     }
   }
 
@@ -619,7 +614,6 @@ export class VoteUIStateService implements OnDestroy {
    * Cleanup on service destruction
    */
   ngOnDestroy(): void {
-    console.log('🧹 VoteUIStateService: Cleaning up');
 
     // Stop cleanup timer
     if (this.cleanupInterval) {
@@ -637,6 +631,5 @@ export class VoteUIStateService implements OnDestroy {
     this.optimisticUpdates.clear();
     this.activeErrors.clear();
 
-    console.log('✅ VoteUIStateService: Cleanup completed');
   }
 }

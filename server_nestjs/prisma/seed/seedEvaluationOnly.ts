@@ -3,6 +3,169 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+// ========================================
+// HELPER FUNCTIONS
+// ========================================
+
+/**
+ * Creates or updates a user with hashed password
+ * @param email - Unique email address
+ * @param firstname - User's first name
+ * @param lastname - User's last name
+ * @param globalRole - User's global role
+ * @returns Created/updated user entity
+ */
+async function upsertUser(
+  email: string,
+  firstname: string,
+  lastname: string,
+  globalRole: GlobalRole,
+) {
+  return prisma.user.upsert({
+    where: { email },
+    update: {},
+    create: {
+      email,
+      firstname,
+      lastname,
+      password: await bcrypt.hash('password123', 10),
+      globalRole,
+    },
+  });
+}
+
+/**
+ * Enrolls a user in a subject with specified role
+ * @param userId - User ID to enroll
+ * @param subjectId - Subject ID to enroll in
+ * @param role - Subject-specific role (STUDENT or TEACHER)
+ * @returns UserSubject entity
+ */
+async function enrollUserInSubject(
+  userId: number,
+  subjectId: number,
+  role: 'STUDENT' | 'TEACHER',
+) {
+  return prisma.userSubject.upsert({
+    where: {
+      userId_subjectId: { userId, subjectId },
+    },
+    update: {},
+    create: {
+      userId,
+      subjectId,
+      subjectSpecificRole: role,
+      registeredForSL: true,
+    },
+  });
+}
+
+/**
+ * Creates or retrieves a PDF file entity
+ * @param uniqueId - Unique identifier for file
+ * @param filename - Display filename
+ * @param filepath - Storage path
+ * @returns File entity
+ */
+async function upsertPdfFile(uniqueId: string, filename: string, filepath: string) {
+  let file = await prisma.file.findFirst({
+    where: { uniqueIdentifier: uniqueId },
+  });
+
+  if (!file) {
+    file = await prisma.file.create({
+      data: {
+        uniqueIdentifier: uniqueId,
+        name: filename,
+        path: filepath,
+        type: 'application/pdf',
+      },
+    });
+  }
+
+  return file;
+}
+
+/**
+ * Creates or updates a FileUpload association
+ * @param userId - User who uploaded the file
+ * @param fileId - File entity ID
+ * @param moduleId - Associated module ID
+ * @returns FileUpload entity
+ */
+async function upsertFileUpload(userId: number, fileId: number, moduleId: number) {
+  return prisma.fileUpload.upsert({
+    where: {
+      userId_fileId_moduleId: { userId, fileId, moduleId },
+    },
+    update: {},
+    create: { userId, fileId, moduleId },
+  });
+}
+
+/**
+ * Creates or updates comment votes in bulk to avoid N+1 queries
+ * @param votePlans - Array of vote plans per comment
+ */
+async function upsertCommentVotesBulk(
+  votePlans: Array<{
+    commentId: number;
+    votes: Array<{ userId: number; voteCount: number }>;
+  }>,
+) {
+  const allVotes = votePlans.flatMap(vp =>
+    vp.votes.map(v => ({
+      commentId: vp.commentId,
+      userId: v.userId,
+      voteCount: v.voteCount,
+    })),
+  );
+
+  // Fetch existing votes in ONE query
+  const existingVotes = await prisma.evaluationCommentVote.findMany({
+    where: {
+      OR: allVotes.map(v => ({
+        commentId: v.commentId,
+        userId: v.userId,
+      })),
+    },
+  });
+
+  const existingKeys = new Set(existingVotes.map(ev => `${ev.commentId}-${ev.userId}`));
+
+  // Separate updates and creates
+  const updates = allVotes
+    .filter(v => existingKeys.has(`${v.commentId}-${v.userId}`))
+    .map(v => {
+      const existing = existingVotes.find(
+        ev => ev.commentId === v.commentId && ev.userId === v.userId,
+      );
+      return prisma.evaluationCommentVote.update({
+        where: { id: existing!.id },
+        data: { voteCount: v.voteCount },
+      });
+    });
+
+  const creates = allVotes
+    .filter(v => !existingKeys.has(`${v.commentId}-${v.userId}`))
+    .map(v =>
+      prisma.evaluationCommentVote.create({
+        data: {
+          commentId: v.commentId,
+          userId: v.userId,
+          voteCount: v.voteCount,
+        },
+      }),
+    );
+
+  // Execute in parallel
+  await Promise.all([...updates, ...creates]);
+}
+
+// ========================================
+// MAIN SEED FUNCTION
+// ========================================
+
 /**
  * Evaluation-only seed function
  *
@@ -12,6 +175,17 @@ const prisma = new PrismaClient();
  * Prerequisites:
  * - Module with ID 1 must exist
  * - Creates its own evaluation users to avoid dependencies
+ *
+ * Creates:
+ * - 4 evaluation users (3 students, 1 lecturer)
+ * - 1 evaluation session
+ * - 4 evaluation categories
+ * - 2 submissions with PDF files
+ * - 5 comments with votes
+ * - 5 ratings
+ *
+ * @throws {Error} If Module with ID 1 doesn't exist
+ * @returns {Promise<void>} Resolves when seeding completes
  */
 export async function seedEvaluationOnly() {
   console.log('🎯 Starting Evaluation-only seeding...');
@@ -33,53 +207,12 @@ export async function seedEvaluationOnly() {
     // 2. Create evaluation-specific users
     console.log('👥 Creating evaluation users...');
 
-    const evalStudent1 = await prisma.user.upsert({
-      where: { email: 'eval.student1@uni-siegen.de' },
-      update: {},
-      create: {
-        email: 'eval.student1@uni-siegen.de',
-        firstname: 'Max',
-        lastname: 'Evaluation',
-        password: await bcrypt.hash('password123', 10),
-        globalRole: GlobalRole.STUDENT,
-      },
-    });
-
-    const evalStudent2 = await prisma.user.upsert({
-      where: { email: 'eval.student2@uni-siegen.de' },
-      update: {},
-      create: {
-        email: 'eval.student2@uni-siegen.de',
-        firstname: 'Anna',
-        lastname: 'Reviewer',
-        password: await bcrypt.hash('password123', 10),
-        globalRole: GlobalRole.STUDENT,
-      },
-    });
-
-    const evalStudent3 = await prisma.user.upsert({
-      where: { email: 'eval.student3@uni-siegen.de' },
-      update: {},
-      create: {
-        email: 'eval.student3@uni-siegen.de',
-        firstname: 'Lisa',
-        lastname: 'Kritiker',
-        password: await bcrypt.hash('password123', 10),
-        globalRole: GlobalRole.STUDENT,
-      },
-    });
-
-    const evalLecturer = await prisma.user.upsert({
-      where: { email: 'eval.lecturer@uni-siegen.de' },
-      update: {},
-      create: {
-        email: 'eval.lecturer@uni-siegen.de',
-        firstname: 'Prof. Dr.',
-        lastname: 'Evaluation',
-        password: await bcrypt.hash('password123', 10),
-        globalRole: GlobalRole.TEACHER,
-      },
-    });
+    const [evalStudent1, evalStudent2, evalStudent3, evalLecturer] = await Promise.all([
+      upsertUser('eval.student1@uni-siegen.de', 'Max', 'Evaluation', GlobalRole.STUDENT),
+      upsertUser('eval.student2@uni-siegen.de', 'Anna', 'Reviewer', GlobalRole.STUDENT),
+      upsertUser('eval.student3@uni-siegen.de', 'Lisa', 'Kritiker', GlobalRole.STUDENT),
+      upsertUser('eval.lecturer@uni-siegen.de', 'Prof. Dr.', 'Evaluation', GlobalRole.TEACHER),
+    ]);
 
     // Create UserSubject relationships for evaluation users
     const subjectTraKo = await prisma.subject.findFirst({
@@ -88,66 +221,10 @@ export async function seedEvaluationOnly() {
 
     if (subjectTraKo) {
       await Promise.all([
-        prisma.userSubject.upsert({
-          where: {
-            userId_subjectId: {
-              userId: evalStudent1.id,
-              subjectId: subjectTraKo.id,
-            },
-          },
-          update: {},
-          create: {
-            userId: evalStudent1.id,
-            subjectId: subjectTraKo.id,
-            subjectSpecificRole: 'STUDENT',
-            registeredForSL: true,
-          },
-        }),
-        prisma.userSubject.upsert({
-          where: {
-            userId_subjectId: {
-              userId: evalStudent2.id,
-              subjectId: subjectTraKo.id,
-            },
-          },
-          update: {},
-          create: {
-            userId: evalStudent2.id,
-            subjectId: subjectTraKo.id,
-            subjectSpecificRole: 'STUDENT',
-            registeredForSL: true,
-          },
-        }),
-        prisma.userSubject.upsert({
-          where: {
-            userId_subjectId: {
-              userId: evalStudent3.id,
-              subjectId: subjectTraKo.id,
-            },
-          },
-          update: {},
-          create: {
-            userId: evalStudent3.id,
-            subjectId: subjectTraKo.id,
-            subjectSpecificRole: 'STUDENT',
-            registeredForSL: true,
-          },
-        }),
-        prisma.userSubject.upsert({
-          where: {
-            userId_subjectId: {
-              userId: evalLecturer.id,
-              subjectId: subjectTraKo.id,
-            },
-          },
-          update: {},
-          create: {
-            userId: evalLecturer.id,
-            subjectId: subjectTraKo.id,
-            subjectSpecificRole: 'TEACHER',
-            registeredForSL: true,
-          },
-        }),
+        enrollUserInSubject(evalStudent1.id, subjectTraKo.id, 'STUDENT'),
+        enrollUserInSubject(evalStudent2.id, subjectTraKo.id, 'STUDENT'),
+        enrollUserInSubject(evalStudent3.id, subjectTraKo.id, 'STUDENT'),
+        enrollUserInSubject(evalLecturer.id, subjectTraKo.id, 'TEACHER'),
       ]);
     }
 
@@ -165,79 +242,28 @@ export async function seedEvaluationOnly() {
       `👨‍🏫 Lecturer: ${evalLecturer.firstname} ${evalLecturer.lastname} (ID: ${evalLecturer.id})`,
     );
 
-    // Use the created users for the rest of the seed
-    const testLecturer = evalLecturer;
-    const testStudent1 = evalStudent1;
-    const testStudent2 = evalStudent2;
-    const testStudent3 = evalStudent3;
+    // 3. Create PDF files and FileUploads for evaluation system
+    const [pdfFile1, pdfFile2] = await Promise.all([
+      upsertPdfFile(
+        'eval-pdf-001',
+        'stabile-rahmenkonstruktion.pdf',
+        '/uploads/evaluation/eval-pdf-001.pdf',
+      ),
+      upsertPdfFile(
+        'eval-pdf-002',
+        'innovative-konstruktion.pdf',
+        '/uploads/evaluation/eval-pdf-002.pdf',
+      ),
+    ]);
 
-    // 2. Create PDF files and FileUploads for evaluation system
-    let pdfFile1 = await prisma.file.findFirst({
-      where: { uniqueIdentifier: 'eval-pdf-001' },
-    });
-
-    if (!pdfFile1) {
-      pdfFile1 = await prisma.file.create({
-        data: {
-          uniqueIdentifier: 'eval-pdf-001',
-          name: 'stabile-rahmenkonstruktion.pdf',
-          path: '/uploads/evaluation/eval-pdf-001.pdf',
-          type: 'application/pdf',
-        },
-      });
-    }
-
-    let pdfFile2 = await prisma.file.findFirst({
-      where: { uniqueIdentifier: 'eval-pdf-002' },
-    });
-
-    if (!pdfFile2) {
-      pdfFile2 = await prisma.file.create({
-        data: {
-          uniqueIdentifier: 'eval-pdf-002',
-          name: 'innovative-konstruktion.pdf',
-          path: '/uploads/evaluation/eval-pdf-002.pdf',
-          type: 'application/pdf',
-        },
-      });
-    }
-
-    // Create FileUpload entries (EvaluationSubmission.pdfFileId references FileUpload)
-    const pdfUpload1 = await prisma.fileUpload.upsert({
-      where: {
-        userId_fileId_moduleId: {
-          userId: evalStudent1.id,
-          fileId: pdfFile1.id,
-          moduleId: existingModule.id,
-        },
-      },
-      update: {},
-      create: {
-        userId: evalStudent1.id,
-        fileId: pdfFile1.id,
-        moduleId: existingModule.id,
-      },
-    });
-
-    const pdfUpload2 = await prisma.fileUpload.upsert({
-      where: {
-        userId_fileId_moduleId: {
-          userId: evalStudent2.id,
-          fileId: pdfFile2.id,
-          moduleId: existingModule.id,
-        },
-      },
-      update: {},
-      create: {
-        userId: evalStudent2.id,
-        fileId: pdfFile2.id,
-        moduleId: existingModule.id,
-      },
-    });
+    const [pdfUpload1, pdfUpload2] = await Promise.all([
+      upsertFileUpload(evalStudent1.id, pdfFile1.id, existingModule.id),
+      upsertFileUpload(evalStudent2.id, pdfFile2.id, existingModule.id),
+    ]);
 
     console.log('✅ Test PDF files and uploads created/verified');
 
-    // 3. Create evaluation session
+    // 4. Create evaluation session
     const evaluationSession = await prisma.evaluationSession.upsert({
       where: { id: 1000 },
       update: {},
@@ -247,7 +273,7 @@ export async function seedEvaluationOnly() {
         description:
           'Peer-Review Sitzung für eingereichte Entwürfe zu stabilen Rahmenkonstruktionen',
         moduleId: existingModule.id,
-        createdById: testLecturer.id,
+        createdById: evalLecturer.id,
         startDate: new Date('2024-01-15'),
         endDate: new Date('2024-02-15'),
         phase: EvaluationPhase.DISCUSSION,
@@ -258,7 +284,7 @@ export async function seedEvaluationOnly() {
 
     console.log('✅ Evaluation session created/verified');
 
-    // 4. Create evaluation categories (global) and link them to the session via junction table
+    // 5. Create evaluation categories (global) and link them to the session via junction table
     const categories = [
       {
         name: 'Vollständigkeit',
@@ -326,88 +352,74 @@ export async function seedEvaluationOnly() {
 
     console.log('✅ Evaluation categories created/linked to session');
 
-    // 5. Create evaluation submissions
-    let submission1 = await prisma.evaluationSubmission.findFirst({
-      where: {
+    // 6. Create evaluation submissions
+    const submission1 = await prisma.evaluationSubmission.upsert({
+      where: { id: 1 },
+      update: {},
+      create: {
+        id: 1,
         title: 'Entwurf "Stabile Rahmenkonstruktion"',
+        description:
+          'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
+        authorId: evalStudent1.id,
+        pdfFileId: pdfUpload1.id,
         sessionId: evaluationSession.id,
-        authorId: testStudent1.id,
+        status: EvaluationStatus.SUBMITTED,
+        phase: EvaluationPhase.DISCUSSION,
+        submittedAt: new Date('2024-01-20'),
       },
     });
 
-    if (!submission1) {
-      submission1 = await prisma.evaluationSubmission.create({
-        data: {
-          title: 'Entwurf "Stabile Rahmenkonstruktion"',
-          description:
-            'Innovativer Entwurf für eine stabile Rahmenkonstruktion mit modernen Materialien und optimierter Statik.',
-          authorId: testStudent1.id,
-          pdfFileId: pdfUpload1.id,
-          sessionId: evaluationSession.id,
-          status: EvaluationStatus.SUBMITTED,
-          phase: EvaluationPhase.DISCUSSION,
-          submittedAt: new Date('2024-01-20'),
-        },
-      });
-    }
-
-    let submission2 = await prisma.evaluationSubmission.findFirst({
-      where: {
+    const submission2 = await prisma.evaluationSubmission.upsert({
+      where: { id: 2 },
+      update: {},
+      create: {
+        id: 2,
         title: 'Innovative Konstruktionslösung',
+        description:
+          'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
+        authorId: evalStudent2.id,
+        pdfFileId: pdfUpload2.id,
         sessionId: evaluationSession.id,
-        authorId: testStudent2.id,
+        status: EvaluationStatus.SUBMITTED,
+        phase: EvaluationPhase.DISCUSSION,
+        submittedAt: new Date('2024-01-22'),
       },
     });
-
-    if (!submission2) {
-      submission2 = await prisma.evaluationSubmission.create({
-        data: {
-          title: 'Innovative Konstruktionslösung',
-          description:
-            'Alternative Lösung mit nachhaltigen Materialien und kostenoptimierter Bauweise.',
-          authorId: testStudent2.id,
-          pdfFileId: pdfUpload2.id,
-          sessionId: evaluationSession.id,
-          status: EvaluationStatus.SUBMITTED,
-          phase: EvaluationPhase.DISCUSSION,
-          submittedAt: new Date('2024-01-22'),
-        },
-      });
-    }
 
     console.log('✅ Evaluation submissions created/verified');
 
-    // 6. Create evaluation comments with realistic names based on actual users
+    // 7. Create evaluation comments with realistic names based on actual users
     const commentsData = [
       {
         submissionId: submission1.id,
         categoryId: createdCategories[0].id, // Vollständigkeit
         content:
           'Ich vermisse die Angaben zu den Lastannahmen. Ohne diese ist schwer zu beurteilen, ob die Dimensionierung stimmt.',
-        userId: testStudent2.id,
-        anonymousDisplayName: `Student ${testStudent2.firstname}`,
+        userId: evalStudent2.id,
+        anonymousDisplayName: `Student ${evalStudent2.firstname}`,
       },
       {
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
         content: 'Die Linienführung ist sehr sauber und professionell. Alle Maße sind gut lesbar.',
-        userId: testStudent3.id,
-        anonymousDisplayName: `Student ${testStudent3.firstname}`,
+        userId: evalStudent3.id,
+        anonymousDisplayName: `Student ${evalStudent3.firstname}`,
       },
       {
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
         content:
           'Die Schnittdarstellung ist etwas unübersichtlich. Eine Explosionszeichnung wäre hilfreicher gewesen.',
-        userId: testStudent1.id,
-        anonymousDisplayName: `Student ${testStudent1.firstname}`,
+        userId: evalStudent1.id,
+        anonymousDisplayName: `Student ${evalStudent1.firstname}`,
       },
       {
         submissionId: submission1.id,
         categoryId: createdCategories[2].id, // Vergleichbarkeit
         content:
           'Der Maßstab ist konsistent, aber die Legende könnte ausführlicher sein für bessere Vergleichbarkeit.',
-        userId: testLecturer.id,
+        userId: evalLecturer.id,
         anonymousDisplayName: 'Dozent',
       },
       {
@@ -415,7 +427,7 @@ export async function seedEvaluationOnly() {
         categoryId: createdCategories[3].id, // Komplexität
         content:
           'Die nachhaltige Materialwahl ist vorbildlich. Die Dokumentation der Materialauswahl könnte jedoch detaillierter sein.',
-        userId: testLecturer.id,
+        userId: evalLecturer.id,
         anonymousDisplayName: 'Dozent',
       },
     ];
@@ -447,8 +459,7 @@ export async function seedEvaluationOnly() {
 
     console.log('✅ Evaluation comments created (5 comments across both submissions)');
 
-    // 6b. Create comment votes using the new junction table EvaluationCommentVote
-    // We approximate previous upvote/downvote counts with unique voters
+    // 8. Create comment votes using the new junction table EvaluationCommentVote
     const votePlans: Array<{
       commentId: number;
       votes: Array<{ userId: number; voteCount: number }>;
@@ -456,88 +467,72 @@ export async function seedEvaluationOnly() {
       {
         commentId: createdComments[0].id, // First comment (Vollständigkeit)
         votes: [
-          { userId: testStudent1.id, voteCount: 1 },
-          { userId: testStudent3.id, voteCount: 1 },
-          { userId: testLecturer.id, voteCount: 1 },
+          { userId: evalStudent1.id, voteCount: 1 },
+          { userId: evalStudent3.id, voteCount: 1 },
+          { userId: evalLecturer.id, voteCount: 1 },
         ],
       },
       {
         commentId: createdComments[1].id, // Second comment (Grafische Darstellungsqualität 1)
         votes: [
-          { userId: testStudent1.id, voteCount: 1 },
-          { userId: testLecturer.id, voteCount: 1 },
+          { userId: evalStudent1.id, voteCount: 1 },
+          { userId: evalLecturer.id, voteCount: 1 },
         ],
       },
       {
         commentId: createdComments[2].id, // Third comment (Grafische Darstellungsqualität 2)
         votes: [
-          { userId: testLecturer.id, voteCount: 1 }, // upvote
-          { userId: testStudent3.id, voteCount: -1 }, // downvote
+          { userId: evalLecturer.id, voteCount: 1 }, // upvote
+          { userId: evalStudent3.id, voteCount: -1 }, // downvote
         ],
       },
       {
         commentId: createdComments[3].id, // Fourth comment (Vergleichbarkeit)
-        votes: [{ userId: testStudent1.id, voteCount: 1 }],
+        votes: [{ userId: evalStudent1.id, voteCount: 1 }],
       },
       {
         commentId: createdComments[4].id, // Fifth comment (Komplexität)
         votes: [
-          { userId: testStudent1.id, voteCount: 1 },
-          { userId: testStudent3.id, voteCount: 1 },
+          { userId: evalStudent1.id, voteCount: 1 },
+          { userId: evalStudent3.id, voteCount: 1 },
         ],
       },
     ];
 
-    for (const vp of votePlans) {
-      for (const v of vp.votes) {
-        const existing = await prisma.evaluationCommentVote.findFirst({
-          where: { commentId: vp.commentId, userId: v.userId },
-        });
-        if (existing) {
-          await prisma.evaluationCommentVote.update({
-            where: { id: existing.id },
-            data: { voteCount: v.voteCount },
-          });
-        } else {
-          await prisma.evaluationCommentVote.create({
-            data: { commentId: vp.commentId, userId: v.userId, voteCount: v.voteCount },
-          });
-        }
-      }
-    }
+    await upsertCommentVotesBulk(votePlans);
 
     console.log('✅ Evaluation comment votes created');
 
-    // 7. Create evaluation ratings
+    // 9. Create evaluation ratings
     const ratingsData = [
       {
         submissionId: submission1.id,
         categoryId: createdCategories[0].id, // Vollständigkeit
-        userId: testStudent2.id,
+        userId: evalStudent2.id,
         rating: 7,
       },
       {
         submissionId: submission1.id,
         categoryId: createdCategories[1].id, // Grafische Darstellungsqualität
-        userId: testStudent2.id,
+        userId: evalStudent2.id,
         rating: 8,
       },
       {
         submissionId: submission1.id,
         categoryId: createdCategories[2].id, // Vergleichbarkeit
-        userId: testLecturer.id,
+        userId: evalLecturer.id,
         rating: 6,
       },
       {
         submissionId: submission2.id,
         categoryId: createdCategories[0].id, // Vollständigkeit
-        userId: testStudent1.id,
+        userId: evalStudent1.id,
         rating: 8,
       },
       {
         submissionId: submission2.id,
         categoryId: createdCategories[3].id, // Komplexität
-        userId: testLecturer.id,
+        userId: evalLecturer.id,
         rating: 9,
       },
     ];
@@ -563,7 +558,7 @@ export async function seedEvaluationOnly() {
 
     console.log('✅ Evaluation ratings created (5 ratings across both submissions)');
 
-    // 8. Output important IDs for testing
+    // 10. Output important IDs for testing
     console.log('\n📋 EVALUATION TEST-IDs für Frontend:');
     console.log('=====================================');
     console.log(`🎯 Submission ID 1: ${submission1.id}`);
@@ -572,13 +567,13 @@ export async function seedEvaluationOnly() {
     console.log(`🏗️ Module ID: ${existingModule.id} (${existingModule.name})`);
     console.log('\n👥 Created Users for Testing:');
     console.log(
-      `👤 Student 1 (Author of Submission 1): ${testStudent1.firstname} ${testStudent1.lastname} (ID: ${testStudent1.id})`,
+      `👤 Student 1 (Author of Submission 1): ${evalStudent1.firstname} ${evalStudent1.lastname} (ID: ${evalStudent1.id})`,
     );
     console.log(
-      `👤 Student 2 (Author of Submission 2): ${testStudent2.firstname} ${testStudent2.lastname} (ID: ${testStudent2.id})`,
+      `👤 Student 2 (Author of Submission 2): ${evalStudent2.firstname} ${evalStudent2.lastname} (ID: ${evalStudent2.id})`,
     );
     console.log(
-      `👨‍🏫 Lecturer (Session Creator): ${testLecturer.firstname} ${testLecturer.lastname} (ID: ${testLecturer.id})`,
+      `👨‍🏫 Lecturer (Session Creator): ${evalLecturer.firstname} ${evalLecturer.lastname} (ID: ${evalLecturer.id})`,
     );
     console.log('\n🌐 Frontend Test URLs:');
     console.log(`http://localhost:4200/forum/${submission1.id}`);
@@ -587,7 +582,7 @@ export async function seedEvaluationOnly() {
 
     console.log('\n✅ Evaluation-only seeding completed successfully!');
 
-    // 9. Summary statistics
+    // 11. Summary statistics
     const stats = {
       session: 1,
       categories: createdCategories.length,

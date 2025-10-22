@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, combineLatest, forkJoin, of } from 'rxjs';
 import { LRUCache } from '../../utils/lru-cache';
 import {
@@ -35,11 +36,20 @@ import {
 
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
 import { UserService } from '../auth/user.service';
+import { LoggerService } from '../logger/logger.service';
 
+/**
+ * Centralized state management service for evaluation discussions
+ *
+ * @description Manages submission, categories, discussions, ratings, and comment state
+ * with optimized caching and reactive updates. Coordinates data flow between components.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class EvaluationStateService {
+  private readonly log = this.logger.scope('EvaluationStateService');
+
   // Core state subjects
   private submissionSubject = new BehaviorSubject<EvaluationSubmissionDTO | null>(null);
   private categoriesSubject = new BehaviorSubject<EvaluationCategoryDTO[]>([]);
@@ -55,7 +65,6 @@ export class EvaluationStateService {
     (categoryId, subject) => {
       // Cleanup: Complete BehaviorSubject to prevent memory leaks
       subject.complete();
-      console.log(`🧹 LRU evicted discussion cache for category ${categoryId}`);
     }
   );
 
@@ -65,7 +74,6 @@ export class EvaluationStateService {
     20, // Max 20 categories with rating stats
     (categoryId, subject) => {
       subject.complete();
-      console.log(`🧹 LRU evicted rating stats cache for category ${categoryId}`);
     }
   );
 
@@ -99,17 +107,13 @@ export class EvaluationStateService {
   constructor(
     public evaluationService: EvaluationDiscussionService,
     private userservice: UserService,
+    private logger: LoggerService
   ) {
     // Warte auf das Laden der Kategorien und setze die erste verfügbare als aktiv
     this.categories$.subscribe(categories => {
       if (categories.length > 0 && this.activeCategorySubject.value === null) {
         // Setze die erste Kategorie als Standard-aktive Kategorie
         const firstCategory = categories[0];
-        console.log(
-          '🎯 Automatische Auswahl der ersten Kategorie:',
-          firstCategory.id,
-          firstCategory.displayName,
-        );
         this.activeCategorySubject.next(firstCategory.id);
       }
     });
@@ -247,35 +251,27 @@ export class EvaluationStateService {
   // =============================================================================
 
   loadSubmission(submissionId: string, userId: number): void {
-    console.log('🎯 loadSubmission called with:', submissionId);
     this.setLoading(true);
     this.clearError();
 
     this.evaluationService.getSubmission(submissionId).subscribe({
       next: submission => {
-        console.log('✅ Submission loaded:', submission);
+        this.log.info(' Submission loaded:', submission);
         this.submissionSubject.next(submission);
 
         // Prepare parallel operations array
         const parallelOps: Observable<any>[] = [
           this.evaluationService.getCommentStats(submissionId).pipe(
             catchError(error => {
-              console.warn('⚠️ CommentStats loading failed:', error);
+              this.log.warn(' CommentStats loading failed:', error);
               return of(null); // Continue with null if stats fail
             }),
           ),
           this.evaluationService.getOrCreateAnonymousUser(submissionId).pipe(
             tap(anonymousUser => {
-              console.log('🎭 Anonymous user loaded:', {
-                submissionId,
-                anonymousUser,
-                id: anonymousUser?.id,
-                idType: typeof anonymousUser?.id,
-                displayName: anonymousUser?.displayName,
-              });
             }),
             catchError(error => {
-              console.error('⚠️ AnonymousUser loading failed:', error);
+              this.log.error('⚠️ AnonymousUser loading failed:', error);
               return of(null); // Continue with null if user fails
             }),
           ),
@@ -283,11 +279,10 @@ export class EvaluationStateService {
 
         // Add categories loading if sessionId is available
         if (submission.sessionId) {
-          console.log('📡 Adding categories loading for sessionId:', submission.sessionId);
           parallelOps.push(
             this.evaluationService.getCategories(submission.sessionId).pipe(
               catchError(error => {
-                console.warn('⚠️ Categories loading failed:', error);
+                this.log.warn(' Categories loading failed:', error);
                 return of([]); // Continue with empty array if categories fail
               }),
             ),
@@ -295,11 +290,10 @@ export class EvaluationStateService {
         }
 
         // Add rating status loading
-        console.log('📊 Adding rating status loading for submissionId:', submissionId);
         parallelOps.push(
           this.evaluationService.getUserRatingStatus(String(submissionId), userId).pipe(
             tap(statuses => {
-              console.log('✅ Rating statuses loaded during submission init:', statuses);
+              this.log.info(' Rating statuses loaded during submission init:', statuses);
               // Convert array to Map for efficient lookups
               const statusMap = new Map<number, CategoryRatingStatus>();
               statuses.forEach(status => {
@@ -308,7 +302,7 @@ export class EvaluationStateService {
               this.categoryRatingStatusSubject.next(statusMap);
             }),
             catchError(error => {
-              console.warn('⚠️ Rating status loading failed:', error);
+              this.log.warn(' Rating status loading failed:', error);
               // Reset to empty map if loading fails
               this.categoryRatingStatusSubject.next(new Map());
               return of([]); // Continue with empty array if rating status fails
@@ -317,25 +311,19 @@ export class EvaluationStateService {
         );
 
         // Add comment status loading for all categories
-        console.log('💬 Adding comment status loading for submissionId:', submissionId);
         parallelOps.push(
           this.evaluationService.getUserCommentStatusForAllCategories(submissionId).pipe(
             tap(commentStatusObj => {
-              console.log('✅ Comment statuses loaded during submission init:', commentStatusObj);
+              this.log.info(' Comment statuses loaded during submission init:', commentStatusObj);
               // Convert object to Map for consistent interface
               const commentStatusMap = new Map<number, boolean>();
               Object.entries(commentStatusObj).forEach(([categoryId, hasCommented]) => {
                 commentStatusMap.set(Number(categoryId), hasCommented);
               });
               this.categoryCommentStatusSubject.next(commentStatusMap);
-              
-              console.log('📋 Comment status map initialized:', {
-                totalCategories: commentStatusMap.size,
-                categoriesWithComments: Array.from(commentStatusMap.entries()).filter(([_, hasCommented]) => hasCommented).map(([categoryId, _]) => categoryId)
-              });
             }),
             catchError(error => {
-              console.warn('⚠️ Comment status loading failed:', error);
+              this.log.warn(' Comment status loading failed:', error);
               // Reset to empty map if loading fails
               this.categoryCommentStatusSubject.next(new Map());
               return of({}); // Continue with empty object if comment status fails
@@ -344,10 +332,9 @@ export class EvaluationStateService {
         );
 
         // Wait for ALL parallel operations to complete
-        console.log('🔄 Starting parallel operations. Count:', parallelOps.length);
         forkJoin(parallelOps).subscribe({
           next: results => {
-            console.log('✅ All parallel operations completed:', results);
+            this.log.info(' All parallel operations completed:', results);
 
             const [commentStats, anonymousUser, categories] = results;
 
@@ -359,23 +346,22 @@ export class EvaluationStateService {
               this.anonymousUserSubject.next(anonymousUser);
             }
             if (categories && categories.length > 0) {
-              console.log('✅ Categories loaded successfully. Count:', categories.length);
+              this.log.info(' Categories loaded successfully. Count:', categories.length);
               this.categoriesSubject.next(categories);
             }
 
             // ONLY NOW set loading to false - after ALL operations are complete
-            console.log('🎉 All data loaded successfully. Setting loading to false.');
             this.setLoading(false);
           },
           error: error => {
-            console.error('❌ Parallel operations failed:', error);
+            this.log.error('❌ Parallel operations failed:', error);
             this.setError('Fehler beim Laden der Zusatzdaten');
             this.setLoading(false);
           },
         });
       },
       error: error => {
-        console.error('❌ Submission loading failed:', error);
+        this.log.error('❌ Submission loading failed:', error);
         this.setError('Fehler beim Laden der Abgabe');
         this.setLoading(false);
       },
@@ -410,7 +396,7 @@ export class EvaluationStateService {
    * should be preferred as it prevents race conditions and ensures data consistency
    */
   setActiveCategory(categoryId: number): void {
-    console.warn('⚠️ DEPRECATED: setActiveCategory() is deprecated. Use transitionToCategory() instead for atomic transitions.');
+    this.log.warn(' DEPRECATED: setActiveCategory() is deprecated. Use transitionToCategory() instead for atomic transitions.');
     const currentCategory = this.activeCategorySubject.value;
     if (currentCategory !== categoryId) {
       this.activeCategorySubject.next(categoryId);
@@ -432,26 +418,11 @@ export class EvaluationStateService {
     if (currentCategory === categoryId || !submissionId || !anonymousUserId) {
       return of(void 0);
     }
-
-    console.log('🔄 Starting atomic category transition:', { 
-      from: currentCategory, 
-      to: categoryId,
-      submissionId 
-    });
-
     // Start transition loading state
     this.categoryTransitionLoadingSubject.next(true);
 
     const currentStatusMap = this.categoryRatingStatusSubject.value;
     const existingStatus = currentStatusMap.get(categoryId);
-
-    console.log('🔄 Preserving existing status during category transition:', {
-      targetCategory: categoryId,
-      hadExistingStatus: !!existingStatus,
-      existingRating: existingStatus?.rating,
-      statusCount: currentStatusMap.size
-    });
-
     // FIXED: Preserve existing status while loading fresh data to prevent UI flicker
     // Do NOT delete the cached status - this was causing the rating panel to reappear
     
@@ -460,21 +431,7 @@ export class EvaluationStateService {
       take(1),
       map(statuses => {
         // DEBUG: Backend API response verification
-        console.log('🐛 DEBUG Rating Status API Response:', {
-          submissionId,
-          userId: anonymousUserId,
-          userIdType: typeof anonymousUserId,
-          statusesReceived: statuses.length,
-          categories: statuses.map(s => ({ 
-            id: s.categoryId, 
-            hasRated: s.hasRated, 
-            rating: s.rating,
-            canAccessDiscussion: s.canAccessDiscussion,
-            isRequired: s.isRequired
-          }))
-        });
-
-        console.log('✅ Rating statuses loaded for atomic transition:', {
+        this.log.info(' Rating statuses loaded for atomic transition:', {
           statusCount: statuses.length,
           categoriesReceived: statuses.map(s => ({ id: s.categoryId, hasRated: s.hasRated, rating: s.rating }))
         });
@@ -487,7 +444,7 @@ export class EvaluationStateService {
         this.activeCategorySubject.next(categoryId);
         this.categoryRatingStatusSubject.next(mergedStatusMap);
 
-        console.log('✅ Atomic transition completed - status preserved:', {
+        this.log.info(' Atomic transition completed - status preserved:', {
           categoryId,
           newStatusCount: mergedStatusMap.size,
           targetCategoryHasStatus: mergedStatusMap.has(categoryId),
@@ -503,17 +460,16 @@ export class EvaluationStateService {
 
         // 🔧 CRITICAL FIX: Load vote limits for the new category to sync "x/x verfügbar" display
         if (submissionId) {
-          console.log('🔄 Loading vote limits for new category:', categoryId);
           this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
-            next: () => console.log('✅ Vote limits loaded for category transition:', categoryId),
-            error: (error) => console.error('❌ Failed to load vote limits for category:', categoryId, error)
+            next: () => this.log.info(' Vote limits loaded for category transition:', categoryId),
+            error: (error) => this.log.error('❌ Failed to load vote limits for category', { categoryId, error })
           });
         }
 
         return void 0;
       }),
       catchError(error => {
-        console.error('❌ Error during atomic category transition:', error);
+        this.log.error('❌ Error during atomic category transition:', error);
         
         // Fallback: still transition to category but preserve existing status map
         this.activeCategorySubject.next(categoryId);
@@ -523,7 +479,7 @@ export class EvaluationStateService {
       }),
       finalize(() => {
         this.categoryTransitionLoadingSubject.next(false);
-        console.log('✅ Atomic category transition completed:', categoryId);
+        this.log.info(' Atomic category transition completed:', categoryId);
       })
     );
   }
@@ -569,13 +525,6 @@ export class EvaluationStateService {
         const localHasRating = localStatus.hasRated && localStatus.rating !== null;
 
         if (isLocalFresh && localHasRating) {
-          console.log('🔄 Preserving fresh local rating:', {
-            categoryId: categoryIdKey,
-            localRating: localStatus.rating,
-            backendRating: backendStatus?.rating,
-            localUpdatedAt: localStatus.lastUpdatedAt,
-            reason: 'Local data is fresher than backend cache'
-          });
           mergedStatusMap.set(categoryIdKey, localStatus);
           return;
         }
@@ -613,17 +562,11 @@ export class EvaluationStateService {
     submissionId: string,
     categoryId: number,
   ): Observable<EvaluationDiscussionDTO[]> {
-    console.log('📂 getDiscussionsForCategory called:', {
-      submissionId,
-      categoryId,
-    });
-
     // Ensure cache exists before loading
     const subject = this.ensureDiscussionCache(categoryId);
 
     // Load discussions if cache is empty
     if (subject.value.length === 0) {
-      console.log('📡 Loading discussions for category:', categoryId);
       this.loadDiscussionsForCategory(submissionId, categoryId);
     }
 
@@ -637,14 +580,8 @@ export class EvaluationStateService {
    */
   private loadDiscussionsForCategory(submissionId: string, categoryId: number): void {
     const cacheKey = categoryId;
-    console.log('🔍 loadDiscussionsForCategory called:', {
-      submissionId,
-      categoryId,
-      cacheKey,
-    });
     // Phase 3.2: Prevent concurrent loading of the same category
     if (this.categoryLoadingStates.get(categoryId)) {
-      console.log('⚠️ Category', categoryId, 'already loading, skipping duplicate request');
       return;
     }
 
@@ -653,13 +590,6 @@ export class EvaluationStateService {
 
     this.evaluationService.getDiscussionsByCategory(submissionId, categoryId.toString()).subscribe({
       next: discussions => {
-        console.log(
-          '✅ Discussions loaded for category',
-          categoryId,
-          ':',
-          discussions.length,
-          'discussions',
-        );
         const subject = this.discussionCache.get(cacheKey);
         if (subject) {
           subject.next(discussions);
@@ -687,7 +617,7 @@ export class EvaluationStateService {
             currentStatusMap.set(categoryId, true);
             this.categoryCommentStatusSubject.next(currentStatusMap);
             
-            console.log('✅ Comment status updated from backend data:', {
+            this.log.info(' Comment status updated from backend data:', {
               categoryId,
               userId: anonymousUser.id,
               wasAlreadyMarked,
@@ -699,7 +629,7 @@ export class EvaluationStateService {
         this.clearError(); // Clear any previous errors
       },
       error: error => {
-        console.error('❌ Failed to load discussions for category', categoryId, ':', error);
+        this.log.error('❌ Failed to load discussions for category', { categoryId, error });
         this.setError(
           `Fehler beim Laden der Diskussionen für Kategorie ${categoryId}. Bitte aktualisieren Sie die Seite.`,
         );
@@ -707,14 +637,12 @@ export class EvaluationStateService {
         // Provide fallback empty state instead of leaving cache in undefined state
         const subject = this.discussionCache.get(cacheKey);
         if (subject && subject.value.length === 0) {
-          console.log('🔧 Setting fallback empty discussions for category', categoryId);
           subject.next([]);
         }
       },
       complete: () => {
         // Always clean up loading state
         this.categoryLoadingStates.set(categoryId, false);
-        console.log('🧹 Category loading completed for', categoryId);
       },
     });
   }
@@ -738,7 +666,6 @@ export class EvaluationStateService {
   private ensureDiscussionCache(categoryId: number): BehaviorSubject<EvaluationDiscussionDTO[]> {
     const cacheKey = categoryId;
     if (!this.discussionCache.has(cacheKey)) {
-      console.log('🗂️ Creating new discussion cache for category:', categoryId);
       const subject = new BehaviorSubject<EvaluationDiscussionDTO[]>([]);
       this.discussionCache.set(cacheKey, subject);
     }
@@ -754,20 +681,18 @@ export class EvaluationStateService {
    * @param submissionId - The submission ID to load rating status for
    */
   loadCategoryRatingStatus(submissionId: string, userId: number): void {
-    console.log('🎯 Loading category rating status for submission:', submissionId);
-
     this.ratingStatusLoadingSubject.next(true);
 
     this.evaluationService.getUserRatingStatus(String(submissionId), userId).pipe(
       take(1),
       tap(statuses => {
-        console.log('✅ Received rating statuses:', statuses);
+        this.log.info(' Received rating statuses:', statuses);
 
         // BUGFIX: Merge with existing local data instead of blind overwrite
         const currentStatusMap = this.categoryRatingStatusSubject.value;
         const mergedStatusMap = this.mergeRatingStatusMaps(statuses, currentStatusMap);
 
-        console.log('✅ Rating status merged with local preservation:', {
+        this.log.info(' Rating status merged with local preservation:', {
           totalCategories: mergedStatusMap.size,
           preservedLocal: Array.from(mergedStatusMap.entries())
             .filter(([_, status]) => {
@@ -779,7 +704,7 @@ export class EvaluationStateService {
         this.categoryRatingStatusSubject.next(mergedStatusMap);
       }),
       catchError(error => {
-        console.error('❌ Error loading rating status:', error);
+        this.log.error('❌ Error loading rating status:', error);
         this.setError('Fehler beim Laden des Bewertungsstatus');
         return of([]);
       }),
@@ -797,24 +722,11 @@ export class EvaluationStateService {
    * @param rating - The rating value submitted
    */
   updateCategoryRatingStatus(submissionId: string, categoryId: number, rating: number): void {
-    console.log('📝 Updating rating status with isolation:', { 
-      submissionId, 
-      categoryId, 
-      rating,
-      timestamp: new Date().toISOString()
-    });
-
     const currentStatusMap = this.categoryRatingStatusSubject.value;
     const existingStatus = currentStatusMap.get(categoryId);
 
     // Validate that we're updating the correct category
     if (existingStatus) {
-      console.log('📋 Previous status for category:', {
-        categoryId,
-        hadRating: existingStatus.hasRated,
-        previousRating: existingStatus.rating,
-        newRating: rating
-      });
     }
 
     // Create updated status with enhanced data integrity
@@ -839,7 +751,7 @@ export class EvaluationStateService {
     // Atomic update
     this.categoryRatingStatusSubject.next(newStatusMap);
 
-    console.log('✅ Rating status updated with category isolation:', {
+    this.log.info(' Rating status updated with category isolation:', {
       updatedCategoryId: categoryId,
       newRating: rating,
       totalCategoriesInMap: newStatusMap.size,
@@ -865,16 +777,10 @@ export class EvaluationStateService {
    * @memberof EvaluationStateService
    */
   deleteCategoryRating(submissionId: string, categoryId: number): Observable<void> {
-    console.log('🗑️ Deleting category rating:', { 
-      submissionId, 
-      categoryId,
-      timestamp: new Date().toISOString()
-    });
-
     // Call backend to delete rating from database
     return this.evaluationService.deleteUserRating(submissionId, categoryId).pipe(
       tap(response => {
-        console.log('✅ Backend deletion successful:', response);
+        this.log.info(' Backend deletion successful:', response);
 
         // Update local state after successful backend deletion
         const currentStatusMap = this.categoryRatingStatusSubject.value;
@@ -906,7 +812,7 @@ export class EvaluationStateService {
           );
           this.ratingsSubject.next(updatedRatings);
 
-          console.log('✅ Local state updated after rating deletion:', {
+          this.log.info(' Local state updated after rating deletion:', {
             deletedCategoryId: categoryId,
             totalCategoriesInMap: newStatusMap.size,
             updatedCategory: updatedStatus,
@@ -916,7 +822,7 @@ export class EvaluationStateService {
       }),
       map(() => void 0), // Convert to void observable
       catchError(error => {
-        console.error('❌ Failed to delete category rating:', error);
+        this.log.error('❌ Failed to delete category rating:', error);
         throw error;
       })
     );
@@ -927,12 +833,6 @@ export class EvaluationStateService {
    * @param submissionId - The submission ID to refresh
    */
   refreshRatingStatus(submissionId: string, userId: number): void {
-    console.log('🔄 Refreshing rating status from server:', {
-      submissionId,
-      userId,
-      currentStatusCount: this.categoryRatingStatusSubject.value.size,
-      timestamp: new Date().toISOString()
-    });
     this.loadCategoryRatingStatus(submissionId, userId);
   }
 
@@ -958,14 +858,14 @@ export class EvaluationStateService {
 
     // Phase 1.2: Validate anonymous user exists
     if (!anonymousUser) {
-      console.error('❌ Cannot create comment: Anonymous user not available');
+      this.log.error('❌ Cannot create comment: Anonymous user not available');
       throw new Error('Anonymous user not available. Please reload the page.');
     }
 
     // Phase 3.2: Prevent double submissions
     const operationKey = `${submissionId}-${categoryId}`;
     if (this.commentCreationInProgress.has(operationKey)) {
-      console.warn('⚠️ Comment creation already in progress for category', categoryId);
+      this.log.warn(' Comment creation already in progress for category', categoryId);
       throw new Error('Ein Kommentar wird bereits erstellt. Bitte warten Sie einen Moment.');
     }
 
@@ -976,7 +876,7 @@ export class EvaluationStateService {
       parentId: parentId ? Number(parentId) : undefined, // Include parentId for reply functionality
     };
 
-    console.log('✅ Anonymous user validated:', anonymousUser.displayName);
+    this.log.info(' Anonymous user validated:', anonymousUser.displayName);
 
     // Mark operation as in progress
     this.commentCreationInProgress.add(operationKey);
@@ -985,11 +885,6 @@ export class EvaluationStateService {
       map(comment => {
         // 🚨 CRITICAL FIX: Ensure authorId is set to current anonymous user
         if (!comment.authorId && anonymousUser) {
-          console.log('🔧 Setting authorId for new comment:', {
-            commentId: comment.id,
-            authorId: anonymousUser.id,
-            displayName: anonymousUser.displayName
-          });
           comment.authorId = anonymousUser.id;
         }
         
@@ -999,14 +894,13 @@ export class EvaluationStateService {
         return comment;
       }),
       catchError(error => {
-        console.error('❌ Comment creation failed:', error);
+        this.log.error('❌ Comment creation failed:', error);
         this.setError('Fehler beim Erstellen des Kommentars. Bitte versuchen Sie es erneut.');
         throw error; // Re-throw for component to handle
       }),
       finalize(() => {
         // Always clean up the progress tracking
         this.commentCreationInProgress.delete(operationKey);
-        console.log('🧹 Comment creation operation completed for category', categoryId);
       }),
     );
   }
@@ -1039,7 +933,7 @@ export class EvaluationStateService {
     categoryId: number,
     comment: EvaluationCommentDTO,
   ): void {
-    console.log('➕ handleCommentAdded called:', {
+    this.log.debug('➕ handleCommentAdded called:', {
       submissionId,
       categoryId,
       commentId: comment.id,
@@ -1050,7 +944,7 @@ export class EvaluationStateService {
     try {
       // Validate input parameters
       if (!submissionId || !categoryId || !comment) {
-        console.error('❌ Invalid parameters for handleCommentAdded:', {
+        this.log.error('❌ Invalid parameters for handleCommentAdded:', {
           submissionId,
           categoryId,
           comment,
@@ -1067,7 +961,6 @@ export class EvaluationStateService {
       // Find or create discussion
       let discussion = updatedDiscussions.find(d => d.categoryId === categoryId);
       if (!discussion) {
-        console.log('🆕 Creating new discussion for category:', categoryId);
         discussion = {
           id: Date.now(), // Generate unique numeric ID
           submissionId: Number(submissionId),
@@ -1083,13 +976,13 @@ export class EvaluationStateService {
 
       // Type guard - should never be undefined after find/create logic above
       if (!discussion) {
-        console.error('❌ Discussion is unexpectedly undefined');
+        this.log.error('❌ Discussion is unexpectedly undefined');
         return;
       }
 
       // Handle replies vs top-level comments differently
       if (!discussion.comments || !Array.isArray(discussion.comments)) {
-        console.warn('⚠️ Discussion.comments was invalid, initializing as empty array');
+        this.log.warn(' Discussion.comments was invalid, initializing as empty array');
         discussion.comments = [];
       }
 
@@ -1097,12 +990,12 @@ export class EvaluationStateService {
         // This is a reply - find the parent comment and add to its replies array
         const success = this.addReplyToParent(discussion.comments, comment);
         if (success) {
-          console.log('✅ Reply added to parent comment:', {
+          this.log.info(' Reply added to parent comment:', {
             replyId: comment.id,
             parentId: comment.parentId,
           });
         } else {
-          console.warn('⚠️ Could not find parent comment, adding as top-level:', {
+          this.log.warn(' Could not find parent comment, adding as top-level:', {
             replyId: comment.id,
             parentId: comment.parentId,
           });
@@ -1112,7 +1005,7 @@ export class EvaluationStateService {
       } else {
         // This is a top-level comment - add to beginning (newest first)
         discussion.comments = [comment, ...discussion.comments];
-        console.log('✅ Top-level comment added to cache:', {
+        this.log.info(' Top-level comment added to cache:', {
           commentId: comment.id,
         });
       }
@@ -1124,7 +1017,7 @@ export class EvaluationStateService {
       // Add new comment to the lookup map
       this.commentIdToCategoryIdMap.set(String(comment.id), categoryId);
 
-      console.log('✅ Comment processing complete:', {
+      this.log.info(' Comment processing complete:', {
         discussionId: discussion.id,
         commentId: comment.id,
         isReply: !!comment.parentId,
@@ -1139,7 +1032,7 @@ export class EvaluationStateService {
         subject.next([...updatedDiscussions]);
       }, 50);
     } catch (error) {
-      console.error('❌ Error in handleCommentAdded:', error);
+      this.log.error('❌ Error in handleCommentAdded:', error);
       this.setError('Fehler beim Aktualisieren der Kommentare. Bitte laden Sie die Seite neu.');
     }
   }
@@ -1159,21 +1052,14 @@ export class EvaluationStateService {
 
         // Update reply count
         comment.replyCount = (comment.replyCount || 0) + 1;
-
-        console.log('🔗 Reply linked to parent:', {
-          parentId: comment.id,
-          replyId: reply.id,
-          newReplyCount: comment.replyCount,
-        });
-
         return true;
       }
 
       // Recursively search in replies
       if (comment.replies && comment.replies.length > 0) {
         if (this.addReplyToParent(comment.replies, reply)) {
-          // Update reply count for nested replies
-          comment.replyCount = this.calculateReplyCount(comment.replies);
+          // Update reply count for nested replies (unified method)
+          comment.replyCount = this.calculateTotalComments(comment.replies);
           return true;
         }
       }
@@ -1183,36 +1069,23 @@ export class EvaluationStateService {
   }
 
   /**
-   * Calculates total comments including all nested replies
-   * @param comments - Array of top-level comments
-   * @returns Total count of all comments and replies
+   * Calculates total comments including all nested replies (unified method)
+   * Replaces both calculateTotalComments and calculateReplyCount for DRY principle
+   * @param comments - Array of comments or replies
+   * @returns Total count of all comments and nested replies
    */
   private calculateTotalComments(comments: EvaluationCommentDTO[]): number {
-    let total = comments.length;
-
-    for (const comment of comments) {
-      if (comment.replies && comment.replies.length > 0) {
-        total += this.calculateTotalComments(comment.replies);
-      }
-    }
-
-    return total;
-  }
-
-  /**
-   * Calculates reply count for a comment recursively
-   * @param replies - Array of replies
-   * @returns Total count of all replies (including nested)
-   */
-  private calculateReplyCount(replies: EvaluationCommentDTO[]): number {
-    if (!replies || replies.length === 0) {
+    if (!comments || comments.length === 0) {
       return 0;
     }
 
-    return replies.reduce((count, reply) => {
-      return count + 1 + this.calculateReplyCount(reply.replies || []);
+    return comments.reduce((count, comment) => {
+      // Count this comment + recursively count all its replies
+      return count + 1 + this.calculateTotalComments(comment.replies || []);
     }, 0);
   }
+
+  // calculateReplyCount() removed - use calculateTotalComments() instead (unified implementation)
 
   // =============================================================================
   // VOTE STATUS MANAGEMENT - ARCHITECTURE REFACTOR
@@ -1223,31 +1096,20 @@ export class EvaluationStateService {
     200, // Max 200 comments with vote status tracking
     (commentId, subject) => {
       subject.complete();
-      console.log(`🧹 LRU evicted vote status cache for comment ${commentId}`);
     }
   );
   private commentVoteLoadingCache = new LRUCache<string, BehaviorSubject<boolean>>(
     200, // Max 200 comments with loading state tracking
     (commentId, subject) => {
       subject.complete();
-      console.log(`🧹 LRU evicted vote loading cache for comment ${commentId}`);
     }
   );
 
   // =============================================================================
-  // VOTING MANAGEMENT & CACHE SYNCHRONIZATION - 🚀 PHASE 4
-  // =============================================================================
-
-  // 🚀 PHASE 4: Vote completion notifications for cache synchronization - Updated to pass full result
-  private voteCompletionSubject = new BehaviorSubject<{commentId: string, fullResult: VoteResultDTO | VoteLimitResponseDTO} | null>(null);
-  private voteCompletion$ = this.voteCompletionSubject.asObservable(); // Private - nur intern verwendet
-
-  private voteErrorSubject = new BehaviorSubject<{commentId: string} | null>(null);
-  private voteError$ = this.voteErrorSubject.asObservable(); // Private - nur intern verwendet
-
-  // =============================================================================
   // VOTE STATUS MANAGEMENT - CENTRALIZED BUSINESS LOGIC
   // =============================================================================
+
+  // voteCompletionSubject and voteErrorSubject removed - unused event subjects (no subscribers)
 
   /**
    * Gets the complete vote state for a comment including status and loading state (internal use)
@@ -1292,7 +1154,7 @@ export class EvaluationStateService {
     const localVote = this.getUserVoteFromLocalComment(commentId);
 
     if (localVote !== null) {
-      console.log('✅ User vote found in local data:', {
+      this.log.info(' User vote found in local data:', {
         commentId,
         localVote,
       });
@@ -1301,13 +1163,12 @@ export class EvaluationStateService {
     }
 
     // Second attempt: Load from API if not found locally
-    console.log('🔄 Loading user vote status from API for comment:', commentId);
     loadingSubject.next(true);
 
     this.getUserVoteStatus(commentId).pipe(
       retry(2),
-      catchError((error: any) => {
-        console.error('❌ Failed to load user vote status after retries:', {
+      catchError((error: HttpErrorResponse) => {
+        this.log.error('❌ Failed to load user vote status after retries:', {
           commentId,
           error: error,
           errorMessage: error?.message,
@@ -1320,7 +1181,7 @@ export class EvaluationStateService {
       }),
       take(1)
     ).subscribe((voteType: VoteType | null) => {
-      console.log('✅ User vote status loaded from API:', {
+      this.log.info(' User vote status loaded from API:', {
         commentId,
         voteType,
       });
@@ -1352,15 +1213,6 @@ export class EvaluationStateService {
     const currentVote = voteStatusSubject.value;
     const newVote = currentVote === voteType ? null : voteType; // Toggle logic
     const isAdding = newVote !== null;
-
-    console.log('🗳️ Vote initiated:', {
-      commentId,
-      currentVote,
-      voteType,
-      newVote,
-      isAdding
-    });
-
     // Optimistic update for immediate UI feedback
     voteStatusSubject.next(newVote);
     
@@ -1371,19 +1223,12 @@ export class EvaluationStateService {
     return this.voteCommentWithLimits(commentId, voteType, categoryId).pipe(
       tap(result => {
         if (result) {
-          // Vote succeeded - emit completion event with full result
-          this.voteCompletionSubject.next({
-            commentId,
-            fullResult: result,
-          });
           // Update final vote status
           voteStatusSubject.next(result.userVote);
         }
       }),
       catchError(error => {
         // Vote failed - revert optimistic update
-        console.log('❌ Vote failed, reverting optimistic update');
-
         // FIXED: Rollback the vote limit optimistic update
         this.updateVoteLimitState(categoryId, !isAdding, Number(commentId));
 
@@ -1396,8 +1241,6 @@ export class EvaluationStateService {
           this.loadUserVoteStatusForComment(commentId);
         }
 
-        // Emit error event
-        this.voteErrorSubject.next({ commentId });
         throw error;
       })
     );
@@ -1460,13 +1303,9 @@ export class EvaluationStateService {
     // Call backend API
     return this.evaluationService.getUserVoteForComment(commentId).pipe(
       tap(voteType => {
-        console.log('🔍 User vote status loaded from API:', {
-          commentId,
-          voteType,
-        });
       }),
       catchError(error => {
-        console.error('❌ Failed to load user vote status:', error);
+        this.log.error('❌ Failed to load user vote status:', error);
         return of(null); // Return null if failed
       }),
     );
@@ -1487,14 +1326,9 @@ export class EvaluationStateService {
    * - Smart cache invalidation
    */
   private handleVoteUpdate(commentId: string, voteData: VoteUpdateData): void {
-    console.log('🔧 SMART: Processing vote update with cascade prevention:', {
-      commentId,
-      voteData
-    });
-
     const categoryId = this.commentIdToCategoryIdMap.get(commentId);
     if (categoryId === undefined) {
-      console.warn(
+      this.log.warn(
         `Could not find category for commentId ${commentId}. Vote update may not be reflected in UI.`,
       );
       return;
@@ -1507,7 +1341,7 @@ export class EvaluationStateService {
 
     const anonymousUser = this.anonymousUserSubject.value;
     if (!anonymousUser) {
-      console.warn('Cannot update vote, anonymous user not available');
+      this.log.warn('Cannot update vote, anonymous user not available');
       return;
     }
 
@@ -1516,7 +1350,6 @@ export class EvaluationStateService {
     // 🔧 SMART CHECK: Only proceed if the update would actually change something
     const needsUpdate = this.shouldUpdateDiscussions(discussions, commentId, voteData);
     if (!needsUpdate) {
-      console.log('🚀 SMART: Skipping vote update - no meaningful changes detected');
       return;
     }
 
@@ -1530,7 +1363,7 @@ export class EvaluationStateService {
 
     // 🔧 PERFORMANCE: Only emit if discussions actually changed (referential comparison)
     if (updatedDiscussions !== discussions) {
-      console.log('✅ SMART: Emitting optimized vote update');
+      this.log.info(' SMART: Emitting optimized vote update');
       subject.next(updatedDiscussions);
     }
   }
@@ -1838,16 +1671,13 @@ export class EvaluationStateService {
    * @param submissionId - The submission ID to refresh discussions for
    */
   refreshDiscussions(submissionId: string): void {
-    console.log('🔄 Refreshing discussions for submission:', submissionId);
-
     // Get current active category and refresh its discussions
     const currentActiveCategory = this.activeCategorySubject.value;
     if (currentActiveCategory && currentActiveCategory > 0) {
       // loadDiscussionsForCategory returns void and handles subscription internally
       this.loadDiscussionsForCategory(submissionId, currentActiveCategory);
-      console.log('✅ Discussions refresh initiated for category:', currentActiveCategory);
+      this.log.info(' Discussions refresh initiated for category:', currentActiveCategory);
     } else {
-      console.log('⚠️ No active category to refresh discussions for');
     }
   }
 
@@ -1887,7 +1717,7 @@ export class EvaluationStateService {
     const currentStatus = currentStatusMap.get(categoryId);
 
     if (!currentStatus) {
-      console.warn('⚠️ Vote limit status not found for category:', categoryId);
+      this.log.warn(' Vote limit status not found for category:', categoryId);
       return;
     }
 
@@ -1928,8 +1758,8 @@ export class EvaluationStateService {
     if (voteType !== null) {
       const voteLimitStatus = this.voteLimitStatusSubject.value.get(categoryId);
       if (voteLimitStatus && !voteLimitStatus.canVote) {
-        console.warn(
-          `⚠️ No more votes available for category ${categoryId}`,
+        this.log.warn(
+          `No more votes available for category ${categoryId}`,
         );
         return of(null);
       }
@@ -1953,17 +1783,9 @@ export class EvaluationStateService {
           netVotes: result.netVotes || result.voteStats?.upVotes || 0,
         });
 
-        // 🚀 PHASE 4: Emit vote completion for cache synchronization
-        this.voteCompletionSubject.next({
-          commentId,
-          fullResult: result,
-        });
-
         return result;
       }),
       catchError(error => {
-        // 🚀 PHASE 4: Emit vote error for cache synchronization
-        this.voteErrorSubject.next({ commentId });
         throw error;
       }),
     );
@@ -2005,9 +1827,6 @@ export class EvaluationStateService {
     this.voteLimitStatusSubject.next(currentStatusMap);
 
     this.voteLimitLoadingSubject.next(false);
-
-    console.log('📊 Vote limit status set locally for category:', categoryId, defaultVoteLimitStatus);
-
     return of(void 0);
   }
 
@@ -2076,8 +1895,6 @@ export class EvaluationStateService {
    * @param submissionId - The submission ID for storage key
    */
   markCategoryAsCommented(categoryId: number, submissionId: string): void {
-    console.log('📝 Marking category as commented:', { categoryId, submissionId });
-
     // Update in-memory state
     const currentStatusMap = new Map(this.categoryCommentStatusSubject.value);
     currentStatusMap.set(categoryId, true);
@@ -2087,47 +1904,11 @@ export class EvaluationStateService {
     this.saveCommentStatusToStorage(submissionId, categoryId);
   }
 
-  /**
-   * Loads comment status from localStorage for a submission
-   *
-   * @param submissionId - The submission ID
-   */
-  loadCommentStatusFromStorage(submissionId: string): void {
-    try {
-      const storageKey = `${this.commentStatusStorageKey}_${submissionId}`;
-      const storedData = localStorage.getItem(storageKey);
-      
-      if (storedData) {
-        const commentedCategories: number[] = JSON.parse(storedData);
-        const statusMap = new Map<number, boolean>();
-        
-        // Mark all stored categories as commented
-        commentedCategories.forEach(categoryId => {
-          statusMap.set(categoryId, true);
-        });
-        
-        this.categoryCommentStatusSubject.next(statusMap);
-        
-        console.log('💾 Loaded comment status from storage:', {
-          submissionId,
-          commentedCategories,
-          statusMapSize: statusMap.size
-        });
-      } else {
-        console.log('💾 No comment status found in storage for submission:', submissionId);
-        // Initialize empty map
-        this.categoryCommentStatusSubject.next(new Map());
-      }
-    } catch (error) {
-      console.error('❌ Failed to load comment status from storage:', error);
-      // Initialize empty map on error
-      this.categoryCommentStatusSubject.next(new Map());
-    }
-  }
+  // loadCommentStatusFromStorage() removed - redundant (comment status loaded from backend in loadSubmission())
 
   /**
    * Saves comment status to localStorage
-   * 
+   *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID to add
    */
@@ -2145,15 +1926,9 @@ export class EvaluationStateService {
       if (!commentedCategories.includes(categoryId)) {
         commentedCategories.push(categoryId);
         localStorage.setItem(storageKey, JSON.stringify(commentedCategories));
-        
-        console.log('💾 Saved comment status to storage:', {
-          submissionId,
-          categoryId,
-          totalCommentedCategories: commentedCategories.length
-        });
       }
     } catch (error) {
-      console.error('❌ Failed to save comment status to storage:', error);
+      this.log.error('❌ Failed to save comment status to storage:', error);
     }
   }
 
@@ -2176,51 +1951,28 @@ export class EvaluationStateService {
     
     // Optimistic update for immediate UI feedback
     this.updateVoteLimitState(categoryId, isAdding, Number(commentId));
-    
-    console.log('🎯 Optimistic vote limit update:', {
-      categoryId,
-      commentId,
-      voteType,
-      isAdding,
-      currentStatus: this.getVoteLimitStatusForCategory(categoryId)
-    });
-
     return this.evaluationService.voteCommentWithLimits(commentId, voteType).pipe(
       tap(response => {
         // Update vote limit status from backend response
         if (response.voteLimitStatus) {
           this.updateVoteLimitStatus(categoryId, response.voteLimitStatus);
-          console.log('✅ Updated vote limit status from backend:', response.voteLimitStatus);
+          this.log.info(' Updated vote limit status from backend:', response.voteLimitStatus);
         } else {
           // 🚀 FALLBACK SYNC: If backend doesn't provide voteLimitStatus, load it explicitly
           const submissionId = this.submissionSubject.value?.id;
           if (submissionId) {
-            console.log('⚠️ Backend response missing voteLimitStatus, loading explicitly as fallback');
             this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
-              next: () => console.log('✅ Fallback vote limit status loaded successfully'),
-              error: (error) => console.error('❌ Fallback vote limit status loading failed:', error)
+              next: () => this.log.info(' Fallback vote limit status loaded successfully'),
+              error: (error) => this.log.error('❌ Fallback vote limit status loading failed:', error)
             });
           }
         }
 
-        // 🚀 CRITICAL FIX: Emit vote completion event for Smart Sync to work
-        if (response.success) {
-          console.log('📤 Emitting vote completion event with full response:', {
-            commentId,
-            userVoteCount: response.userVoteCount,
-            voteLimitStatus: response.voteLimitStatus
-          });
-          
-          this.voteCompletionSubject.next({
-            commentId,
-            fullResult: response as VoteLimitResponseDTO // Pass complete VoteLimitResponseDTO
-          });
-        }
       }),
       catchError(error => {
         // FIXED: Rollback optimistic update on error (opposite of original action)
         this.updateVoteLimitState(categoryId, !isAdding, Number(commentId));
-        console.error('❌ Failed to vote with enhanced limits, rolling back optimistic update:', error);
+        this.log.error('❌ Failed to vote with enhanced limits, rolling back optimistic update:', error);
         throw error;
       })
     );

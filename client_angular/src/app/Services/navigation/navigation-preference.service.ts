@@ -20,6 +20,9 @@ export class NavigationPreferenceService {
   );
   private enabledNavigationTypes: NavigationType[] = ['graph', 'mobile', 'highlight'];
 
+  constructor(private readonly moduleSettings: ModuleSettingsService) {
+  }
+
   /**
    * Returns the current navigation preference as an Observable
    */
@@ -76,7 +79,6 @@ export class NavigationPreferenceService {
    * @param moduleId The ID of the module
    */
   loadEnabledNavigationTypes(moduleId: number): Observable<NavigationType[]> {
-    console.log('loadEnabledNavigationTypes', moduleId);
     return this.moduleSettings.getSetting<NavigatorSetting>(moduleId, 'enabled_navigators').pipe(
       map(setting => {
         if (setting?.enabled && setting.enabled.length > 0) {
@@ -99,8 +101,5 @@ export class NavigationPreferenceService {
     );
   }
 
-  constructor(private readonly moduleSettings: ModuleSettingsService) {
-    // Load enabled navigation types for module ID 1 (default module)
-    //this.loadEnabledNavigationTypes(1).subscribe();
-  }
+
 }

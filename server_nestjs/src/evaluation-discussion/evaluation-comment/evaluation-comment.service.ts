@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
 import { Prisma, PrismaClient } from '@prisma/client';
@@ -11,6 +11,7 @@ import {
   VoteCountResponseDTO,
   VoteLimitResponseDTO,
   VoteLimitStatusDTO,
+  CommentStatusMapDTO,
 } from '@DTOs/index';
 
 /**
@@ -60,6 +61,8 @@ const COMMENT_INCLUDE_WITH_RELATIONS = {
 
 @Injectable()
 export class EvaluationCommentService {
+  private readonly logger = new Logger(EvaluationCommentService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
@@ -509,6 +512,64 @@ export class EvaluationCommentService {
     } else {
       // If no existing comment, create a new one
       await this.createCommentFromRating(submissionId, categoryId, userId, content, score);
+    }
+  }
+
+  /**
+   * Get user comment status for all categories in a submission
+   *
+   * @description Efficient single-query approach to check which categories
+   * the user has commented in. Essential for proper state initialization
+   * after page refreshes, including auto-created rating comments.
+   *
+   * Performance: Uses GROUP BY aggregation instead of N+1 queries.
+   *
+   * @param submissionId - The submission ID
+   * @param userId - The user ID
+   * @returns Map of categoryId to hasCommented boolean
+   */
+  async getUserCommentStatusForAllCategories(
+    submissionId: number,
+    userId: number
+  ): Promise<CommentStatusMapDTO> {
+    try {
+      // Single optimized query: group comments by category and check user participation
+      const commentsByCategory = await this.prisma.evaluationComment.groupBy({
+        by: ['categoryId'],
+        where: {
+          submissionId,
+          userId,
+        },
+        _count: {
+          id: true,
+        },
+      });
+
+      // Transform to map: categoryId -> hasCommented
+      const statusMap: CommentStatusMapDTO = {};
+      for (const category of commentsByCategory) {
+        statusMap[category.categoryId] = category._count.id > 0;
+      }
+
+      return statusMap;
+    } catch (error) {
+      // Log error without sensitive data (GDPR compliant, no stack traces)
+      this.logger.error(
+        'Failed to load comment status for all categories',
+        error instanceof Error ? error.name : 'UnknownError'
+      );
+
+      // In development: Log full details for debugging
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('[DEV] Full error details:', {
+          submissionId,
+          userId,
+          error: error instanceof Error ? error.stack : error
+        });
+      }
+
+      // BLOCKER #6 FIX: Throw error instead of returning {} to prevent data integrity issues
+      throw new InternalServerErrorException('Failed to load comment status');
     }
   }
 }

@@ -89,7 +89,6 @@ export class AppComponent implements OnInit {
 
   disableConsoleInProduction(): void {
     if (environment.production) {
-      console.warn(`🚨 Console output is disabled on production!`);
       console.log = function (): void {};
       console.debug = function (): void {};
       console.warn = function (): void {};

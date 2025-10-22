@@ -10,7 +10,6 @@ import {
   Query,
   UseGuards,
   BadRequestException,
-  Req,
   ParseIntPipe,
   HttpCode,
   HttpStatus,
@@ -23,6 +22,7 @@ import {
   VoteCountResponseDTO,
   VoteLimitResponseDTO,
   VoteLimitStatusDTO,
+  CommentStatusMapDTO,
 } from '@DTOs/index';
 import { CreateEvaluationCommentDTO, UpdateEvaluationCommentDTO } from '@DTOs/index';
 
@@ -38,8 +38,11 @@ export class EvaluationCommentController {
   // Comment create
   @Post('create')
   @roles('ANY')
-  async create(@Body() createDto: CreateEvaluationCommentDTO, @Req() req): Promise<EvaluationCommentDTO> {
-    return this.evaluationCommentService.create(createDto, req.user.id);
+  async create(
+    @Body() createDto: CreateEvaluationCommentDTO,
+    @GetUser() user: User
+  ): Promise<EvaluationCommentDTO> {
+    return this.evaluationCommentService.create(createDto, user.id);
   }
 
   // Comment delete
@@ -57,9 +60,9 @@ export class EvaluationCommentController {
   async update(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() updateDto: UpdateEvaluationCommentDTO,
-    @Req() req,
+    @GetUser() user: User,
   ): Promise<void> {
-    await this.evaluationCommentService.update(commentId, updateDto, req.user.id);
+    await this.evaluationCommentService.update(commentId, updateDto, user.id);
   }
 
   // Get by submission + category
@@ -68,9 +71,9 @@ export class EvaluationCommentController {
   async getAllByCategory(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
-    @Req() req,
+    @GetUser() user: User,
   ): Promise<EvaluationCommentDTO[]> {
-    return this.evaluationCommentService.getAllByCategory(submissionId, categoryId, req.user.id);
+    return this.evaluationCommentService.getAllByCategory(submissionId, categoryId, user.id);
   }
 
   // Get replies for comment
@@ -78,9 +81,9 @@ export class EvaluationCommentController {
   @roles('ANY')
   async getReplies(
     @Param('commentId', ParseIntPipe) parentId: number,
-    @Req() req,
+    @GetUser() user: User,
   ): Promise<EvaluationCommentDTO[]> {
-    return this.evaluationCommentService.getReplies(parentId, req.user.id);
+    return this.evaluationCommentService.getReplies(parentId, user.id);
   }
 
   // Vote on comment with limit enforcement
@@ -89,9 +92,9 @@ export class EvaluationCommentController {
   async vote(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() body: { isUpvote: boolean },
-    @Req() req,
+    @GetUser() user: User,
   ): Promise<VoteLimitResponseDTO> {
-    return this.evaluationCommentService.vote(commentId, body.isUpvote, req.user.id);
+    return this.evaluationCommentService.vote(commentId, body.isUpvote, user.id);
   }
 
   // Get votes for comment (including user's vote in a separate parameter)
@@ -99,8 +102,8 @@ export class EvaluationCommentController {
   @roles('ANY')
   async getVotes(
     @Param('commentId', ParseIntPipe) commentId: number,
-    @Req() req): Promise<VoteCountResponseDTO> {
-    return this.evaluationCommentService.getVotes(commentId, req.user.id);
+    @GetUser() user: User): Promise<VoteCountResponseDTO> {
+    return this.evaluationCommentService.getVotes(commentId, user.id);
   }
 
   // Reset own votes in category
@@ -110,9 +113,9 @@ export class EvaluationCommentController {
   async resetUserVotes(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
-    @Req() req,
+    @GetUser() user: User,
   ): Promise<void> {
-    await this.evaluationCommentService.resetUserVotes(submissionId, categoryId, req.user.id);
+    await this.evaluationCommentService.resetUserVotes(submissionId, categoryId, user.id);
   }
 
   // Get vote limit status for a category
@@ -121,8 +124,18 @@ export class EvaluationCommentController {
   async getVoteLimitStatus(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
-    @Req() req,
+    @GetUser() user: User,
   ): Promise<VoteLimitStatusDTO> {
-    return this.evaluationCommentService.getVoteLimitStatus(req.user.id, categoryId, submissionId);
+    return this.evaluationCommentService.getVoteLimitStatus(user.id, categoryId, submissionId);
+  }
+
+  // Get user comment status for all categories
+  @Get('comment-status/:submissionId')
+  @roles('ANY')
+  async getUserCommentStatusForAllCategories(
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @GetUser() user: User,
+  ): Promise<CommentStatusMapDTO> {
+    return this.evaluationCommentService.getUserCommentStatusForAllCategories(submissionId, user.id);
   }
 }

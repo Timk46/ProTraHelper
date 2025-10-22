@@ -159,7 +159,6 @@ export function Memoize<TArgs extends unknown[] = unknown[], TReturn = unknown>(
           maxSize,
           (key: string, value: TReturn) => {
             if (debug) {
-              console.log(`🧹 Memoize: Evicted cache entry for ${methodName}:`, key);
             }
           }
         );
@@ -180,11 +179,6 @@ export function Memoize<TArgs extends unknown[] = unknown[], TReturn = unknown>(
         methodStats.hitRate = methodStats.hits / (methodStats.hits + methodStats.misses);
 
         if (debug) {
-          console.log(`✅ Memoize: Cache HIT for ${methodName}`, {
-            key: cacheKey.substring(0, 50),
-            hitRate: `${(methodStats.hitRate * 100).toFixed(1)}%`,
-            cacheSize: cache.size
-          });
         }
 
         return cachedValue;
@@ -196,11 +190,6 @@ export function Memoize<TArgs extends unknown[] = unknown[], TReturn = unknown>(
       methodStats.hitRate = methodStats.hits / (methodStats.hits + methodStats.misses);
 
       if (debug) {
-        console.log(`❌ Memoize: Cache MISS for ${methodName}`, {
-          key: cacheKey.substring(0, 50),
-          hitRate: `${(methodStats.hitRate * 100).toFixed(1)}%`,
-          cacheSize: cache.size
-        });
       }
 
       // Call original method
@@ -254,5 +243,4 @@ export function getMemoizationStats(methodName: string): MemoizationStats | unde
 export function clearMemoizationCache(instance: object): void {
   // WeakMap will automatically clean up when instance is garbage collected
   // This function is mainly for documentation purposes
-  console.log('🧹 Memoization cache will be automatically cleared on instance destruction');
 }

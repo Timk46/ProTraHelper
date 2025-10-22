@@ -52,7 +52,6 @@ export class PdfSimpleViewerPanelComponent implements OnDestroy, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['uploadFileId'] && this.uploadFileId) {
-      console.log('VIEWER HERE:', this.uploadFileId);
       this.pdfFromFileUploadId(this.uploadFileId);
     }
   }

@@ -163,7 +163,6 @@ export class EvaluationPerformanceService {
    */
   startComponentProfiling(componentName: string, options: ProfilingOptions = {}): void {
     if (this.componentProfilingMap.has(componentName)) {
-      console.warn(`⚠️ Component profiling already active for: ${componentName}`);
       return;
     }
 
@@ -197,7 +196,6 @@ export class EvaluationPerformanceService {
   stopComponentProfiling(componentName: string): ComponentProfiling | null {
     const profiling = this.componentProfilingMap.get(componentName);
     if (!profiling) {
-      console.warn(`⚠️ No active profiling found for component: ${componentName}`);
       return null;
     }
 
@@ -372,12 +370,6 @@ export class EvaluationPerformanceService {
       bandwidthUsage: networkMetrics.bandwidthUsage + this.estimateBandwidth(url)
     });
 
-    console.log(`📡 Network request recorded: ${url}`, {
-      duration: `${duration.toFixed(2)}ms`,
-      success,
-      fromCache,
-      averageResponseTime: `${newAverageResponseTime.toFixed(2)}ms`
-    });
   }
 
   /**

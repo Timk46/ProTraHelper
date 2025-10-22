@@ -805,7 +805,6 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     this.isRhinoSwitching = true;
 
     try {
-      console.log('🎯 Attempting to focus existing Rhino window...');
 
       // Use direct focus approach - never launches Rhino
       const result = await firstValueFrom(this.rhinoFocusService.focusRhinoWindowUnified());
@@ -836,7 +835,6 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
           panelClass: 'success-snackbar',
         });
       } else {
-        console.warn('⚠️ Rhino focus failed:', result?.message || 'Unknown error');
 
         let userMessage = '';
         let actionText = 'OK';

@@ -802,8 +802,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           console.log('📡 Loading submission from backend...', submissionId);
           this.stateService.loadSubmission(submissionId, Number(this.userservice.getTokenID()));
 
-          // Load comment status from localStorage for real submissions
-          this.stateService.loadCommentStatusFromStorage(submissionId);
+          // Comment status is now loaded automatically from backend in loadSubmission()
           console.log('📝 Loaded comment status for submission:', submissionId);
         } else {
           // No submission ID provided - show empty state

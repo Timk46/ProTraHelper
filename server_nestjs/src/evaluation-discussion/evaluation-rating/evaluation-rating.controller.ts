@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req, Logger } from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
@@ -6,6 +6,7 @@ import { roles } from '../../auth/common/guards/roles.guard';
 import { EvaluationRatingService } from './evaluation-rating.service';
 import { EvaluationRatingDTO, CategoryRatingStatus } from '@DTOs/index';
 import { CreateEvaluationRatingDTO, UpdateEvaluationRatingDTO } from '@DTOs/index';
+import { ParseIntPipe } from '../../common/pipes/parse-int.pipe';
 
 /**
  * Type-safe authenticated request interface
@@ -22,6 +23,8 @@ interface AuthenticatedRequest extends Request {
 @Controller('evaluation-ratings')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class EvaluationRatingController {
+  private readonly logger = new Logger(EvaluationRatingController.name);
+
   constructor(private readonly evaluationRatingService: EvaluationRatingService) {}
 
   @Post()
@@ -36,53 +39,53 @@ export class EvaluationRatingController {
   @Put(':id')
   @roles('ANY')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateEvaluationRatingDTO,
     @Req() req: AuthenticatedRequest,
   ): Promise<EvaluationRatingDTO> {
-    return this.evaluationRatingService.update(Number(id), updateDto, req.user.id);
+    return this.evaluationRatingService.update(id, updateDto, req.user.id);
   }
 
   @Get('submission/:submissionId')
   @roles('ANY')
   async getSubmissionRatings(
-    @Param('submissionId') submissionId: string,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
   ): Promise<EvaluationRatingDTO[]> {
-    return this.evaluationRatingService.getSubmissionRatings(Number(submissionId));
+    return this.evaluationRatingService.getSubmissionRatings(submissionId);
   }
 
   @Get('category/:categoryId')
   @roles('ANY')
   async getCategoryRatings(
-    @Param('categoryId') categoryId: string,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
   ): Promise<EvaluationRatingDTO[]> {
-    return this.evaluationRatingService.getCategoryRatings(Number(categoryId));
+    return this.evaluationRatingService.getCategoryRatings(categoryId);
   }
 
   @Get('submission/:submissionId/summary')
   @roles('ANY')
-  async getRatingSummary(@Param('submissionId') submissionId: string): Promise<any> {
-    return this.evaluationRatingService.getRatingSummary(Number(submissionId));
+  async getRatingSummary(@Param('submissionId', ParseIntPipe) submissionId: number): Promise<any> {
+    return this.evaluationRatingService.getRatingSummary(submissionId);
   }
 
   @Get('submission/:submissionId/user/:userId')
   @roles('ANY')
   async getUserRatings(
-    @Param('submissionId') submissionId: string,
-    @Param('userId') userId: string,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<EvaluationRatingDTO[]> {
-    console.log('getUserRatings', submissionId, 'userId', userId);
-    return this.evaluationRatingService.getUserRatings(Number(submissionId), Number(userId));
+    this.logger.debug(`Getting ratings for submission: ${submissionId}, user: ${userId}`);
+    return this.evaluationRatingService.getUserRatings(submissionId, userId);
   }
 
   @Get('submission/:submissionId/category/:categoryId/stats')
   @roles('ANY')
   async getCategoryStats(
-    @Param('submissionId') submissionId: string,
-    @Param('categoryId') categoryId: string,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
   ): Promise<any> {
-    console.log('getCategoryStats', submissionId, 'categoryId', categoryId);
-    return this.evaluationRatingService.getCategoryStats(Number(submissionId), Number(categoryId));
+    this.logger.debug(`Getting category stats for submission: ${submissionId}, category: ${categoryId}`);
+    return this.evaluationRatingService.getCategoryStats(submissionId, categoryId);
   }
 
   /**
@@ -101,13 +104,13 @@ export class EvaluationRatingController {
   @Get('submission/:submissionId/category/:categoryId/user')
   @roles('ANY')
   async hasUserRatedCategory(
-    @Param('submissionId') submissionId: string,
-    @Param('categoryId') categoryId: string,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
     @Req() req: AuthenticatedRequest,
   ): Promise<{ hasRated: boolean }> {
     const hasRated = await this.evaluationRatingService.hasUserRatedCategory(
-      Number(submissionId),
-      Number(categoryId),
+      submissionId,
+      categoryId,
       req.user.id,
     );
     return { hasRated };
@@ -128,13 +131,10 @@ export class EvaluationRatingController {
   @Get('submission/:submissionId/user/:userId/status')
   @roles('ANY')
   async getUserRatingStatus(
-    @Param('submissionId') submissionId: string,
-    @Param('userId') userId: string,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ): Promise<CategoryRatingStatus[]> {
-    return this.evaluationRatingService.getUserRatingStatus(
-      Number(submissionId),
-      Number(userId)
-    );
+    return this.evaluationRatingService.getUserRatingStatus(submissionId, userId);
   }
 
   /**
@@ -153,15 +153,17 @@ export class EvaluationRatingController {
   @Delete('submission/:submissionId/category/:categoryId/user')
   @roles('ANY')
   async deleteUserRating(
-    @Param('submissionId') submissionId: string,
-    @Param('categoryId') categoryId: string,
+    @Param('submissionId', ParseIntPipe) submissionId: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
     @Req() req: AuthenticatedRequest,
   ): Promise<{ success: boolean; message: string }> {
     await this.evaluationRatingService.deleteUserRating(
-      Number(submissionId),
-      Number(categoryId),
+      submissionId,
+      categoryId,
       req.user.id,
     );
+
+    this.logger.log(`Rating deleted: submission=${submissionId}, category=${categoryId}, user=${req.user.id}`);
 
     return {
       success: true,

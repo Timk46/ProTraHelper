@@ -16,8 +16,6 @@ export class ModuleSettingsService {
    * Gets the settings for a specific module and key
    */
   getSetting<T>(moduleId: number, key: string): Observable<T> {
-    console.log('moduleId in getsetting', moduleId);
-    console.log('key in getsetting', key);
     return this.http
       .get<{ value: string }>(`${this.apiUrl}/module-settings/${moduleId}/${key}`)
       .pipe(map(response => JSON.parse(response.value) as T));
@@ -27,9 +25,6 @@ export class ModuleSettingsService {
    * Updates settings for a specific module and key
    */
   updateSetting<T>(moduleId: number, key: string, value: T): Observable<void> {
-    console.log('moduleId in updatesetting', moduleId);
-    console.log('key in updatesetting', key);
-    console.log('value in updatesetting', value);
     return this.http.post<void>(`${this.apiUrl}/module-settings/${moduleId}/${key}`, {
       value: JSON.stringify(value),
     });

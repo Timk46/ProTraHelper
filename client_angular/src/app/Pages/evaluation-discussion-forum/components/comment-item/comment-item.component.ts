@@ -162,15 +162,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       this._cachedIsCurrentUser = null; // Unknown state
     }
     
-    console.log('🔧 CommentItem initialized:', {
-      commentId: this.comment?.id,
-      author: this.comment?.author?.displayName,
-      content: this.comment?.content?.substring(0, 50) + '...',
-      depth: this.depth,
-      isCurrentUser: this._cachedIsCurrentUser,
-      hasAnonymousUser: !!this.anonymousUser,
-      timestamp: new Date().toISOString()
-    });
 
     this.formatCommentTime();
     // 🚀 PHASE 2.3: Initialize cached values for performance
@@ -192,16 +183,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Initialize panel state
     this.initializePanelState();
 
-    console.log('💬 Comment item initialized:', {
-      commentId: this.comment.id,
-      authorId: this.comment.author.id,
-      authorType: this.comment.author.type,
-      authorDisplayName: this.comment.author.displayName,
-      anonymousUserId: this.anonymousUser?.id,
-      isCurrentUser: this._cachedIsCurrentUser, // Use cached value
-      isPanelExpanded: this.isPanelExpanded,
-      globalSessionVotes: this.voteSessionService.getSessionVotes(),
-    });
   }
 
   ngAfterViewInit(): void {
@@ -247,7 +228,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
       // 🚀 PHASE 3: Reload vote status if comment or anonymousUser changed
       if (changes['comment'] && !changes['comment'].firstChange) {
-        console.log('🔄 Comment changed, reloading vote status');
         this.loadUserVoteStatus();
       }
     }
@@ -259,12 +239,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       
       // Reset session votes when parent state updates (indicates backend sync)
       if (currentValue !== previousValue) {
-        console.log('🔄 Available votes changed - checking if session reset needed:', {
-          commentId: this.comment?.id,
-          previousAvailable: previousValue,
-          currentAvailable: currentValue,
-          globalSessionVotes: this.voteSessionService.getSessionVotes(),
-        });
         // Note: Session votes are now handled globally and don't reset per component
         
         // 🚀 OPTIMISTIC UI UPDATE: Force UI update after session reset
@@ -274,20 +248,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // 🚀 PHASE 1.3: Aggressive change detection for immediate UI updates
     if (changes['comment'] || changes['isVoting'] || changes['canVote'] || changes['availableVotes']) {
-      console.log('🔄 Vote-related inputs changed, triggering change detection:', {
-        commentId: this.comment?.id,
-        hasCommentChanged: !!changes['comment'],
-        hasVotingStateChanged: !!changes['isVoting'],
-        hasVoteLimitsChanged: !!(changes['canVote'] || changes['availableVotes']),
-        hasVoteCountsChanged: !!changes['availableVotes'],
-        newVotingState: changes['isVoting']?.currentValue,
-        previousVotingState: changes['isVoting']?.previousValue,
-        globalSessionVotes: this.voteSessionService.getSessionVotes(),
-      });
 
       // 🚀 PHASE 1: Use detectChanges() for immediate update when voting state changes
       if (changes['isVoting'] && changes['isVoting'].currentValue !== changes['isVoting'].previousValue) {
-        console.log('⚡ Voting state changed - forcing immediate detection');
         this.cdr.detectChanges();
       } else {
         // 🚀 PHASE 1: Use detectChanges() for consistent immediate UI updates
@@ -302,11 +265,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
       if (currentVoteStats && previousVoteStats &&
           (currentVoteStats.upVotes !== previousVoteStats.upVotes)) {
-        console.log('📊 Vote stats changed - forcing immediate update:', {
-          commentId: this.comment.id,
-          previousUpVotes: previousVoteStats.upVotes,
-          currentUpVotes: currentVoteStats.upVotes,
-        });
         this.cdr.detectChanges();
       }
     }
@@ -350,16 +308,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     if (localVote !== null) {
       // Found vote in local data
-      console.log('✅ User vote found in local data:', {
-        commentId: this.comment.id,
-        localVote,
-      });
       this.setVoteStatus(localVote, 'local-data');
       return;
     }
 
     // Second attempt: Load from API if not found locally
-    console.log('🔄 Loading user vote status from API for comment:', this.comment.id);
     this._userVoteLoadingState.next(true);
 
     this.evaluationStateService
@@ -385,10 +338,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       )
       .subscribe({
         next: (voteType: VoteType | null) => {
-          console.log('✅ User vote status loaded from API:', {
-            commentId: this.comment.id,
-            voteType,
-          });
 
           this._userVoteLoadingState.next(false);
           this.setVoteStatus(voteType, 'api-fallback');
@@ -418,11 +367,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * @param source Optional source description for logging
    */
   private setVoteStatus(voteStatus: VoteType | null, source: string = 'unknown'): void {
-    console.log('🔄 Setting vote status:', {
-      commentId: this.comment.id,
-      voteStatus,
-      source,
-    });
 
     // Update the Observable (primary source of truth)
     this._userVoteStatusCache.next(voteStatus);
@@ -472,7 +416,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       .getUserVoteCountForComment(this.comment.id.toString())
       .pipe(
         catchError((error) => {
-          console.warn('⚠️ Backend getUserVoteCountForComment failed, using fallback:', error);
           return of(0);
         }),
         takeUntil(this.destroy$)
@@ -488,11 +431,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
             source: 'backend-fallback'
           });
         } else {
-          console.log('⚠️ Skipping backend fallback - already initialized or operations pending:', {
-            localVoteCount: this.localVoteCount,
-            pendingOperations: this.pendingVoteOperations,
-            backendCount: count
-          });
         }
       });
   }
@@ -508,7 +446,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // 🚀 PRIORITY 1: Direct userVoteCount in comment (highest priority)
     if (typeof this.comment.userVoteCount === 'number') {
-      console.log('📊 ✅ Priority 1: Extracted from comment.userVoteCount:', this.comment.userVoteCount);
       return this.comment.userVoteCount;
     }
 
@@ -519,18 +456,15 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
         const userId = this.anonymousUser.id.toString();
         if (voteDetails.userVoteCounts[userId] !== undefined) {
           const count = voteDetails.userVoteCounts[userId];
-          console.log('📊 ✅ Priority 2: Extracted from voteDetails.userVoteCounts:', count);
           return count;
         }
       }
     } catch (error) {
-      console.warn('⚠️ Priority 2 extraction failed:', error);
     }
 
     // 🚀 PRIORITY 3: voteStats.userVoteCount (legacy support)
     if ((this.comment.voteStats as any)?.userVoteCount !== undefined) {
       const count = (this.comment.voteStats as any).userVoteCount;
-      console.log('📊 ✅ Priority 3: Extracted from voteStats.userVoteCount:', count);
       return count;
     }
 
@@ -541,16 +475,13 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       );
 
       if (userVotes.length > 0) {
-        console.log('📊 ⚡ Priority 4: Estimated from votes array:', userVotes.length);
         return userVotes.length; // Minimum estimate
       }
     } catch (error) {
-      console.warn('⚠️ Priority 4 extraction failed:', error);
     }
 
     // Method 4: Legacy fallback (original logic)
     const legacyCount = this._cachedUserVote === 'UP' ? 1 : 0;
-    console.log('📊 Using legacy fallback vote count:', legacyCount);
     return legacyCount;
   }
 
@@ -560,7 +491,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * This prevents interference from global state updates
    */
   private setupVoteEventListeners(): void {
-    console.log('🔧 LOCAL: Skipping global vote event listeners - using local vote management');
 
     // 🔧 Note: Global vote listeners removed to prevent cascade updates
     // Vote operations are now handled entirely locally in performLocalVoteOperation()
@@ -603,11 +533,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     const newState = this.commentPanelStateService.togglePanelState(this.comment.id.toString());
 
-    console.log('🔄 Panel toggled:', {
-      commentId: this.comment.id,
-      newState,
-      replyCount: this.comment.replyCount,
-    });
 
     // The panel state will be updated via the subscription in initializePanelState
     // No need to manually update isPanelExpanded here
@@ -692,17 +617,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
       // Additional safety checks
       if (!this.canVoteOnComment || this.isVoting) {
-        console.warn('🎯 Vote blocked by safety checks:', {
-          canVoteOnComment: this.canVoteOnComment,
-          isVoting: this.isVoting,
-          commentId: this.comment.id
-        });
         return;
       }
 
       // Check vote limits
       if (!this.canAddMoreVotes()) {
-        console.log('❌ Vote limit reached');
         this.showVoteLimitWarning();
         return;
       }
@@ -730,13 +649,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Haptic feedback
     this.triggerHapticFeedback('light');
 
-    console.log('🔧 Performing vote operation via VoteOperationsService:', {
-      voteType,
-      commentId: this.comment.id,
-      previousCount: this.localVoteCount,
-      expectedCount: this.expectedVoteCount,
-      currentSessionVotes: this.voteSessionService.getSessionVotes(),
-    });
 
     // Optimistic update
     this.localVoteCount = this.expectedVoteCount;
@@ -785,13 +697,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
       // Check if user has votes to remove
       if (this.getUserVoteCount() === 0) {
-        console.log('❌ Cannot remove vote - user has no votes on this comment');
         return;
       }
 
       // Additional safety checks (but allow removal even if voting is disabled)
       if (this.isVoting) {
-        console.warn('🎯 Remove vote blocked - operation in progress');
         return;
       }
 
@@ -816,7 +726,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     } else if (voteType === null) {
       await this.removeVote();
     } else {
-      console.log('❌ Invalid vote type for ranking system:', voteType);
     }
   }
 
@@ -826,14 +735,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * Prevents the re-rendering cascade by handling votes locally with proper error handling
    */
   private async performLocalVoteOperation(voteType: VoteType | null): Promise<void> {
-    console.log('🔧 Performing local vote operation via VoteOperationsService:', {
-      commentId: this.comment.id,
-      voteType,
-      localVoteCount: this.localVoteCount,
-      submissionId: this.comment.submissionId,
-      categoryId: this.comment.categoryId,
-      anonymousUserId: this.anonymousUser?.id
-    });
 
     try {
       // Use LegacyVoteAdapter for consistent vote handling with limits
@@ -845,11 +746,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
         this.anonymousUser?.id
       );
 
-      console.log('✅ Local vote operation completed via VoteOperationsService:', {
-        commentId: this.comment.id,
-        voteType,
-        result
-      });
 
       this.onLocalVoteCompleted(result);
 
@@ -862,10 +758,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
       // Handle VoteOperationError with user-friendly messages
       if (error?.code === 'VOTE_LIMIT_EXCEEDED') {
-        console.warn('⚠️ Vote limit exceeded - showing user notification');
         // Could show a toast or dialog here
       } else if (error?.code === 'SELF_VOTE_ATTEMPT') {
-        console.warn('⚠️ Self-voting attempt blocked');
       }
 
       this.onLocalVoteError();
@@ -885,20 +779,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     const backendVoteCount = this.legacyVoteAdapter.extractVoteCountFromResponse(result);
 
     if (backendVoteCount !== undefined) {
-      console.log('🔧 Synchronizing local vote count with VoteOperationsService result:', {
-        commentId: this.comment.id,
-        previousCount: this.localVoteCount,
-        backendCount: backendVoteCount,
-        resultType: 'VoteLimitResponseDTO'
-      });
 
       this.localVoteCount = backendVoteCount;
       this.setVoteStatus(backendVoteCount > 0 ? 'UP' : null, 'local-api-completion');
     } else {
-      console.log('🔧 Using expected vote count (no backend count available):', {
-        commentId: this.comment.id,
-        expectedCount: this.expectedVoteCount
-      });
 
       // Use expected count if backend doesn't provide one
       this.localVoteCount = this.expectedVoteCount;
@@ -907,7 +791,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // Update vote limit status if available
     if (result && typeof result === 'object' && 'voteLimitStatus' in result) {
-      console.log('📊 Vote limit status received from VoteOperationsService:', result.voteLimitStatus);
       // Could update local vote limit displays here if needed
     }
 
@@ -926,7 +809,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * Reverts optimistic updates and provides user feedback
    */
   private onLocalVoteError(): void {
-    console.log('❌ Local vote operation failed, reverting optimistic update');
 
     // Decrease pending operations counter
     this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
@@ -949,7 +831,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * Reverts optimistic updates and provides user feedback
    */
   onVoteError(): void {
-    console.log('❌ Vote failed, reverting optimistic update');
 
     // Reload vote status from local data first (faster fallback)
     const localVote = this.getUserVoteFromLocal();
@@ -968,9 +849,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // 🚀 PHASE 5: Simplified - only emit event, reply input handled by parent
     this.replyRequested.emit(this.comment.id.toString());
 
-    console.log('🎯 Reply requested:', {
-      commentId: this.comment.id.toString(),
-    });
   }
 
   // 🚀 PHASE 5: Old reply submission methods removed - handled by separate reply-input component
@@ -1014,11 +892,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    */
   isCurrentUser(): boolean | null {
     if (!this.anonymousUser || !this.comment) {
-      console.warn('🎯 Cannot determine current user - missing data:', {
-        anonymousUser: !!this.anonymousUser,
-        comment: !!this.comment,
-        commentId: this.comment?.id
-      });
       return null; // 🚨 RETURN NULL INSTEAD OF FALSE FOR UNKNOWN STATE
     }
 
@@ -1031,17 +904,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     const userIdNum = Number(anonymousUserId);
     const isOwn = authorIdNum === userIdNum;
 
-    console.log('🎯 Enhanced user ownership check:', {
-      commentId: this.comment.id,
-      commentAuthorId,
-      commentAuthorIdType: typeof commentAuthorId,
-      authorIdNum,
-      anonymousUserId,
-      anonymousUserIdType: typeof anonymousUserId,
-      userIdNum,
-      isOwn,
-      authorDisplayName: this.comment.author?.displayName
-    });
 
     // 🚨 BLOCKING VOTE: If this is the user's own comment, they cannot vote
     if (isOwn) {
@@ -1169,14 +1031,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Check if we have any votes remaining after session votes
     const hasVotesRemaining = effectiveAvailableVotes > 0;
 
-    console.log('🔍 Vote limit check:', {
-      commentId: this.comment.id,
-      availableVotes: this.availableVotes,
-      sessionVotesGiven: this.voteSessionService.getSessionVotes(),
-      effectiveAvailableVotes,
-      pendingOperations: this.pendingVoteOperations,
-      canAddMore: hasVotesRemaining,
-    });
 
     return hasVotesRemaining;
   }
@@ -1232,11 +1086,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     const effectiveAvailableVotes = this.availableVotes - this.voteSessionService.getSessionVotes();
     
     if (effectiveAvailableVotes <= 0) {
-      console.log('⚠️ Vote limit reached - showing dialog:', {
-        availableVotes: this.availableVotes,
-        globalSessionVotes: this.voteSessionService.getSessionVotes(),
-        effectiveAvailableVotes,
-      });
       
       // Calculate total comment count for dialog
       const totalComments = this.getTotalCommentCount();
@@ -1263,11 +1112,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
         }
       });
     } else {
-      console.log('⚠️ Vote limit warning not shown - votes still available:', {
-        availableVotes: this.availableVotes,
-        globalSessionVotes: this.voteSessionService.getSessionVotes(),
-        effectiveAvailableVotes,
-      });
     }
   }
 
@@ -1352,15 +1196,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    */
   private performFinalSynchronization(): void {
     if (this.pendingVoteOperations > 0) {
-      console.log('⚠️ Skipping final sync - operations still pending');
       return;
     }
 
-    console.log('🔄 Performing final synchronization:', {
-      commentId: this.comment.id,
-      currentLocalVoteCount: this.localVoteCount,
-      cachedUserVote: this._cachedUserVote
-    });
 
     // Try to get accurate count from all sources
     const extractedCount = this.extractVoteCountFromLocalData();
@@ -1374,7 +1212,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // Last resort: try backend call if still uncertain
     if (finalCount === 0 && this._cachedUserVote === 'UP') {
-      console.log('🔄 Final sync: Attempting backend call for accurate count');
       this.evaluationStateService
         .evaluationService
         .getUserVoteCountForComment(this.comment.id.toString())
@@ -1384,7 +1221,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
         )
         .subscribe((backendCount: number) => {
           if (backendCount > 0 && backendCount !== this.localVoteCount) {
-            console.log('✅ Final sync: Updated from backend call:', backendCount);
             this.localVoteCount = backendCount;
             this.cdr.detectChanges();
           }
@@ -1394,15 +1230,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // Update if we found a better value
     if (finalCount !== this.localVoteCount) {
-      console.log('✅ Final sync: Updated localVoteCount:', {
-        from: this.localVoteCount,
-        to: finalCount,
-        source
-      });
       this.localVoteCount = finalCount;
       this.cdr.detectChanges();
     } else {
-      console.log('✅ Final sync: No update needed, localVoteCount is accurate:', finalCount);
     }
   }
 
@@ -1642,13 +1472,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * Optimized synchronization logic and fallback strategies
    */
   onVoteCompleted(voteResult: VoteLimitResponseDTO | unknown): void {
-    console.log('✅ Enhanced vote completion processing:', {
-      commentId: this.comment.id,
-      voteResult,
-      pendingOperations: this.pendingVoteOperations,
-      expectedVoteCount: this.expectedVoteCount,
-      currentLocalVoteCount: this.localVoteCount
-    });
 
     // 🛠️ SMART SYNC: Sicheres Decrement der pending operations
     this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
@@ -1666,7 +1489,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Methode 1: Direkte VoteLimitResponseDTO Zugriff (höchste Priorität)
     if (this.isVoteLimitResponseDTO(voteResult) && voteResult.userVoteCount !== undefined) {
       backendVoteCount = voteResult.userVoteCount;
-      console.log('📊 ✅ Methode 1: userVoteCount aus VoteLimitResponseDTO:', backendVoteCount);
     }
 
     // Methode 2: Verschachtelte Strukturen (mittlere Priorität)
@@ -1676,7 +1498,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
                         result.data?.userVoteCount ||
                         result.fullResult?.userVoteCount;
       if (backendVoteCount !== undefined) {
-        console.log('📊 ✅ Methode 2: userVoteCount aus verschachtelter Struktur:', backendVoteCount);
       }
     }
 
@@ -1684,7 +1505,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     if (backendVoteCount === undefined) {
       backendVoteCount = this.extractVoteCountFromResponse(voteResult);
       if (backendVoteCount !== undefined) {
-        console.log('📊 ⚡ Methode 3: userVoteCount aus Legacy-Extraktion:', backendVoteCount);
       }
     }
 
@@ -1711,29 +1531,12 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       // Keine weiteren Operations - Backend-Antwort sicher akzeptieren
       this.localVoteCount = backendVoteCount;
       this.cdr.detectChanges();
-      console.log('🔄 Keine pending operations - Backend-Antwort akzeptiert:', {
-        commentId: this.comment.id,
-        newLocalVoteCount: this.localVoteCount,
-        backendVoteCount
-      });
     } else if (Math.abs(backendVoteCount - this.expectedVoteCount) <= 1) {
       // Backend-Antwort stimmt mit Erwartung überein (Toleranz: ±1)
       this.localVoteCount = backendVoteCount;
       this.cdr.detectChanges();
-      console.log('🔄 Backend-Antwort stimmt mit Erwartung überein:', {
-        commentId: this.comment.id,
-        backendVoteCount,
-        expectedVoteCount: this.expectedVoteCount
-      });
     } else {
       // Race Condition erkannt - optimistischen Wert beibehalten
-      console.log('⚠️ Race Condition erkannt - verzögerte Backend-Antwort ignoriert:', {
-        commentId: this.comment.id,
-        delayedBackendResponse: backendVoteCount,
-        currentOptimisticValue: this.localVoteCount,
-        expectedVoteCount: this.expectedVoteCount,
-        pendingOperations: this.pendingVoteOperations
-      });
     }
   }
 
@@ -1741,17 +1544,14 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
    * 🛠️ NEU: Fallback-Behandlung wenn Backend Vote Count nicht extrahiert werden kann
    */
   private handleVoteCountFallback(voteResult: unknown): void {
-    console.warn('⚠️ Konnte userVoteCount nicht extrahieren, verwende Fallback-Logik:', voteResult);
 
     if (this.pendingVoteOperations === 0 && this.expectedVoteCount !== undefined) {
-      console.log('🔧 Verwende expectedVoteCount als Fallback:', this.expectedVoteCount);
       this.localVoteCount = this.expectedVoteCount;
       this.cdr.detectChanges();
     } else {
       // Versuche lokale Extraktion als letzten Ausweg
       const localExtracted = this.extractVoteCountFromLocalData();
       if (localExtracted !== this.localVoteCount && (localExtracted > 0 || this.localVoteCount > 0)) {
-        console.log('🔧 Verwende lokale Extraktion als ultimativen Fallback:', localExtracted);
         this.localVoteCount = localExtracted;
         this.cdr.detectChanges();
       }
@@ -1790,7 +1590,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
           return (result['response'] as Record<string, unknown>)['userVoteCount'] as number;
         }
       }
-      console.warn('⚠️ All extraction methods failed');
       return undefined;
     } catch (error) {
       console.error('❌ Error during userVoteCount extraction:', error);

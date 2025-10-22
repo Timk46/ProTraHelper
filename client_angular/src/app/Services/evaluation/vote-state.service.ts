@@ -125,7 +125,6 @@ export class VoteStateService implements OnDestroy {
     (commentId: number, subject: BehaviorSubject<number>) => {
       subject.complete();
       this.cacheMetrics.evictions++;
-      console.log(`🧹 VoteStateService: LRU evicted vote cache for comment ${commentId}`);
     }
   );
 
@@ -137,7 +136,6 @@ export class VoteStateService implements OnDestroy {
     20,
     (key, subject) => {
       subject.complete();
-      console.log(`🧹 VoteStateService: LRU evicted stats cache for ${key}`);
     }
   );
 
@@ -149,7 +147,6 @@ export class VoteStateService implements OnDestroy {
     20,
     (key, subject) => {
       subject.complete();
-      console.log(`🧹 VoteStateService: LRU evicted vote limit cache for ${key}`);
     }
   );
 
@@ -273,7 +270,6 @@ export class VoteStateService implements OnDestroy {
       cached = new BehaviorSubject<number>(0);
       this.voteCache.set(commentId, cached);
 
-      console.log(`📊 VoteStateService: Vote count for ${commentId} not in cache, initializing (cache miss)`);
     } else {
       this.cacheMetrics.hits++;
     }
@@ -353,7 +349,6 @@ export class VoteStateService implements OnDestroy {
    * @param commentId - Comment identifier (number)
    */
   invalidateVoteCache(commentId: number): void {
-    console.log(`🧹 VoteStateService: Invalidating vote cache for ${commentId}`);
     this.voteCache.delete(commentId);
   }
 
@@ -365,7 +360,6 @@ export class VoteStateService implements OnDestroy {
    */
   invalidateStatsCache(submissionId: number, categoryId: number): void {
     const key = this.getStatsCacheKey(submissionId, categoryId);
-    console.log(`🧹 VoteStateService: Invalidating stats cache for ${key}`);
     this.statsCache.delete(key);
   }
 
@@ -377,7 +371,6 @@ export class VoteStateService implements OnDestroy {
    */
   invalidateVoteLimitCache(submissionId: number, categoryId: number): void {
     const key = this.getVoteLimitCacheKey(submissionId, categoryId);
-    console.log(`🧹 VoteStateService: Invalidating vote limit cache for ${key}`);
     this.voteLimitCache.delete(key);
   }
 
@@ -400,7 +393,6 @@ export class VoteStateService implements OnDestroy {
       cached.next(voteCount);
     }
 
-    console.log(`✅ VoteStateService: Updated vote cache for ${commentId} = ${voteCount}`);
   }
 
   // =============================================================================
@@ -421,7 +413,6 @@ export class VoteStateService implements OnDestroy {
       return a.timestamp - b.timestamp;
     });
 
-    console.log(`📋 VoteStateService: Operation queued. Queue size: ${this.voteQueue.length}`);
   }
 
   /**
@@ -438,7 +429,6 @@ export class VoteStateService implements OnDestroy {
     }
 
     this.isProcessingQueue = true;
-    console.log(`🔄 VoteStateService: Processing queue (${this.voteQueue.length} operations) with batch size ${this.QUEUE_BATCH_SIZE}`);
 
     try {
       while (this.voteQueue.length > 0) {
@@ -461,11 +451,9 @@ export class VoteStateService implements OnDestroy {
         // Log batch results
         const fulfilled = results.filter(r => r.status === 'fulfilled').length;
         const rejected = results.filter(r => r.status === 'rejected').length;
-        console.log(`✅ VoteStateService: Batch completed - ${fulfilled} succeeded, ${rejected} failed`);
       }
     } finally {
       this.isProcessingQueue = false;
-      console.log('✅ VoteStateService: Queue processing completed');
     }
   }
 
@@ -495,10 +483,8 @@ export class VoteStateService implements OnDestroy {
     // Invalidate vote limit cache for category
     if (operation.categoryId && operation.submissionId) {
       this.invalidateVoteLimitCache(operation.submissionId, operation.categoryId);
-      console.log(`🧹 VoteStateService: Invalidated vote limit cache for submission ${operation.submissionId}, category ${operation.categoryId}`);
     }
 
-    console.log(`✅ VoteStateService: Vote executed successfully for ${operation.commentId}`);
   }
 
   /**
@@ -514,7 +500,6 @@ export class VoteStateService implements OnDestroy {
       // Calculate exponential backoff delay
       const delayMs = this.RETRY_BASE_DELAY * Math.pow(2, operation.retryCount);
 
-      console.warn(`🔄 VoteStateService: Retrying vote for ${operation.commentId} in ${delayMs}ms (attempt ${operation.retryCount + 1}/${this.MAX_RETRY_ATTEMPTS}) - Error: ${errorCode}`);
 
       await this.delay(delayMs);
 
@@ -653,7 +638,6 @@ export class VoteStateService implements OnDestroy {
   private loadRatingStatsFromBackend(submissionId: number, categoryId: number): void {
     const key = this.getStatsCacheKey(submissionId, categoryId);
 
-    console.log(`📊 VoteStateService: Loading rating stats from backend for ${key}`);
 
     this.voteCoreService.loadRatingStats(submissionId, categoryId).pipe(
       takeUntil(this.destroy$),
@@ -661,7 +645,6 @@ export class VoteStateService implements OnDestroy {
         const cached = this.statsCache.get(key);
         if (cached) {
           cached.next(stats);
-          console.log(`✅ VoteStateService: Rating stats loaded for ${key}`);
         }
       }),
       catchError((error: unknown) => {
@@ -677,7 +660,6 @@ export class VoteStateService implements OnDestroy {
   private loadVoteLimitStatusFromBackend(submissionId: number, categoryId: number): void {
     const key = this.getVoteLimitCacheKey(submissionId, categoryId);
 
-    console.log(`📊 VoteStateService: Loading vote limit status from backend for ${key}`);
 
     this.voteCoreService.loadVoteLimitStatus(submissionId, categoryId).pipe(
       takeUntil(this.destroy$),
@@ -685,7 +667,6 @@ export class VoteStateService implements OnDestroy {
         const cached = this.voteLimitCache.get(key);
         if (cached) {
           cached.next(status);
-          console.log(`✅ VoteStateService: Vote limit status loaded for ${key}`);
         }
       }),
       catchError((error: unknown) => {
@@ -712,7 +693,6 @@ export class VoteStateService implements OnDestroy {
       this.handleRemoteVoteUpdate(event);
     });
 
-    console.log('✅ VoteStateService: Real-time listeners configured');
   }
 
   /**
@@ -722,7 +702,6 @@ export class VoteStateService implements OnDestroy {
     if (!event.commentId) return;
 
     const commentId = event.commentId; // Already a number from VoteEvent DTO
-    console.log(`🔄 VoteStateService: Remote vote update for comment ${commentId}`);
 
     // Invalidate cache for affected comment
     this.invalidateVoteCache(commentId);
@@ -764,11 +743,6 @@ export class VoteStateService implements OnDestroy {
       const hitRate = ((this.cacheMetrics.hits / total) * 100).toFixed(1);
       const uptime = ((Date.now() - this.cacheMetrics.lastReset) / 1000).toFixed(0);
 
-      console.log(`📊 VoteStateService Cache Metrics:
-        Hit Rate: ${hitRate}% (${this.cacheMetrics.hits}/${total})
-        Evictions: ${this.cacheMetrics.evictions}
-        Uptime: ${uptime}s
-      `);
     }
   }
 
@@ -780,7 +754,6 @@ export class VoteStateService implements OnDestroy {
    * Cleanup on service destruction
    */
   ngOnDestroy(): void {
-    console.log('🧹 VoteStateService: Cleaning up');
 
     // Complete all subjects
     this.destroy$.next();
@@ -795,6 +768,5 @@ export class VoteStateService implements OnDestroy {
     // Clear queue
     this.voteQueue = [];
 
-    console.log('✅ VoteStateService: Cleanup completed');
   }
 }

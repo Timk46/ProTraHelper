@@ -116,7 +116,6 @@ export class BundleAnalyzerService {
     // Generate optimization recommendations
     this.generateOptimizationRecommendations();
     
-    console.log('✅ Bundle analysis completed');
   }
 
   /**
@@ -170,13 +169,6 @@ export class BundleAnalyzerService {
       timestamp: Date.now()
     });
 
-    console.log('📊 Resource analysis:', {
-      totalSize: `${(totalSize / 1024).toFixed(2)}KB`,
-      mainChunk: `${(mainChunkSize / 1024).toFixed(2)}KB`,
-      lazyChunks: `${(lazyChunksSize / 1024).toFixed(2)}KB`,
-      vendorChunk: `${(vendorChunkSize / 1024).toFixed(2)}KB`,
-      compression: `${(compressionRatio * 100).toFixed(1)}%`
-    });
   }
 
   /**

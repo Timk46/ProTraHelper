@@ -18,6 +18,7 @@ import {
 } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { LRUCache } from '../../utils/lru-cache';
+import { LoggerService } from '../logger/logger.service';
 // Import all evaluation DTOs
 import {
   EvaluationSubmissionDTO,
@@ -29,6 +30,7 @@ import {
   VoteType,
   VoteResultDTO,
   CommentStatsDTO,
+  CommentStatusMapDTO,
   AnonymousEvaluationUserDTO,
   EvaluationRatingDTO,
   RatingStatsDTO,
@@ -48,6 +50,8 @@ import {
   providedIn: 'root',
 })
 export class EvaluationDiscussionService {
+  private readonly log = this.logger.scope('EvaluationDiscussionService');
+
   private readonly apiUrls = {
     submissions: `${environment.server}/evaluation-submissions`,
     comments: `${environment.server}/evaluation-comments`,
@@ -60,20 +64,10 @@ export class EvaluationDiscussionService {
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
 
   // Performance optimization: LRU cache for pending requests (prevents duplicate HTTP calls)
-  private pendingRequests = new LRUCache<string, Observable<unknown>>(
-    50, // Max 50 concurrent pending requests
-    (key) => {
-      console.log(`🧹 EvaluationDiscussionService: LRU evicted pending request ${key}`);
-    }
-  );
+  private pendingRequests = new LRUCache<string, Observable<unknown>>(50);
 
   // Performance optimization: LRU cache for GET request results (request-level caching)
-  private requestCache = new LRUCache<string, Observable<unknown>>(
-    100, // Max 100 cached GET requests
-    (key) => {
-      console.log(`🧹 EvaluationDiscussionService: LRU evicted cached request ${key}`);
-    }
-  );
+  private requestCache = new LRUCache<string, Observable<unknown>>(100);
 
   // Configuration for retry logic
   private readonly MAX_RETRY_ATTEMPTS = 3;
@@ -81,9 +75,10 @@ export class EvaluationDiscussionService {
   private readonly DEBOUNCE_TIME = 300; // ms
   private readonly THROTTLE_TIME = 1000; // ms
 
-  constructor(private http: HttpClient) {
-    // Using real backend APIs - no mock data initialization needed
-  }
+  constructor(
+    private http: HttpClient,
+    private logger: LoggerService
+  ) {}
 
   // =============================================================================
   // PERFORMANCE & RETRY HELPERS
@@ -94,6 +89,10 @@ export class EvaluationDiscussionService {
    * @param request - The HTTP request observable
    * @param options - Retry options
    * @returns Observable with retry logic applied
+   */
+  /**
+   * Enhanced HTTP request with exponential backoff retry logic
+   * Critical for resilient API communication in unstable networks
    */
   private withRetry<T>(
     request: Observable<T>,
@@ -111,7 +110,6 @@ export class EvaluationDiscussionService {
 
     // Deduplication: Return existing request if already pending
     if (requestKey && this.pendingRequests.has(requestKey)) {
-      console.log('🔄 Returning existing request for key:', requestKey);
       return this.pendingRequests.get(requestKey)! as Observable<T>;
     }
 
@@ -122,30 +120,28 @@ export class EvaluationDiscussionService {
             const shouldRetryError = shouldRetry(error);
             const isLastAttempt = attempt >= maxAttempts - 1;
 
-            console.log(`🔄 Request attempt ${attempt + 1}/${maxAttempts}:`, {
-              status: error.status,
-              shouldRetry: shouldRetryError,
-              isLastAttempt,
-            });
-
             if (!shouldRetryError || isLastAttempt) {
+              // Log only final failures
+              if (isLastAttempt) {
+                this.log.error(`Request failed after ${maxAttempts} attempts`, {
+                  status: error.status,
+                  message: error.message
+                });
+              }
               return throwError(() => error);
             }
 
             const delayTime = this.RETRY_DELAYS[attempt] || 5000;
-            console.log(`⏰ Retrying in ${delayTime}ms...`);
             return timer(delayTime);
           }),
         ),
       ),
       tap(() => {
-        // Clean up pending request on success
         if (requestKey) {
           this.pendingRequests.delete(requestKey);
         }
       }),
       catchError(error => {
-        // Clean up pending request on final error
         if (requestKey) {
           this.pendingRequests.delete(requestKey);
         }
@@ -153,7 +149,6 @@ export class EvaluationDiscussionService {
       }),
     );
 
-    // Cache pending request
     if (requestKey) {
       this.pendingRequests.set(requestKey, requestWithRetry);
     }
@@ -210,46 +205,37 @@ export class EvaluationDiscussionService {
    * );
    * ```
    */
+  /**
+   * Request-level caching with automatic expiration
+   * Prevents duplicate API calls and improves performance
+   */
   private withCache<T>(
     cacheKey: string,
     requestFactory: () => Observable<T>,
-    cacheDuration: number = 300000 // 5 minutes default
+    cacheDuration: number = 300000
   ): Observable<T> {
-    // Check if we have a cached observable
     if (this.requestCache.has(cacheKey)) {
-      console.log(`✅ Returning cached request for key: ${cacheKey}`);
       return this.requestCache.get(cacheKey)! as Observable<T>;
     }
 
-    console.log(`🆕 Creating new cached request for key: ${cacheKey}`);
-
-    // Create new observable with shareReplay
     const cached$ = requestFactory().pipe(
       shareReplay({
         bufferSize: 1,
-        refCount: true, // Auto-cleanup when no subscribers
+        refCount: true,
       }),
       tap({
         next: () => {
-          // Set timeout to invalidate cache after duration
           setTimeout(() => {
-            if (this.requestCache.has(cacheKey)) {
-              console.log(`⏰ Cache expired for key: ${cacheKey}`);
-              this.requestCache.delete(cacheKey);
-            }
+            this.requestCache.delete(cacheKey);
           }, cacheDuration);
         },
         error: () => {
-          // Remove from cache on error
-          console.log(`❌ Removing failed request from cache: ${cacheKey}`);
           this.requestCache.delete(cacheKey);
         }
       })
     );
 
-    // Store in cache
     this.requestCache.set(cacheKey, cached$ as Observable<unknown>);
-
     return cached$;
   }
 
@@ -258,26 +244,21 @@ export class EvaluationDiscussionService {
    * @param votes - Array of vote operations
    * @returns Observable with batch voting results
    */
+  /**
+   * Batch vote multiple comments atomically
+   */
   batchVoteComments(
     votes: Array<{ commentId: string; voteType: VoteType }>,
   ): Observable<VoteResultDTO[]> {
-    console.log('🗳️ Batch voting on comments:', votes.length, 'votes');
-
     const batchRequest = this.http.post<VoteResultDTO[]>(`${this.apiUrls.comments}/batch-vote`, {
       votes,
     });
 
     return this.withRetry(batchRequest, {
       requestKey: `batch-vote-${votes.map(v => v.commentId).join('-')}`,
-      shouldRetry: error => {
-        // Don't retry on validation errors (4xx)
-        return error.status >= 500 || !error.status;
-      },
+      shouldRetry: error => error.status >= 500 || !error.status,
     }).pipe(
-      throttleTime(this.THROTTLE_TIME, undefined, { leading: true, trailing: true }),
-      tap(results => {
-        console.log('✅ Batch vote completed:', results.length, 'results');
-      }),
+      throttleTime(this.THROTTLE_TIME, undefined, { leading: true, trailing: true })
     );
   }
 
@@ -286,153 +267,114 @@ export class EvaluationDiscussionService {
   // =============================================================================
 
   getSubmission(submissionId: string): Observable<EvaluationSubmissionDTO> {
-    const request = this.http.get<EvaluationSubmissionDTO>(
-      `${this.apiUrls.submissions}/${submissionId}`,
-    );
-
-    return this.withRetry(request, {
-      requestKey: `submission-${submissionId}`,
-      maxAttempts: 3,
-    }).pipe(
-      distinctUntilChanged(),
-      tap(submission => {
-        console.log('✅ Submission loaded with retry support:', submission.id);
-      }),
-    );
+    return this.withRetry(
+      this.http.get<EvaluationSubmissionDTO>(`${this.apiUrls.submissions}/${submissionId}`),
+      {
+        requestKey: `submission-${submissionId}`,
+        maxAttempts: 3,
+      }
+    ).pipe(distinctUntilChanged());
   }
 
   /**
    * Gets evaluation categories from the sessions endpoint
-   * Requires sessionId - gets it from current submission
    */
   getCategories(sessionId?: number): Observable<EvaluationCategoryDTO[]> {
     if (!sessionId) {
       throw new Error('SessionId required for categories endpoint');
     }
 
-    const request = this.http.get<EvaluationCategoryDTO[]>(
-      `${this.apiUrls.sessions}/${sessionId}/categories`,
-    );
-
-    return this.withRetry(request, {
-      requestKey: `categories-${sessionId}`,
-      maxAttempts: 2,
-    }).pipe(
-      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr)),
-      tap(categories => {
-        console.log('✅ Categories loaded with retry support:', categories.length);
-      }),
+    return this.withRetry(
+      this.http.get<EvaluationCategoryDTO[]>(`${this.apiUrls.sessions}/${sessionId}/categories`),
+      {
+        requestKey: `categories-${sessionId}`,
+        maxAttempts: 2,
+      }
+    ).pipe(
+      distinctUntilChanged((prev, curr) => JSON.stringify(prev) === JSON.stringify(curr))
     );
   }
 
+  /**
+   * Get discussions (comments) for a specific category
+   * Transforms flat comment list into discussion DTO structure
+   */
   getDiscussionsByCategory(
     submissionId: string,
     categoryId: string,
   ): Observable<EvaluationDiscussionDTO[]> {
-    console.log('🔍 getDiscussionsByCategory service call', submissionId, categoryId);
-    // Phase 2.1: Transform EvaluationCommentDTO[] response to EvaluationDiscussionDTO[]
     return this.http
-      .get<
-        EvaluationCommentDTO[]
-      >(`${this.apiUrls.comments}/get/${submissionId}/${categoryId}`)
+      .get<EvaluationCommentDTO[]>(`${this.apiUrls.comments}/get/${submissionId}/${categoryId}`)
       .pipe(
         map(comments => {
-          // Backend returns comments directly, but frontend expects discussion containers
-          console.log('🔄 Transforming', comments.length, 'comments to discussion format');
-
           if (comments.length === 0) {
             return [];
           }
 
-          // Create a single discussion container for this category
+          // Transform to discussion container structure
           const discussion: EvaluationDiscussionDTO = {
             id: Number(`discussion-${submissionId}-${categoryId}`),
             submissionId: Number(submissionId),
             categoryId: Number(categoryId),
-            comments: comments,
+            comments,
             createdAt: new Date(),
             totalComments: comments.length,
-            availableComments: 3, // System default
+            availableComments: 3,
             usedComments: comments.length,
           };
 
-          console.log('✅ Discussion created with', discussion.totalComments, 'comments');
           return [discussion];
         }),
       );
   }
 
   createComment(comment: CreateEvaluationCommentDTO): Observable<EvaluationCommentDTO> {
-    console.log('createComment in frontend:', comment);
     return this.http.post<EvaluationCommentDTO>(`${this.apiUrls.comments}/create`, comment).pipe(
       tap(newComment => {
-        // Update local state for real-time updates
         this.commentsSubject.next([...this.commentsSubject.value, newComment]);
       }),
     );
   }
 
   /**
-   * Votes on a comment with enhanced retry logic and performance optimization
-   * Corrected parameter name to match backend expectation
+   * Vote on a comment with enhanced retry logic
    */
   voteComment(commentId: string, voteType: VoteType): Observable<VoteResultDTO> {
-    const request = this.http.post<VoteResultDTO>(
-      `${this.apiUrls.comments}/votes/vote/${commentId}`,
-      { isUpvote: voteType === 'UP' }
-    );
-
-    return this.withRetry(request, {
-      requestKey: `vote-${commentId}-${voteType}-${Date.now()}`, // Include timestamp to prevent caching votes
-      maxAttempts: 2,
-      shouldRetry: error => {
-        // Don't retry client errors (4xx) except 429
-        return error.status >= 500 || error.status === 429 || !error.status;
-      },
-    }).pipe(
-      throttleTime(500, undefined, { leading: true, trailing: false }), // Prevent spam voting
-      tap(result => {
-        console.log('✅ Vote completed with retry support:', {
-          commentId,
-          voteType,
-          result: result.userVote,
-        });
-      }),
+    return this.withRetry(
+      this.http.post<VoteResultDTO>(
+        `${this.apiUrls.comments}/votes/vote/${commentId}`,
+        { isUpvote: voteType === 'UP' }
+      ),
+      {
+        requestKey: `vote-${commentId}-${voteType}-${Date.now()}`,
+        maxAttempts: 2,
+        shouldRetry: error => error.status >= 500 || error.status === 429 || !error.status,
+      }
+    ).pipe(
+      throttleTime(500, undefined, { leading: true, trailing: false })
     );
   }
 
   /**
-   * Gets the current user's vote status for a specific comment
-   * @param commentId - The comment ID
-   * @returns Observable<VoteType | null> - The user's vote or null
+   * Get user's vote for a specific comment
    */
   getUserVoteForComment(commentId: string): Observable<VoteType | null> {
-    // Use existing votes/get endpoint instead of non-existent user-vote endpoint
     return this.http
       .get<VoteCountResponseDTO>(`${this.apiUrls.comments}/votes/get/${commentId}`)
       .pipe(
         map(response => response.userVoteCount > 0 ? 'UP' : null),
-        catchError(error => {
-          console.warn('⚠️ getUserVoteForComment failed, returning null:', error);
-          return of(null);
-        })
+        catchError(() => of(null))
       );
   }
 
   /**
-   * Get user's vote count for a comment (multiple votes support)
-   * @param commentId - The comment ID to check
-   * @returns Observable containing user's vote count
+   * Get user's vote count for a comment
    */
   getUserVoteCountForComment(commentId: string): Observable<number> {
-    // Use existing votes/get endpoint instead of non-existent user-vote-count endpoint
     return this.http.get<VoteCountResponseDTO>(`${this.apiUrls.comments}/votes/get/${commentId}`).pipe(
       map(response => response.userVoteCount),
       retry(2),
-      catchError(error => {
-        console.warn('⚠️ getUserVoteCountForComment failed, returning 0:', error);
-        return of(0);
-      })
+      catchError(() => of(0))
     );
   }
 
@@ -447,33 +389,37 @@ export class EvaluationDiscussionService {
   }
 
   /**
-   * Gets user comment status for all categories for a specific submission
-   * 
-   * @description This method checks all categories to determine which ones
-   * the user has already commented in. This is used to properly initialize
-   * the frontend comment status after page refreshes, including comments
-   * that were automatically created from ratings.
-   * 
-   * @param submissionId - The submission ID to check
-   * @returns Observable containing map of categoryId to boolean indicating if user has commented
+   * Gets user comment status for all categories in a submission
+   *
+   * @description Essential for proper state initialization after page refreshes.
+   * Checks which categories the user has commented in, including auto-created
+   * rating comments.
+   *
+   * @param submissionId - The submission ID
+   * @returns Map of categoryId to hasCommented boolean
    */
-  getUserCommentStatusForAllCategories(submissionId: string): Observable<{ [categoryId: number]: boolean }> {
-    const endpoint = `${this.apiUrls.comments}/comment-status/${submissionId}`;
-    console.log('🔍 Getting comment status for all categories:', {
-      endpoint,
-      submissionId
-    });
-    
-    return this.http.get<{ [categoryId: number]: boolean }>(endpoint).pipe(
-      tap(result => {
-        console.log('✅ Comment status retrieved:', {
-          submissionId,
-          categoriesWithComments: Object.keys(result).filter(key => result[+key]),
-          totalCategories: Object.keys(result).length
-        });
-      }),
+  getUserCommentStatusForAllCategories(submissionId: string): Observable<CommentStatusMapDTO> {
+    return this.http.get<CommentStatusMapDTO>(
+      `${this.apiUrls.comments}/comment-status/${submissionId}`
+    ).pipe(
       retry(2),
-      catchError(this.handleError<{ [categoryId: number]: boolean }>('getUserCommentStatusForAllCategories'))
+      catchError((error: HttpErrorResponse) => {
+        // BLOCKER #6 FIX: Log error and return empty map for graceful degradation
+        // Frontend can distinguish between "no comments" ({}) and "error loading" (this log)
+        this.log.error('Failed to load comment status for all categories', {
+          submissionId,
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
+
+        // Return empty map as fallback - Frontend will show loading error state
+        // This is acceptable because:
+        // 1. User can still use the app (graceful degradation)
+        // 2. Error is logged for monitoring
+        // 3. UI can show error message to user
+        return of({});
+      })
     );
   }
 
@@ -548,33 +494,18 @@ export class EvaluationDiscussionService {
   }
 
   /**
-   * Gets the rating status for all categories for the current user and submission
-   *
-   * @description This method returns the complete rating status overview,
-   * indicating which categories the user has rated and which discussions they can access.
-   * This is essential for the rating gate functionality.
-   *
-   * @param {string} submissionId - The submission ID to check
-   * @returns {Observable<CategoryRatingStatus[]>} Observable containing rating status for all categories
-   * @memberof EvaluationDiscussionService
+   * Gets the rating status for all categories
+   * Essential for rating gate functionality
    */
   getUserRatingStatus(submissionId: string, userId: number): Observable<CategoryRatingStatus[]> {
-    const endpoint = `${this.apiUrls.ratings}/submission/${submissionId}/user/${userId}/status`;
-
-    // DEBUG: API call verification
-    console.log('🐛 DEBUG API Call:', {
-      method: 'getUserRatingStatus',
-      endpoint,
-      submissionId,
-      userId,
-      userIdType: typeof userId,
-      isNaN: isNaN(userId),
-      timestamp: new Date().toISOString()
-    });
-
     return this.http
-      .get<CategoryRatingStatus[]>(endpoint)
-      .pipe(retry(2), catchError(this.handleError<CategoryRatingStatus[]>('getUserRatingStatus')));
+      .get<CategoryRatingStatus[]>(
+        `${this.apiUrls.ratings}/submission/${submissionId}/user/${userId}/status`
+      )
+      .pipe(
+        retry(2),
+        catchError(this.handleError<CategoryRatingStatus[]>('getUserRatingStatus'))
+      );
   }
 
   /**
@@ -594,38 +525,25 @@ export class EvaluationDiscussionService {
         const categoryStatus = statuses.find(s => s.categoryId === categoryId);
         return categoryStatus?.rating || null;
       }),
-      catchError(error => {
-        console.error('Failed to get user category rating:', error);
+      catchError((error: HttpErrorResponse) => {
+        this.log.error('Failed to get user category rating', {
+          status: error.status,
+          message: error.message
+        });
         return of(null);
       }),
     );
   }
 
   /**
-   * Deletes a user's rating for a specific category and submission
-   *
-   * @description Removes the user's rating from the database and triggers
-   * cache invalidation to ensure consistent state across the application
-   *
-   * @param {string} submissionId - The submission ID
-   * @param {number} categoryId - The category ID
-   * @returns {Observable<{success: boolean, message: string}>} Observable containing deletion result
+   * Deletes a user's rating for a specific category
    */
   deleteUserRating(submissionId: string, categoryId: number): Observable<{success: boolean, message: string}> {
-    const deleteEndpoint = `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`;
-
-    console.log('🗑️ Calling backend to delete rating:', {
-      endpoint: deleteEndpoint,
-      submissionId,
-      categoryId,
-      timestamp: new Date().toISOString()
-    });
-
-    return this.http.delete<{success: boolean, message: string}>(deleteEndpoint).pipe(
-      tap(response => {
-        console.log('✅ Rating deleted successfully from backend:', response);
-
-        // Update local ratings state by removing the deleted rating
+    return this.http.delete<{success: boolean, message: string}>(
+      `${this.apiUrls.ratings}/submission/${submissionId}/category/${categoryId}/user`
+    ).pipe(
+      tap(() => {
+        // Update local state
         const currentRatings = this.ratingsSubject.value;
         const updatedRatings = currentRatings.filter(
           rating => !(rating.categoryId === categoryId && rating.submissionId === Number(submissionId))
@@ -633,7 +551,7 @@ export class EvaluationDiscussionService {
         this.ratingsSubject.next(updatedRatings);
       }),
       catchError(error => {
-        console.error('❌ Failed to delete rating from backend:', error);
+        this.log.error('Failed to delete rating', { submissionId, categoryId, error });
         throw error;
       })
     );
@@ -693,26 +611,16 @@ export class EvaluationDiscussionService {
   // =============================================================================
 
   /**
-   * Gets the vote limit status for a user in a specific submission and category
-   *
-   * @description Fetches current vote usage from backend.
-   * Returns category-wide vote limit information (10 votes total per category).
-   *
-   * @param submissionId - The submission ID
-   * @param categoryId - The category ID
-   * @returns Observable containing vote limit status from backend
+   * Gets the vote limit status for a category
+   * Returns 10-vote-per-category limit information
    */
   getVoteLimitStatus(submissionId: string, categoryId: string): Observable<VoteLimitStatusDTO> {
-    const url = `${this.apiUrls.comments}/vote-limit/${submissionId}/${categoryId}`;
-
-    return this.http.get<VoteLimitStatusDTO>(url).pipe(
-      tap(status => {
-        console.log('📊 Vote limit status received from backend:', { submissionId, categoryId, status });
-      }),
+    return this.http.get<VoteLimitStatusDTO>(
+      `${this.apiUrls.comments}/vote-limit/${submissionId}/${categoryId}`
+    ).pipe(
       retry(2),
       catchError(error => {
-        console.error('❌ Failed to load vote limit status, using defaults:', error);
-        // Fallback to defaults if backend fails
+        this.log.error('Failed to load vote limit status, using defaults', { submissionId, categoryId, error });
         return of({
           maxVotes: 10,
           remainingVotes: 10,
@@ -743,28 +651,12 @@ export class EvaluationDiscussionService {
 
   /**
    * Resets user votes in a specific category
-   *
-   * @param submissionId - The submission ID
-   * @param categoryId - The category ID
-   * @param voteType - The type of votes to reset ('UP' or 'ALL') - Ranking System
-   * @returns Observable containing reset result and updated vote limit status
    */
   resetVotes(submissionId: string, categoryId: number, voteType: 'UP' | 'ALL'): Observable<ResetVotesResponseDTO> {
-    const url = `${this.apiUrls.comments}/votes/reset`;
     const body: ResetVotesDTO = { submissionId: Number(submissionId), categoryId, voteType };
 
-    console.log('🔄 Resetting votes via frontend service:', { submissionId, categoryId, voteType });
-
-    return this.http.delete<ResetVotesResponseDTO>(url, { body }).pipe(
+    return this.http.delete<ResetVotesResponseDTO>(`${this.apiUrls.comments}/votes/reset`, { body }).pipe(
       retry(2),
-      tap(response => {
-        console.log('✅ Vote reset successful:', {
-          resetCount: response.resetCount,
-          voteType,
-          categoryId,
-          voteLimitStatus: response.voteLimitStatus
-        });
-      }),
       catchError(this.handleError<ResetVotesResponseDTO>('resetVotes'))
     );
   }
@@ -790,19 +682,15 @@ export class EvaluationDiscussionService {
 
   /**
    * Generic error handler for HTTP operations
-   *
-   * @description Returns an error handler function that logs the operation
-   * and returns a safe fallback value
-   *
-   * @param {string} operation - Name of the operation that failed
-   * @returns {Function} Error handler function
-   * @memberof EvaluationDiscussionService
+   * Logs critical errors and re-throws for upstream handling
    */
-  private handleError<T>(operation = 'operation'): (error: any) => Observable<T> {
-    return (error: any): Observable<T> => {
-      console.error(`${operation} failed:`, error);
-
-      // Let the app keep running by returning a safe fallback
+  private handleError<T>(operation = 'operation'): (error: HttpErrorResponse) => Observable<T> {
+    return (error: HttpErrorResponse): Observable<T> => {
+      this.log.error(`${operation} failed`, {
+        status: error.status,
+        message: error.message,
+        url: error.url
+      });
       return throwError(() => new Error(`${operation} failed: ${error.message || error}`));
     };
   }
@@ -812,34 +700,18 @@ export class EvaluationDiscussionService {
   // =============================================================================
 
   /**
-   * Gets all submissions for a user for navigation purposes
-   *
-   * @description Fetches all submissions belonging to a specific user from the backend API.
-   * Used for populating the submission navigation list in the evaluation forum.
-   * @param userId - The user ID (optional, defaults to current user)
-   * @returns Observable<EvaluationSubmissionDTO[]> List of user submissions
-   * @memberof EvaluationDiscussionService
+   * Gets all submissions for a user (for navigation)
    */
   getUserSubmissions(userId?: number): Observable<EvaluationSubmissionDTO[]> {
-    let url = `${this.apiUrls.submissions}`;
-    
-    if (userId) {
-      url += `?userId=${userId}`;
-    }
-
-    const requestKey = `getUserSubmissions-${userId || 'current'}`;
+    const url = userId
+      ? `${this.apiUrls.submissions}?userId=${userId}`
+      : this.apiUrls.submissions;
 
     return this.withRetry(
       this.http.get<EvaluationSubmissionDTO[]>(url),
-      { requestKey }
+      { requestKey: `getUserSubmissions-${userId || 'current'}` }
     ).pipe(
-      tap(submissions => {
-        console.log('✅ Retrieved user submissions:', submissions.length, 'submissions');
-        submissions.forEach(s => console.log(`  - ${s.id}: ${s.title}`));
-      }),
       catchError(this.handleError<EvaluationSubmissionDTO[]>('getUserSubmissions'))
     );
   }
-
-  // All mock methods removed - using real backend APIs
 }

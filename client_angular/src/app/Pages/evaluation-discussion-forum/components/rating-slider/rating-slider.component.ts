@@ -234,7 +234,6 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
    * @memberof RatingSliderComponent
    */
   public resetSliderState(): void {
-    console.log('🔄 Resetting slider state for category:', this.categoryId);
     
     // Reset all local state to unrated
     this.currentRating = null;
@@ -251,11 +250,6 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     // Force change detection to update UI
     this.cdr.markForCheck();
     
-    console.log('✅ Slider state reset completed:', {
-      categoryId: this.categoryId,
-      newValue: this.currentValue,
-      isModified: this.isModified
-    });
   }
 
   /**
@@ -269,7 +263,6 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
    * @memberof RatingSliderComponent
    */
   onQuickRating(value: number): void {
-    console.log('🎯 Quick rating selected:', value);
     
     // Mark that user has interacted manually
     this.hasUserInteracted = true;
@@ -283,11 +276,6 @@ export class RatingSliderComponent extends BaseComponent implements OnInit, OnCh
     // Force change detection for OnPush components
     this.cdr.markForCheck();
     
-    console.log('📊 Quick rating completed:', { 
-      selectedValue: value, 
-      formValue: this.ratingForm.get('rating')?.value, 
-      currentValue: this.currentValue 
-    });
   }
 
   // =============================================================================

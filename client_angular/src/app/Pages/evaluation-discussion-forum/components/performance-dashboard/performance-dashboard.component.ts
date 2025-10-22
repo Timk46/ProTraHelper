@@ -1142,7 +1142,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
    * Refreshes all performance metrics
    */
   refreshMetrics(): void {
-    console.log('🔄 Refreshing performance metrics...');
     this.performanceService.analyzeBundlePerformance();
     this.bundleAnalyzer.analyzeBundleStructure();
   }
@@ -1152,7 +1151,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
    */
   toggleAutoRefresh(): void {
     this.autoRefreshEnabled = !this.autoRefreshEnabled;
-    console.log(`⚡ Auto refresh ${this.autoRefreshEnabled ? 'enabled' : 'disabled'}`);
   }
 
   /**
@@ -1177,7 +1175,6 @@ export class PerformanceDashboardComponent implements OnInit, OnDestroy {
     link.click();
     URL.revokeObjectURL(url);
 
-    console.log('📊 Performance report exported');
   }
 
   /**

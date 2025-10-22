@@ -58,7 +58,6 @@ export class RhinoFocusService {
   private isAvailable: boolean | null = null;
 
   constructor(private readonly http: HttpClient) {
-    console.log('🎯 RhinoFocusService initialized');
     this.checkAvailability();
   }
 
@@ -97,7 +96,6 @@ export class RhinoFocusService {
         return response.available;
       }),
       catchError(error => {
-        console.warn('⚠️ Rhino API availability check failed:', error);
         this.isAvailable = false;
         return of(false);
       }),
@@ -147,7 +145,6 @@ export class RhinoFocusService {
   focusRhinoWindowUnified(
     request: RhinoFocusRequestDTO = {},
   ): Observable<UnifiedRhinoFocusResponseDTO> {
-    console.log('🎯 Unified Rhino focus:', request);
 
     if (!this.config.enabled || this.isAvailable === false) {
       console.log('🚫 Rhino unified focus disabled or unavailable');
@@ -172,7 +169,6 @@ export class RhinoFocusService {
         timeout(this.config.timeoutMs),
         retry(this.config.retryAttempts),
         map((response: UnifiedRhinoFocusResponseDTO) => {
-          console.log('✅ Unified Rhino focus result:', response);
           return response;
         }),
         catchError(error =>
@@ -218,7 +214,6 @@ export class RhinoFocusService {
         timeout(this.config.timeoutMs),
         retry(this.config.retryAttempts),
         map((response: UnifiedRhinoFocusResponseDTO) => {
-          console.log('✅ Native Rhino focus result:', response);
           return response;
         }),
         catchError(error =>
@@ -240,7 +235,6 @@ export class RhinoFocusService {
   focusRhinoWindowPowerShell(
     request: RhinoFocusRequestDTO = {},
   ): Observable<RhinoFocusResponseDTO> {
-    console.log('🔄 PowerShell Rhino focus:', request);
 
     if (!this.config.enabled || this.isAvailable === false) {
       console.log('🚫 PowerShell Rhino focus disabled or unavailable');
@@ -262,7 +256,6 @@ export class RhinoFocusService {
       timeout(this.config.timeoutMs),
       retry(this.config.retryAttempts),
       map((response: RhinoFocusResponseDTO) => {
-        console.log('✅ PowerShell Rhino focus result:', response);
         return response;
       }),
       catchError(error =>
@@ -308,7 +301,6 @@ export class RhinoFocusService {
       timeout(this.config.timeoutMs),
       retry(this.config.retryAttempts),
       map(windows => {
-        console.log('🔍 Rhino windows found:', windows.length);
         return windows;
       }),
       catchError(error => this.handleError('getRhinoWindowInfo', error, [])),
@@ -332,7 +324,6 @@ export class RhinoFocusService {
       timeout(this.config.timeoutMs),
       retry(this.config.retryAttempts),
       map(status => {
-        console.log('📊 Rhino window status:', status);
         return status;
       }),
       catchError(error =>
@@ -405,11 +396,9 @@ export class RhinoFocusService {
       .pipe(
         timeout(this.config.timeoutMs),
         map(response => {
-          console.log('📊 Native implementation status:', response);
           return response;
         }),
         catchError(error => {
-          console.warn('⚠️ Native status check failed:', error);
           return of({
             available: false,
             enabled: false,
@@ -447,7 +436,6 @@ export class RhinoFocusService {
           return response;
         }),
         catchError(error => {
-          console.warn('⚠️ Failed to set native as default:', error);
           return of({
             success: false,
             message: 'Configuration update failed',
@@ -513,7 +501,6 @@ export class RhinoFocusService {
 
     // Fallback-Verhalten
     if (this.config.fallbackOnError && fallbackValue !== undefined) {
-      console.log(`🔄 Using fallback value for ${operation}`);
       return of(fallbackValue);
     }
 
@@ -531,7 +518,6 @@ export class RhinoFocusService {
   ensureRhinoActive(
     request: EnsureRhinoActiveRequestDTO = {},
   ): Observable<EnsureRhinoActiveResponseDTO> {
-    console.log('🎯 Ensuring Rhino is active:', request);
 
     if (!this.config.enabled) {
       console.log('🚫 Rhino service disabled');
@@ -551,7 +537,6 @@ export class RhinoFocusService {
         timeout(this.config.timeoutMs),
         retry(this.config.retryAttempts),
         map((response: EnsureRhinoActiveResponseDTO) => {
-          console.log('✅ Ensure Rhino active result:', response);
           return response;
         }),
         catchError(error =>
@@ -572,7 +557,6 @@ export class RhinoFocusService {
    * @returns Observable with availability status
    */
   checkRhinoAvailabilityStatus(): Observable<RhinoAvailabilityStatusDTO> {
-    console.log('🔍 Checking Rhino availability status');
 
     if (!this.config.enabled) {
       return of({
@@ -591,7 +575,6 @@ export class RhinoFocusService {
       timeout(this.config.timeoutMs),
       retry(this.config.retryAttempts),
       map((status: RhinoAvailabilityStatusDTO) => {
-        console.log('✅ Rhino availability status:', status);
         return status;
       }),
       catchError(error => {
@@ -618,7 +601,6 @@ export class RhinoFocusService {
   focusOnlyRhino(
     focusMethod: 'native' | 'powershell' | 'unified' = 'unified',
   ): Observable<EnsureRhinoActiveResponseDTO> {
-    console.log('🎯 Focus-only Rhino:', { focusMethod });
 
     if (!this.config.enabled) {
       return of({
@@ -638,7 +620,6 @@ export class RhinoFocusService {
         timeout(this.config.timeoutMs),
         retry(this.config.retryAttempts),
         map((response: EnsureRhinoActiveResponseDTO) => {
-          console.log('✅ Focus-only result:', response);
           return response;
         }),
         catchError(error =>
@@ -684,7 +665,6 @@ export class RhinoFocusService {
         timeout(this.config.timeoutMs * 2), // Double timeout for launch operations
         retry(this.config.retryAttempts),
         map((response: EnsureRhinoActiveResponseDTO) => {
-          console.log('✅ Launch-only result:', response);
           return response;
         }),
         catchError(error =>
@@ -705,12 +685,10 @@ export class RhinoFocusService {
    * @returns Observable with detailed system status
    */
   getSystemStatus(): Observable<any> {
-    console.log('🔧 Getting system status');
 
     return this.http.get(`${this.unifiedBaseUrl}/system-status`).pipe(
       timeout(this.config.timeoutMs),
       map((status: any) => {
-        console.log('✅ System status:', status);
         return status;
       }),
       catchError(error => {
@@ -730,7 +708,6 @@ export class RhinoFocusService {
    * @returns Observable with focus result
    */
   focusRhinoWindowEnhanced(request: RhinoFocusRequestDTO = {}): Observable<RhinoFocusResponseDTO> {
-    console.log('🎯 Enhanced Rhino focus (with fallback to launch):', request);
 
     // Convert old request format to new format
     const unifiedRequest: EnsureRhinoActiveRequestDTO = {

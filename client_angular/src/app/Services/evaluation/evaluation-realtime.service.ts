@@ -105,7 +105,6 @@ export class EvaluationRealtimeService implements OnDestroy {
     console.log('🔌 Connecting to real-time updates for submission:', submissionId);
     
     if (this.socket?.connected) {
-      console.log('✅ Already connected, joining submission room');
       this.joinSubmissionRoom(submissionId);
       return of(true);
     }
@@ -131,7 +130,6 @@ export class EvaluationRealtimeService implements OnDestroy {
 
         // Connection success
         this.socket.on('connect', () => {
-          console.log('✅ WebSocket connected for submission:', submissionId);
           this.connectionStatus$.next('connected');
           this.reconnectAttempts = 0;
           this.lastHeartbeat = Date.now();
@@ -315,7 +313,6 @@ export class EvaluationRealtimeService implements OnDestroy {
     });
 
     this.socket.on('phase-switched', (data) => {
-      console.log('🔄 Real-time phase change received:', data);
       this.events$.next({
         type: 'phase-switched',
         submissionId: data.submissionId,
@@ -395,7 +392,6 @@ export class EvaluationRealtimeService implements OnDestroy {
     const delay = this.RECONNECT_DELAYS[this.reconnectAttempts] || 30000;
     this.reconnectAttempts++;
     
-    console.log(`🔄 Attempting reconnection ${this.reconnectAttempts}/${this.MAX_RECONNECT_ATTEMPTS} in ${delay}ms`);
     this.connectionStatus$.next('reconnecting');
 
     timer(delay).pipe(
@@ -423,7 +419,6 @@ export class EvaluationRealtimeService implements OnDestroy {
       const timeSinceLastHeartbeat = Date.now() - this.lastHeartbeat;
       
       if (timeSinceLastHeartbeat > this.HEARTBEAT_INTERVAL * 2) {
-        console.warn('⚠️ Connection health check failed - no heartbeat received');
         if (this.socket?.connected) {
           this.connectionStatus$.next('error');
           this.handleReconnection();
@@ -436,7 +431,6 @@ export class EvaluationRealtimeService implements OnDestroy {
    * Cleanup on service destruction
    */
   ngOnDestroy(): void {
-    console.log('🧹 Cleaning up real-time service');
     
     this.destroy$.next();
     this.destroy$.complete();

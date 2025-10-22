@@ -209,15 +209,8 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     if (changes['discussions'] || changes['sortOrder']) {
       const shouldReprocess = this.shouldReprocessDiscussions(changes);
       
-      console.log('🔧 ngOnChanges triggered', {
-        discussionsCount: this.discussions?.length || 0,
-        sortOrder: this.sortOrder,
-        isFirstChange: changes['discussions']?.firstChange,
-        shouldReprocess
-      });
 
       if (shouldReprocess) {
-        console.log('✅ Reprocessing discussions - data actually changed');
         this.performanceService.markRenderStart('discussion-thread');
         
         // Only clear cache when we actually need to reprocess
@@ -290,10 +283,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       const shouldReprocess = prevHash !== currHash;
 
       if (shouldReprocess) {
-        console.log('🔄 Discussion hash changed, reprocessing required', {
-          prevHash: prevHash.substring(0, 100),
-          currHash: currHash.substring(0, 100)
-        });
       } else {
         console.log('🚀 Discussion hash unchanged, skipping reprocess');
       }
@@ -596,7 +585,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
    */
   private setupPanelStateSubscription(): void {
     this.commentPanelStateService.panelStates$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      console.log('🔄 Panel states changed, refreshing flattened comments');
       this.processFlattenedComments();
       this.cdr.markForCheck();
     });
@@ -617,14 +605,12 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     this.flattenedComments = [];
     this.lastProcessedDiscussionsHash = discussionsHash;
 
-    console.log('🔧 processFlattenedComments: Processing', this.discussions.length, 'discussions');
 
     // Process each discussion with memoization
     this.discussions.forEach(discussion => {
       // Defensive programming: ensure comments array exists
       const comments = discussion.comments || [];
       const mainComments = comments.filter(c => !c.parentId);
-      console.log('🔧 Processing discussion:', discussion.id, 'with', mainComments.length, 'main comments (total:', comments.length, ')');
 
       // Add discussion header (always create new for state changes)
       this.flattenedComments.push({
@@ -642,8 +628,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
       this.flattenedComments.push(...flattenedComments);
     });
 
-    console.log('🔧 flattenedComments:', this.flattenedComments);
-    console.log('🔧 Final flattenedComments count:', this.flattenedComments.length);
   }
 
   /**
@@ -764,7 +748,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   private sortComments(comments: EvaluationCommentDTO[]): EvaluationCommentDTO[] {
     // Defensive programming: handle undefined/null comments array
     if (!comments || !Array.isArray(comments)) {
-      console.warn('⚠️ sortComments: Received invalid comments array:', comments);
       return [];
     }
 
@@ -841,13 +824,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
         depth,
         comment,
       });
-      console.log('🔧 Added comment to flattened:', {
-        type: 'comment',
-        commentId: comment.id,
-        content: comment.content?.substring(0, 50) + '...',
-        replyCount: comment.replyCount,
-        hasBackendReplies: comment.replies?.length || 0,
-      });
 
       // Add replies if they exist AND the panel is expanded (using Backend replies[])
       const backendReplies = comment.replies || [];
@@ -860,13 +836,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
           flattened.push(...flattenedReplies);
         }
 
-        console.log('🔧 Panel state for comment:', {
-          commentId: comment.id,
-          isPanelExpanded,
-          backendReplyCount: comment.replyCount,
-          actualRepliesLength: backendReplies.length,
-          repliesShown: isPanelExpanded ? backendReplies.length : 0,
-        });
       }
 
       // 🚀 PHASE 2: Add reply-input item if active for this comment
@@ -881,11 +850,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
           isReplyInputActive: true,
         });
 
-        console.log('🔧 Added reply-input for comment:', {
-          commentId: comment.id,
-          depth: depth + 1,
-          isReplyActive,
-        });
       }
     });
 
@@ -912,17 +876,11 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   }
 
   onReplyRequested(commentId: string): void {
-    console.log('🔄 Reply requested for comment:', commentId);
 
     // 🚀 Toggle Reply-Input - if already active, deactivate it, otherwise activate it
     const isCurrentlyActive = this.isReplyInputActive(commentId);
     this.setReplyInputActive(commentId, !isCurrentlyActive);
 
-    console.log('🔄 Reply input toggled:', {
-      commentId,
-      wasActive: isCurrentlyActive,
-      nowActive: !isCurrentlyActive
-    });
 
     // Find the comment in the flattened list for legacy event
     const commentItem = this.flattenedComments.find(
@@ -935,18 +893,15 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
         parentComment: commentItem.comment,
       });
     } else {
-      console.warn('⚠️ Could not find comment for reply:', commentId);
     }
   }
 
   // 🚀 PHASE 2: Neue Reply-Input Event Handler
   onReplyInputCancelled(commentId: string): void {
-    console.log('❌ Reply input cancelled for comment:', commentId);
     this.setReplyInputActive(commentId, false);
   }
 
   onReplyInputSubmitted(data: { commentId: string; content: string }): void {
-    console.log('✅ Reply input submitted for comment:', data.commentId);
 
     // Emit to parent for actual submission
     this.replySubmitted.emit({
@@ -1000,11 +955,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     this.processFlattenedComments(); // Refresh view
     this.cdr.markForCheck();
 
-    console.log('🔄 Reply input state changed:', {
-      commentId,
-      isActive,
-      totalActiveInputs: Array.from(this.activeReplyInputs.values()).filter(Boolean).length,
-    });
   }
 
   /**

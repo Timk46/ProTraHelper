@@ -5,6 +5,7 @@ import { io } from 'socket.io-client';
 import { Observable, Subject, BehaviorSubject, timer } from 'rxjs';
 import { UserService } from '../auth/user.service';
 import { takeUntil, retry, switchMap } from 'rxjs/operators';
+import { LoggerService } from '../logger/logger.service';
 
 interface SocketConnection {
   socket: Socket;
@@ -17,12 +18,17 @@ interface SocketConnection {
   providedIn: 'root',
 })
 export class WebSocketService implements OnDestroy {
+  private readonly log = this.logger.scope('WebSocketService');
+
   /** A map of WebSocket connections, indexed by the full URL of the connection.
    * The value is an object containing the socket instance and a BehaviorSubject for the connection status.*/
   private readonly sockets: Map<string, SocketConnection> = new Map();
   private readonly destroyed$ = new Subject<void>();
 
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly logger: LoggerService
+  ) {}
 
   /**
    * Initiates a WebSocket connection.
@@ -47,17 +53,15 @@ export class WebSocketService implements OnDestroy {
       const connectionSubject = new BehaviorSubject<boolean>(false);
 
       socket.on('connect', () => {
-        console.log(`WebSocket connected: ${fullUrl}`);
         connectionSubject.next(true);
       });
 
       socket.on('disconnect', () => {
-        console.log(`WebSocket disconnected: ${fullUrl}`);
         connectionSubject.next(false);
       });
 
       socket.on('connect_error', (error: Error) => {
-        console.error(`Connection error for ${fullUrl}:`, error);
+        this.log.error('WebSocket connection error', { fullUrl, error: error.message });
         this.handleReconnection(fullUrl);
       });
 
@@ -116,7 +120,7 @@ export class WebSocketService implements OnDestroy {
     if (socket) {
       socket.emit(eventName, data);
     } else {
-      console.error(`No socket connection for ${url}/${namespace}`);
+      this.log.error('No socket connection found', { url, namespace, eventName });
     }
   }
 
@@ -153,7 +157,6 @@ export class WebSocketService implements OnDestroy {
         switchMap(() => {
           const connection = this.sockets.get(fullUrl);
           if (connection && !connection.socket.connected) {
-            console.log(`Attempting to reconnect to ${fullUrl}...`);
             connection.socket.connect();
             return connection.connectionSubject;
           }

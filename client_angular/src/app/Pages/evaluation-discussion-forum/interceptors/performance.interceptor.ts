@@ -77,12 +77,6 @@ export class PerformanceInterceptor implements HttpInterceptor {
           responseSize = this.estimateResponseSize(event);
           
           // Log successful response
-          console.log(`✅ Request completed: ${request.method} ${request.url}`, {
-            duration: `${duration.toFixed(2)}ms`,
-            status: event.status,
-            fromCache: isFromCache,
-            size: `${(responseSize / 1024).toFixed(2)}KB`
-          });
 
           // Record performance metrics
           this.performanceService.recordNetworkRequest(
@@ -300,15 +294,9 @@ export class PerformanceInterceptor implements HttpInterceptor {
     const commentsCount = Array.isArray(response.body) ? response.body.length : 1;
     const avgTimePerComment = duration / commentsCount;
 
-    console.log(`💬 Comment loading pattern:`, {
-      count: commentsCount,
-      totalTime: `${duration.toFixed(2)}ms`,
-      avgPerComment: `${avgTimePerComment.toFixed(2)}ms`
-    });
 
     // Alert if comment loading is slow
     if (avgTimePerComment > 50) {
-      console.warn(`⚠️ Slow comment loading detected: ${avgTimePerComment.toFixed(2)}ms per comment`);
     }
   }
 
@@ -334,7 +322,6 @@ export class PerformanceInterceptor implements HttpInterceptor {
 
     // Track if submission loading is becoming slower over time
     if (duration > 1000) {
-      console.warn(`⚠️ Slow submission loading: ${submissionId} took ${duration.toFixed(2)}ms`);
     }
   }
 
@@ -357,7 +344,6 @@ export class PerformanceInterceptor implements HttpInterceptor {
 
     // Voting should be fast for good UX
     if (duration > 500) {
-      console.warn(`⚠️ Slow voting response: ${duration.toFixed(2)}ms`);
     }
   }
 
@@ -376,15 +362,9 @@ export class PerformanceInterceptor implements HttpInterceptor {
     const query = request.params.get('query') || '';
     const resultsCount = Array.isArray(response.body) ? response.body.length : 0;
 
-    console.log(`🔍 Search pattern:`, {
-      query: query.substring(0, 20) + (query.length > 20 ? '...' : ''),
-      results: resultsCount,
-      duration: `${duration.toFixed(2)}ms`
-    });
 
     // Search should be reasonably fast
     if (duration > 2000) {
-      console.warn(`⚠️ Slow search query: "${query}" took ${duration.toFixed(2)}ms`);
     }
   }
 
@@ -430,11 +410,9 @@ export class PerformanceInterceptor implements HttpInterceptor {
    * Tracks 404 resource not found errors
    */
   private trackResourceNotFoundError(request: HttpRequest<any>, error: HttpErrorResponse): void {
-    console.warn(`🔍 Resource not found: ${request.method} ${request.url}`);
     
     // Check if it's a submission or comment that doesn't exist
     if (request.url.includes('/submissions/') || request.url.includes('/comments/')) {
-      console.warn(`⚠️ Potential data inconsistency detected in: ${request.url}`);
     }
   }
 
@@ -446,7 +424,6 @@ export class PerformanceInterceptor implements HttpInterceptor {
     
     // This could indicate permission issues or session expiry
     if (request.url.includes('/evaluation/')) {
-      console.warn(`⚠️ Potential evaluation access issue detected`);
     }
   }
 
@@ -467,7 +444,6 @@ export class PerformanceInterceptor implements HttpInterceptor {
     console.error(`📡 Network error: ${request.method} ${request.url}`);
     
     // Network errors could indicate connectivity issues
-    console.warn(`⚠️ Network connectivity issue detected`);
   }
 
   // =============================================================================

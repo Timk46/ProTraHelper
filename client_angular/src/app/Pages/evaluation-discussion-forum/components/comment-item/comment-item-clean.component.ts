@@ -150,11 +150,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
   // =============================================================================
 
   ngOnInit(): void {
-    console.log('🔧 CommentItemClean initialized:', {
-      commentId: this.comment?.id,
-      userVoteCount: this.userVoteCount,
-      isVoting: this.isVoting
-    });
     
     this.formatCommentTime();
     this.updateCachedValues();
@@ -169,12 +164,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     
     // Force change detection for vote-related updates
     if (changes['userVoteCount'] || changes['isVoting'] || changes['error']) {
-      console.log('🔧 Vote state changed:', {
-        commentId: this.comment?.id,
-        userVoteCount: this.userVoteCount,
-        isVoting: this.isVoting,
-        error: this.error
-      });
       this.cdr.markForCheck();
     }
   }
@@ -216,7 +205,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (!this.canAddMoreVotes()) {
-      console.log('❌ Cannot add vote - limit exceeded');
       return;
     }
 
@@ -229,7 +217,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     // 🚀 Haptic feedback for mobile
     this.triggerHapticFeedback('light');
     
-    console.log('🔧 SAFE: Emitting vote event (ADD):', this.comment.id);
     
     // 🔧 ARCHITECTURE: Pure event emission - no business logic
     this.voted.emit({
@@ -253,7 +240,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.userVoteCount === 0) {
-      console.log('❌ Cannot remove vote - user has no votes on this comment');
       return;
     }
 
@@ -266,7 +252,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     // 🚀 Haptic feedback for mobile
     this.triggerHapticFeedback('light');
     
-    console.log('🔧 SAFE: Emitting vote event (REMOVE):', this.comment.id);
     
     // 🔧 ARCHITECTURE: Pure event emission - no business logic
     this.voted.emit({
@@ -282,7 +267,6 @@ export class CommentItemCleanComponent implements OnInit, OnChanges, OnDestroy {
     // 🚀 Haptic feedback for mobile
     this.triggerHapticFeedback('medium');
     
-    console.log('🔧 DUMB: Emitting reply request:', this.comment.id);
     
     // 🔧 ARCHITECTURE: Pure event emission - no business logic
     this.replyRequested.emit(this.comment.id);

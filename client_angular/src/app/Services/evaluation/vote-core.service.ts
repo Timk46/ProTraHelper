@@ -97,7 +97,6 @@ export class VoteCoreService implements OnDestroy {
     this.validateId(submissionId, 'submissionId');
     this.validateId(categoryId, 'categoryId');
 
-    console.log(`📊 VoteCoreService: Loading rating stats for submission ${submissionId}, category ${categoryId}`);
 
     return this.evaluationDiscussionService.getRatingStats(submissionId.toString(), categoryId.toString()).pipe(
       takeUntil(this.destroy$)
@@ -130,7 +129,6 @@ export class VoteCoreService implements OnDestroy {
     this.validateId(submissionId, 'submissionId');
     this.validateId(categoryId, 'categoryId');
 
-    console.log(`📊 VoteCoreService: Loading vote limit status for submission ${submissionId}, category ${categoryId}`);
 
     return this.evaluationDiscussionService.getVoteLimitStatus(submissionId.toString(), categoryId.toString()).pipe(
       takeUntil(this.destroy$)
@@ -180,7 +178,6 @@ export class VoteCoreService implements OnDestroy {
    * Called automatically by Angular when service is destroyed.
    */
   ngOnDestroy(): void {
-    console.log('🧹 VoteCoreService: Cleaning up');
     this.destroy$.next();
     this.destroy$.complete();
   }

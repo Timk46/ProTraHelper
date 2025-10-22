@@ -163,10 +163,8 @@ export class CommentPanelStateService {
         const stateMap = new Map<string, boolean>(Object.entries(stateObject));
         this.panelStates.next(stateMap);
         
-        console.log('📂 Loaded comment panel states from localStorage:', stateMap.size, 'states');
       }
     } catch (error) {
-      console.warn('⚠️ Failed to load comment panel states from localStorage:', error);
       // Continue with empty state if localStorage fails
     }
   }
@@ -183,7 +181,6 @@ export class CommentPanelStateService {
       
       console.log('💾 Saved comment panel states to localStorage:', currentStates.size, 'states');
     } catch (error) {
-      console.warn('⚠️ Failed to save comment panel states to localStorage:', error);
       // Continue without persistence if localStorage fails
     }
   }
@@ -196,7 +193,6 @@ export class CommentPanelStateService {
       localStorage.removeItem(this.STORAGE_KEY);
       console.log('🗑️ Cleared comment panel states from localStorage');
     } catch (error) {
-      console.warn('⚠️ Failed to clear comment panel states from localStorage:', error);
     }
   }
 }

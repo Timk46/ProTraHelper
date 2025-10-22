@@ -48,7 +48,6 @@ export class LegacyVoteAdapter {
     private voteStateService: VoteStateService,
     private voteUIStateService: VoteUIStateService
   ) {
-    console.warn('⚠️ LegacyVoteAdapter: This adapter is deprecated. Migrate to new vote services.');
   }
 
   // =============================================================================
@@ -284,7 +283,6 @@ export class LegacyVoteAdapter {
       // Confirm optimistic update
       this.voteUIStateService.confirmOptimisticUpdate(commentId);
 
-      console.log('✅ Vote completed successfully');
     } catch (error) {
       console.error('❌ Vote failed:', error);
 
@@ -401,8 +399,6 @@ export class LegacyVoteAdapter {
 
       // Log summary after reaching warning limit
       if (this.deprecationWarnings.size === this.MAX_WARNINGS) {
-        console.warn('⚠️ LegacyVoteAdapter: Maximum deprecation warnings reached. Further warnings suppressed.');
-        console.warn('📊 Call logMigrationMetrics() to see usage statistics.');
       }
     }
   }
@@ -418,7 +414,6 @@ export class LegacyVoteAdapter {
    */
   logMigrationMetrics(): void {
     if (this.usageMetrics.size === 0) {
-      console.log('📊 LegacyVoteAdapter: No deprecated methods have been called yet.');
       return;
     }
 
@@ -499,7 +494,6 @@ export class LegacyVoteAdapter {
   isMigrationComplete(): boolean {
     // Note: This would check actual usage in a real implementation
     // For now, return false to prevent accidental removal
-    console.warn('⚠️ Migration completion check not implemented');
     return false;
   }
 }

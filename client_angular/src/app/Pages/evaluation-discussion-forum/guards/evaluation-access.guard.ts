@@ -61,16 +61,13 @@ export class EvaluationAccessGuardService {
       return true;
     }
 
-    console.log('🔍 Checking evaluation access for submission:', submissionId);
     
     // Validate submission access
     return this.validateSubmissionAccess(submissionId).pipe(
       map(hasAccess => {
         if (hasAccess) {
-          console.log('✅ Evaluation access granted for submission:', submissionId);
           return true;
         } else {
-          console.warn('❌ Evaluation access denied for submission:', submissionId);
           // Redirect to dashboard with error message
           return this.router.createUrlTree(['/dashboard'], {
             queryParams: { 
@@ -104,19 +101,16 @@ export class EvaluationAccessGuardService {
     return this.evaluationService.getSubmission(submissionId).pipe(
       map(submission => {
         if (!submission) {
-          console.warn('⚠️ Submission not found:', submissionId);
           return false;
         }
 
         // Check if user is logged in
         if (!this.userService.isUserLoggedIn()) {
-          console.warn('⚠️ User not logged in for evaluation access');
           return false;
         }
 
         // Check subject registration (reuse existing logic)
         if (!this.userService.isRegisteredForSubject('Tragkonstruktion 3')) {
-          console.warn('⚠️ User not registered for required subject');
           return false;
         }
 
@@ -125,22 +119,15 @@ export class EvaluationAccessGuardService {
         // - Check if user has specific role permissions
         // - Check if submission belongs to user's group/session
         
-        console.log('✅ Submission access validation passed:', {
-          submissionId: submission.id,
-          phase: submission.phase,
-          sessionId: submission.sessionId
-        });
         
         return true;
       }),
       catchError(error => {
         // Handle specific error types
         if (error.status === 404) {
-          console.warn('⚠️ Submission not found (404):', submissionId);
           return of(false);
         }
         if (error.status === 403) {
-          console.warn('⚠️ Access forbidden (403) for submission:', submissionId);
           return of(false);
         }
         
@@ -178,11 +165,6 @@ export class EvaluationAccessGuardService {
       const endDate = new Date(submission.evaluationEndDate);
       
       if (now < startDate || now > endDate) {
-        console.warn('⚠️ Evaluation period not active:', {
-          now: now.toISOString(),
-          start: startDate.toISOString(),
-          end: endDate.toISOString()
-        });
         return false;
       }
     }

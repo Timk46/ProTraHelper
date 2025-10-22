@@ -119,12 +119,10 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
     if (generatedPdfUrl) {
       // Update the pdfUrl if we generated a better one
       if (!this.pdfUrl || this.pdfUrl !== generatedPdfUrl) {
-        console.log('🔄 Updating pdfUrl from:', this.pdfUrl, 'to:', generatedPdfUrl);
         this.pdfUrl = generatedPdfUrl;
       }
       this.loadRealPdf();
     } else if (this.submission) {
-      console.log('📋 No PDF URL available, falling back to mock data');
       this.initializeMockPdfData();
       this.loadPdf();
     } else {
@@ -254,13 +252,11 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
       if (this.pdfUrl || this.submission) {
         this.isLoading = false;
         this.cdr.markForCheck(); // Trigger change detection for successful loading
-        console.log('✅ Mock PDF loading completed');
       } else {
         this.hasError = true;
         this.errorMessage = 'PDF-Dokument konnte nicht geladen werden';
         this.isLoading = false;
         this.cdr.markForCheck(); // Trigger change detection for error state
-        console.log('❌ Mock PDF loading failed');
       }
     }, 1000);
   }
@@ -339,7 +335,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
   private downloadWithFileService(uniqueIdentifier: string): void {
     this.fileService.downloadFile(uniqueIdentifier).subscribe({
       next: (response) => {
-        console.log('✅ FileService download successful');
         const blob = response.body;
         if (blob) {
           const url = window.URL.createObjectURL(blob);
@@ -372,7 +367,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      console.log('✅ Direct link download initiated');
     } catch (error) {
       console.error('❌ Direct link download failed:', error);
       // Final fallback: create mock PDF for demonstration
@@ -381,7 +375,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
   }
 
   private downloadMockPdf(): void {
-    console.log('📋 Creating mock PDF download');
     const blob = new Blob(['Mock PDF Content - Real PDF not available'], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -518,24 +511,20 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
 
     // Priority 1: Direct pdfUrl input
     if (this.pdfUrl) {
-      console.log('✅ Using direct pdfUrl:', this.pdfUrl);
       return this.pdfUrl;
     }
 
     // Priority 2: Generate URL from pdfFile.uniqueIdentifier (correct approach)
     if (this.submission?.pdfFile?.uniqueIdentifier) {
       const generatedUrl = `${environment.server}/files/download/${this.submission.pdfFile.uniqueIdentifier}`;
-      console.log('✅ Generated URL from pdfFile.uniqueIdentifier:', generatedUrl);
       return generatedUrl;
     }
 
     // Priority 3: Fallback to pdfMetadata.downloadUrl
     if (this.submission?.pdfMetadata?.downloadUrl) {
-      console.log('⚠️ Using fallback pdfMetadata.downloadUrl:', this.submission.pdfMetadata.downloadUrl);
       return this.submission.pdfMetadata.downloadUrl;
     }
 
-    console.log('❌ No PDF URL could be generated');
     return null;
   }
 
@@ -556,14 +545,12 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
           const shouldTryBlobFallback = this.submission?.pdfFile?.uniqueIdentifier;
           
           if (shouldTryBlobFallback) {
-            console.log('🔄 Will try blob fallback if direct approach fails');
             this.loadPdfAsBlob();
           } else {
             this.isLoading = false;
             this.totalPages = 1; // Unknown page count for object
             this.currentPage = 1;
             this.cdr.markForCheck();
-            console.log('✅ PDF loading completed with direct URL:', this.pdfUrl);
           }
         }, 1000);
       } catch (error) {
@@ -594,7 +581,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
 
     this.fileService.downloadFile(uniqueIdentifier).subscribe({
       next: (response) => {
-        console.log('✅ Blob download successful');
         const blob = response.body;
         if (blob && blob.type === 'application/pdf') {
           this.createBlobUrl(blob);
@@ -626,7 +612,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
       this.currentPage = 1;
       this.cdr.markForCheck();
       
-      console.log('✅ Blob PDF URL created and ready for display');
     } catch (error) {
       console.error('❌ Error creating blob URL:', error);
       this.showPdfLoadError('Fehler beim Erstellen der PDF-Anzeige');
@@ -634,7 +619,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
   }
 
   private tryBlobFallback(): void {
-    console.log('🔄 Trying blob fallback approach');
     if (this.submission?.pdfFile?.uniqueIdentifier) {
       this.loadPdfAsBlob();
     } else {
@@ -672,7 +656,6 @@ export class PdfViewerPanelComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Clean up blob URL to prevent memory leaks
     if (this.currentBlobUrl) {
-      console.log('🧹 Cleaning up blob URL on component destroy');
       window.URL.revokeObjectURL(this.currentBlobUrl);
       this.currentBlobUrl = null;
     }
