@@ -58,7 +58,10 @@ export class QuestionDataGroupReviewGateService {
     // Check if the group review gate exists for the given questionId
     const groupReviewGate = await this.prisma.groupReviewGate.findUnique({
       where: { questionId },
-      select: { linkedQuestionId: true },
+      select: {
+        id: true,
+        linkedQuestionId: true,
+      },
     });
 
     if (!groupReviewGate) {
@@ -90,46 +93,23 @@ export class QuestionDataGroupReviewGateService {
       return []; // No other members in the group
     }
 
-    // Fetch the latest answers from all other group members for the linked question
-    const allAnswers = await this.prisma.userUploadAnswer.findMany({
+    // Find evaluation submissions for the linked question by these group members
+    const availableSubmissions = await this.prisma.evaluationSubmission.findMany({
       where: {
-        userAnswer: {
-          userId: { in: memberIds },
-          questionId: groupReviewGate.linkedQuestionId,
+        session: {
+          groupReviewGateId: groupReviewGate.id,
         },
-      },
-      include: {
-        userAnswer: {
-          select: {
-            user: {
-              select: {
-                id: true,
-                firstname: true,
-                lastname: true,
-              },
-            },
-            createdAt: true,
-          },
+        authorId: {
+          in: memberIds,
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
       },
     });
 
-    // Reduce to get the latest answer for each user
-    const latestAnswersByUser = allAnswers.reduce((acc, answer) => {
-      const userId = answer.userAnswer.user.id;
-      if (!acc[userId] || acc[userId].createdAt < answer.createdAt) acc[userId] = answer;
-      return acc;
-    }, {} as Record<number, (typeof allAnswers)[0]>);
-
-    // Map to the desired DTO format // TODO: Make anonymous and get real data
-    return Object.values(latestAnswersByUser).map(answer => ({
-      submissionIdentifier:
-        answer.userAnswer.user.firstname + ' ' + answer.userAnswer.user.lastname,
-      reviewPhase: 'Diskussionsphase',
-      userStatus: 'Kommentar ausstehend',
+    // Map to the desired DTO format // TODO: Detect User Status
+    return availableSubmissions.map(submission => ({
+      submissionId: submission.id,
+      reviewPhase: submission.phase,
+      userStatus: '🦆',
     }));
   }
 

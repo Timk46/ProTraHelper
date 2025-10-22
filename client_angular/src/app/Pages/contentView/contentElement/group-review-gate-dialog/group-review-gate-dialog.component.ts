@@ -54,9 +54,8 @@ export class GroupReviewGateDialogComponent implements OnInit {
   }
 
   onGoToReview(status: GroupReviewStatusDTO): void {
-    // TODO: Implement navigation to the actual review page
-    console.log('Navigate to review for:', status.submissionIdentifier);
-    this.router.navigate(['/forum']);
+    console.log('Navigate to review for:', status.submissionId);
+    this.router.navigate(['/forum', status.submissionId]);
     this.dialogRef.close();
   }
 

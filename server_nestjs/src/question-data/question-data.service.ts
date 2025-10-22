@@ -238,19 +238,7 @@ export class QuestionDataService {
     };
 
     if (questionTypeStr === questionType.GROUP_REVIEW_GATE) {
-      const userGroup = await this.prisma.userGroupMembership.findFirst({
-        where: { userId: userId },
-        include: { group: { include: { UserGroupMembership: { include: { user: true } } } } },
-      });
-
-      if (userGroup) {
-        const otherMembers = userGroup.group.UserGroupMembership.filter(m => m.userId !== userId);
-        questionData.groupReviewStatuses = otherMembers.map((member, index) => ({
-          submissionIdentifier: `Abgabe ${String.fromCharCode(65 + index)}`,
-          reviewPhase: 'Phase 1: Feedback geben',
-          userStatus: index % 2 === 0 ? 'erledigt' : 'offen', // Dummy status
-        }));
-      }
+      questionData.groupReviewStatuses = []; // Does not count to question data
     }
 
     return questionData;

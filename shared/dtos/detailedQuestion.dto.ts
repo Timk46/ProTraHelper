@@ -145,7 +145,7 @@ export interface detailedGroupReviewGateDTO {
 }
 
 export interface GroupReviewStatusDTO {
-  submissionIdentifier: string;
+  submissionId: number;
   reviewPhase: string;
   userStatus: string;
 }
