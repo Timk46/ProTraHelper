@@ -1001,18 +1001,19 @@ enum EvaluationPhase {
 // ==========================================
 
 model EvaluationSession {
-  id          Int             @id @default(autoincrement())
-  title       String
-  description String?
-  startDate   DateTime
-  endDate     DateTime
-  moduleId    Int
-  createdById Int
-  isActive    Boolean         @default(true)
-  isAnonymous Boolean         @default(true)
-  phase       EvaluationPhase @default(DISCUSSION)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  id                Int             @id @default(autoincrement())
+  groupReviewGateId Int?
+  title             String
+  description       String?
+  startDate         DateTime
+  endDate           DateTime
+  moduleId          Int
+  createdById       Int
+  isActive          Boolean         @default(true)
+  isAnonymous       Boolean         @default(true)
+  phase             EvaluationPhase @default(DISCUSSION)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   // Relations
   module      Module                      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
