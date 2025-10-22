@@ -118,10 +118,8 @@ export class EditGroupReviewGateComponent {
 
       // Lade bereits verlinkte Kategorien
       if (this.detailedQuestionData.groupReviewGate?.linkedCategories) {
-        const linkedCategoriesData = this.detailedQuestionData.groupReviewGate.linkedCategories;
-        console.log('Linked Categories Data:', linkedCategoriesData);
+        const linkedCategoriesData = JSON.parse(this.detailedQuestionData.groupReviewGate.linkedCategories as any);
         if (linkedCategoriesData && linkedCategoriesData.linkedCategoryIds) {
-          console.log('Linked Category IDs:', linkedCategoriesData.linkedCategoryIds);
           this.selectedCategories = this.allCategories.filter(cat =>
             linkedCategoriesData.linkedCategoryIds.includes(cat.id),
           );
