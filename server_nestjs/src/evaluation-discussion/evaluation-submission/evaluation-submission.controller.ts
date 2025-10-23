@@ -17,6 +17,7 @@ import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
 import { EvaluationSubmissionService } from './evaluation-submission.service';
+import { AuthorizedSubmission } from '../decorators/authorized-submission.decorator';
 import { EvaluationSubmissionDTO, CommentStatsDTO, EvaluationSessionDTO } from '@DTOs/index';
 import { CreateEvaluationSubmissionDTO, UpdateEvaluationSubmissionDTO } from '@DTOs/index';
 
@@ -42,34 +43,43 @@ export class EvaluationSubmissionController {
 
   @Get(':id/pdf')
   @roles('ANY')
-  async getPdf(@Param('id', ParseIntPipe) id: number, @Res() res: Response): Promise<void> {
-    const fileStream = await this.evaluationSubmissionService.getPdfStream(id);
+  async getPdf(
+    @AuthorizedSubmission() submissionId: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    const fileStream = await this.evaluationSubmissionService.getPdfStream(submissionId);
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="submission-${id}.pdf"`,
+      'Content-Disposition': `inline; filename="submission-${submissionId}.pdf"`,
     });
     fileStream.pipe(res);
   }
 
   @Get(':id/discussions')
   @roles('ANY')
-  async getDiscussions(@Param('id', ParseIntPipe) id: number, @Query('categoryId') categoryId?: string) {
+  async getDiscussions(
+    @AuthorizedSubmission() submissionId: number,
+    @Query('categoryId') categoryId?: string,
+  ) {
     return this.evaluationSubmissionService.getDiscussions(
-      id,
+      submissionId,
       categoryId ? Number(categoryId) : undefined,
     );
   }
 
   @Get(':id/stats')
   @roles('ANY')
-  async getStats(@Param('id', ParseIntPipe) id: number) {
-    return this.evaluationSubmissionService.getStats(id);
+  async getStats(@AuthorizedSubmission() submissionId: number) {
+    return this.evaluationSubmissionService.getStats(submissionId);
   }
 
   @Get(':id/anonymous-user')
   @roles('ANY')
-  async getAnonymousUser(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
-    return this.evaluationSubmissionService.getAnonymousUser(id, req.user.id);
+  async getAnonymousUser(
+    @AuthorizedSubmission() submissionId: number,
+    @Req() req: any,
+  ) {
+    return this.evaluationSubmissionService.getAnonymousUser(submissionId, req.user.id);
   }
 
   /**
@@ -89,8 +99,11 @@ export class EvaluationSubmissionController {
    */
   @Get(':id/comment-stats')
   @roles('ANY')
-  async getCommentStats(@Param('id', ParseIntPipe) id: number, @Req() req: any): Promise<CommentStatsDTO> {
-    return this.evaluationSubmissionService.getCommentStats(id, req.user.id);
+  async getCommentStats(
+    @AuthorizedSubmission() submissionId: number,
+    @Req() req: any,
+  ): Promise<CommentStatsDTO> {
+    return this.evaluationSubmissionService.getCommentStats(submissionId, req.user.id);
   }
 
   /**
@@ -136,7 +149,7 @@ export class EvaluationSubmissionController {
 
   @Get(':id')
   @roles('ANY')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<EvaluationSubmissionDTO> {
-    return this.evaluationSubmissionService.findOne(id);
+  async findOne(@AuthorizedSubmission() submissionId: number): Promise<EvaluationSubmissionDTO> {
+    return this.evaluationSubmissionService.findOne(submissionId);
   }
 }

@@ -166,17 +166,18 @@ export class ProductionFilesService {
       return true;
     }
     if (productionFile.file.privacy === filePrivacy.RESTRICTED) {
-      // The file owner is in a UserGrop. Find all group members and check if the user is in one of these groups
-      const groups = await this.prisma.userGroup.findMany({
+      // The file owner is in a UserGroup. Check if user and owner share at least one common group
+      // Optimized: Use count with take:1 instead of loading full objects
+      const sharedGroupCount = await this.prisma.userGroup.count({
         where: {
-          UserGroupMembership: { some: { id: productionFile.user.id } },
-        }, include: { UserGroupMembership: true },
+          AND: [
+            { UserGroupMembership: { some: { userId: productionFile.user.id } } },
+            { UserGroupMembership: { some: { userId: user.id } } },
+          ],
+        },
+        take: 1, // Stop after first match - early termination
       });
-      return groups.some((group) => {
-        if (group.UserGroupMembership.some((member) => member.id === user.id)) {
-          return true;
-        }
-      }); 
+      return sharedGroupCount > 0;
     }
     return false;
   }

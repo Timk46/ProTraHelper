@@ -1,18 +1,20 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { EvaluationDiscussionForumComponent } from './evaluation-discussion-forum/evaluation-discussion-forum.component';
+import { LoggedInGuard } from '../../Guards/is-logged-in.guard';
+import { evaluationAccessGuard } from './guards/evaluation-access.guard';
 
 const routes: Routes = [
   {
     path: ':submissionId',
     component: EvaluationDiscussionForumComponent,
-    // Guards können hier hinzugefügt werden, falls nötig
-    // canActivate: [LoggedInGuard, EvaluationAccessGuard]
+    canActivate: [LoggedInGuard, evaluationAccessGuard]
   },
   {
     path: '',
     component: EvaluationDiscussionForumComponent, // Allow access without submissionId
-    pathMatch: 'full'
+    pathMatch: 'full',
+    canActivate: [LoggedInGuard]
   }
 ];
 

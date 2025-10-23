@@ -57,7 +57,6 @@ export class EvaluationAccessGuardService {
     
     // If no submissionId in route, allow access (will show submission selection)
     if (!submissionId) {
-      console.log('🔓 Evaluation access granted: No specific submission requested');
       return true;
     }
 
@@ -93,83 +92,51 @@ export class EvaluationAccessGuardService {
 
   /**
    * Validates if the user has access to a specific submission
-   * 
+   *
    * @param submissionId - The submission ID to validate
-   * @returns Observable<boolean> - True if user has access
+   * @returns Observable<boolean | UrlTree> - True if user has access, UrlTree for redirect
    */
-  private validateSubmissionAccess(submissionId: string): Observable<boolean> {
+  private validateSubmissionAccess(submissionId: string): Observable<boolean | UrlTree> {
     return this.evaluationService.getSubmission(submissionId).pipe(
       map(submission => {
-        if (!submission) {
+        if (!submission || !this.userService.isUserLoggedIn()) {
           return false;
         }
 
-        // Check if user is logged in
-        if (!this.userService.isUserLoggedIn()) {
-          return false;
-        }
-
-        // Check subject registration (reuse existing logic)
-        if (!this.userService.isRegisteredForSubject('Tragkonstruktion 3')) {
-          return false;
-        }
-
-        // Additional evaluation-specific checks can be added here:
-        // - Check if evaluation period is active
-        // - Check if user has specific role permissions
-        // - Check if submission belongs to user's group/session
-        
-        
+        // Backend enforces all authorization logic (group membership, roles, etc.)
+        // If we reach here, the backend call succeeded, so user has access
         return true;
       }),
-      catchError(error => {
-        // Handle specific error types
-        if (error.status === 404) {
-          return of(false);
-        }
-        if (error.status === 403) {
-          return of(false);
-        }
-        
-        console.error('❌ Error validating submission access:', error);
-        return of(false); // Deny access on error
-      })
+      catchError(this.handleAccessError.bind(this))
     );
   }
 
   /**
-   * Checks if the evaluation phase allows forum access
-   * 
-   * @param phase - The current evaluation phase
-   * @returns boolean - True if forum access is allowed
+   * Handles access errors with user-friendly redirects
+   *
+   * @param error - The error from the backend
+   * @returns Observable<UrlTree> - Redirect to dashboard with error message
+   * @private
    */
-  private isForumAccessAllowed(phase: string): boolean {
-    // Define which phases allow forum access
-    const allowedPhases = ['DISCUSSION', 'EVALUATION', 'RATING'];
-    return allowedPhases.includes(phase);
-  }
+  private handleAccessError(error: any): Observable<UrlTree> {
+    // Error mapping for user-friendly messages
+    const errorMap: Record<number, { error: string; message: string }> = {
+      403: {
+        error: 'group_access_denied',
+        message: 'Sie gehören nicht zur richtigen Gruppe für diese Abgabe.'
+      },
+      404: {
+        error: 'submission_not_found',
+        message: 'Die Abgabe wurde nicht gefunden.'
+      },
+    };
 
-  /**
-   * Validates time-based access restrictions
-   * 
-   * @param submission - The submission object
-   * @returns boolean - True if time restrictions are met
-   */
-  private validateTimeRestrictions(submission: any): boolean {
-    const now = new Date();
-    
-    // Example: Check if evaluation period is active
-    // This would typically come from the submission or session data
-    if (submission.evaluationStartDate && submission.evaluationEndDate) {
-      const startDate = new Date(submission.evaluationStartDate);
-      const endDate = new Date(submission.evaluationEndDate);
-      
-      if (now < startDate || now > endDate) {
-        return false;
-      }
-    }
-    
-    return true;
+    const errorConfig = errorMap[error.status] || {
+      error: 'evaluation_error',
+      message: 'Fehler beim Laden der Abgabe.'
+    };
+
+    return of(this.router.createUrlTree(['/dashboard'], { queryParams: errorConfig }));
   }
 }
 
@@ -187,32 +154,3 @@ export const evaluationAccessGuard: CanActivateFn = (
   return guardService.canActivate(route, state);
 };
 
-/**
- * Type guard for evaluation permissions
- * 
- * @description Utility function to check evaluation permissions in components
- * 
- * @param submission - The submission to check
- * @param userRole - The user's role
- * @returns boolean - True if user has evaluation permissions
- */
-export function hasEvaluationPermission(
-  submission: any, 
-  userRole: string
-): boolean {
-  // Define role-based permissions
-  const adminRoles = ['ADMIN', 'LECTURER', 'TEACHER'];
-  const studentRoles = ['STUDENT', 'PARTICIPANT'];
-  
-  // Admins have full access
-  if (adminRoles.includes(userRole)) {
-    return true;
-  }
-  
-  // Students need to be in evaluation phase
-  if (studentRoles.includes(userRole)) {
-    return submission?.phase === 'EVALUATION' || submission?.phase === 'DISCUSSION';
-  }
-  
-  return false;
-}

@@ -18,6 +18,7 @@ import { EvaluationRatingService } from './evaluation-rating/evaluation-rating.s
 // Shared Services
 import { EvaluationCacheService } from './shared/evaluation-cache.service';
 import { EvaluationUtilsService } from './shared/evaluation-utils.service';
+import { EvaluationAuthorizationService } from './evaluation-authorization.service';
 
 @Module({
   imports: [PrismaModule, NotificationModule, FilesModule],
@@ -35,6 +36,7 @@ import { EvaluationUtilsService } from './shared/evaluation-utils.service';
     // Shared Services
     EvaluationCacheService,
     EvaluationUtilsService,
+    EvaluationAuthorizationService,
   ],
   exports: [
     EvaluationSessionService,
@@ -44,6 +46,7 @@ import { EvaluationUtilsService } from './shared/evaluation-utils.service';
     // Shared Services
     EvaluationCacheService,
     EvaluationUtilsService,
+    EvaluationAuthorizationService,
   ],
 })
 export class EvaluationDiscussionModule {}
