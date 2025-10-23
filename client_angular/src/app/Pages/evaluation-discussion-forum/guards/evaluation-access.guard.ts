@@ -1,17 +1,19 @@
 import { Injectable, inject } from '@angular/core';
-import { 
-  CanActivateFn, 
-  ActivatedRouteSnapshot, 
-  RouterStateSnapshot, 
-  Router, 
-  UrlTree 
+import {
+  CanActivateFn,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  Router,
+  UrlTree
 } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError, take } from 'rxjs/operators';
 
 import { UserService } from '../../../Services/auth/user.service';
 import { EvaluationStateService } from '../../../Services/evaluation/evaluation-state.service';
 import { EvaluationDiscussionService } from '../../../Services/evaluation/evaluation-discussion.service';
+import { LoggerService } from '../../../Services/logger/logger.service';
 
 /**
  * Guard that validates access to evaluation discussions
@@ -36,10 +38,13 @@ import { EvaluationDiscussionService } from '../../../Services/evaluation/evalua
   providedIn: 'root'
 })
 export class EvaluationAccessGuardService {
+  private readonly log = this.logger.scope('EvaluationAccessGuard');
+
   constructor(
     private userService: UserService,
     private evaluationService: EvaluationDiscussionService,
-    private router: Router
+    private router: Router,
+    private logger: LoggerService
   ) {}
 
   /**
@@ -76,11 +81,15 @@ export class EvaluationAccessGuardService {
           });
         }
       }),
-      catchError(error => {
-        console.error('❌ Error checking evaluation access:', error);
+      catchError((error: HttpErrorResponse) => {
+        this.log.error('Evaluation access check failed', {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
         // Redirect to dashboard on error
         return of(this.router.createUrlTree(['/dashboard'], {
-          queryParams: { 
+          queryParams: {
             error: 'evaluation_error',
             message: 'Fehler beim Überprüfen der Bewertungsberechtigung.'
           }
@@ -114,11 +123,11 @@ export class EvaluationAccessGuardService {
   /**
    * Handles access errors with user-friendly redirects
    *
-   * @param error - The error from the backend
+   * @param error - The HTTP error response from the backend
    * @returns Observable<UrlTree> - Redirect to dashboard with error message
    * @private
    */
-  private handleAccessError(error: any): Observable<UrlTree> {
+  private handleAccessError(error: HttpErrorResponse): Observable<UrlTree> {
     // Error mapping for user-friendly messages
     const errorMap: Record<number, { error: string; message: string }> = {
       403: {
