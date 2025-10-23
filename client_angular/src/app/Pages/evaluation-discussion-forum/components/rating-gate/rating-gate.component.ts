@@ -1651,7 +1651,6 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
 
     try {
       localStorage.setItem(this.DISCUSSION_PANEL_STORAGE_KEY, String(this.isDiscussionExpanded));
-      console.log('📝 Discussion panel expansion state saved:', this.isDiscussionExpanded);
     } catch (error) {
       console.warn('Failed to save discussion panel expansion state to localStorage:', error);
     }

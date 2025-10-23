@@ -206,12 +206,6 @@ export class EvaluationPerformanceService {
     // Update performance metrics
     this.updateComponentMetrics(componentName, profiling);
 
-    console.log(`🏁 Stopped profiling component: ${componentName}`, {
-      duration: profiling.totalDuration,
-      renderCount: profiling.renderCount,
-      averageRenderTime: profiling.averageRenderTime
-    });
-
     return profiling;
   }
 

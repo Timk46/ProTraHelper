@@ -63,8 +63,6 @@ export class VoteCoreService implements OnDestroy {
   submitVote(commentId: number, voteType: VoteType): Observable<VoteLimitResponseDTO> {
     this.validateCommentId(commentId);
 
-    console.log(`🗳️ VoteCoreService: Submitting ${voteType || 'remove'} vote for comment ${commentId}`);
-
     return this.evaluationDiscussionService.voteCommentWithLimits(commentId.toString(), voteType).pipe(
       takeUntil(this.destroy$)
     );

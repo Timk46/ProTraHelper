@@ -230,8 +230,6 @@ export class VoteStateService implements OnDestroy {
    * ```
    */
   async submitVote(commentId: number, voteType: VoteType, categoryId?: number): Promise<void> {
-    console.log(`🗳️ VoteStateService: Queuing ${voteType || 'remove'} vote for comment ${commentId}`);
-
     const operation: VoteOperation = {
       commentId,
       voteType,
@@ -435,8 +433,6 @@ export class VoteStateService implements OnDestroy {
         // Extract batch from queue
         const batch = this.voteQueue.splice(0, this.QUEUE_BATCH_SIZE);
 
-        console.log(`📦 VoteStateService: Processing batch of ${batch.length} operations`);
-
         // Process batch concurrently
         const results = await Promise.allSettled(
           batch.map(async (operation) => {
@@ -462,8 +458,6 @@ export class VoteStateService implements OnDestroy {
    */
   private async executeVoteOperation(operation: VoteOperation): Promise<void> {
     const timeoutMs = 5000;
-
-    console.log(`🗳️ VoteStateService: Executing vote for ${operation.commentId} (attempt ${operation.retryCount + 1})`);
 
     const votePromise = firstValueFrom(
       this.voteCoreService.submitVote(operation.commentId, operation.voteType)

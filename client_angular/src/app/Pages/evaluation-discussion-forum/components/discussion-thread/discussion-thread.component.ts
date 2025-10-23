@@ -178,7 +178,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     });
     this.performanceService.markComponentInit('discussion-thread');
 
-    console.log('this discussions:', this.discussions);
     this.processFlattenedComments();
     this.setupPanelStateSubscription();
     this.setupPerformanceOptimizations();
@@ -598,7 +597,6 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
     // Performance optimization: Check if discussions have changed
     const discussionsHash = this.generateDiscussionsHash();
     if (discussionsHash === this.lastProcessedDiscussionsHash) {
-      console.log('🚀 Skipping comment processing - no changes detected');
       return;
     }
 

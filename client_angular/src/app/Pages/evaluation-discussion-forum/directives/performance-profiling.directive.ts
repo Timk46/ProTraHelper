@@ -123,16 +123,7 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
    */
   ngOnDestroy(): void {
     // Stop component profiling
-    const profiling = this.performanceService.stopComponentProfiling(this.componentName);
-    
-    if (profiling) {
-      console.log(`🏁 Profiling completed for ${this.componentName}:`, {
-        duration: `${profiling.totalDuration?.toFixed(2)}ms`,
-        renders: profiling.renderCount,
-        changeDetections: this.changeDetectionCount,
-        domChanges: this.domChangeCount
-      });
-    }
+    this.performanceService.stopComponentProfiling(this.componentName);
 
     // Clean up observers
     this.cleanupObservers();
@@ -181,10 +172,6 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
     if ('MutationObserver' in window) {
       this.mutationObserver = new MutationObserver((mutations) => {
         this.domChangeCount += mutations.length;
-        
-        // Log significant DOM changes
-        if (mutations.length > 10) {
-        }
       });
 
       this.mutationObserver.observe(this.elementRef.nativeElement, {
@@ -199,11 +186,8 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
 
     // Set up resize monitoring
     if ('ResizeObserver' in window) {
-      this.resizeObserver = new ResizeObserver((entries) => {
-        entries.forEach(entry => {
-          const { width, height } = entry.contentRect;
-          console.log(`📏 Component ${this.componentName} resized: ${width}x${height}`);
-        });
+      this.resizeObserver = new ResizeObserver(() => {
+        // Track resize events without logging
       });
 
       this.resizeObserver.observe(this.elementRef.nativeElement);
@@ -220,13 +204,10 @@ export class PerformanceProfilingDirective implements OnInit, OnDestroy, AfterVi
       this.intersectionObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const isVisible = entry.isIntersecting;
-          const visibilityRatio = entry.intersectionRatio;
 
           if (isVisible) {
-            console.log(`👁️ Component ${this.componentName} became visible (${(visibilityRatio * 100).toFixed(1)}% visible)`);
             this.onComponentVisible();
           } else {
-            console.log(`👁️ Component ${this.componentName} became hidden`);
             this.onComponentHidden();
           }
         });

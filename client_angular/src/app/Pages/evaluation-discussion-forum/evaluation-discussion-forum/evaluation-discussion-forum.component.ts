@@ -655,7 +655,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     ).subscribe(metrics => {
       const componentMetrics = metrics.componentMetrics.get('evaluation-discussion-forum');
       if (componentMetrics && componentMetrics.averageRenderTime > 50) {
-        console.warn(`📊 Component performance alert: Average render time ${componentMetrics.averageRenderTime.toFixed(2)}ms`);
+        console.debug(`Component performance: Average render time ${componentMetrics.averageRenderTime.toFixed(2)}ms`);
       }
     });
 

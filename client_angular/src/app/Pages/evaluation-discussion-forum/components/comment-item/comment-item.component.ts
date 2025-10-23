@@ -207,14 +207,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       
       if (this.anonymousUser && this.comment?.author) {
         this._cachedIsCurrentUser = this.isCurrentUser();
-        
+
         if (wasUnknown) {
-          console.log('🔐 Ownership determined:', {
-            commentId: this.comment.id,
-            isCurrentUser: this._cachedIsCurrentUser,
-            authorId: this.comment.author.id,
-            userId: this.anonymousUser.id
-          });
           this.cdr.detectChanges(); // Force UI update
         }
       } else {
@@ -290,12 +284,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // Cache upvote tooltip only (ranking system)
     this._cachedUpvoteTooltip = this.getUpvoteTooltip();
-
-    console.log('🚀 Cached values updated for performance:', {
-      commentId: this.comment?.id,
-      isCurrentUser: this._cachedIsCurrentUser,
-      authorDisplayName: this._cachedAuthorDisplayName,
-    });
   }
 
   /**
@@ -425,12 +413,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
         if (this.pendingVoteOperations === 0 && this.localVoteCount === 0) {
           this.localVoteCount = count;
           this.cdr.detectChanges(); // Immediate UI update
-          console.log('🔢 Backend fallback initialization:', {
-            commentId: this.comment.id,
-            voteCount: this.localVoteCount,
-            source: 'backend-fallback'
-          });
-        } else {
         }
       });
   }

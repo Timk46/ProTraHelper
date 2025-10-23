@@ -102,8 +102,6 @@ export class BundleAnalyzerService {
    * Analyzes the current bundle structure
    */
   analyzeBundleStructure(): void {
-    console.log('📦 Starting bundle structure analysis...');
-    
     // Analyze loaded resources
     this.analyzeLoadedResources();
     
@@ -200,8 +198,6 @@ export class BundleAnalyzerService {
       detectedModules,
       timestamp: Date.now()
     });
-
-    console.log('🧩 Detected modules:', detectedModules.length);
   }
 
   /**
@@ -280,13 +276,6 @@ export class BundleAnalyzerService {
       ...currentMetrics,
       loadingPerformance,
       timestamp: Date.now()
-    });
-
-    console.log('⏱️ Loading performance:', {
-      mainChunk: `${mainChunkLoadTime.toFixed(2)}ms`,
-      avgLazyChunk: `${averageLazyChunkLoadTime.toFixed(2)}ms`,
-      totalLoad: `${totalLoadTime.toFixed(2)}ms`,
-      parallelEfficiency: `${(parallelLoadingEfficiency * 100).toFixed(1)}%`
     });
   }
 
@@ -402,8 +391,6 @@ export class BundleAnalyzerService {
       optimization,
       timestamp: Date.now()
     });
-
-    console.log('💡 Generated recommendations:', recommendations.length);
   }
 
   // =============================================================================
