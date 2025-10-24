@@ -1677,68 +1677,8 @@ export class EvaluationStateService {
     );
   }
 
-  // clearCategoryRating() removed - unused (use deleteCategoryRating() instead)
 
-  // =============================================================================
-  // PHASE MANAGEMENT
-  // =============================================================================
 
-  get currentPhase$(): Observable<EvaluationPhase | null> {
-    return this.submission$.pipe(
-      map(submission => submission?.phase || null),
-      distinctUntilChanged(),
-    );
-  }
-
-  switchPhase(submissionId: string, targetPhase: EvaluationPhase): Observable<any> {
-    const request = {
-      submissionId,
-      targetPhase,
-    };
-
-    return this.evaluationService.switchPhase(request).pipe(
-      map(response => {
-        // Update submission state
-        const currentSubmission = this.submissionSubject.value;
-        if (currentSubmission) {
-          this.submissionSubject.next({
-            ...currentSubmission,
-            phase: targetPhase,
-          });
-        }
-        return response;
-      }),
-    );
-  }
-
-  /**
-   * Alternative phase switching using submission-based endpoint (more efficient)
-   */
-  switchPhaseBySubmission(
-    submissionId: string,
-    targetPhase: EvaluationPhase,
-    reason?: string,
-  ): Observable<any> {
-    const request = {
-      submissionId,
-      targetPhase,
-      reason,
-    };
-
-    return this.evaluationService.switchPhaseBySubmission(request).pipe(
-      map(response => {
-        // Update submission state
-        const currentSubmission = this.submissionSubject.value;
-        if (currentSubmission) {
-          this.submissionSubject.next({
-            ...currentSubmission,
-            phase: targetPhase,
-          });
-        }
-        return response;
-      }),
-    );
-  }
 
   // =============================================================================
   // STATISTICS AND AGGREGATION

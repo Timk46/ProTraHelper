@@ -5,12 +5,12 @@
  */
 
 import { Injectable } from '@nestjs/common';
-import { spawn, exec } from 'child_process';
+import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export interface DirectRhinoLaunchRequest {
   filePath: string;
@@ -230,11 +230,14 @@ export class RhinoDirectService {
 
   /**
    * Führt Registry-Abfrage aus
+   * Uses execFile for security (no shell injection possible)
    */
   private async queryRegistry(keyPath: string, valueName: string): Promise<string | null> {
     try {
-      const command = `reg query "${keyPath}" /v "${valueName}"`;
-      const { stdout } = await execAsync(command);
+      // Use execFile instead of exec to avoid shell injection and deprecation warning
+      const { stdout } = await execFileAsync('reg', ['query', keyPath, '/v', valueName], {
+        windowsHide: true,
+      });
 
       const lines = stdout.split('\n');
       for (const line of lines) {

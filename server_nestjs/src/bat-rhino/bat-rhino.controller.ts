@@ -21,18 +21,29 @@ export class BatRhinoController {
   async launchDirect(@Body() request: any): Promise<BatExecutionResult> {
     this.logger.log(`Direct Rhino launch requested for file: ${request.filePath}`);
 
+    // Validate that filePath is provided
+    if (!request.filePath) {
+      this.logger.error('No filePath provided in request');
+      throw new HttpException(
+        'Fehler: Kein Dateipfad angegeben. Eine Rhino-Datei muss ausgewählt sein.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     try {
-      // Map frontend request to backend formatexample2
+      // Map frontend request to backend format - use ONLY the provided filePath
       const batRequest: BatScriptRequest = {
-        filePath: request.filePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example2.gh',
-        command: `_-Grasshopper B D W L W H D O "${
-          request.filePath || 'C:\\Dev\\hefl\\files\\Grasshopper\\example2.gh'
-        }" W _MaxViewport _Enter`,
+        filePath: request.filePath,
+        command: `_-Grasshopper B D W L W H D O "${request.filePath}" W _MaxViewport _Enter`,
         rhinoPath: request.rhinoPath,
         batchMode: request.batchMode !== false,
         showViewport: request.showViewport !== false,
         userId: 'web-user',
       };
+
+      // Log the file being executed for debugging
+      this.logger.log(`Executing Rhino with file: ${batRequest.filePath}`);
+      this.logger.debug(`Full batRequest: ${JSON.stringify(batRequest, null, 2)}`);
 
       // Execute Rhino directly
       const result = await this.batScriptGeneratorService.executeRhinoDirectly(batRequest);

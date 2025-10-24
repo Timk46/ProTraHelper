@@ -23,9 +23,7 @@ export * from "./detailedQuestion.dto";
 export * from "./fillInType.enum";
 export * from "./fillInText.dto";
 export * from "./highlight-concept.dto";
-export * from "./peer-review.dto";
-export * from "./peer-review-session.dto";
-export * from "./peer-submission.dto";
+
 
 // Version
 export * from "./version.dto";
@@ -72,8 +70,6 @@ export * from "./comment-stats.dto";
 export * from "./comment-status-map.dto";
 export { CommentStatusMapDTO, CommentStatusResponseDTO } from "./comment-status-map.dto"; // Explicit export for both types
 export * from "./anonymous-evaluation-user.dto";
-export * from "./phase-switch.dto";
-export * from "./phase-switch-schedule.dto";
 export * from "./evaluation-user-vote-response.dto";
 export * from './group-review-gate.dto';
 export * from './vote-limit-status.dto';
@@ -83,4 +79,3 @@ export * from './vote-reset.dto';
 export { EvaluationDiscussionDTO, VoteType } from "./evaluation-comment.dto";
 export { EvaluationPhase } from "./evaluation-submission.dto";
 export { RatingStatsDTO } from "./evaluation-rating.dto";
-export { PhaseSwitchResponseDTO } from "./phase-switch.dto";

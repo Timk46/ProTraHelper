@@ -5,12 +5,12 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { RhinoNativeFocusService } from './rhino-native-focus.service';
 import { UnifiedRhinoFocusResponseDTO } from '@DTOs/rhino-window.dto';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export interface WindowInfo {
   processId: number;
@@ -199,12 +199,17 @@ export class RhinoWindowManagerService {
     try {
       // Use Base64 encoding to avoid all escaping issues
       const encodedScript = Buffer.from(powershellScript, 'utf-8').toString('base64');
-      const command = `powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodedScript}`;
 
-      const { stdout, stderr } = await execAsync(command, {
-        timeout: 10000, // 10 second timeout
-        encoding: 'utf8',
-      });
+      // Use execFile for security (no shell injection) and to avoid deprecation warning
+      const { stdout, stderr } = await execFileAsync(
+        'powershell',
+        ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodedScript],
+        {
+          timeout: 10000, // 10 second timeout
+          encoding: 'utf8',
+          windowsHide: true,
+        },
+      );
 
       this.logger.debug('📋 PowerShell stdout:', stdout);
       if (stderr) {
@@ -283,12 +288,17 @@ export class RhinoWindowManagerService {
 
     try {
       const encodedScript = Buffer.from(simpleScript, 'utf-8').toString('base64');
-      const command = `powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodedScript}`;
 
-      const { stdout, stderr } = await execAsync(command, {
-        timeout: 5000,
-        encoding: 'utf8',
-      });
+      // Use execFile for security and to avoid deprecation warning
+      const { stdout, stderr } = await execFileAsync(
+        'powershell',
+        ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodedScript],
+        {
+          timeout: 5000,
+          encoding: 'utf8',
+          windowsHide: true,
+        },
+      );
 
       if (stderr) {
         this.logger.warn('⚠️ Simplified PowerShell stderr:', stderr);
@@ -587,7 +597,19 @@ export class RhinoWindowManagerService {
         } | ConvertTo-Json -Compress
       `;
 
-      const { stdout } = await execAsync(`powershell -Command "${powershellScript}"`);
+      // Use Base64 encoding and execFile for security
+      // PowerShell -EncodedCommand expects UTF-16LE encoding
+      const encodedScript = Buffer.from(powershellScript, 'utf16le' as BufferEncoding).toString(
+        'base64',
+      );
+      const { stdout } = await execFileAsync(
+        'powershell',
+        ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodedScript],
+        {
+          encoding: 'utf8',
+          windowsHide: true,
+        },
+      );
       const result = JSON.parse(stdout.trim());
 
       this.logger.debug(`🎯 Focus result: ${result.Message}`);
@@ -659,7 +681,19 @@ export class RhinoWindowManagerService {
         }
       `;
 
-      const { stdout } = await execAsync(`powershell -Command "${powershellScript}"`);
+      // Use Base64 encoding and execFile for security
+      // PowerShell -EncodedCommand expects UTF-16LE encoding
+      const encodedScript = Buffer.from(powershellScript, 'utf16le' as BufferEncoding).toString(
+        'base64',
+      );
+      const { stdout } = await execFileAsync(
+        'powershell',
+        ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodedScript],
+        {
+          encoding: 'utf8',
+          windowsHide: true,
+        },
+      );
 
       if (!stdout.trim()) {
         return [];
@@ -928,8 +962,10 @@ export class RhinoWindowManagerService {
     };
 
     try {
-      // Test PowerShell
-      await execAsync('powershell -Command "Write-Output test"');
+      // Test PowerShell - use execFile for security
+      await execFileAsync('powershell', ['-Command', 'Write-Output test'], {
+        windowsHide: true,
+      });
       features.powershell = true;
 
       // Test Windows API
@@ -939,7 +975,19 @@ export class RhinoWindowManagerService {
         Write-Output "API_OK"
       `;
 
-      const { stdout } = await execAsync(`powershell -Command "${apiTestScript}"`);
+      // Use Base64 encoding and execFile for security
+      // PowerShell -EncodedCommand expects UTF-16LE encoding
+      const encodedScript = Buffer.from(apiTestScript, 'utf16le' as BufferEncoding).toString(
+        'base64',
+      );
+      const { stdout } = await execFileAsync(
+        'powershell',
+        ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodedScript],
+        {
+          encoding: 'utf8',
+          windowsHide: true,
+        },
+      );
       if (stdout.includes('API_OK')) {
         features.windowsApi = true;
       }

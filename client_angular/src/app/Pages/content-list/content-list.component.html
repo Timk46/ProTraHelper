@@ -106,17 +106,8 @@
 
         <!-- button bar -->
         <div class="content-list-element-introduction-buttons">
-          <!-- <button
-            *ngIf="shouldShowRhinoButton(content)"
-            mat-raised-button
-            class="rhino-button"
-            (click)="onRhinoBatDirectButtonClick($event)"
-          >
-            <mat-icon>flash_on</mat-icon>
-            Rhino
-          </button> -->
           <button
-            *ngIf="hasContentElementType(content, 'RHINO')"
+            *ngIf="shouldShowRhinoButton(content)"
             mat-raised-button
             class="rhino-button"
             (click)="onRhinoBatDirectButtonClick($event)"

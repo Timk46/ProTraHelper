@@ -287,10 +287,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       startWith(),
       takeUntil(this.destroy$)
     );
-    this.currentPhase$ = this.stateService.currentPhase$.pipe(
-      startWith(),
-      takeUntil(this.destroy$)
-    );
     this.loading$ = this.stateService.loading$.pipe(
       takeUntil(this.destroy$)
     );
@@ -1366,44 +1362,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // No manual refresh needed - the state service handles this reactively
   }
 
-  onPhaseToggled(targetPhase: 'discussion' | 'evaluation'): void {
-    if (!this.submissionId) return;
 
-    // Convert string to enum
-    const evaluationPhase =
-      targetPhase === 'discussion' ? EvaluationPhase.DISCUSSION : EvaluationPhase.EVALUATION;
-
-    this.stateService
-      .switchPhase(this.submissionId, evaluationPhase)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: response => {
-          const phaseName = targetPhase === 'discussion' ? 'Diskussion' : 'Bewertung';
-          this.snackBar.open(`Phase wurde zu ${phaseName} gewechselt`, 'Schließen', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-          });
-        },
-        error: error => {
-          this.snackBar.open('Fehler beim Wechseln der Phase', 'Schließen', {
-            duration: 5000,
-            horizontalPosition: 'center',
-            verticalPosition: 'bottom',
-          });
-        },
-      });
-  }
-
-  /**
-   * Toggle between discussion and evaluation phase (for development)
-   */
-  togglePhase(): void {
-    this.currentPhase$.pipe(take(1)).subscribe(currentPhase => {
-      const targetPhase = currentPhase === EvaluationPhase.DISCUSSION ? 'evaluation' : 'discussion';
-      this.onPhaseToggled(targetPhase);
-    });
-  }
 
   // =============================================================================
   // UTILITY METHODS

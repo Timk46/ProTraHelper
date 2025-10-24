@@ -36,8 +36,6 @@ import {
   RatingStatsDTO,
   CategoryRatingStatus,
   HasRatedResponse,
-  PhaseSwitchRequestDTO,
-  PhaseSwitchResponseDTO,
   UserVoteResponseDTO,
   VoteCountResponseDTO,
   VoteLimitStatusDTO,
@@ -561,35 +559,6 @@ export class EvaluationDiscussionService {
   // PHASE MANAGEMENT
   // =============================================================================
 
-  /**
-   * Switches evaluation phase using session-based approach
-   * Gets sessionId from submission first, then switches phase
-   */
-  switchPhase(request: PhaseSwitchRequestDTO): Observable<PhaseSwitchResponseDTO> {
-    // First get the submission to extract sessionId
-    return this.getSubmission(request.submissionId).pipe(
-      switchMap(submission => {
-        // Now call phase switch with the sessionId
-        return this.http.post<PhaseSwitchResponseDTO>(
-          `${this.apiUrls.sessions}/${submission.sessionId}/switch-phase`,
-          {
-            phase: request.targetPhase,
-          },
-        );
-      }),
-    );
-  }
-
-  /**
-   * Alternative submission-based phase switching (more efficient)
-   * Directly switches phase using submission ID without additional API call
-   */
-  switchPhaseBySubmission(request: PhaseSwitchRequestDTO): Observable<any> {
-    return this.http.post(`${this.apiUrls.submissions}/${request.submissionId}/switch-phase`, {
-      targetPhase: request.targetPhase,
-      reason: request.reason,
-    });
-  }
 
   // =============================================================================
   // REAL-TIME UPDATES SIMULATION
