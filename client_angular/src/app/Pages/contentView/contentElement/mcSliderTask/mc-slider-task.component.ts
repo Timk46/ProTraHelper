@@ -9,16 +9,15 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { MCOptionViewDTO, McQuestionDTO, TaskViewData } from '@DTOs/index';
-import { QuestionDTO, McQuestionOptionDTO } from '@DTOs/index';
+import { QuestionDTO } from '@DTOs/index';
 import { UserAnswerDataDTO, userAnswerFeedbackDTO } from '@DTOs/index';
 import { QuestionDataService } from 'src/app/Services/question/question-data.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { firstValueFrom, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RhinoFocusService } from 'src/app/Services/rhino-focus.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfettiService } from 'src/app/Services/animations/confetti.service';
 
@@ -80,8 +79,6 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   maxScore: number = 0;
 
   // Rhino integration state
-  isRhinoSwitching: boolean = false;
-
   // For handling RxJS subscriptions cleanup
   private readonly destroy$ = new Subject<void>();
 
@@ -98,7 +95,6 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
     private readonly dialogRef: MatDialogRef<McSliderTaskComponent>,
     private readonly location: Location,
     private readonly cdr: ChangeDetectorRef,
-    private readonly rhinoFocusService: RhinoFocusService,
     private readonly snackBar: MatSnackBar,
     private readonly confettiService: ConfettiService,
   ) {
@@ -769,128 +765,10 @@ export class McSliderTaskComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Fokussiert ein bereits laufendes Rhino-Fenster ohne automatisches Starten
-   *
-   * Diese Methode fokussiert nur ein bereits geöffnetes Rhino-Fenster und bringt es
-   * in den Vordergrund. Falls Rhino nicht läuft, wird eine entsprechende Meldung angezeigt.
-   *
-   * @description
-   * Die Methode implementiert einen Schutz gegen mehrfache gleichzeitige Ausführungen
-   * durch das `isRhinoSwitching` Flag. Sie nutzt die focus-only Funktionalität,
-   * die NUR fokussiert und niemals automatisch Rhino startet.
-   *
-   * @async
-   * @returns {Promise<void>} Ein Promise, das aufgelöst wird, wenn die Rhino-Fokussierung
-   *                          abgeschlossen ist (erfolgreich oder fehlgeschlagen)
-   *
-   * @throws {Error} Wirft einen Fehler, wenn die Rhino-Fokussierung fehlschlägt
-   *
-   * @example
-   * ```typescript
-   * // Wird über Button-Klick aufgerufen
-   * await this.switchToRhino();
-   * ```
-   *
-   * @see {@link RhinoFocusService.focusOnlyRhino} - Der focus-only Service
-   *
-   * @note
-   * `firstValueFrom()` wird hier verwendet, um ein Observable in ein Promise zu konvertieren.
-   * Die focus-only Methode versucht nur zu fokussieren und startet niemals automatisch Rhino.
-   */
-  async switchToRhino(): Promise<void> {
-    if (this.isRhinoSwitching) {
-      return;
-    }
-
-    this.isRhinoSwitching = true;
-
-    try {
-
-      // Use direct focus approach - never launches Rhino
-      const result = await firstValueFrom(this.rhinoFocusService.focusRhinoWindowUnified());
-
-      if (result && result.success) {
-        // Successful focus
-        let message = '';
-        let icon = '';
-
-        // UnifiedRhinoFocusResponseDTO doesn't have 'action' field, use implementation info
-        switch (result.implementation) {
-          case 'native':
-            message = 'Rhino-Fenster erfolgreich fokussiert (native)';
-            icon = '🎯';
-            break;
-          case 'powershell':
-            message = 'Rhino-Fenster erfolgreich fokussiert (PowerShell)';
-            icon = '🎯';
-            break;
-          default:
-            message = 'Rhino-Fenster erfolgreich fokussiert';
-            icon = '🎯';
-        }
-
-        console.log(`${icon} ${message}`, result);
-        this.snackBar.open(`${icon} ${message}`, 'OK', {
-          duration: 3000,
-          panelClass: 'success-snackbar',
-        });
-      } else {
-
-        let userMessage = '';
-        let actionText = 'OK';
-        
-        // Check if Rhino is not running (UnifiedRhinoFocusResponseDTO structure)
-        if (result?.message?.includes('Keine Rhino-Fenster gefunden') || 
-            result?.message?.includes('No Rhino windows found')) {
-          userMessage = 'Rhino ist nicht geöffnet. Bitte starten Sie Rhino zuerst über den regulären Rhino-Button.';
-          actionText = 'Verstanden';
-        } else {
-          userMessage = result?.message || 'Rhino-Fenster konnte nicht fokussiert werden';
-        }
-
-        this.snackBar.open(`ℹ️ ${userMessage}`, actionText, {
-          duration: 6000,
-          panelClass: 'warning-snackbar',
-        });
-      }
-    } catch (error) {
-      console.error('❌ Rhino focus error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler';
-      this.snackBar.open(`❌ Fehler beim Fokussieren von Rhino: ${errorMessage}`, 'OK', {
-        duration: 5000,
-        panelClass: 'error-snackbar',
-      });
-    } finally {
-      this.isRhinoSwitching = false;
-      this.cdr.detectChanges();
-    }
-  }
-
-  /**
-   * Check if Rhino is available - Simplified check
-   */
-  isRhinoAvailable(): boolean {
-    // For manual button clicks, we always allow the attempt
-    // The actual availability will be checked during the focus operation
-    return true;
-  }
-
-  /**
-   * Get Rhino button tooltip text for focus-only functionality
-   */
-  getRhinoButtonTooltip(): string {
-    if (this.isRhinoSwitching) {
-      return 'Rhino-Fenster wird fokussiert...';
-    }
-    return 'Rhino-Fenster fokussieren (bringt bereits geöffnetes Rhino in den Vordergrund)';
-  }
-
-  /**
    * Close dialog or navigate back
    */
   onClose(): void {
-    // Automatic Rhino integration removed - users can manually focus Rhino using the button
-    console.log('Component closing. Use the Rhino button to manually focus if needed.');
+    console.log('Component closing.');
 
     if (this.dialogRef) {
       this.dialogRef.close();

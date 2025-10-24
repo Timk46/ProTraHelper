@@ -39,7 +39,6 @@ import { CompareModule } from './umlearn/compare/compare.module';
 import { GhFilesModule } from './gh-files/gh-files.module'; // Import the new module
 import { RhinoDirectModule } from './rhino-direct/rhino-direct.module';
 import { BatRhinoModule } from './bat-rhino/bat-rhino.module';
-import { RhinoUnifiedModule } from './rhino-unified/rhino-unified.module';
 import { MCSliderModule } from './mcslider/mcslider.module';
 import { RhinoIntegrationModule } from './rhino-integration/rhino-integration.module';
 
@@ -129,7 +128,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
     GhFilesModule, // Add the new module to imports
     RhinoDirectModule,
     BatRhinoModule,
-    RhinoUnifiedModule,
     MCSliderModule,
     RhinoIntegrationModule,
 

@@ -14,23 +14,6 @@
     </button>
   </div>
 
-  <!-- Rhino Switch Button -->
-  <div *ngIf="componentState !== McSliderTaskState.LOADING" class="rhino-switch-button">
-    <button
-      mat-icon-button
-      (click)="switchToRhino()"
-      [disabled]="isRhinoSwitching"
-      aria-label="Rhino-Fenster fokussieren"
-      [matTooltip]="getRhinoButtonTooltip()"
-      [class.rhino-switch-button--loading]="isRhinoSwitching"
-      [class.rhino-switch-button--available]="isRhinoAvailable()"
-      [class.rhino-switch-button--unavailable]="!isRhinoAvailable()">
-
-      <mat-icon *ngIf="!isRhinoSwitching" aria-hidden="true">center_focus_strong</mat-icon>
-      <mat-spinner *ngIf="isRhinoSwitching" diameter="20" aria-hidden="true"></mat-spinner>
-    </button>
-  </div>
-
   <!-- Questions view -->
   <div
     *ngIf="
