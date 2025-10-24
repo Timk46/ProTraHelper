@@ -24,6 +24,13 @@ interface SubmissionAuthMetadata {
    * @default 'submissionId'
    */
   paramName: string;
+
+  /**
+   * Source location of the submission ID
+   * @default 'params' - read from route parameters
+   * 'body' - read from request body
+   */
+  source?: 'params' | 'body';
 }
 
 /**
@@ -104,37 +111,46 @@ export class SubmissionAuthorizationGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<{
       user: User;
       params: Record<string, string>;
+      body: Record<string, any>;
       url: string;
     }>();
-    const { user, params } = request;
+    const { user, params, body } = request;
 
-    // Extract submission ID from route parameters
-    const submissionIdParam = params[metadata.paramName];
+    // Determine source location (params or body)
+    const source = metadata.source || 'params';
 
-    if (!submissionIdParam) {
-      this.logger.error('Missing submission ID in route parameters', {
+    // Extract submission ID from specified source
+    const sourceData = source === 'body' ? body : params;
+    const submissionIdValue = sourceData[metadata.paramName];
+
+    if (submissionIdValue === undefined || submissionIdValue === null) {
+      this.logger.error(`Missing submission ID in ${source}`, {
         paramName: metadata.paramName,
-        availableParams: Object.keys(params),
+        source,
+        availableKeys: Object.keys(sourceData),
         route: request.url,
       });
 
       throw new BadRequestException(
-        `Route parameter '${metadata.paramName}' is required for submission authorization`,
+        `${source === 'body' ? 'Body property' : 'Route parameter'} '${metadata.paramName}' is required for submission authorization`,
       );
     }
 
-    // Parse and validate submission ID
-    const submissionId = parseInt(submissionIdParam, 10);
+    // Parse and validate submission ID (handle both string and number)
+    const submissionId = typeof submissionIdValue === 'number'
+      ? submissionIdValue
+      : parseInt(String(submissionIdValue), 10);
 
     if (isNaN(submissionId) || submissionId <= 0) {
       this.logger.error('Invalid submission ID format', {
         paramName: metadata.paramName,
-        value: submissionIdParam,
+        source,
+        value: submissionIdValue,
         route: request.url,
       });
 
       throw new BadRequestException(
-        `Invalid submission ID: '${submissionIdParam}' must be a positive integer`,
+        `Invalid submission ID: '${submissionIdValue}' must be a positive integer`,
       );
     }
 

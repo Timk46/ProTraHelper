@@ -14,39 +14,47 @@ import { SUBMISSION_AUTH_KEY } from '../guards/submission-authorization.guard';
  * - Submission authors do NOT get automatic access (must be in a group)
  *
  * **How it works**:
- * 1. Decorator sets metadata indicating which route parameter contains the submission ID
+ * 1. Decorator sets metadata indicating where to find the submission ID (params or body)
  * 2. SubmissionAuthorizationGuard reads this metadata during request processing
- * 3. Guard extracts submission ID from route parameters
+ * 3. Guard extracts submission ID from the specified source
  * 4. Guard calls EvaluationAuthorizationService to verify access
  * 5. Request proceeds if authorized, otherwise ForbiddenException is thrown
  *
  * **Prerequisites**:
  * - Controller must use `@UseGuards(SubmissionAuthorizationGuard)`
- * - Route must have a parameter containing the submission ID
+ * - Route/body must contain the submission ID
  * - User must be authenticated (enforced by RolesGuard/JwtAuthGuard)
  *
- * @param paramName - Name of the route parameter containing the submission ID (default: 'submissionId')
+ * @param paramName - Name of the parameter/property containing the submission ID (default: 'submissionId')
+ * @param source - Where to find the submission ID: 'params' for route parameters, 'body' for request body (default: 'params')
  *
  * @example
  * ```typescript
- * // Basic usage with default parameter name
+ * // Route parameters (default)
  * @Controller('evaluation-comments')
  * @UseGuards(RolesGuard, SubmissionAuthorizationGuard)
  * export class EvaluationCommentController {
  *   @Get('get/:submissionId/:categoryId')
  *   @roles('ANY')
- *   @AuthorizedSubmission() // Checks 'submissionId' parameter
+ *   @AuthorizedSubmission() // Checks params.submissionId
  *   async getAllByCategory(
- *     @Param('submissionId', ParseIntPipe) submissionId: number,
- *     @GetUser() user: User
+ *     @Param('submissionId', ParseIntPipe) submissionId: number
  *   ) {
- *     // User has verified access to this submission
  *     return this.service.getComments(submissionId);
+ *   }
+ *
+ *   // Request body
+ *   @Post('create')
+ *   @roles('ANY')
+ *   @AuthorizedSubmission('submissionId', 'body') // Checks body.submissionId
+ *   async create(@Body() createDto: CreateCommentDTO) {
+ *     // createDto.submissionId is verified before this executes
+ *     return this.service.create(createDto);
  *   }
  *
  *   // Custom parameter name
  *   @Get('custom/:evalSubmissionId/data')
- *   @AuthorizedSubmission('evalSubmissionId') // Checks custom parameter
+ *   @AuthorizedSubmission('evalSubmissionId') // Checks params.evalSubmissionId
  *   async getCustomData(@Param('evalSubmissionId') id: number) {
  *     return this.service.getData(id);
  *   }
@@ -55,21 +63,22 @@ import { SUBMISSION_AUTH_KEY } from '../guards/submission-authorization.guard';
  *
  * @example
  * ```typescript
- * // Multiple endpoints with different submission parameters
- * @Controller('evaluations')
+ * // Combining with validation pipes
+ * @Controller('submissions')
  * @UseGuards(RolesGuard, SubmissionAuthorizationGuard)
- * export class EvaluationController {
- *   @Get('submissions/:submissionId/ratings')
- *   @AuthorizedSubmission() // Default: 'submissionId'
- *   async getRatings(@Param('submissionId') id: number) { }
- *
- *   @Get('reviews/:reviewId/submission/:submissionId')
- *   @AuthorizedSubmission('submissionId') // Explicit parameter name
- *   async getReview(@Param('submissionId') id: number) { }
+ * export class SubmissionController {
+ *   @Post('update')
+ *   @AuthorizedSubmission('submissionId', 'body')
+ *   async update(
+ *     @Body(ValidationPipe) updateDto: UpdateSubmissionDTO
+ *   ) {
+ *     // Authorization checked AFTER validation
+ *     return this.service.update(updateDto);
+ *   }
  * }
  * ```
  *
- * @throws {BadRequestException} If the specified parameter is missing from the route
+ * @throws {BadRequestException} If the specified parameter/property is missing or invalid
  * @throws {ForbiddenException} If user lacks access to the submission
  * @throws {NotFoundException} If the submission doesn't exist
  *
@@ -78,5 +87,8 @@ import { SUBMISSION_AUTH_KEY } from '../guards/submission-authorization.guard';
  *
  * @public
  */
-export const AuthorizedSubmission = (paramName: string = 'submissionId') =>
-  SetMetadata(SUBMISSION_AUTH_KEY, { paramName });
+export const AuthorizedSubmission = (
+  paramName: string = 'submissionId',
+  source: 'params' | 'body' = 'params'
+) =>
+  SetMetadata(SUBMISSION_AUTH_KEY, { paramName, source });

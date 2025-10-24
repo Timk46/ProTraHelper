@@ -3,6 +3,7 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
+import { EvaluationAuthorizationService } from '../evaluation-authorization.service';
 import { Prisma, PrismaClient } from '@prisma/client';
 import {
   CreateEvaluationCommentDTO,
@@ -66,6 +67,7 @@ export class EvaluationCommentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
+    private readonly authorizationService: EvaluationAuthorizationService,
   ) {}
 
   async create(createDto: CreateEvaluationCommentDTO, userId: number): Promise<EvaluationCommentDTO> {
@@ -107,8 +109,45 @@ export class EvaluationCommentService {
     }
   }
 
+  /**
+   * Validates that user has access to the submission that the comment belongs to
+   * Optimized single-query approach that combines existence check with authorization
+   * @param commentId - Comment ID
+   * @param userId - User ID requesting access
+   * @returns The comment with submissionId and userId for further checks
+   * @throws NotFoundException if comment doesn't exist
+   * @throws ForbiddenException if user lacks access to submission
+   */
+  private async validateCommentAccess(commentId: number, userId: number): Promise<{ id: number; submissionId: number; userId: number }> {
+    // Load comment with submissionId (optimized query - only fields we need)
+    const comment = await this.prisma.evaluationComment.findUnique({
+      where: { id: commentId },
+      select: {
+        id: true,
+        submissionId: true,
+        userId: true,
+      },
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment with ID ${commentId} not found`);
+    }
+
+    // Check submission authorization (group-based access control)
+    await this.authorizationService.checkAccessOrThrow(comment.submissionId, userId);
+
+    return comment;
+  }
+
   async remove(id: number, userId: number): Promise<void> {
-    await this.validateCommentOwnership(id, userId);
+    // Validate submission access + get comment data (single query)
+    const comment = await this.validateCommentAccess(id, userId);
+
+    // Check ownership (only author can delete)
+    if (comment.userId !== userId) {
+      throw new ForbiddenException('You are not authorized to delete this comment');
+    }
+
     await this.prisma.evaluationComment.delete({
       where: { id },
     });
@@ -119,7 +158,14 @@ export class EvaluationCommentService {
     updateDto: UpdateEvaluationCommentDTO,
     userId: number,
   ): Promise<void> {
-    await this.validateCommentOwnership(id, userId);
+    // Validate submission access + get comment data (single query)
+    const comment = await this.validateCommentAccess(id, userId);
+
+    // Check ownership (only author can update)
+    if (comment.userId !== userId) {
+      throw new ForbiddenException('You are not authorized to update this comment');
+    }
+
     await this.prisma.evaluationComment.update({
       where: { id },
       data: {
@@ -145,6 +191,9 @@ export class EvaluationCommentService {
   }
 
   async getReplies(parentId: number, userId: number): Promise<EvaluationCommentDTO[]> {
+    // Validate submission access via parent comment
+    await this.validateCommentAccess(parentId, userId);
+
     const replies = await this.prisma.evaluationComment.findMany({
       where: {
         parentId,
@@ -250,14 +299,19 @@ export class EvaluationCommentService {
    *
    * @description Implements 10-vote-per-category limit system with atomic transaction.
    * Users can distribute 10 votes across all comments in a category.
+   * Authorization is checked before the transaction begins.
    *
    * @param commentId - Comment ID to vote on
    * @param isUpvote - true to add vote, false to remove vote
    * @param userId - User ID
    * @returns Vote operation result with updated category-wide limits
    * @throws NotFoundException if comment not found
+   * @throws ForbiddenException if user lacks access to submission
    */
   async vote(commentId: number, isUpvote: boolean, userId: number): Promise<VoteLimitResponseDTO> {
+    // Validate submission access BEFORE transaction (single query)
+    await this.validateCommentAccess(commentId, userId);
+
     return await this.prisma.$transaction(async (tx) => {
       // 1. Get comment with category and submission info
       const comment = await tx.evaluationComment.findUnique({
@@ -378,6 +432,9 @@ export class EvaluationCommentService {
   }
 
   async getVotes(commentId: number, userId: number): Promise<VoteCountResponseDTO> {
+    // Validate submission access
+    await this.validateCommentAccess(commentId, userId);
+
     const votes = await this.prisma.evaluationCommentVote.findMany({
       where: { commentId },
     });

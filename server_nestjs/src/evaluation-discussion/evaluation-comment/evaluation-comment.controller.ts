@@ -38,8 +38,13 @@ export class EvaluationCommentController {
   constructor(private readonly evaluationCommentService: EvaluationCommentService) {}
 
   // Comment create
+  /**
+   * Creates a new comment or reply
+   * @security Protected by @AuthorizedSubmission (body) - verifies group membership
+   */
   @Post('create')
   @roles('ANY')
+  @AuthorizedSubmission('submissionId', 'body')
   async create(
     @Body() createDto: CreateEvaluationCommentDTO,
     @GetUser() user: User
@@ -48,6 +53,10 @@ export class EvaluationCommentController {
   }
 
   // Comment delete
+  /**
+   * Deletes a comment
+   * @security Authorization checked in service layer
+   */
   @Delete('delete/:commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @roles('ANY')
@@ -56,6 +65,10 @@ export class EvaluationCommentController {
   }
 
   // Comment update
+  /**
+   * Updates a comment
+   * @security Authorization checked in service layer
+   */
   @Put('update/:commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @roles('ANY')
@@ -92,6 +105,10 @@ export class EvaluationCommentController {
   }
 
   // Get replies for comment
+  /**
+   * Gets all replies for a comment
+   * @security Authorization checked in service layer
+   */
   @Get('replies/:commentId')
   @roles('ANY')
   async getReplies(
@@ -102,6 +119,10 @@ export class EvaluationCommentController {
   }
 
   // Vote on comment with limit enforcement
+  /**
+   * Votes on a comment (upvote or downvote)
+   * @security Authorization checked in service layer
+   */
   @Post('votes/vote/:commentId')
   @roles('ANY')
   async vote(
@@ -113,6 +134,10 @@ export class EvaluationCommentController {
   }
 
   // Get votes for comment (including user's vote in a separate parameter)
+  /**
+   * Gets vote counts for a comment
+   * @security Authorization checked in service layer
+   */
   @Get('votes/get/:commentId')
   @roles('ANY')
   async getVotes(

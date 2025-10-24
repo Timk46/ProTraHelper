@@ -26,12 +26,13 @@ export class FilesController {
   /**
    * Upload a new file.
    *
-   * POST /files/upload   DISABLED FOR NOW
+   * POST /files/upload
    *
    * @param {Express.Multer.File} file - The file to upload
    * @returns {Promise<FileDto>} The metadata of the uploaded file
    */
 
+  @roles('ADMIN', 'LECTURER')
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadPublicFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
