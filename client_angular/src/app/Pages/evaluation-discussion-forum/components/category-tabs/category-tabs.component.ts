@@ -41,6 +41,9 @@ export class CategoryTabsComponent {
   @Input() activeCategory: number = 1;
   @Input() commentStats: CommentStatsDTO | null = null;
 
+  // 🔧 NEW: Disable category switching during transitions
+  @Input() disabled: boolean = false;
+
   // =============================================================================
   // OUTPUTS - EVENTS TO PARENT (SMART COMPONENT)
   // =============================================================================

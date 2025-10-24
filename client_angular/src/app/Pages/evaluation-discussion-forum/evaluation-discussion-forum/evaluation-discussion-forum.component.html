@@ -48,6 +48,7 @@
         [categories]="vm.categories"
         [activeCategory]="vm.activeCategory"
         [commentStats]="vm.commentStats"
+        [disabled]="isCategoryTransitionLoading"
         (categorySelected)="onCategorySelected($event)"
       >
       </app-category-tabs>

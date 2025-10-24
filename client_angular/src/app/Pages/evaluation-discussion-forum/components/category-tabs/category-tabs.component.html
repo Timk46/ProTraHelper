@@ -2,12 +2,22 @@
 <div class="category-tabs-container">
   <!-- Tab buttons matching the design -->
   <div class="criteria-tabs">
-    <button 
+    <button
       *ngFor="let category of categories; trackBy: trackByCategory"
       class="criteria-tab"
       [class.active]="isActiveCategory(category.id)"
-      (click)="onTabChanged(category.id)">
+      [class.loading-disabled]="disabled"
+      [disabled]="disabled"
+      (click)="onTabChanged(category.id)"
+      [attr.aria-disabled]="disabled"
+      [style.cursor]="disabled ? 'wait' : 'pointer'">
       {{ category.displayName }}
+      <!-- Loading indicator for active tab during transition -->
+      <mat-spinner
+        *ngIf="disabled && isActiveCategory(category.id)"
+        diameter="16"
+        class="inline-spinner">
+      </mat-spinner>
     </button>
   </div>
 </div>

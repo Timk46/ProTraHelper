@@ -1,3 +1,5 @@
+import { FileDto } from './file.dto';
+
 // generic interface for a node in the concept graph
 export interface ConceptNodeDTO {
   databaseId: number;
@@ -12,6 +14,8 @@ export interface ConceptNodeDTO {
   prerequisiteEdgeIds: number[];
   successorEdgeIds: number[];
   edgeChildIds: number[];
+  rhinoFileId?: number | null;
+  rhinoFile?: FileDto;
 }
 
 export interface ConceptNode {
@@ -20,6 +24,8 @@ export interface ConceptNode {
   description: string | null;
   descriptionHTML?: string;
   conceptGraphId: number | null;
+  rhinoFileId?: number | null;
+  rhinoFile?: FileDto;
 }
 
 export interface ConceptNodeEditDTO {
@@ -27,4 +33,5 @@ export interface ConceptNodeEditDTO {
   name?: string;
   description?: string;
   descriptionHTML?: string;
+  rhinoFileId?: number | null;
 }

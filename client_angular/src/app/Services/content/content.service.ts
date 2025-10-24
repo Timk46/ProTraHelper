@@ -49,6 +49,15 @@ export class ContentService {
     return this.http.get<ConceptNode[]>(environment.server + `/content/conceptsFull`);
   }
 
+  /**
+   * Fetches a single ConceptNode with rhinoFile relation
+   * @param conceptId The id of the concept node
+   * @returns ConceptNode with rhinoFile relation
+   */
+  getConcept(conceptId: number): Observable<ConceptNode> {
+    return this.http.get<ConceptNode>(environment.server + `/content/concepts/${conceptId}`);
+  }
+
   updateConcept(conceptId: number, concept: ConceptNodeEditDTO): Observable<boolean> {
     return this.http.put<boolean>(environment.server + `/content/concepts/${conceptId}`, concept);
   }

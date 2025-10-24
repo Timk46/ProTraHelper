@@ -115,6 +115,8 @@ model ConceptNode {
   descriptionHTML         String?
   conceptGraphId          Int?
   transcript              String?
+  rhinoFileId             Int?
+  rhinoFile               File?                     @relation("ConceptRhinoFile", fields: [rhinoFileId], references: [id])
   childEdges              ConceptEdge[]             @relation("conceptEdgeParent")
   mySuccessors            ConceptEdge[]             @relation("prerequisiteConcept")
   myPrerequisites         ConceptEdge[]             @relation("successorConcept")
@@ -249,6 +251,7 @@ model File {
   question             Question?             @relation(fields: [questionId], references: [id])
   TranscriptEmbeddings TranscriptEmbedding[]
   fileUploads          FileUpload[]
+  conceptNodesWithRhino ConceptNode[]        @relation("ConceptRhinoFile")
 }
 
 model ContentView {

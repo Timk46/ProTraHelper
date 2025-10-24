@@ -207,6 +207,12 @@ export class ContentController {
     return this.contentService.getConcepts();
   }
 
+  @roles('ANY')
+  @Get('/concepts/:conceptId')
+  async getConcept(@Param('conceptId') conceptId: number): Promise<ConceptNode> {
+    return this.contentService.getConcept(Number(conceptId));
+  }
+
   @roles('ADMIN', 'LECTURER')
   @Put('/concepts/:conceptId')
   async updateConcept(

@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 // content.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   ContentsForConceptDTO,
@@ -71,6 +71,7 @@ export class ContentService {
             },
           },
         },
+        rhinoFile: true,
       },
     });
 
@@ -741,7 +742,31 @@ export class ContentService {
           name: 'root',
         },
       },
+      include: {
+        rhinoFile: true,
+      },
     });
+  }
+
+  /**
+   * Fetches a single ConceptNode with rhinoFile relation
+   * @param conceptId - The ID of the concept node to fetch
+   * @returns ConceptNode with rhinoFile relation
+   * @throws NotFoundException if ConceptNode not found
+   */
+  async getConcept(conceptId: number): Promise<ConceptNode> {
+    const conceptNode = await this.prisma.conceptNode.findUnique({
+      where: { id: conceptId },
+      include: {
+        rhinoFile: true,
+      },
+    });
+
+    if (!conceptNode) {
+      throw new NotFoundException(`ConceptNode with ID ${conceptId} not found`);
+    }
+
+    return conceptNode;
   }
 
   async updateConcept(conceptId: number, concept: ConceptNodeEditDTO): Promise<boolean> {

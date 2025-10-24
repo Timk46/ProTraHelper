@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { Observable, Subject, combineLatest, BehaviorSubject, of, interval, from } from 'rxjs';
-import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged, shareReplay, finalize, tap } from 'rxjs/operators';
+import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged, shareReplay, finalize, tap, catchError } from 'rxjs/operators';
 
 // Angular Material Imports
 import { MatCardModule } from '@angular/material/card';
@@ -130,6 +130,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // =============================================================================
 
   private destroy$ = new Subject<void>();
+
+  // 🔧 RACE CONDITION FIX: Centralized category selection with switchMap
+  private categorySelection$ = new Subject<number>();
+
+  // 🔧 LOADING STATE: Block UI during category transitions
+  public isCategoryTransitionLoading = false;
 
   // 🚀 PHASE 5: Integration observables for comprehensive state management
   public applicationState$ = this.globalStateService.applicationState$;
@@ -871,6 +877,83 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           });
         }
       });
+
+    // 🔧 RACE CONDITION FIX: Centralized category selection with request cancellation
+    // This prevents multiple concurrent requests when user rapidly switches categories
+    this.categorySelection$
+      .pipe(
+        // ✅ DEBOUNCING: Ignore rapid successive clicks (wait 150ms for user to finish clicking)
+        debounceTime(150),
+
+        // ✅ THROTTLING: Maximum 1 request per 200ms (prevent request flooding)
+        // Note: RxJS throttleTime not imported by default - using debounceTime for simplicity
+
+        // ✅ SWITCHMAP: Cancel old requests when new category is selected
+        // This is the KEY fix - ensures only the latest request completes
+        switchMap(categoryId => {
+          console.log('🔄 Category selection triggered:', categoryId);
+
+          // Set loading state to block UI
+          this.isCategoryTransitionLoading = true;
+
+          // Reset UI state before transition
+          this.ratingJustSubmitted = false;
+          this.showRatingPanel = false;
+
+          // Perform atomic category transition
+          return this.stateService.transitionToCategory(categoryId).pipe(
+            // Handle errors per transition
+            tap(() => {
+              console.log('✅ Category transition completed:', categoryId);
+            }),
+            catchError(error => {
+              console.error('❌ Category transition failed:', error);
+              this.showSnackBar('Kategoriewechsel fehlgeschlagen', 'OK', 3000, true);
+              return of(void 0); // Continue with empty value on error
+            }),
+            // Always clean up loading state
+            finalize(() => {
+              this.isCategoryTransitionLoading = false;
+              this.cdr.markForCheck(); // Trigger change detection
+            })
+          );
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: () => {
+          // Transition completed successfully
+          // Update panel expansion state based on rating/comment status
+          this.activeCategory$.pipe(take(1)).subscribe(categoryId => {
+            this.updatePanelExpansionState(categoryId);
+            this.cdr.markForCheck();
+          });
+        },
+        error: (error) => {
+          // This should never happen due to catchError above, but handle it anyway
+          console.error('❌ Unexpected error in category selection stream:', error);
+          this.isCategoryTransitionLoading = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  /**
+   * Updates panel expansion state after category transition
+   * @param categoryId - The category ID to update panels for
+   */
+  private updatePanelExpansionState(categoryId: number): void {
+    // Set rating panel expansion based on rating status
+    this.stateService.isCategoryRated$(categoryId).pipe(take(1)).subscribe(isRated => {
+      this.isRatingPanelExpanded = !isRated; // Expand if not rated
+      console.log(`📋 Rating panel ${isRated ? 'collapsed' : 'expanded'} for category ${categoryId} (rated: ${isRated})`);
+    });
+
+    // Set discussion panel expansion based on comment status
+    this.stateService.hasCommentedInCategory$(categoryId).pipe(take(1)).subscribe(hasCommented => {
+      this.isDiscussionHeaderExpanded = false; // Always collapsed by default
+      console.log(`🗨️ Discussion panel ${hasCommented ? 'expanded' : 'collapsed'} for category ${categoryId} (commented: ${hasCommented})`);
+    });
   }
 
   // =============================================================================
@@ -878,46 +961,23 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // =============================================================================
 
   /**
-   * Handles category selection events using atomic transitions
+   * Handles category selection events using centralized Subject pattern
    * @param categoryId - The ID of the selected category
+   *
+   * 🔧 RACE CONDITION FIX: This method now only emits the category ID
+   * to the categorySelection$ Subject. The actual transition logic is handled
+   * in setupEventHandling() with switchMap to prevent concurrent requests.
    */
   onCategorySelected(categoryId: number): void {
-    console.log('🔄 Initiating atomic category transition to:', categoryId);
+    console.log('🎯 Category selected:', categoryId);
 
-    // Reset rating submission state when changing categories
-    this.ratingJustSubmitted = false;
-    this.showRatingPanel = false;
-
-    // Use atomic category transition to prevent race conditions
-    this.stateService.transitionToCategory(categoryId).pipe(
-      take(1),
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: () => {
-        console.log('✅ Atomic category transition completed successfully');
-
-        // Set panel expansion based on rating status
-        this.stateService.isCategoryRated$(categoryId).pipe(take(1)).subscribe(isRated => {
-          // Expand panel for unrated categories, collapse for rated ones
-          this.isRatingPanelExpanded = !isRated;
-          console.log(`📋 Rating panel ${isRated ? 'collapsed' : 'expanded'} for category ${categoryId} (rated: ${isRated})`);
-          this.cdr.markForCheck();
-        });
-
-        // Set discussion panel expansion based on comment status
-        this.stateService.hasCommentedInCategory$(categoryId).pipe(take(1)).subscribe(hasCommented => {
-          // Keep discussion panel collapsed by default
-          this.isDiscussionHeaderExpanded = false;
-          console.log(`🗨️ Discussion panel ${hasCommented ? 'expanded' : 'collapsed'} for category ${categoryId} (commented: ${hasCommented})`);
-          this.cdr.markForCheck();
-        });
-      },
-      error: (error) => {
-        console.error('❌ Category transition failed:', error);
-        this.showSnackBar('Fehler beim Kategoriewechsel', 'OK', 3000, true);
-        this.cdr.markForCheck();
-      }
-    });
+    // Emit category selection to centralized stream
+    // The switchMap in setupEventHandling() will handle:
+    // - Debouncing rapid clicks
+    // - Cancelling old requests
+    // - Loading state management
+    // - Error handling
+    this.categorySelection$.next(categoryId);
   }
 
   // Method removed - rating status is now handled reactively through stateService

@@ -468,13 +468,51 @@ export class EvaluationStateService {
 
         return void 0;
       }),
-      catchError(error => {
-        this.log.error('❌ Error during atomic category transition:', error);
-        
-        // Fallback: still transition to category but preserve existing status map
-        this.activeCategorySubject.next(categoryId);
-        this.setError('Fehler beim Laden des Bewertungsstatus. Seite ggf. aktualisieren.');
-        
+      catchError((error: unknown) => {
+        // Detailed error logging for debugging
+        this.log.error('❌ Error during atomic category transition:', {
+          error,
+          errorType: error?.constructor?.name,
+          status: error instanceof HttpErrorResponse ? error.status : undefined,
+          message: error instanceof HttpErrorResponse ? error.message : undefined,
+          categoryId,
+          submissionId,
+          anonymousUserId
+        });
+
+        // ✅ INTELLIGENT ERROR HANDLING: Only show popup for REAL backend errors
+        if (error instanceof HttpErrorResponse && error.status >= 400) {
+          // Real HTTP error from backend - show appropriate error message
+          this.log.error('🚨 Backend error detected - showing popup:', {
+            status: error.status,
+            statusText: error.statusText,
+            url: error.url
+          });
+
+          // Fallback: still transition to category but preserve existing status map
+          this.activeCategorySubject.next(categoryId);
+
+          // Specific error messages based on status code
+          if (error.status === 403) {
+            this.setError('Zugriff verweigert. Sie gehören möglicherweise nicht mehr zur richtigen Gruppe.');
+          } else if (error.status === 404) {
+            this.setError('Bewertungsdaten nicht gefunden. Bitte laden Sie die Seite neu.');
+          } else if (error.status >= 500) {
+            this.setError('Serverfehler beim Laden des Bewertungsstatus. Bitte versuchen Sie es erneut.');
+          } else {
+            this.setError('Fehler beim Laden des Bewertungsstatus. Seite ggf. aktualisieren.');
+          }
+        } else {
+          // ⚠️ HTTP Cancellation or Network Error - NO popup, silent handling
+          this.log.warn('⚠️ Request cancelled or network error (no popup shown):', {
+            errorType: error?.constructor?.name,
+            categoryId
+          });
+
+          // Silently transition to category without error popup
+          this.activeCategorySubject.next(categoryId);
+        }
+
         return of(void 0);
       }),
       finalize(() => {

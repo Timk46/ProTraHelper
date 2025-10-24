@@ -5,11 +5,14 @@ import {
   ContentsForConceptDTO,
   LinkableContentElementDTO,
   questionType,
+  ConceptNode,
 } from '@DTOs/index';
 import { contentElementType } from '@DTOs/index';
 import { animate, state, style, transition, trigger } from '@angular/animations';
 import { ScreenSizeService } from 'src/app/Services/mobile/screen-size.service';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
+import { ContentService } from 'src/app/Services/content/content.service';
+import { LoggerService } from 'src/app/Services/logger/logger.service';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { ContentViewComponent } from '../contentView/contentView.component';
@@ -69,15 +72,23 @@ export class ContentListComponent implements OnInit, OnChanges {
   protected editModeActive: boolean = false;
   protected isArchitectureStudent: boolean = false;
 
+  // Cache for ConceptNode with rhinoFile relation
+  private _cachedConceptNode?: ConceptNode;
+
+  // Logger instance scoped to this component
+  private readonly log = this.logger.scope('ContentListComponent');
+
   constructor(
     private readonly dialog: MatDialog,
     private readonly sSS: ScreenSizeService,
     private readonly progressService: ProgressService,
     private readonly userService: UserService,
+    private readonly contentService: ContentService,
     private readonly contentLinkerService: ContentLinkerService,
     private readonly snackBar: MatSnackBar,
     private readonly confirmService: ConfirmationService,
     private readonly batRhinoService: BatRhinoService,
+    private readonly logger: LoggerService,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
@@ -109,7 +120,29 @@ export class ContentListComponent implements OnInit, OnChanges {
       });
 
       this.filteredContents = sortedContents;
-      console.log('Contents for concept node changed:', this.filteredContents);
+    }
+
+    // Load ConceptNode with rhinoFile if ID changed
+    if (this.activeConceptNodeId &&
+        this._cachedConceptNode?.id !== this.activeConceptNodeId) {
+      this.loadConceptNodeWithRhino();
+    }
+  }
+
+  /**
+   * Loads ConceptNode with rhinoFile relation for Rhino button functionality
+   */
+  private async loadConceptNodeWithRhino(): Promise<void> {
+    try {
+      this._cachedConceptNode = await firstValueFrom(
+        this.contentService.getConcept(this.activeConceptNodeId)
+      );
+    } catch (error) {
+      this.log.error('Failed to load ConceptNode with rhinoFile', {
+        conceptNodeId: this.activeConceptNodeId,
+        error
+      });
+      this._cachedConceptNode = undefined;
     }
   }
 
@@ -136,20 +169,46 @@ export class ContentListComponent implements OnInit, OnChanges {
 
   /**
    * Determines if the Rhino button should be shown for the given content.
-   * For architecture students: only show for "Analyse Teil 1" content.
-   * For other users: show for all content with QUESTION type (original behavior).
+   * Shows button only when:
+   * 1. Content has QUESTION elements
+   * 2. ConceptNode has a Rhino file configured
+   * 3. This is the content panel with the lowest position (Analyse)
    *
    * @param content - The content object to check.
    * @returns `true` if the Rhino button should be displayed, otherwise `false`.
    */
   shouldShowRhinoButton(content: ContentDTO): boolean {
-    // Check if content has questions first (base requirement)
+    // 1. Check if content has questions
     if (!this.hasContentElementType(content, 'QUESTION')) {
       return false;
     }
 
-    // For regular users: show for all content with questions (original behavior)
-    return true;
+    // 2. Check if ConceptNode has rhinoFile (cached)
+    if (!this._cachedConceptNode?.rhinoFile) {
+      return false;
+    }
+
+    // 3. Check if this is the panel with lowest position
+    return this.isLowestPositionPanel(content);
+  }
+
+  /**
+   * Checks if the given content is the panel with the lowest position number.
+   * Used to identify the "Analyse" panel.
+   *
+   * @param content - The content to check
+   * @returns true if this is the lowest position panel
+   */
+  private isLowestPositionPanel(content: ContentDTO): boolean {
+    const contentsWithPosition = this.filteredContents.filter(c => c.position != null);
+
+    // Fallback: If no positions set, check if first in list
+    if (contentsWithPosition.length === 0) {
+      return this.filteredContents.indexOf(content) === 0;
+    }
+
+    const minPosition = Math.min(...contentsWithPosition.map(c => c.position!));
+    return content.position === minPosition;
   }
 
   /**
@@ -558,9 +617,29 @@ export class ContentListComponent implements OnInit, OnChanges {
   async onRhinoBatDirectButtonClick(event: MouseEvent): Promise<void> {
     event.stopPropagation();
 
+    // Check if ConceptNode has a Rhino file
+    if (!this._cachedConceptNode?.rhinoFile) {
+      this.snackBar.open(
+        '⚠️ Keine Rhino-Datei für dieses Konzept konfiguriert',
+        'OK',
+        { duration: 5000 }
+      );
+      return;
+    }
 
-    const exampleFilePath = 'C:\\Dev\\hefl\\files\\Grasshopper\\example.gh';
-    const fileName = 'example.gh';
+    const rhinoFile = this._cachedConceptNode.rhinoFile;
+    const filePath = rhinoFile.path;
+    const fileName = rhinoFile.name;
+
+    // Validate file path exists
+    if (!filePath) {
+      this.snackBar.open(
+        '⚠️ Rhino-Datei hat keinen gültigen Pfad',
+        'OK',
+        { duration: 5000 }
+      );
+      return;
+    }
 
     try {
       // Show loading notification
@@ -569,9 +648,8 @@ export class ContentListComponent implements OnInit, OnChanges {
         panelClass: 'info-snackbar',
       });
 
-      // Create request using the service helper method
-      const request = this.batRhinoService.createGrasshopperRequest(exampleFilePath);
-
+      // Create request using the dynamic file path
+      const request = this.batRhinoService.createGrasshopperRequest(filePath);
 
       // Execute Rhino directly
       const response = await this.batRhinoService.executeDirectly(request).toPromise();
@@ -579,10 +657,9 @@ export class ContentListComponent implements OnInit, OnChanges {
       loadingSnackBar.dismiss();
 
       if (response?.success) {
-
         // Show success message
         this.snackBar.open(
-          `🚀 Rhino wurde erfolgreich gestartet! Grasshopper-Datei: ${fileName}`,
+          `🚀 Rhino gestartet! Grasshopper-Datei: ${fileName}`,
           'OK',
           {
             duration: 8000,
@@ -602,7 +679,7 @@ export class ContentListComponent implements OnInit, OnChanges {
       } else {
         const errorMessage =
           response?.message || 'Unbekannter Fehler bei der direkten Rhino-Ausführung';
-        console.error('❌ Direct Rhino execution failed:', errorMessage);
+        this.log.error('Direct Rhino execution failed', { errorMessage, response });
 
         this.snackBar.open(`❌ Direkte Rhino-Ausführung fehlgeschlagen: ${errorMessage}`, 'OK', {
           duration: 8000,
@@ -620,7 +697,7 @@ export class ContentListComponent implements OnInit, OnChanges {
         );
       }
     } catch (error) {
-      console.error('🚨 Direct Rhino execution error:', error);
+      this.log.error('Direct Rhino execution error', { error, conceptNodeId: this.activeConceptNodeId });
 
       // Dismiss loading if still showing
       this.snackBar.dismiss();
