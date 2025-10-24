@@ -1,0 +1,99 @@
+<mat-card class="concept-rhino-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>view_in_ar</mat-icon>
+      Rhino/Grasshopper Dateien für Konzepte
+    </mat-card-title>
+    <mat-card-subtitle> Verwalten Sie .gh Dateien für CAD-Integration </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <!-- Loading State -->
+    <div *ngIf="!(conceptNodes$ | async) && !loadError" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Konzepte werden geladen...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="loadError" class="error-container">
+      <mat-icon color="warn">error_outline</mat-icon>
+      <p>Fehler beim Laden der Konzepte</p>
+      <button mat-raised-button color="primary" (click)="loadConceptNodes()">
+        <mat-icon>refresh</mat-icon>
+        Erneut versuchen
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="(conceptNodes$ | async)?.length === 0 && !loadError" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>Keine Konzepte vorhanden</p>
+    </div>
+
+    <!-- Data Table -->
+    <ng-container *ngIf="conceptNodes$ | async as conceptNodes">
+      <table
+        mat-table
+        [dataSource]="conceptNodes"
+        *ngIf="conceptNodes.length"
+        class="concept-table"
+      >
+      <!-- ConceptNode Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Konzept</th>
+        <td mat-cell *matCellDef="let node">
+          <div class="concept-name">
+            <mat-icon class="concept-icon">account_tree</mat-icon>
+            <span>{{ node.name }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Current File Column -->
+      <ng-container matColumnDef="file">
+        <th mat-header-cell *matHeaderCellDef>Rhino-Datei</th>
+        <td mat-cell *matCellDef="let node">
+          <div class="file-info" *ngIf="node.rhinoFile; else noFile">
+            <mat-icon color="primary">insert_drive_file</mat-icon>
+            <span class="file-name">{{ node.rhinoFile.name }}</span>
+          </div>
+          <ng-template #noFile>
+            <span class="no-file-text">Keine Datei zugewiesen</span>
+          </ng-template>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Aktionen</th>
+        <td mat-cell *matCellDef="let node">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="openUploadDialog(node)"
+            [disabled]="isProcessing"
+          >
+            <mat-icon>{{ node.rhinoFile ? 'swap_horiz' : 'upload' }}</mat-icon>
+            {{ node.rhinoFile ? 'Ersetzen' : 'Hochladen' }}
+          </button>
+
+          <button
+            mat-icon-button
+            color="warn"
+            *ngIf="node.rhinoFile"
+            (click)="deleteRhinoFile(node)"
+            [disabled]="isProcessing"
+            matTooltip="Rhino-Datei entfernen"
+            [attr.aria-label]="'Rhino-Datei für ' + node.name + ' entfernen'"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+    </ng-container>
+  </mat-card-content>
+</mat-card>

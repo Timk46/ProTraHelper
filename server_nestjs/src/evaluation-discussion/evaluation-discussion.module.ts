@@ -20,6 +20,9 @@ import { EvaluationCacheService } from './shared/evaluation-cache.service';
 import { EvaluationUtilsService } from './shared/evaluation-utils.service';
 import { EvaluationAuthorizationService } from './evaluation-authorization.service';
 
+// Guards
+import { SubmissionAuthorizationGuard } from './guards/submission-authorization.guard';
+
 @Module({
   imports: [PrismaModule, NotificationModule, FilesModule],
   controllers: [
@@ -37,6 +40,8 @@ import { EvaluationAuthorizationService } from './evaluation-authorization.servi
     EvaluationCacheService,
     EvaluationUtilsService,
     EvaluationAuthorizationService,
+    // Guards
+    SubmissionAuthorizationGuard,
   ],
   exports: [
     EvaluationSessionService,

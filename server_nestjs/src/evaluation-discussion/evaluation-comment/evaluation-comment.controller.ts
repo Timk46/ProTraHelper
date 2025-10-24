@@ -16,6 +16,8 @@ import {
 } from '@nestjs/common';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
+import { SubmissionAuthorizationGuard } from '../guards/submission-authorization.guard';
+import { AuthorizedSubmission } from '../decorators/authorized-submission.decorator';
 import { EvaluationCommentService } from './evaluation-comment.service';
 import {
   EvaluationCommentDTO,
@@ -30,7 +32,7 @@ import { GetUser } from '../../auth/common/decorators/get-user.decorator';
 import { User } from '@prisma/client';
 
 @Controller('evaluation-comments')
-@UseGuards(RolesGuard)
+@UseGuards(RolesGuard, SubmissionAuthorizationGuard)
 export class EvaluationCommentController {
 
   constructor(private readonly evaluationCommentService: EvaluationCommentService) {}
@@ -66,8 +68,21 @@ export class EvaluationCommentController {
   }
 
   // Get by submission + category
+  /**
+   * Gets all comments for a specific submission and category
+   *
+   * @security Protected by @AuthorizedSubmission - verifies group membership
+   * Users can only access comments from submissions they have permission to view.
+   *
+   * @param submissionId - The submission ID
+   * @param categoryId - The evaluation category ID
+   * @param user - Current authenticated user
+   * @returns Array of comments for the category
+   * @throws {ForbiddenException} If user lacks access to the submission
+   */
   @Get('get/:submissionId/:categoryId')
   @roles('ANY')
+  @AuthorizedSubmission()
   async getAllByCategory(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
@@ -110,6 +125,7 @@ export class EvaluationCommentController {
   @Delete('votes/reset/:submissionId/:categoryId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @roles('ANY')
+  @AuthorizedSubmission()
   async resetUserVotes(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
@@ -121,6 +137,7 @@ export class EvaluationCommentController {
   // Get vote limit status for a category
   @Get('vote-limit/:submissionId/:categoryId')
   @roles('ANY')
+  @AuthorizedSubmission()
   async getVoteLimitStatus(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
@@ -132,6 +149,7 @@ export class EvaluationCommentController {
   // Get user comment status for all categories
   @Get('comment-status/:submissionId')
   @roles('ANY')
+  @AuthorizedSubmission()
   async getUserCommentStatusForAllCategories(
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @GetUser() user: User,

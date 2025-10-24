@@ -591,10 +591,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // Handle category selection from URL
     this.currentCategoryId$.pipe(
       takeUntil(this.destroy$),
-      filter(categoryId => !!categoryId)
-    ).subscribe(categoryId => {
-      this.stateService.setActiveCategory(categoryId!);
-    });
+      filter(categoryId => !!categoryId),
+      switchMap(categoryId => this.stateService.transitionToCategory(categoryId!))
+    ).subscribe();
 
     // Update page metadata based on navigation context
     this.navigationContext$.pipe(

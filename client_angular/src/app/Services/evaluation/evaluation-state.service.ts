@@ -39,6 +39,21 @@ import { UserService } from '../auth/user.service';
 import { LoggerService } from '../logger/logger.service';
 
 /**
+ * Result type for immutable reply addition operations
+ *
+ * @description
+ * Returned by the addReplyImmutably() method to indicate whether the parent
+ * comment was found and the reply was successfully added to the comment tree.
+ *
+ * @property comments - The updated comments array with the reply added (if found)
+ * @property found - True if the parent comment was found and reply was added
+ */
+interface ReplyAdditionResult {
+  comments: EvaluationCommentDTO[];
+  found: boolean;
+}
+
+/**
  * Centralized state management service for evaluation discussions
  *
  * @description Manages submission, categories, discussions, ratings, and comment state
@@ -386,21 +401,6 @@ export class EvaluationStateService {
         this.setError('Fehler beim Laden der Kategorien');
       },
     });
-  }
-
-  /**
-   * Sets the active category (non-atomic - use with caution)
-   * @param categoryId - The ID of the category to set as active
-   * @deprecated Use transitionToCategory() for atomic category transitions with rating status validation
-   * @remarks This method is kept for backward compatibility with deep-linking, but transitionToCategory()
-   * should be preferred as it prevents race conditions and ensures data consistency
-   */
-  setActiveCategory(categoryId: number): void {
-    this.log.warn(' DEPRECATED: setActiveCategory() is deprecated. Use transitionToCategory() instead for atomic transitions.');
-    const currentCategory = this.activeCategorySubject.value;
-    if (currentCategory !== categoryId) {
-      this.activeCategorySubject.next(categoryId);
-    }
   }
 
   /**
@@ -966,6 +966,24 @@ export class EvaluationStateService {
    * @param categoryId - The category ID
    * @param comment - The comment that was added
    */
+  /**
+   * Handles a comment being added to the local cache with immutable updates
+   *
+   * @description
+   * This method is optimized for OnPush change detection by creating new object references
+   * for ONLY the discussion that changed. Unchanged discussions maintain their references
+   * for optimal performance.
+   *
+   * Key architectural decisions:
+   * - Uses immutable updates (map + spread) instead of direct mutation
+   * - Single BehaviorSubject emission (no setTimeout workaround needed)
+   * - Orphaned reply detection with graceful fallback
+   * - Comprehensive error logging for debugging
+   *
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID
+   * @param comment - The comment that was added
+   */
   private handleCommentAdded(
     submissionId: string,
     categoryId: number,
@@ -992,83 +1010,95 @@ export class EvaluationStateService {
 
       // Use robust cache method to ensure cache exists
       const subject = this.ensureDiscussionCache(categoryId);
+      const currentDiscussions = subject.value || [];
 
-      const currentDiscussions = subject.value || []; // Fallback to empty array
-      const updatedDiscussions = [...currentDiscussions];
+      // Check if discussion exists for this category
+      const discussionExists = currentDiscussions.some(d => d.categoryId === categoryId);
 
-      // Find or create discussion
-      let discussion = updatedDiscussions.find(d => d.categoryId === categoryId);
-      if (!discussion) {
-        discussion = {
-          id: Date.now(), // Generate unique numeric ID
+      let finalDiscussions: EvaluationDiscussionDTO[];
+
+      if (!discussionExists) {
+        // Create new discussion immutably
+        this.log.info('📝 Creating new discussion for category:', categoryId);
+        const newDiscussion: EvaluationDiscussionDTO = {
+          id: Date.now(),
           submissionId: Number(submissionId),
           categoryId: categoryId,
-          comments: [],
+          comments: [comment],
           createdAt: new Date(),
-          totalComments: 0,
+          totalComments: 1,
           availableComments: 3,
-          usedComments: 0,
+          usedComments: 1,
         };
-        updatedDiscussions.push(discussion);
-      }
 
-      // Type guard - should never be undefined after find/create logic above
-      if (!discussion) {
-        this.log.error('❌ Discussion is unexpectedly undefined');
-        return;
-      }
-
-      // Handle replies vs top-level comments differently
-      if (!discussion.comments || !Array.isArray(discussion.comments)) {
-        this.log.warn(' Discussion.comments was invalid, initializing as empty array');
-        discussion.comments = [];
-      }
-
-      if (comment.parentId) {
-        // This is a reply - find the parent comment and add to its replies array
-        const success = this.addReplyToParent(discussion.comments, comment);
-        if (success) {
-          this.log.info(' Reply added to parent comment:', {
-            replyId: comment.id,
-            parentId: comment.parentId,
-          });
-        } else {
-          this.log.warn(' Could not find parent comment, adding as top-level:', {
-            replyId: comment.id,
-            parentId: comment.parentId,
-          });
-          // Fallback: add as top-level comment if parent not found
-          discussion.comments = [comment, ...discussion.comments];
-        }
+        finalDiscussions = [...currentDiscussions, newDiscussion];
       } else {
-        // This is a top-level comment - add to beginning (newest first)
-        discussion.comments = [comment, ...discussion.comments];
-        this.log.info(' Top-level comment added to cache:', {
-          commentId: comment.id,
+        // Update existing discussions immutably - only deep-copy the ONE discussion that changes
+        finalDiscussions = currentDiscussions.map(d => {
+          if (d.categoryId !== categoryId) {
+            // Completely unchanged - reuse reference for performance
+            return d;
+          }
+
+          // This is the discussion we're updating - handle comment addition immutably
+          let updatedComments: EvaluationCommentDTO[];
+
+          if (comment.parentId) {
+            // Reply: Use immutable helper with orphan detection
+            const result = this.addReplyImmutably(d.comments || [], comment);
+
+            if (!result.found) {
+              // Orphaned reply - parent comment not found
+              this.log.error('❌ Parent comment not found for reply:', {
+                replyId: comment.id,
+                parentId: comment.parentId,
+                categoryId,
+                submissionId
+              });
+
+              // Graceful fallback: Add as top-level comment
+              this.log.warn('⚠️ Adding orphaned reply as top-level comment');
+              updatedComments = [comment, ...(d.comments || [])];
+            } else {
+              updatedComments = result.comments;
+              this.log.info('✅ Reply added to parent successfully:', {
+                replyId: comment.id,
+                parentId: comment.parentId,
+              });
+            }
+          } else {
+            // Top-level comment: Simple prepend (newest first)
+            updatedComments = [comment, ...(d.comments || [])];
+            this.log.info('✅ Top-level comment added:', {
+              commentId: comment.id,
+            });
+          }
+
+          // Return new discussion object (triggers OnPush change detection)
+          const totalComments = this.calculateTotalComments(updatedComments);
+          return {
+            ...d,
+            comments: updatedComments,
+            totalComments,
+            usedComments: totalComments,
+          };
         });
       }
 
-      // Recalculate total comments (including all replies)
-      discussion.totalComments = this.calculateTotalComments(discussion.comments);
-      discussion.usedComments = discussion.totalComments;
-
-      // Add new comment to the lookup map
+      // Add comment to lookup map
       this.commentIdToCategoryIdMap.set(String(comment.id), categoryId);
 
-      this.log.info(' Comment processing complete:', {
-        discussionId: discussion.id,
+      this.log.info('✅ Comment processing complete:', {
+        categoryId,
         commentId: comment.id,
         isReply: !!comment.parentId,
-        totalComments: discussion.totalComments,
+        totalDiscussions: finalDiscussions.length,
       });
 
-      // Force immediate update of discussion cache
-      subject.next(updatedDiscussions);
+      // SINGLE emission - OnPush will detect reference change
+      // No setTimeout needed - immutability ensures proper change detection
+      subject.next(finalDiscussions);
 
-      // Force change detection by manually updating the observable
-      setTimeout(() => {
-        subject.next([...updatedDiscussions]);
-      }, 50);
     } catch (error) {
       this.log.error('❌ Error in handleCommentAdded:', error);
       this.setError('Fehler beim Aktualisieren der Kommentare. Bitte laden Sie die Seite neu.');
@@ -1076,34 +1106,81 @@ export class EvaluationStateService {
   }
 
   /**
-   * Recursively finds a parent comment and adds the reply to its replies array
+   * Immutable recursive reply addition - creates new comment objects instead of mutating
+   *
+   * @description
+   * This method recursively searches for a parent comment and adds the reply to its replies array
+   * WITHOUT mutating the original objects. This is critical for OnPush change detection to work correctly.
+   *
+   * Each comment in the path to the parent is cloned with updated references, ensuring that
+   * Angular's change detection can detect the changes even with OnPush strategy.
+   *
+   * Includes recursion depth limit to prevent stack overflow with deeply nested comment threads.
+   *
    * @param comments - Array of comments to search through
    * @param reply - The reply to add
-   * @returns true if parent was found and reply was added, false otherwise
+   * @param depth - Current recursion depth (internal parameter for safety)
+   * @returns Object containing updated comments array and found flag
+   *
+   * @example
+   * ```typescript
+   * const result = this.addReplyImmutably(discussion.comments, newReply);
+   * if (result.found) {
+   *   discussion.comments = result.comments; // Triggers OnPush change detection
+   * } else {
+   *   console.error('Parent comment not found');
+   * }
+   * ```
    */
-  private addReplyToParent(comments: EvaluationCommentDTO[], reply: EvaluationCommentDTO): boolean {
-    for (const comment of comments) {
-      if (comment.id === reply.parentId) {
-        // Found the parent - add reply to its replies array
-        comment.replies = comment.replies || [];
-        comment.replies.push(reply);
-
-        // Update reply count
-        comment.replyCount = (comment.replyCount || 0) + 1;
-        return true;
-      }
-
-      // Recursively search in replies
-      if (comment.replies && comment.replies.length > 0) {
-        if (this.addReplyToParent(comment.replies, reply)) {
-          // Update reply count for nested replies (unified method)
-          comment.replyCount = this.calculateTotalComments(comment.replies);
-          return true;
-        }
-      }
+  private addReplyImmutably(
+    comments: EvaluationCommentDTO[],
+    reply: EvaluationCommentDTO,
+    depth: number = 0
+  ): ReplyAdditionResult {
+    // Safety: Prevent infinite recursion with deeply nested threads
+    const MAX_DEPTH = 50;
+    if (depth > MAX_DEPTH) {
+      this.log.error('❌ Maximum comment depth exceeded:', {
+        depth,
+        replyId: reply.id,
+        parentId: reply.parentId
+      });
+      return { comments, found: false };
     }
 
-    return false;
+    let found = false;
+
+    const updatedComments = comments.map(comment => {
+      if (comment.id === reply.parentId) {
+        found = true;
+        // Create new comment object with reply added
+        return {
+          ...comment,
+          replies: [...(comment.replies || []), reply],
+          replyCount: (comment.replyCount || 0) + 1
+        };
+      }
+
+      // Recursively search in nested replies
+      if (comment.replies && comment.replies.length > 0) {
+        const result = this.addReplyImmutably(comment.replies, reply, depth + 1);
+
+        if (result.found) {
+          found = true;
+          // Create new comment object with updated nested replies
+          return {
+            ...comment,
+            replies: result.comments,
+            replyCount: result.comments.length  // Direct child count only
+          };
+        }
+      }
+
+      // No changes for this comment - return as-is (reference reuse for performance)
+      return comment;
+    });
+
+    return { comments: updatedComments, found };
   }
 
   /**

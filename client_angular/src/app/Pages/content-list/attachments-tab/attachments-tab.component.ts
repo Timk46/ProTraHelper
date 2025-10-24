@@ -87,7 +87,12 @@ export class AttachmentsTabComponent implements OnInit {
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       this.fileService.uploadFile(file).subscribe(response => {
-        // Assuming response has the fileId, e.g., response.id
+        // Validate response has fileId
+        if (!response.id) {
+          console.error('Upload response missing file ID', response);
+          return;
+        }
+
         const fileId = response.id;
 
         let fileType: contentElementType;

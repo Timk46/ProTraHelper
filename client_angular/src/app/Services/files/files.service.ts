@@ -3,7 +3,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { filePrivacy } from '@DTOs/index';
+import { filePrivacy, FileDto } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',
@@ -17,12 +17,12 @@ export class FileService {
    * Uploads a given file to the server.
    *
    * @param file The file to be uploaded.
-   * @returns An Observable containing the server response.
+   * @returns An Observable containing the uploaded file metadata.
    */
-  uploadFile(file: File): Observable<any> {
+  uploadFile(file: File): Observable<FileDto> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    return this.httpClient.post(`${this.apiUrl}/upload`, formData);
+    return this.httpClient.post<FileDto>(`${this.apiUrl}/upload`, formData);
   }
 
   /**
@@ -57,7 +57,7 @@ export class FileService {
    * @param uniqueIdentifier The unique identifier for the file.
    * @returns An Observable containing the file metadata.
    */
-  getFile(uniqueIdentifier: string): Observable<any> {
-    return this.httpClient.get(`${this.apiUrl}/${uniqueIdentifier}`);
+  getFile(uniqueIdentifier: string): Observable<FileDto> {
+    return this.httpClient.get<FileDto>(`${this.apiUrl}/${uniqueIdentifier}`);
   }
 }

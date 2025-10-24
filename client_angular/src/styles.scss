@@ -286,3 +286,38 @@ button[mat-icon-button] {
     height: 20px;
   }
 } */
+
+// Custom SnackBar Styles for success and error messages
+.success-snackbar {
+  --mdc-snackbar-container-color: #4caf50 !important;
+  --mat-snack-bar-button-color: #ffffff !important;
+
+  .mdc-snackbar__surface {
+    background-color: #4caf50 !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}
+
+.error-snackbar {
+  --mdc-snackbar-container-color: #f44336 !important;
+  --mat-snack-bar-button-color: #ffffff !important;
+
+  .mdc-snackbar__surface {
+    background-color: #f44336 !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+
+  .mat-mdc-button {
+    color: white !important;
+  }
+}

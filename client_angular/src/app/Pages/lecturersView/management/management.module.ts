@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ManagementRoutingModule } from './management-routing.module';
 import { UserGroupingComponent } from './user-grouping/user-grouping.component';
 import { GroupReviewSessionComponent } from './group-review-session/group-review-session.component';
+import { ConceptRhinoFilesComponent } from './concept-rhino-files/concept-rhino-files.component';
+import { RhinoFileUploadDialogComponent } from './concept-rhino-files/rhino-file-upload-dialog/rhino-file-upload-dialog.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +19,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   imports: [
@@ -37,8 +41,15 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     MatProgressBarModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
+    MatDialogModule,
+    MatTooltipModule,
   ],
-  declarations: [UserGroupingComponent, GroupReviewSessionComponent],
+  declarations: [
+    UserGroupingComponent,
+    GroupReviewSessionComponent,
+    ConceptRhinoFilesComponent,
+    RhinoFileUploadDialogComponent,
+  ],
   providers: [],
   bootstrap: [],
 })
