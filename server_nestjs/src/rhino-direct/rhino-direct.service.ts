@@ -4,7 +4,6 @@
  * Registry-basierte Rhino-Erkennung und Fallback-Mechanismen
  */
 
-<<<<<<< Updated upstream
 import { Injectable } from '@nestjs/common';
 import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
@@ -27,31 +26,19 @@ export type SystemRhinoInfo = SystemRhinoInfoDTO;
 export class RhinoDirectService {
   private readonly commonRhinoPaths = [
     'C:\\Program Files\\Rhino 8\\System\\Rhino.exe',
-=======
-import { spawn, execFile } from 'child_process';import { promisify } from 'util';import * as fs from 'fs';import * as path from 'path';import {  DirectRhinoLaunchRequest,  DirectRhinoLaunchResponseDTO,  RhinoInstallation,  SystemRhinoInfoDTO,} from '@DTOs/index';const execFileAsync = promisify(execFile);
-const execFileAsync = promisify(execFile);
-
-export interface DirectRhinoLaunchRequest {
-  filePath: string;
-  rhinoPath?: string;
-  showViewport?: boolean;
-  batchMode?: boolean;
-// Type aliases for backward compatibilityexport type DirectRhinoLaunchResponse = DirectRhinoLaunchResponseDTO;export type SystemRhinoInfo = SystemRhinoInfoDTO;
->>>>>>> Stashed changes
     'C:\\Program Files\\Rhino 7\\System\\Rhino.exe',
     'C:\\Program Files (x86)\\Rhino 8\\System\\Rhino.exe',
     'C:\\Program Files (x86)\\Rhino 7\\System\\Rhino.exe',
   ];
 
   constructor() {
-    console.log('🚀 Direct Rhino Service initialized');
   }
 
   /**
    * Startet Rhino mit der angegebenen Grasshopper-Datei
    */
   async launchRhino(request: DirectRhinoLaunchRequest): Promise<DirectRhinoLaunchResponse> {
-    console.log('🦏 Starting Rhino launch process:', request);
+    console.log(' Starting Rhino launch process:', request);
 
     // Validiere Dateipfad
     if (!fs.existsSync(request.filePath)) {
@@ -69,11 +56,11 @@ export interface DirectRhinoLaunchRequest {
       if (systemInfo.defaultPath) {
         rhinoPath = systemInfo.defaultPath;
         executionMethod = 'registry';
-        console.log('✅ Found Rhino via registry:', rhinoPath);
+        console.log(' Found Rhino via registry:', rhinoPath);
       } else if (systemInfo.installations.length > 0) {
         rhinoPath = systemInfo.installations[0].path;
         executionMethod = 'fallback';
-        console.log('✅ Found Rhino via fallback search:', rhinoPath);
+        console.log(' Found Rhino via fallback search:', rhinoPath);
       } else {
         throw new Error('Rhino-Installation nicht gefunden. Bitte Pfad manuell angeben.');
       }
@@ -86,7 +73,7 @@ export interface DirectRhinoLaunchRequest {
 
     // Erstelle Rhino-Befehl
     const command = this.buildRhinoCommand(request.filePath, request);
-    console.log('🔧 Built Rhino command:', command);
+    console.log(' Built Rhino command:', command);
 
     try {
       // Starte Rhino-Prozess
@@ -101,7 +88,7 @@ export interface DirectRhinoLaunchRequest {
         executionMethod,
       };
     } catch (error) {
-      console.error('❌ Rhino process execution failed:', error);
+      console.error(' Rhino process execution failed:', error);
       throw new Error(`Rhino-Prozess konnte nicht gestartet werden: ${error.message}`);
     }
   }
@@ -152,7 +139,7 @@ export interface DirectRhinoLaunchRequest {
       }
     }
 
-    console.log('✅ System Rhino info gathered:', {
+    console.log(' System Rhino info gathered:', {
       installations: installations.length,
       defaultPath,
     });
@@ -172,7 +159,7 @@ export interface DirectRhinoLaunchRequest {
       const systemInfo = await this.getSystemRhinoInfo();
       return systemInfo.installations.length > 0;
     } catch (error) {
-      console.error('❌ Rhino availability test failed:', error);
+      console.error(' Rhino availability test failed:', error);
       return false;
     }
   }
@@ -281,7 +268,7 @@ export interface DirectRhinoLaunchRequest {
     commands.push('_Enter');
 
     const commandString = commands.join(' ');
-    console.log('🔧 Built Rhino command:', commandString, 'was successful');
+    console.log(' Built Rhino command:', commandString, 'was successful');
     return `-runscript="${commandString}"`;
   }
 
@@ -290,7 +277,7 @@ export interface DirectRhinoLaunchRequest {
    */
   private async executeRhinoProcess(rhinoPath: string, command: string): Promise<number> {
     return new Promise((resolve, reject) => {
-      console.log('🚀 Spawning Rhino process:', { rhinoPath, command });
+      console.log(' Spawning Rhino process:', { rhinoPath, command });
 
       const process = spawn(rhinoPath, [command], {
         detached: true,
@@ -298,13 +285,13 @@ export interface DirectRhinoLaunchRequest {
       });
 
       process.on('spawn', () => {
-        console.log('✅ Rhino process spawned successfully, PID:', process.pid);
+        console.log(' Rhino process spawned successfully, PID:', process.pid);
         process.unref(); // Lasse Prozess im Hintergrund laufen
         resolve(process.pid);
       });
 
       process.on('error', error => {
-        console.error('❌ Rhino process spawn error:', error);
+        console.error(' Rhino process spawn error:', error);
         reject(error);
       });
 

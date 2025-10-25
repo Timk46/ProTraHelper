@@ -141,7 +141,6 @@ export interface SetupPackageInfo {
   platform?: 'windows' | 'mac' | 'linux';
 }
 
-<<<<<<< Updated upstream
 // Direct Rhino Service DTOs
 export interface DirectRhinoLaunchRequest {
   filePath: string;
@@ -150,13 +149,6 @@ export interface DirectRhinoLaunchRequest {
   showViewport?: boolean;
 }
 
-=======
-/**
- * Response DTO for direct Rhino launch operations
- *
- * @interface DirectRhinoLaunchResponseDTO
- */
->>>>>>> Stashed changes
 export interface DirectRhinoLaunchResponseDTO {
   success: boolean;
   message: string;
@@ -166,14 +158,6 @@ export interface DirectRhinoLaunchResponseDTO {
   executionMethod: 'direct' | 'registry' | 'fallback';
 }
 
-<<<<<<< Updated upstream
-=======
-/**
- * System-wide Rhino installation information
- *
- * @interface SystemRhinoInfoDTO
- */
->>>>>>> Stashed changes
 export interface SystemRhinoInfoDTO {
   installations: RhinoInstallation[];
   defaultPath?: string;
