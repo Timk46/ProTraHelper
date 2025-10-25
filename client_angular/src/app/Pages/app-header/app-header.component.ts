@@ -1,7 +1,6 @@
 import { OnInit, Component, EventEmitter, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
 import { ConfirmationBoxComponent } from 'src/app/Pages/confirmation-box/confirmation-box.component';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { NavigationPreferenceService } from 'src/app/Services/navigation/navigation-preference.service';
@@ -38,7 +37,6 @@ export class AppHeaderComponent implements OnInit {
     private readonly router: Router,
     public dialog: MatDialog,
     private readonly navigationPreferenceService: NavigationPreferenceService,
-    private readonly location: Location,
   ) {
     // Subscribe to the authentication observable
     this.userService.isAuthenticated$.subscribe(isAuthenticated => {
@@ -57,10 +55,6 @@ export class AppHeaderComponent implements OnInit {
       // Hier könnte man die Anzeige basierend auf der Route steuern
       this.showNavToggle = !currentUrl.includes('/login');
     });
-  }
-
-  navigateToPreviousRoute(): void {
-    this.location.back();
   }
 
   logOut(logOutAllUserDevices: boolean): void {

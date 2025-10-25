@@ -1,3 +1,42 @@
+// ========================================
+// GOLDEN RATIO DESIGN TOKENS
+// ========================================
+
+// Fibonacci Spacing Scale
+$space-xs: 8px;
+$space-sm: 13px;
+$space-md: 21px;
+$space-lg: 34px;
+$space-xl: 55px;
+
+// Typography Scale
+$font-xs: 12px;
+$font-sm: 14px;
+$font-base: 16px;
+$font-md: 18px;
+$font-lg: 21px;
+$font-xl: 26px;
+$font-2xl: 42px;
+$font-3xl: 68px;
+
+// Line Heights
+$line-height-normal: 1.4;
+$line-height-relaxed: 1.618; // φ
+
+// Border Radius
+$radius-sm: 5px;
+$radius-md: 8px;
+$radius-lg: 13px;
+
+// Component Tokens
+$button-height-sm: 48px;
+$button-height-md: 55px;
+$button-min-width: 233px; // 144 × φ ≈ 233px
+$button-min-width-reduced: 180px; // Reduced for submit button
+
+// Transition Timing
+$transition-normal: 324ms;
+
 // Nord Theme Color Variables
 $nord0: #2e3440; // Polar Night (darkest)
 $nord1: #3b4252; // Polar Night
@@ -87,44 +126,46 @@ $nord15: #b48ead; // Aurora (purple)
   }
 }
 
-// Main content section - previously a card
+// Main content section (Golden Ratio optimized)
 .content-section {
-  padding: 12px 0;
-  margin-bottom: 8px;
+  padding: $space-md 0; // 21px (was 12px)
+  margin-bottom: $space-sm; // 13px (was 8px)
   background-color: transparent;
   position: relative;
   border-bottom: none;
   animation: fadeIn 0.3s ease-in-out;
-  transition: all 0.3s ease;
+  transition: all $transition-normal ease; // 324ms
 
   &--compact {
-    padding: 8px 0;
+    padding: $space-sm 0; // 13px
   }
 
   &__header {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
-    margin-bottom: 8px;
+    margin-bottom: $space-md; // 21px (was 8px)
 
     &-title {
-      font-size: 1.4rem;
+      font-size: $font-lg; // 21px (was 22.4px)
       font-weight: 500;
       color: $nord0;
-      margin: 0 0 0.25rem 0;
+      margin: 0 0 $space-sm 0; // 13px bottom margin
+      line-height: $line-height-normal; // 1.4
       animation: slideIn 0.4s ease-out;
 
       // For HTML content rendering
       ::ng-deep p {
         margin: 0;
+        line-height: $line-height-relaxed; // 1.618
       }
 
       ::ng-deep pre {
         background-color: rgba($nord5, 0.5);
-        padding: 12px;
-        border-radius: 5px;
+        padding: $space-sm; // 13px
+        border-radius: $radius-sm; // 5px
         font-family: 'Monaco', 'Consolas', monospace;
-        font-size: 0.9rem;
+        font-size: $font-sm; // 14px
         overflow-x: auto;
       }
 
@@ -133,44 +174,44 @@ $nord15: #b48ead; // Aurora (purple)
         padding: 2px 4px;
         border-radius: 3px;
         font-family: 'Monaco', 'Consolas', monospace;
-        font-size: 0.9rem;
+        font-size: $font-sm; // 14px
       }
     }
 
     &--compact {
-      margin-bottom: 4px;
+      margin-bottom: $space-xs; // 8px
       display: block;
       align-items: center;
     }
   }
 
   &__score {
-    font-size: 0.9rem;
+    font-size: $font-sm; // 14px (was 14.4px)
     display: flex;
     align-items: center;
     color: $nord3;
-    margin-bottom: 0.5rem;
+    margin-bottom: $space-sm; // 13px (was 0.5rem)
 
     .score-icon {
-      margin-right: 6px;
+      margin-right: $space-xs; // 8px (was 6px)
       color: $nord10;
-      font-size: 18px;
+      font-size: $font-md; // 18px
     }
 
     &--compact {
-      margin-bottom: 0.25rem;
+      margin-bottom: $space-xs; // 8px
     }
   }
 
   // Footer with buttons
   &__footer {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-    gap: 12px;
+    justify-content: center; // ✅ Centered (was flex-end)
+    margin-top: $space-lg; // 34px (was 20px)
+    gap: $space-sm; // 13px (was 12px)
 
     &--compact {
-      margin-top: 8px;
+      margin-top: $space-sm; // 13px
       justify-content: center;
     }
 
@@ -208,38 +249,39 @@ $nord15: #b48ead; // Aurora (purple)
   }
 }
 
-// Options styling
+// Options styling (Golden Ratio optimized)
 .options {
-  margin: 8px 0;
-  padding: 8px 0 6px;
+  margin: $space-md 0; // 21px (was 8px)
+  padding: $space-md 0; // 21px vertical breathing room
   background-color: transparent;
 
   &--compact {
-    margin: 6px 0;
-    padding: 6px 0;
+    margin: $space-sm 0; // 13px
+    padding: $space-sm 0; // 13px
   }
 
   &__container {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: $space-sm; // 13px (Fibonacci, was 10px)
 
     &--compact {
-      gap: 10px;
+      gap: $space-sm; // 13px
     }
   }
 }
 
-// Option items (previously card-based)
+// Option items (Golden Ratio optimized)
 .option-item {
   background-color: rgba($nord5, 0.1);
   border-left: none;
-  border-radius: 4px;
-  padding: 6px 8px;
-  margin-bottom: 6px;
+  border-radius: $radius-md; // 8px (was 4px)
+  padding: $space-sm $space-md; // 13px × 21px (was 6px × 8px) - 162% increase!
+  margin-bottom: $space-sm; // 13px (was 6px)
   cursor: pointer;
+  min-height: $font-3xl; // 68px (touch-friendly, Fibonacci)
 
-  transition: all 0.2s ease;
+  transition: all $transition-normal ease; // 324ms φ-based timing
   position: relative;
   @include focus-visible;
 
@@ -259,10 +301,10 @@ $nord15: #b48ead; // Aurora (purple)
   &-content {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: $space-sm; // 13px (Fibonacci)
 
     &--compact {
-      gap: 8px;
+      gap: $space-xs; // 8px
     }
 
     .item-indicator {
@@ -271,11 +313,16 @@ $nord15: #b48ead; // Aurora (purple)
 
       .mat-icon {
         color: $nord9;
+        font-size: $font-xl; // 26px (was 24px) - more prominent
+        width: $font-xl;
+        height: $font-xl;
       }
     }
 
     .item-text {
       flex-grow: 1;
+      font-size: $font-base; // 16px
+      line-height: $line-height-relaxed; // 1.618 (Golden Ratio!)
 
       ::ng-deep * {
         margin: 0;
@@ -283,12 +330,12 @@ $nord15: #b48ead; // Aurora (purple)
 
       ::ng-deep pre {
         background-color: rgba($nord6, 0.7);
-        padding: 12px;
-        border-radius: 5px;
+        padding: $space-sm; // 13px
+        border-radius: $radius-sm; // 5px
         font-family: 'Monaco', 'Consolas', monospace;
-        font-size: 0.9rem;
+        font-size: $font-sm; // 14px
         overflow-x: auto;
-        margin-top: 8px;
+        margin-top: $space-xs; // 8px
       }
 
       ::ng-deep code {
@@ -296,27 +343,40 @@ $nord15: #b48ead; // Aurora (purple)
         padding: 2px 4px;
         border-radius: 3px;
         font-family: 'Monaco', 'Consolas', monospace;
-        font-size: 0.9rem;
+        font-size: $font-sm; // 14px
       }
     }
   }
 }
 
-// Button styling
+// Button styling (Golden Ratio optimized)
 .mc-button {
-  border-radius: 8px;
-  padding: 8px 16px;
+  border-radius: $radius-md; // 8px
+  padding: 0 $space-lg; // 34px horizontal (was 8px 16px)
+  height: $button-height-sm; // 48px (reduced from 55px for less dominance)
+  min-width: $button-min-width-reduced; // 180px (reduced from 233px)
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: $space-xs; // 8px (reduced from 13px)
   font-weight: 500;
+  font-size: $font-base; // 16px (reduced from 18px)
   text-transform: none;
   letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Subtle shadow
 
   &--compact {
-    padding: 6px 12px;
+    padding: 0 $space-md; // 21px
+    height: 48px;
   }
-  transition: all 0.2s ease;
+  transition: all $transition-normal ease; // 324ms φ-based timing
+
+  mat-icon {
+    font-size: 20px; // 20px (reduced from 24px)
+    width: 20px;
+    height: 20px;
+    margin-right: 0; // Icon gap handled by gap property
+  }
 
   &--primary {
     background-color: $nord10;
@@ -324,7 +384,8 @@ $nord15: #b48ead; // Aurora (purple)
 
     &:hover:not([disabled]) {
       background-color: darken($nord10, 5%);
-      transform: translateY(-2px);
+      transform: translateY(-3px); // Enhanced lift effect
+      box-shadow: 0 8px $space-lg rgba(0, 0, 0, 0.2); // 34px shadow
     }
 
     &:active:not([disabled]) {
@@ -343,7 +404,8 @@ $nord15: #b48ead; // Aurora (purple)
 
     &:hover:not([disabled]) {
       background-color: darken($nord4, 5%);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px $space-lg rgba(0, 0, 0, 0.15);
     }
 
     &:active:not([disabled]) {
@@ -362,7 +424,8 @@ $nord15: #b48ead; // Aurora (purple)
 
     &:hover:not([disabled]) {
       background-color: darken($nord14, 5%);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px $space-lg rgba(0, 0, 0, 0.2);
     }
 
     &:active:not([disabled]) {
@@ -376,7 +439,8 @@ $nord15: #b48ead; // Aurora (purple)
 
     &:hover:not([disabled]) {
       background-color: darken($nord13, 5%);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px $space-lg rgba(0, 0, 0, 0.2);
     }
 
     &:active:not([disabled]) {
@@ -390,7 +454,8 @@ $nord15: #b48ead; // Aurora (purple)
 
     &:hover:not([disabled]) {
       background-color: darken($nord11, 5%);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
+      box-shadow: 0 8px $space-lg rgba(0, 0, 0, 0.2);
     }
 
     &:active:not([disabled]) {
@@ -551,40 +616,40 @@ $nord15: #b48ead; // Aurora (purple)
   }
 }
 
-// Responsive adjustments
+// Responsive adjustments (Golden Ratio optimized)
 @media screen and (max-width: 600px) {
   .mc-task {
-    width: calc(100% - 32px);
-    padding: 0 16px;
+    width: calc(100% - #{$space-lg}); // 34px total padding
+    padding: 0 $space-md; // 21px horizontal
   }
 
   .content-section {
-    padding: 12px 0;
+    padding: $space-sm 0; // 13px
 
-    margin-bottom: 10px;
+    margin-bottom: $space-sm; // 13px
 
     &__header {
       flex-direction: column;
 
       &-title {
-        font-size: 1.2rem;
-        margin-right: 30px; // Space for close button
+        font-size: $font-md; // 18px
+        margin-right: $space-lg; // 34px space for close button
       }
     }
 
     &__footer {
       flex-direction: column;
-      gap: 10px;
+      gap: $space-sm; // 13px
     }
   }
 
   .option-item {
-    padding: 8px 10px;
-    margin-bottom: 10px;
+    padding: $space-xs $space-sm; // 8px × 13px
+    margin-bottom: $space-sm; // 13px
 
     &-content {
-      min-height: 48px; // Minimum touch target height
-      gap: 8px;
+      min-height: $button-height-sm; // 48px - Minimum touch target height
+      gap: $space-xs; // 8px
 
       .item-indicator {
         margin-top: 0;
@@ -600,19 +665,19 @@ $nord15: #b48ead; // Aurora (purple)
 
   // Mobile-optimized buttons
   .mc-button {
-    min-height: 40px;
+    min-height: $button-height-sm; // 48px
     width: 100%; // Full width on mobile
     justify-content: center;
-    padding: 6px 12px;
+    padding: 0 $space-sm; // 13px horizontal
   }
 
   .feedback-section {
-    padding: 10px 0;
-    margin-top: 16px;
+    padding: $space-sm 0; // 13px
+    margin-top: $space-md; // 21px
 
     &__header {
-      gap: 8px;
-      margin-bottom: 8px;
+      gap: $space-xs; // 8px
+      margin-bottom: $space-xs; // 8px
 
       &-icon {
         width: 24px;
@@ -620,7 +685,7 @@ $nord15: #b48ead; // Aurora (purple)
       }
 
       &-title {
-        font-size: 1rem;
+        font-size: $font-base; // 16px
       }
     }
 
@@ -628,49 +693,49 @@ $nord15: #b48ead; // Aurora (purple)
       flex-direction: row;
 
       align-items: flex-start;
-      gap: 6px;
+      gap: $space-xs; // 8px
 
       &-text {
-        font-size: 0.85rem;
+        font-size: $font-xs; // 12px
       }
     }
 
     &__message {
-      font-size: 0.85rem;
+      font-size: $font-xs; // 12px
     }
   }
 }
 
-// Medium screen sizes
+// Medium screen sizes (Golden Ratio optimized)
 @media screen and (min-width: 601px) and (max-width: 900px) {
   .content-section {
-    padding: 16px 0;
-    margin-bottom: 16px;
+    padding: $space-md 0; // 21px
+    margin-bottom: $space-md; // 21px
 
     &__header-title {
-      font-size: 1.25rem;
+      font-size: $font-lg; // 21px
     }
   }
 
   .option-item {
-    padding: 14px;
-    margin-bottom: 10px;
+    padding: $space-sm; // 13px
+    margin-bottom: $space-sm; // 13px
   }
 
   .mc-button {
-    min-width: 150px;
+    min-width: 150px; // Balanced for tablets
   }
 
   .feedback-section {
-    padding: 12px 0;
-    margin-top: 10px;
+    padding: $space-sm 0; // 13px
+    margin-top: $space-sm; // 13px
 
     &__header-title {
-      font-size: 1rem;
+      font-size: $font-base; // 16px
     }
 
     &__message {
-      font-size: 0.95rem;
+      font-size: $font-sm; // 14px
     }
   }
 }

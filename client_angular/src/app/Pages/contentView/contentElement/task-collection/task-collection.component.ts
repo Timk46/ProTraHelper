@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { QuestionDataService } from '../../../../Services/question/question-data.service';
+import { LoggerService } from '../../../../Services/logger/logger.service';
 import {
   LinkedCollectionContentElementDto,
   QuestionCollectionDto,
@@ -51,7 +52,7 @@ export interface ITaskComponent {
 })
 export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
   @Input() taskViewData!: TaskViewData;
-  @Output() submitClicked = new EventEmitter<any>();
+  @Output() submitClicked = new EventEmitter<number>(); // Emits score/progress
 
   @ViewChild('taskHost', { read: ViewContainerRef, static: false })
   taskHost!: ViewContainerRef;
@@ -76,10 +77,14 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
     [questionType.GROUP_REVIEW_GATE]: GroupReviewGateDialogComponent,
   };
 
+  // Scoped logger for better traceability
+  private readonly log = this.logger.scope('TaskCollectionComponent');
+
   constructor(
     public dialogRef: DialogRef,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private readonly questionService: QuestionDataService,
+    private readonly logger: LoggerService,
   ) {
     if (data && data.taskViewData) {
       this.taskViewData = data.taskViewData;
@@ -149,7 +154,12 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
       const currentTaskElement = this.sortedTasks[this.currentIndex];
 
       if (!currentTaskElement.questionId || !currentTaskElement.questionType) {
-        console.error(`Task is missing questionId or questionType:`, currentTaskElement);
+        this.log.error('Task missing required fields', {
+          task: currentTaskElement,
+          index: this.currentIndex,
+          questionId: currentTaskElement.questionId,
+          questionType: currentTaskElement.questionType,
+        });
         this.isLoading = false;
         return;
       }
@@ -158,7 +168,11 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
       this.taskHost.clear();
 
       if (!componentToLoad) {
-        console.error(`No component mapped for question type: ${currentTaskElement.questionType}`);
+        this.log.error('No component mapped for question type', {
+          questionType: currentTaskElement.questionType,
+          task: currentTaskElement,
+          index: this.currentIndex,
+        });
         this.componentRef = undefined;
         this.isLoading = false;
         return;

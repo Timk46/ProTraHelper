@@ -60,7 +60,7 @@ interface TableCell {
 })
 export class FillinTaskComponent implements OnInit, OnDestroy {
   @ViewChild('tableContainer') tableContainer!: ElementRef;
-  @Output() submitClicked = new EventEmitter<any>();
+  @Output() submitClicked = new EventEmitter<number>(); // Emits progress score
   @Input() conceptId!: number;
   @Input() questionId!: number;
   taskViewData!: TaskViewData;
@@ -459,7 +459,10 @@ export class FillinTaskComponent implements OnInit, OnDestroy {
           this.feedbackText = data;
           this.isSending = false;
           this.submitClicked.emit(data.progress);
-          this.taskViewData.progress = Math.max(this.taskViewData.progress, data.progress);
+          this.taskViewData.progress = Math.max(
+            this.taskViewData.progress ?? 0,
+            data.progress,
+          );
           this.submitDisabled = true;
           this.updateIsCorrect();
 

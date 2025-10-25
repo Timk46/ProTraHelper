@@ -7,7 +7,6 @@ import {
   questionType,
   taskViewDTO,
 } from '@DTOs/index';
-import { takeUntil } from 'rxjs';
 import { ProgressService } from 'src/app/Services/progress/progress.service';
 import { FillinTaskNewComponent } from '../../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { FreeTextTaskComponent } from '../../contentView/contentElement/free-text-task/free-text-task.component';
@@ -23,6 +22,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { UploadTaskComponent } from '../../contentView/contentElement/upload-task/upload-task.component';
 import { GroupReviewGateDialogComponent } from '../../contentView/contentElement/group-review-gate-dialog/group-review-gate-dialog.component';
 import { TaskCollectionComponent } from '../../contentView/contentElement/task-collection/task-collection.component';
+import { LoggerService } from 'src/app/Services/logger/logger.service';
 
 @Component({
   selector: 'app-content-list-item',
@@ -60,6 +60,9 @@ export class ContentListItemComponent implements OnInit {
   protected editModeActive: boolean = false;
   protected editModeButtonsClickable: boolean = false;
 
+  // Scoped logger for better traceability
+  private readonly log = this.logger.scope('ContentListItemComponent');
+
   constructor(
     private readonly progressService: ProgressService,
     private readonly dialog: MatDialog,
@@ -69,6 +72,7 @@ export class ContentListItemComponent implements OnInit {
     private readonly contentLinkerService: ContentLinkerService,
     private readonly questionDataService: QuestionDataService,
     private readonly snackBar: MatSnackBar,
+    private readonly logger: LoggerService,
   ) {
     this.isAdmin = this.userService.getRole() === 'ADMIN';
   }
@@ -265,11 +269,14 @@ export class ContentListItemComponent implements OnInit {
         ...question,
       };
 
-      // Subscribe to dialog events and manage with takeUntil
-      dialogRef.componentInstance.submitClicked
-        .pipe(takeUntil(dialogRef.afterClosed()))
-        .subscribe((score: number) => {
-          console.log('current score:', question.progress, 'submitted score:', score);
+      // Subscribe to dialog events
+      const submitSubscription = dialogRef.componentInstance.submitClicked.subscribe(
+        (score: number) => {
+          this.log.debug('Score update received', {
+            currentScore: question.progress,
+            submittedScore: score,
+            questionId: question.id,
+          });
 
           // update the score if higher
           if (score > question.progress) {
@@ -278,11 +285,20 @@ export class ContentListItemComponent implements OnInit {
             this.scoreUpdated.emit(this.contentElementData);
 
             if (score === 100) {
-              console.log('Aufgabe wurde zum ersten Mal erfolgreich gelöst.');
+              this.log.info('Task completed successfully for the first time', {
+                questionId: question.id,
+                questionName: question.name,
+              });
               this.progressService.answerSubmitted();
             }
           }
-        });
+        },
+      );
+
+      // Clean up subscription when dialog closes
+      dialogRef.afterClosed().subscribe(() => {
+        submitSubscription.unsubscribe();
+      });
     }
   }
 
