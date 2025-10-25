@@ -42,7 +42,7 @@ export interface CodeSubmissionFileDto {
  */
 export interface TestResultDTO {
   // Frontend variant fields
-  name?: string;
+  name: string;
   passed?: boolean;
   // Backend variant fields
   test?: string;

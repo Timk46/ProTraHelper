@@ -9,8 +9,8 @@ import {
   QuestionTypeProgressDTO,
   DailyProgressDTO,
   AllUsersDailyProgressDTO,
+  ProcessEmailsResponseDTO,
 } from '@DTOs/index';
-nexport { QuestionTypeProgressDTO as QuestionTypeProgress, DailyProgressDTO as DailyProgress, UserDetailsDTO as UserDetails } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',
@@ -56,7 +56,7 @@ export class AdminService {
     return this.http.get<SubjectDTO[]>(`${this.apiUrl}/subjects`);
   }
 
-  processEmailsForSubject(emails: string[], subjectId: number): Observable<unknown> {
-    return this.http.post(`${this.apiUrl}/process-emails`, { emails, subjectId });
+  processEmailsForSubject(emails: string[], subjectId: number): Observable<ProcessEmailsResponseDTO> {
+    return this.http.post<ProcessEmailsResponseDTO>(`${this.apiUrl}/process-emails`, { emails, subjectId });
   }
 }

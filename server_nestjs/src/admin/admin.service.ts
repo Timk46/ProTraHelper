@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { User } from '@prisma/client';
 import { contentElementType } from '@prisma/client';
-import { UserDTO } from '@DTOs/user.dto';
+import { UserDTO, ProcessEmailsResponseDTO } from '@DTOs/index';
 
 /**
  * Service responsible for administrative operations such as managing users and subjects.
@@ -111,7 +111,7 @@ export class AdminService {
    * @param subjectId The ID of the subject to register users for.
    * @returns A message indicating how many users were processed and created.
    */
-  async processEmailsForSubject(emails: string[], subjectId: number) {
+  async processEmailsForSubject(emails: string[], subjectId: number): Promise<ProcessEmailsResponseDTO> {
     let createdUsers = 0;
     let processedUsers = 0;
 

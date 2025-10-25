@@ -3,6 +3,7 @@ import { AdminService } from './admin.service';
 import { UsersService } from '../users/users.service';
 import { RolesGuard, roles } from '../auth/common/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
+import { ProcessEmailsResponseDTO } from '@DTOs/index';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -70,7 +71,7 @@ export class AdminController {
   async processEmailsForSubject(
     @Body('emails') emails: string[],
     @Body('subjectId') subjectId: number,
-  ) {
+  ): Promise<ProcessEmailsResponseDTO> {
     return this.adminService.processEmailsForSubject(emails, subjectId);
   }
 }

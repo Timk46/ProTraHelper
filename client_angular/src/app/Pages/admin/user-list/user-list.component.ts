@@ -11,7 +11,7 @@ import { ScaleType } from '@swimlane/ngx-charts';
 import { ConfirmationBoxComponent } from '../../confirmation-box/confirmation-box.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from '../../../Services/auth/user.service';
-import { UserListItemDTO, SubjectDTO, AllUsersDailyProgressDTO } from '@DTOs/index';
+import { UserListItemDTO, SubjectDTO, AllUsersDailyProgressDTO, ChartSeriesDTO } from '@DTOs/index';
 import { ContentManagementService } from '../../../Services/admin/content-management.service';
 
 @Component({
@@ -38,7 +38,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   // New properties for the all users daily progress chart
-  allUsersDailyProgressData: any[] = [];
+  allUsersDailyProgressData: ChartSeriesDTO[] = [];
   view: [number, number] = [700, 400];
   showXAxis: boolean = true;
   showYAxis: boolean = true;
@@ -82,7 +82,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
       },
-      (error: any) => console.error('Error loading users:', error),
+      (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error loading users:', errorMessage);
+      },
     );
   }
 
@@ -91,7 +94,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
       (subjects: SubjectDTO[]) => {
         this.subjects = subjects;
       },
-      (error: any) => console.error('Error loading subjects:', error),
+      (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error loading subjects:', errorMessage);
+      },
     );
   }
 
@@ -118,7 +124,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
         this.allUsersDailyProgressData = Object.values(progressByType);
       },
-      (error: any) => console.error('Error loading all users daily progress:', error),
+      (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error loading all users daily progress:', errorMessage);
+      },
     );
   }
 
@@ -140,7 +149,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
       () => {
         this.loadUsers(); // Reload the user list to reflect the changes
       },
-      (error: any) => console.error('Error toggling registeredForSL:', error),
+      (error: unknown) => {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error toggling registeredForSL:', errorMessage);
+      },
     );
   }
 
@@ -159,7 +171,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
         const content = e.target?.result as string;
         const emails = content.split(';').map(email => email.trim());
         this.adminService.processEmailsForSubject(emails, this.selectedSubject as number).subscribe(
-          (response: { message: string }) => {
+          response => {
             console.log('File processed successfully');
             this.snackBar.open(response.message, 'Close', {
               duration: 5000,
@@ -168,9 +180,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
             });
             this.loadUsers(); // Reload the user list to reflect the changes
           },
-          (error: any) => {
-            console.error('Error processing file:', error);
-            this.snackBar.open('Error processing file: ' + error.message, 'Close', {
+          (error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error('Error processing file:', errorMessage);
+            this.snackBar.open('Error processing file: ' + errorMessage, 'Close', {
               duration: 5000,
               horizontalPosition: 'center',
               verticalPosition: 'bottom',
@@ -213,15 +226,16 @@ export class UserListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onContentFileSelected(event: any) {
-    const file = event.target.files[0];
+  onContentFileSelected(event: Event) {
+    const element = event.target as HTMLInputElement;
+    const file = element.files?.[0];
     if (file && file.type === 'application/json') {
       this.selectedContentFile = file;
     } else {
       this.snackBar.open('Bitte wählen Sie eine JSON-Datei aus', 'Schließen', {
         duration: 3000,
       });
-      event.target.value = '';
+      element.value = '';
     }
   }
 

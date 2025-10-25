@@ -1,14 +1,19 @@
 import { OnInit } from '@angular/core';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {
-  AdminService,
-  QuestionTypeProgress,
-  DailyProgress,
-  UserDetails,
-} from '../services/admin.service';
+import { AdminService } from '../services/admin.service';
 import { Color } from '@swimlane/ngx-charts';
 import { ScaleType } from '@swimlane/ngx-charts';
+import { UserDetailsDTO, QuestionTypeProgressDTO, DailyProgressDTO, ChartDataPointDTO } from '@DTOs/index';
+
+
+/**
+ * Multi-series chart data structure for ngx-charts
+ */
+interface ChartSeriesData {
+  name: string;
+  series: ChartDataPointDTO[];
+}
 
 @Component({
   selector: 'app-user-progress',
@@ -17,13 +22,13 @@ import { ScaleType } from '@swimlane/ngx-charts';
 })
 export class UserProgressComponent implements OnInit {
   userId: number = 0;
-  userDetails: UserDetails | null = null;
-  questionTypeProgress: QuestionTypeProgress | null = null;
-  dailyProgress: DailyProgress[] | null = null;
+  userDetails: UserDetailsDTO | null = null;
+  questionTypeProgress: QuestionTypeProgressDTO | null = null;
+  dailyProgress: DailyProgressDTO[] | null = null;
 
   // ngx-charts data
-  questionTypeProgressData: any[] = [];
-  dailyProgressData: any[] = [];
+  questionTypeProgressData: ChartSeriesData[] = [];
+  dailyProgressData: ChartSeriesData[] = [];
 
   // Chart options
   view: [number, number] = [700, 400];
@@ -60,28 +65,28 @@ export class UserProgressComponent implements OnInit {
 
   loadUserDetails(): void {
     this.adminService.getUserDetails(this.userId).subscribe(
-      (details: UserDetails) => {
+      (details: UserDetailsDTO) => {
         this.userDetails = details;
       },
-      (error: any) => console.error('Error loading user details:', error),
+      (error: unknown) => console.error('Error loading user details:', error),
     );
   }
 
   loadUserProgress(): void {
     this.adminService.getUserProgressByQuestionType(this.userId).subscribe(
-      (progress: QuestionTypeProgress) => {
+      (progress: QuestionTypeProgressDTO) => {
         this.questionTypeProgress = progress;
         this.updateQuestionTypeProgressData();
       },
-      (error: any) => console.error('Error loading question type progress:', error),
+      (error: unknown) => console.error('Error loading question type progress:', error),
     );
 
     this.adminService.getUserDailyProgress(this.userId).subscribe(
-      (progress: DailyProgress[]) => {
+      (progress: DailyProgressDTO[]) => {
         this.dailyProgress = progress;
         this.updateDailyProgressData();
       },
-      (error: any) => console.error('Error loading daily progress:', error),
+      (error: unknown) => console.error('Error loading daily progress:', error),
     );
   }
 

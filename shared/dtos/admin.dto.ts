@@ -77,3 +77,12 @@ export interface AllUsersDailyProgressDTO {
   type: string;
   count: number;
 }
+
+/**
+ * Response from processing email list for subject registration
+ *
+ * @interface ProcessEmailsResponseDTO
+ */
+export interface ProcessEmailsResponseDTO {
+  message: string;
+}

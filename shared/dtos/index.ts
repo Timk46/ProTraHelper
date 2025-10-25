@@ -13,6 +13,7 @@ export * from "./discussionMessage.dto";
 export * from "./discussionMessageVote.dto";
 export * from "./chatBot.dto";
 export * from "./admin.dto";
+export * from "./chart.dto";
 export * from "./discussionCreation.dto";
 export * from "./discussionFilter.dto";
 export * from "./module.dto";

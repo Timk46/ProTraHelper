@@ -76,7 +76,7 @@ export class WorkspaceStateService {
     return this.runCodeService.executeStudentCode(taskId, inputArgs, additionalFiles).pipe(
       tap(result => {
         // Default to null if result or nested properties are missing
-        let finalResultForSubject: CodeSubmissionResult | null = null;
+        let finalResultForSubject: CodeSubmissionResultDto | null = null;
 
         if (result?.CodeSubmissionResult) {
           let frontendTestResults: TestResult[] = []; // Default to empty array
@@ -107,9 +107,7 @@ export class WorkspaceStateService {
         }
 
         // Emit the correctly typed frontend object (or null)
-        this.codeSubmissionResultSubject.next(
-          finalResultForSubject as CodeSubmissionResultDto | null,
-        ); // Cast to satisfy Subject type
+        this.codeSubmissionResultSubject.next(finalResultForSubject);
         this.workspaceStateSubject.next(WorkspaceState.SUBMITTED_CODE);
         console.log(JSON.stringify(this.codeSubmissionResultSubject));
       }),
