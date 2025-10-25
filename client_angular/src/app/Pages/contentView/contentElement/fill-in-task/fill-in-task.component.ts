@@ -20,6 +20,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { FormControl } from '@angular/forms';
 import { Location } from '@angular/common';
+import { TaskViewData } from '@DTOs/index';
 
 interface ContentPart {
   type: 'sentence' | 'table';
@@ -48,15 +49,6 @@ interface TableCell {
   id?: string;
 }
 
-interface TaskViewData {
-  contentNodeId: number;
-  contentElementId: number;
-  id: number;
-  name: string;
-  type: string;
-  progress: number;
-  description?: string;
-}
 
 /**
  * @deprecated This component is deprecated and may be removed in future releases. Please use the new FillinTaskNewComponent instead.

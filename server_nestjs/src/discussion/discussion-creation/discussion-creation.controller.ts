@@ -10,13 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { DiscussionCreationService } from './discussion-creation.service';
-import {
-  AnonymousUserDTO,
-  discussionNodeNamesDTO} from '@DTOs/index';
-import {
-  discussionCreationDTO,
-  discussionMessageCreationDTO
-} from '@DTOs/index';
+import { AnonymousUserDTO, discussionNodeNamesDTO } from '@DTOs/index';
+import { discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
 import { DiscussionDataService } from '../discussion-data/discussion-data.service';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
 

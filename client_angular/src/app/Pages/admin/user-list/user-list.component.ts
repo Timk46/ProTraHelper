@@ -5,27 +5,14 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AdminService, AllUsersDailyProgress } from '../services/admin.service';
+import { AdminService } from '../services/admin.service';
 import { Color } from '@swimlane/ngx-charts';
 import { ScaleType } from '@swimlane/ngx-charts';
 import { ConfirmationBoxComponent } from '../../confirmation-box/confirmation-box.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UserService } from '../../../Services/auth/user.service';
+import { UserListItemDTO, SubjectDTO, AllUsersDailyProgressDTO } from '@DTOs/index';
 import { ContentManagementService } from '../../../Services/admin/content-management.service';
-
-interface UserListItem {
-  id: number;
-  email: string;
-  kiFeedbackCount: number;
-  chatBotMessageCount: number;
-  totalProgress: number;
-  subjects: { id: number; name: string; registeredForSL: boolean }[];
-}
-
-interface Subject {
-  id: number;
-  name: string;
-}
 
 @Component({
   selector: 'app-user-list',
@@ -33,7 +20,7 @@ interface Subject {
   styleUrls: ['./user-list.component.scss'],
 })
 export class UserListComponent implements OnInit, AfterViewInit {
-  dataSource: MatTableDataSource<UserListItem> = new MatTableDataSource<UserListItem>([]);
+  dataSource: MatTableDataSource<UserListItemDTO> = new MatTableDataSource<UserListItemDTO>([]);
   displayedColumns: string[] = [
     'email',
     'id',
@@ -42,7 +29,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
     'totalProgress',
     'subjects',
   ];
-  subjects: Subject[] = [];
+  subjects: SubjectDTO[] = [];
   selectedSubject: number | null = null;
   selectedFile: File | null = null;
   selectedContentFile: File | null = null;
@@ -80,7 +67,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.loadUsers();
     this.loadSubjects();
-    this.loadAllUsersDailyProgress();
+    this.loadAllUsersDailyProgressDTO();
   }
 
   ngAfterViewInit() {
@@ -90,7 +77,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   loadUsers(): void {
     this.adminService.getAllUsers().subscribe(
-      (users: UserListItem[]) => {
+      (users: UserListItemDTO[]) => {
         this.dataSource = new MatTableDataSource(users);
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
@@ -101,16 +88,16 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   loadSubjects(): void {
     this.adminService.getSubjects().subscribe(
-      (subjects: Subject[]) => {
+      (subjects: SubjectDTO[]) => {
         this.subjects = subjects;
       },
       (error: any) => console.error('Error loading subjects:', error),
     );
   }
 
-  loadAllUsersDailyProgress(): void {
+  loadAllUsersDailyProgressDTO(): void {
     this.adminService.getAllUsersDailyProgress().subscribe(
-      (progress: AllUsersDailyProgress[]) => {
+      (progress: AllUsersDailyProgressDTO[]) => {
         // Process the data for the chart
         const progressByType: {
           [key: string]: { name: string; series: { name: string; value: number }[] };

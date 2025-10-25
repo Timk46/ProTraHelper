@@ -1,17 +1,5 @@
 import { Injectable } from '@angular/core';
-
-/**
- * Interface for task view data to maintain type safety
- */
-export interface TaskViewData {
-  contentNodeId: number;
-  contentElementId: number;
-  id: number;
-  name: string;
-  type: string;
-  progress: number;
-  description?: string;
-}
+import { TaskViewData } from '../../../../shared/dtos';
 
 /**
  * Service providing mock data for different task types

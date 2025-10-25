@@ -20,8 +20,6 @@ import { ConfirmationService } from 'src/app/Services/confirmation/confirmation.
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FillinTaskNewComponent } from '../contentView/contentElement/fill-in-task-new/fill-in-task-new.component';
 import { TaskViewData } from '@DTOs/index';
-import { QuestionDataService } from 'src/app/Services/question/question-data.service';
-import { MatAccordion } from '@angular/material/expansion';
 
 /**
  * @deprecated This component is no longer used in the application and should not longer be used.

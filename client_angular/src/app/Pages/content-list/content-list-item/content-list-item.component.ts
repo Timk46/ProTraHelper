@@ -183,12 +183,7 @@ export class ContentListItemComponent implements OnInit {
     const question: taskViewDTO = this.contentElementData.question;
     // Create dialog configuration
     const dialogConfig = new MatDialogConfig();
-    /* dialogConfig.data = { //dialog data is not needed because of the input new approach
-      taskViewData: {
-        contentElementId: this.contentElementData.id,
-        ...question,
-      },
-    }; */
+    
     dialogConfig.width = 'auto';
     dialogConfig.maxHeight = '95vh';
 

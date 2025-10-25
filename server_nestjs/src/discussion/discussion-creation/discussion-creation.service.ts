@@ -1,13 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { NotificationService } from '@/notification/notification.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import {
-  AnonymousUserDTO,
-  discussionCreationDTO,
-  discussionMessageCreationDTO} from '@DTOs/index';
-import {
-  NotificationType,
-} from '@DTOs/index';
+import { AnonymousUserDTO, discussionCreationDTO, discussionMessageCreationDTO } from '@DTOs/index';
+import { NotificationType } from '@DTOs/index';
 import { Injectable } from '@nestjs/common';
 import * as xss from 'xss';
 

@@ -2,48 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-
-interface UserListItem {
-  id: number;
-  email: string;
-  kiFeedbackCount: number;
-  chatBotMessageCount: number;
-  totalProgress: number;
-  subjects: { id: number; name: string; registeredForSL: boolean }[];
-}
-
-interface Subject {
-  id: number;
-  name: string;
-}
-
-export interface QuestionTypeProgress {
-  [key: string]: {
-    total: number;
-    completed: number;
-  };
-}
-
-export interface DailyProgress {
-  date: string;
-  count: number;
-}
-
-export interface AllUsersDailyProgress {
-  date: string;
-  type: string;
-  count: number;
-}
-
-export interface UserDetails {
-  id: number;
-  email: string;
-  firstname: string;
-  lastname: string;
-  globalRole: string;
-  createdAt: string;
-  totalProgress: number;
-}
+import {
+  UserListItemDTO,
+  UserDetailsDTO,
+  SubjectDTO,
+  QuestionTypeProgressDTO,
+  DailyProgressDTO,
+  AllUsersDailyProgressDTO,
+} from '@DTOs/index';
+nexport { QuestionTypeProgressDTO as QuestionTypeProgress, DailyProgressDTO as DailyProgress, UserDetailsDTO as UserDetails } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',
@@ -53,43 +20,43 @@ export class AdminService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getAllUsers(): Observable<UserListItem[]> {
-    return this.http.get<UserListItem[]>(`${this.apiUrl}/users`);
+  getAllUsers(): Observable<UserListItemDTO[]> {
+    return this.http.get<UserListItemDTO[]>(`${this.apiUrl}/users`);
   }
 
-  getUserTotalProgress(userId: number): Observable<any> {
+  getUserTotalProgress(userId: number): Observable<unknown> {
     return this.http.get(`${this.apiUrl}/users/${userId}/progress`);
   }
 
-  getUserProgressByQuestionType(userId: number): Observable<QuestionTypeProgress> {
-    return this.http.get<QuestionTypeProgress>(
+  getUserProgressByQuestionType(userId: number): Observable<QuestionTypeProgressDTO> {
+    return this.http.get<QuestionTypeProgressDTO>(
       `${this.apiUrl}/users/${userId}/progress-by-question-type`,
     );
   }
 
-  getUserDailyProgress(userId: number): Observable<DailyProgress[]> {
-    return this.http.get<DailyProgress[]>(`${this.apiUrl}/users/${userId}/daily-progress`);
+  getUserDailyProgress(userId: number): Observable<DailyProgressDTO[]> {
+    return this.http.get<DailyProgressDTO[]>(`${this.apiUrl}/users/${userId}/daily-progress`);
   }
 
-  getAllUsersDailyProgress(): Observable<AllUsersDailyProgress[]> {
-    return this.http.get<AllUsersDailyProgress[]>(`${this.apiUrl}/all-users-daily-progress`);
+  getAllUsersDailyProgress(): Observable<AllUsersDailyProgressDTO[]> {
+    return this.http.get<AllUsersDailyProgressDTO[]>(`${this.apiUrl}/all-users-daily-progress`);
   }
 
-  getUserDetails(userId: number): Observable<UserDetails> {
-    return this.http.get<UserDetails>(`${this.apiUrl}/users/${userId}/details`);
+  getUserDetails(userId: number): Observable<UserDetailsDTO> {
+    return this.http.get<UserDetailsDTO>(`${this.apiUrl}/users/${userId}/details`);
   }
 
-  toggleRegisteredForSL(userId: number, subjectId: number, value: boolean): Observable<any> {
+  toggleRegisteredForSL(userId: number, subjectId: number, value: boolean): Observable<unknown> {
     return this.http.patch(`${this.apiUrl}/users/${userId}/subjects/${subjectId}`, {
       registeredForSL: value,
     });
   }
 
-  getSubjects(): Observable<Subject[]> {
-    return this.http.get<Subject[]>(`${this.apiUrl}/subjects`);
+  getSubjects(): Observable<SubjectDTO[]> {
+    return this.http.get<SubjectDTO[]>(`${this.apiUrl}/subjects`);
   }
 
-  processEmailsForSubject(emails: string[], subjectId: number): Observable<any> {
+  processEmailsForSubject(emails: string[], subjectId: number): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/process-emails`, { emails, subjectId });
   }
 }

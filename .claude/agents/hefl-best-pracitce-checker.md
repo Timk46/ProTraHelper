@@ -115,6 +115,12 @@ These should be addressed but don't block implementation:
 - ⚠️ Circular dependency risk
 - ⚠️ Unclear service scope (root vs. module)
 
+#### W4: Code Structure Issues
+- ⚠️ Creating new methods instead of extending existing ones (check if existing method could be enhanced)
+- ⚠️ Methods planned that exceed reasonable complexity (~50 lines, single responsibility)
+- ⚠️ Duplicate functionality across multiple methods
+- ⚠️ Missing explanatory comments in documentation for complex methods (beyond @param/@returns)
+
 ### 🟢 INFO (Nice-to-Have Improvements)
 
 Suggestions that improve quality but are optional:
@@ -125,8 +131,10 @@ Suggestions that improve quality but are optional:
 - 💡 E2E scenarios to cover
 
 #### I2: Documentation
-- 💡 Add JSDoc/Compodoc to plan outline
+- 💡 Always use Compodoc-style documentation for written code
 - 💡 Include README updates if new module
+- 💡 Add explanatory comments (1-2 sentences) for complex methods beyond standard @param/@returns tags
+- 💡 Ensure non-trivial methods explain WHAT they do and WHY they exist
 
 #### I3: Performance Optimizations
 - 💡 Consider lazy loading for this module
@@ -228,11 +236,19 @@ Shared Utility → Add to Core/Shared Module
 1. Are all planned functions actually used?
 2. Is there speculative code ("we might need...")?
 3. Is the MVP scope clear?
+4. Could existing methods be extended instead of creating new ones?
 
 **Red Flags:**
 - Multiple CRUD endpoints when only one is needed
 - "Helper" functions without clear usage
 - "For future features" comments
+- Creating new methods when existing ones could be enhanced (check for code duplication)
+
+**Code Reusability Check:**
+```
+✅ GOOD: "Extend getUserById() to accept optional 'includeRoles' parameter"
+⚠️ WARNING: "Create getUserWithRoles() alongside existing getUserById()" (consider extending existing method instead)
+```
 
 ### ✅ 8. Integration Impact
 

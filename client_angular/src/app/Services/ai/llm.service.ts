@@ -2,23 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-
-export interface ChatSession {
-  id: number;
-  title: string;
-  createdAt: string;
-  messages: ChatBotMessage[];
-}
-
-export interface ChatBotMessage {
-  id: number;
-  question: string;
-  answer: string;
-  createdAt: string;
-  isBot: boolean;
-  ratingByStudent?: number;
-  sessionId?: number;
-}
+import { ChatSessionDTO, ChatBotMessageDTO } from '@DTOs/index';
+export { ChatSessionDTO as ChatSession, ChatBotMessageDTO as ChatBotMessage } from '@DTOs/index';
 
 @Injectable({
   providedIn: 'root',
@@ -30,8 +15,8 @@ export class LlmService {
    * Gets all chat sessions for the current user
    * @returns Observable of chat sessions array
    */
-  getChatSessions(): Observable<ChatSession[]> {
-    return this.http.get<ChatSession[]>(`${environment.server}/chat-bot/sessions`);
+  getChatSessions(): Observable<ChatSessionDTO[]> {
+    return this.http.get<ChatSessionDTO[]>(`${environment.server}/chat-bot/sessions`);
   }
 
   /**
@@ -50,6 +35,7 @@ export class LlmService {
    * @param context The context of the conversation.
    * @param question The question to ask.
    * @param dialogSessionId The ID of the dialog session.
+   * @param url Added url parameter
    * @param sessionId Optional ID of an existing chat session.
    * @returns Observable of the response.
    */
@@ -57,15 +43,15 @@ export class LlmService {
     context: { role: string; content: string }[],
     question: string,
     dialogSessionId: string,
-    url: string, // Added url parameter
+    url: string,
     sessionId?: number,
-  ): Observable<ChatBotMessage> {
-    return this.http.post<ChatBotMessage>(`${environment.server}/chat-bot/ask/basic/getDialog`, {
+  ): Observable<ChatBotMessageDTO> {
+    return this.http.post<ChatBotMessageDTO>(`${environment.server}/chat-bot/ask/basic/getDialog`, {
       context,
       question,
       dialogSessionId,
       sessionId,
-      url, // Added url to payload
+      url,
     });
   }
 }

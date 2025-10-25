@@ -80,7 +80,6 @@ import { EvaluationDiscussionModule } from './evaluation-discussion/evaluation-d
 import { GroupReviewSessionModule } from './lecturers-view/group-review-session/group-review-session.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 
-
 @Module({
   imports: [
     FilesModule,
@@ -103,10 +102,12 @@ import { ThrottlerModule } from '@nestjs/throttler';
     ContentLinkerModule,
     CodingQuestionGeneratorModule,
     ScheduleModule.forRoot(),
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // Default TTL in milliseconds
-      limit: 100, // Default global limit
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // Default TTL in milliseconds
+        limit: 100, // Default global limit
+      },
+    ]),
 
     AdminModule, // Add this line
     HighlightConceptsModule,
@@ -133,11 +134,15 @@ import { ThrottlerModule } from '@nestjs/throttler';
 
     // Evaluation System
     EvaluationDiscussionModule,
-    GroupReviewSessionModule
+    GroupReviewSessionModule,
   ],
   controllers: [
     AppController,
-    DiscussionListController, DiscussionVoteController, DiscussionViewController, DiscussionCreationController, UserGroupController
+    DiscussionListController,
+    DiscussionVoteController,
+    DiscussionViewController,
+    DiscussionCreationController,
+    UserGroupController,
   ],
   providers: [
     AppService,

@@ -2,24 +2,12 @@
  * Modelle für Code-Submission und Feedback im tutor-kai Modul
  */
 
-export interface TestResult {
-  name: string;
-  passed: boolean;
-  exception?: string;
-}
+import { TestResultDTO, CodeSubmissionResultDto as CodeSubmissionResultDtoImport } from '@DTOs/index';
 
-export interface CodeSubmissionResult {
-  CodeSubmissionResult: {
-    output: string | null;
-    score: number;
-    testResults?: TestResult[];
-    testsPassed?: boolean;
-  };
-  encryptedCodeSubissionId: string;
-}
-
-// Entspricht dem DTO auf der Server-Seite
-export type CodeSubmissionResultDto = CodeSubmissionResult;
+// Re-export for backward compatibility
+export type TestResult = TestResultDTO;
+export type CodeSubmissionResult = CodeSubmissionResultDtoImport['CodeSubmissionResult'];
+export type CodeSubmissionResultDto = CodeSubmissionResultDtoImport;
 
 export enum FeedbackLevel {
   LOW = 'Wenig Unterstützung',
@@ -47,5 +35,3 @@ export interface FeedbackRating {
   comment: string;
   submissionId: string;
 }
-
-// Removed unused FeedbackCategory, FeedbackQuestion interfaces and FEEDBACK_CATEGORIES constant

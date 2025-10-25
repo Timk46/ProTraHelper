@@ -8,7 +8,10 @@ import { NotificationDTO } from '@Interfaces/notification.dto';
 
 @Injectable()
 export class UserConceptService {
-  constructor(private readonly prisma: PrismaService, private readonly notificationService: NotificationService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   /**
    * Gets the maximum level from training content for a given concept node
@@ -30,7 +33,7 @@ export class UserConceptService {
     }
 
     // Filter out null awards and find maximum
-    const levels = training.map(t => t.awards).filter(award => award !== null) ;
+    const levels = training.map(t => t.awards).filter(award => award !== null);
 
     return levels.length > 0 ? Math.max(...levels) : 0;
   }

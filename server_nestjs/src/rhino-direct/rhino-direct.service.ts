@@ -4,6 +4,7 @@
  * Registry-basierte Rhino-Erkennung und Fallback-Mechanismen
  */
 
+<<<<<<< Updated upstream
 import { Injectable } from '@nestjs/common';
 import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
@@ -26,6 +27,17 @@ export type SystemRhinoInfo = SystemRhinoInfoDTO;
 export class RhinoDirectService {
   private readonly commonRhinoPaths = [
     'C:\\Program Files\\Rhino 8\\System\\Rhino.exe',
+=======
+import { spawn, execFile } from 'child_process';import { promisify } from 'util';import * as fs from 'fs';import * as path from 'path';import {  DirectRhinoLaunchRequest,  DirectRhinoLaunchResponseDTO,  RhinoInstallation,  SystemRhinoInfoDTO,} from '@DTOs/index';const execFileAsync = promisify(execFile);
+const execFileAsync = promisify(execFile);
+
+export interface DirectRhinoLaunchRequest {
+  filePath: string;
+  rhinoPath?: string;
+  showViewport?: boolean;
+  batchMode?: boolean;
+// Type aliases for backward compatibilityexport type DirectRhinoLaunchResponse = DirectRhinoLaunchResponseDTO;export type SystemRhinoInfo = SystemRhinoInfoDTO;
+>>>>>>> Stashed changes
     'C:\\Program Files\\Rhino 7\\System\\Rhino.exe',
     'C:\\Program Files (x86)\\Rhino 8\\System\\Rhino.exe',
     'C:\\Program Files (x86)\\Rhino 7\\System\\Rhino.exe',

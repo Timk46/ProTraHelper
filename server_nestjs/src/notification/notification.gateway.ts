@@ -2,9 +2,7 @@
 /* eslint-disable prettier/prettier */
 import { NotificationDTO } from '@Interfaces/notification.dto';
 import { JwtService } from '@nestjs/jwt';
-import {
-  OnGatewayConnection,
-  OnGatewayDisconnect} from '@nestjs/websockets';
+import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
 import {
   WebSocketGateway,
   WebSocketServer,

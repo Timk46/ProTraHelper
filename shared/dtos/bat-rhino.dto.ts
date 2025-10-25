@@ -45,6 +45,14 @@ export interface BatRhinoSetupStatus {
   message: string;
 }
 
+// ✅ NEW: Request DTO for direct Rhino launch (replaces 'any' in controller)
+export interface DirectRhinoLaunchRequest {
+  filePath: string;
+  rhinoPath?: string;
+  showViewport?: boolean;
+  batchMode?: boolean;
+}
+
 // Backend Service DTOs (für bestehende Controller/Services)
 export interface BatScriptConfig {
   rhinoPath: string;
@@ -82,6 +90,13 @@ export interface BatExecutionResult {
     batScript: string;
     registryFile: string;
     setupPackage: string;
+  };
+
+  // ✅ NEW: Performance metrics
+  performance?: {
+    sessionReuseEnabled: boolean;
+    executionTimeMs: number;
+    rhinoWasRunning: boolean;
   };
 }
 
@@ -126,6 +141,7 @@ export interface SetupPackageInfo {
   platform?: 'windows' | 'mac' | 'linux';
 }
 
+<<<<<<< Updated upstream
 // Direct Rhino Service DTOs
 export interface DirectRhinoLaunchRequest {
   filePath: string;
@@ -134,6 +150,13 @@ export interface DirectRhinoLaunchRequest {
   showViewport?: boolean;
 }
 
+=======
+/**
+ * Response DTO for direct Rhino launch operations
+ *
+ * @interface DirectRhinoLaunchResponseDTO
+ */
+>>>>>>> Stashed changes
 export interface DirectRhinoLaunchResponseDTO {
   success: boolean;
   message: string;
@@ -143,6 +166,14 @@ export interface DirectRhinoLaunchResponseDTO {
   executionMethod: 'direct' | 'registry' | 'fallback';
 }
 
+<<<<<<< Updated upstream
+=======
+/**
+ * System-wide Rhino installation information
+ *
+ * @interface SystemRhinoInfoDTO
+ */
+>>>>>>> Stashed changes
 export interface SystemRhinoInfoDTO {
   installations: RhinoInstallation[];
   defaultPath?: string;
