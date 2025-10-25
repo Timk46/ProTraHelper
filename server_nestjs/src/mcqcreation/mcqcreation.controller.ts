@@ -2,20 +2,7 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { McqCreationService } from './mcqcreation.service';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
-import { McqGenerationDTO } from '@DTOs/question.dto';
-import { OptionDTO } from '@DTOs/question.dto';
-interface Answer {
-  answer?: string;
-  isCorrect?: boolean;
-}
-
-interface McqEvaluation {
-  correct?: boolean;
-  reasoning?: string;
-}
-interface McqEvaluations {
-  evaluations?: McqEvaluation[];
-}
+import { McqGenerationDTO, OptionDTO, McqEvaluation } from '@DTOs/index';
 
 @UseGuards(RolesGuard)
 @Controller('mcqcreation')
@@ -37,7 +24,7 @@ export class McqcreationController {
       otherOptions: OptionDTO[];
       concept: string;
     },
-  ): Promise<Answer> {
+  ): Promise<OptionDTO> {
     return await this.mcqCreationService.getAnswer(
       answerData.question,
       answerData.option,
@@ -100,7 +87,7 @@ export class McqcreationController {
   async getEvaluation(
     @Query('question') question: string,
     @Query('answers') answers: string[],
-  ): Promise<McqEvaluations> {
+  ): Promise<McqEvaluation> {
     console.log('question in controller', question);
     console.log('answers in controller', answers);
     return await this.mcqCreationService.getEvaluation(question, answers);

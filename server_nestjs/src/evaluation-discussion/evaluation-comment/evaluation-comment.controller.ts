@@ -34,7 +34,6 @@ import { User } from '@prisma/client';
 @Controller('evaluation-comments')
 @UseGuards(RolesGuard, SubmissionAuthorizationGuard)
 export class EvaluationCommentController {
-
   constructor(private readonly evaluationCommentService: EvaluationCommentService) {}
 
   // Comment create
@@ -47,7 +46,7 @@ export class EvaluationCommentController {
   @AuthorizedSubmission('submissionId', 'body')
   async create(
     @Body() createDto: CreateEvaluationCommentDTO,
-    @GetUser() user: User
+    @GetUser() user: User,
   ): Promise<EvaluationCommentDTO> {
     return this.evaluationCommentService.create(createDto, user.id);
   }
@@ -60,7 +59,10 @@ export class EvaluationCommentController {
   @Delete('delete/:commentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @roles('ANY')
-  async remove(@Param('commentId', ParseIntPipe) commentId: number, @GetUser() user: User): Promise<void> {
+  async remove(
+    @Param('commentId', ParseIntPipe) commentId: number,
+    @GetUser() user: User,
+  ): Promise<void> {
     await this.evaluationCommentService.remove(commentId, user.id);
   }
 
@@ -142,7 +144,8 @@ export class EvaluationCommentController {
   @roles('ANY')
   async getVotes(
     @Param('commentId', ParseIntPipe) commentId: number,
-    @GetUser() user: User): Promise<VoteCountResponseDTO> {
+    @GetUser() user: User,
+  ): Promise<VoteCountResponseDTO> {
     return this.evaluationCommentService.getVotes(commentId, user.id);
   }
 
@@ -179,6 +182,9 @@ export class EvaluationCommentController {
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @GetUser() user: User,
   ): Promise<CommentStatusMapDTO> {
-    return this.evaluationCommentService.getUserCommentStatusForAllCategories(submissionId, user.id);
+    return this.evaluationCommentService.getUserCommentStatusForAllCategories(
+      submissionId,
+      user.id,
+    );
   }
 }

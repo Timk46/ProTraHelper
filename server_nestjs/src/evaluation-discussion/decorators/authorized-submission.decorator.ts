@@ -88,7 +88,6 @@ import { SUBMISSION_AUTH_KEY } from '../guards/submission-authorization.guard';
  * @public
  */
 export const AuthorizedSubmission = (
-  paramName: string = 'submissionId',
-  source: 'params' | 'body' = 'params'
-) =>
-  SetMetadata(SUBMISSION_AUTH_KEY, { paramName, source });
+  paramName = 'submissionId',
+  source: 'params' | 'body' = 'params',
+) => SetMetadata(SUBMISSION_AUTH_KEY, { paramName, source });

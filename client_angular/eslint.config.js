@@ -11,10 +11,12 @@ module.exports = tseslint.config(
     files: ['src/**/*.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked, ...angular.configs.tsRecommended],
     processor: angular.processInlineTemplates,
-    parserOptions: {
-      project: 'tsconfig.json',
-      tsconfigRootDir: __dirname,
-      createDefaultProgram: true,
+    languageOptions: {
+      parserOptions: {
+        project: 'tsconfig.json',
+        tsconfigRootDir: __dirname,
+        createDefaultProgram: true,
+      },
     },
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',

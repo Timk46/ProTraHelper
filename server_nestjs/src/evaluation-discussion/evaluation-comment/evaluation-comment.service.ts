@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationService } from '../../notification/notification.service';
 import { EvaluationAuthorizationService } from '../evaluation-authorization.service';
@@ -18,7 +25,10 @@ import {
 /**
  * Prisma transaction client type for type-safe transaction operations
  */
-type PrismaTransaction = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
+type PrismaTransaction = Omit<
+  PrismaClient,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
 
 /**
  * Type definition for comment with all required relations for DTO mapping
@@ -70,7 +80,10 @@ export class EvaluationCommentService {
     private readonly authorizationService: EvaluationAuthorizationService,
   ) {}
 
-  async create(createDto: CreateEvaluationCommentDTO, userId: number): Promise<EvaluationCommentDTO> {
+  async create(
+    createDto: CreateEvaluationCommentDTO,
+    userId: number,
+  ): Promise<EvaluationCommentDTO> {
     // Create the comment
     const createdComment = await this.prisma.evaluationComment.create({
       data: {
@@ -118,7 +131,10 @@ export class EvaluationCommentService {
    * @throws NotFoundException if comment doesn't exist
    * @throws ForbiddenException if user lacks access to submission
    */
-  private async validateCommentAccess(commentId: number, userId: number): Promise<{ id: number; submissionId: number; userId: number }> {
+  private async validateCommentAccess(
+    commentId: number,
+    userId: number,
+  ): Promise<{ id: number; submissionId: number; userId: number }> {
     // Load comment with submissionId (optimized query - only fields we need)
     const comment = await this.prisma.evaluationComment.findUnique({
       where: { id: commentId },
@@ -153,11 +169,7 @@ export class EvaluationCommentService {
     });
   }
 
-  async update(
-    id: number,
-    updateDto: UpdateEvaluationCommentDTO,
-    userId: number,
-  ): Promise<void> {
+  async update(id: number, updateDto: UpdateEvaluationCommentDTO, userId: number): Promise<void> {
     // Validate submission access + get comment data (single query)
     const comment = await this.validateCommentAccess(id, userId);
 
@@ -208,25 +220,28 @@ export class EvaluationCommentService {
   private mapToCommentDTO(comment: CommentWithRelations, userId: number): EvaluationCommentDTO {
     // Calculate vote statistics for ranking system
     // In ranking system, all votes are positive (upvotes), so sum all voteCount values
-    const upVotes = comment.EvaluationCommentVote?.reduce((acc, vote) => {
-      return acc + vote.voteCount;
-    }, 0) || 0;
+    const upVotes =
+      comment.EvaluationCommentVote?.reduce((acc, vote) => {
+        return acc + vote.voteCount;
+      }, 0) || 0;
 
     const userVoteCount =
       comment.EvaluationCommentVote?.find(vote => vote.userId === userId)?.voteCount || 0;
 
     // Map author information
-    const author = comment.user ? {
-      id: comment.user.id,
-      type: 'user' as const,
-      displayName: `${comment.user.firstname} ${comment.user.lastname}`,
-      firstname: comment.user.firstname,
-      lastname: comment.user.lastname,
-    } : {
-      id: comment.userId,
-      type: 'user' as const,
-      displayName: 'Unknown User',
-    };
+    const author = comment.user
+      ? {
+          id: comment.user.id,
+          type: 'user' as const,
+          displayName: `${comment.user.firstname} ${comment.user.lastname}`,
+          firstname: comment.user.firstname,
+          lastname: comment.user.lastname,
+        }
+      : {
+          id: comment.userId,
+          type: 'user' as const,
+          displayName: 'Unknown User',
+        };
 
     return {
       id: comment.id,
@@ -239,13 +254,14 @@ export class EvaluationCommentService {
       updatedAt: comment.updatedAt,
       author,
       // Map database votes to DTO format (voteCount -> voteType)
-      votes: comment.EvaluationCommentVote?.map(vote => ({
-        id: vote.id,
-        commentId: vote.commentId,
-        userId: vote.userId,
-        voteType: 'UP' as const,
-        createdAt: vote.createdAt,
-      })) || [],
+      votes:
+        comment.EvaluationCommentVote?.map(vote => ({
+          id: vote.id,
+          commentId: vote.commentId,
+          userId: vote.userId,
+          voteType: 'UP' as const,
+          createdAt: vote.createdAt,
+        })) || [],
       voteStats: {
         upVotes,
         downVotes: 0, // Deprecated in ranking system
@@ -274,7 +290,7 @@ export class EvaluationCommentService {
     userId: number,
     categoryId: number,
     submissionId: number,
-    tx?: PrismaTransaction
+    tx?: PrismaTransaction,
   ): Promise<number> {
     const prisma = tx || this.prisma;
 
@@ -283,12 +299,12 @@ export class EvaluationCommentService {
         userId,
         comment: {
           submissionId,
-          categoryId
-        }
+          categoryId,
+        },
       },
       _sum: {
-        voteCount: true
-      }
+        voteCount: true,
+      },
     });
 
     return result._sum.voteCount || 0;
@@ -312,7 +328,7 @@ export class EvaluationCommentService {
     // Validate submission access BEFORE transaction (single query)
     await this.validateCommentAccess(commentId, userId);
 
-    return await this.prisma.$transaction(async (tx) => {
+    return await this.prisma.$transaction(async tx => {
       // 1. Get comment with category and submission info
       const comment = await tx.evaluationComment.findUnique({
         where: { id: commentId },
@@ -346,7 +362,7 @@ export class EvaluationCommentService {
         userId,
         comment.categoryId,
         comment.submissionId,
-        tx
+        tx,
       );
 
       const newTotalVotesInCategory = currentTotalVotesInCategory + voteValue;
@@ -426,7 +442,9 @@ export class EvaluationCommentService {
           canVote: remainingVotes > 0,
           displayText: `${newTotalVotesInCategory}/10 vergeben`,
         },
-        message: `Vote ${isUpvote ? 'hinzugefügt' : 'entfernt'}. ${remainingVotes} Votes verbleibend in dieser Kategorie.`,
+        message: `Vote ${
+          isUpvote ? 'hinzugefügt' : 'entfernt'
+        }. ${remainingVotes} Votes verbleibend in dieser Kategorie.`,
       };
     });
   }
@@ -482,14 +500,10 @@ export class EvaluationCommentService {
   async getVoteLimitStatus(
     userId: number,
     categoryId: number,
-    submissionId: number
+    submissionId: number,
   ): Promise<VoteLimitStatusDTO> {
     // Calculate total votes used in category
-    const totalVotesUsed = await this.getTotalUserVotesInCategory(
-      userId,
-      categoryId,
-      submissionId
-    );
+    const totalVotesUsed = await this.getTotalUserVotesInCategory(userId, categoryId, submissionId);
 
     // Get all voted comment IDs
     const votedComments = await this.prisma.evaluationCommentVote.findMany({
@@ -497,10 +511,10 @@ export class EvaluationCommentService {
         userId,
         comment: {
           submissionId,
-          categoryId
-        }
+          categoryId,
+        },
       },
-      select: { commentId: true }
+      select: { commentId: true },
     });
 
     const remainingVotes = 10 - totalVotesUsed;
@@ -510,7 +524,7 @@ export class EvaluationCommentService {
       remainingVotes,
       votedCommentIds: votedComments.map(v => v.commentId),
       canVote: remainingVotes > 0,
-      displayText: `${totalVotesUsed}/10 vergeben`
+      displayText: `${totalVotesUsed}/10 vergeben`,
     };
   }
 
@@ -523,7 +537,7 @@ export class EvaluationCommentService {
     categoryId: number,
     userId: number,
     content: string,
-    score: number
+    score: number,
   ): Promise<void> {
     await this.prisma.evaluationComment.create({
       data: {
@@ -545,7 +559,7 @@ export class EvaluationCommentService {
     categoryId: number,
     userId: number,
     content: string,
-    score: number
+    score: number,
   ): Promise<void> {
     // Find the user's comment in this category
     const existingComment = await this.prisma.evaluationComment.findFirst({
@@ -587,7 +601,7 @@ export class EvaluationCommentService {
    */
   async getUserCommentStatusForAllCategories(
     submissionId: number,
-    userId: number
+    userId: number,
   ): Promise<CommentStatusMapDTO> {
     try {
       // Single optimized query: group comments by category and check user participation
@@ -613,7 +627,7 @@ export class EvaluationCommentService {
       // Log error without sensitive data (GDPR compliant, no stack traces)
       this.logger.error(
         'Failed to load comment status for all categories',
-        error instanceof Error ? error.name : 'UnknownError'
+        error instanceof Error ? error.name : 'UnknownError',
       );
 
       // In development: Log full details for debugging
@@ -621,7 +635,7 @@ export class EvaluationCommentService {
         console.error('[DEV] Full error details:', {
           submissionId,
           userId,
-          error: error instanceof Error ? error.stack : error
+          error: error instanceof Error ? error.stack : error,
         });
       }
 

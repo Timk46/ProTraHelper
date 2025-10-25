@@ -59,7 +59,10 @@ export class FilesService {
    * @param {string} uniqueIdentifier - The unique identifier of the file
    * @returns {StreamableFile} The StreamableFile for downloading
    */
-  async downloadFile(uniqueIdentifier: string, userId: number = undefined): Promise<StreamableFile> {
+  async downloadFile(
+    uniqueIdentifier: string,
+    userId: number = undefined,
+  ): Promise<StreamableFile> {
     const file: FileDto = await this.getFile(uniqueIdentifier);
     const filePath = process.env.FILE_PATH + file.path;
 
@@ -142,7 +145,6 @@ export class FilesService {
     };
   } */
 
-
   /**
    * Checks whether the specified user has access to a file identified by its unique identifier.
    *
@@ -155,7 +157,11 @@ export class FilesService {
   async hasAccess(fileUniqueIdentifier: string, user: any): Promise<boolean> {
     console.log('hasAccess: ', fileUniqueIdentifier, user.globalRole);
     const file = await this.getFile(fileUniqueIdentifier);
-    if (file.privacy === filePrivacy.PUBLIC || user.globalRole === 'ADMIN' || user.globalRole === 'TEACHER') {
+    if (
+      file.privacy === filePrivacy.PUBLIC ||
+      user.globalRole === 'ADMIN' ||
+      user.globalRole === 'TEACHER'
+    ) {
       return true;
     }
     return false;

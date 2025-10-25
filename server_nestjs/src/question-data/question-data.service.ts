@@ -848,7 +848,7 @@ export class QuestionDataService {
       } else {
         // Multiple Choice: Calculate based on correctly identified options
         let correctAnswers = 0;
-        let totalOptions = mcOptions.length;
+        const totalOptions = mcOptions.length;
 
         // Calculate how many options were correctly identified
         for (const mcOption of mcOptions) {

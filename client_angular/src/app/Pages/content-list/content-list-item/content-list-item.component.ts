@@ -97,11 +97,11 @@ export class ContentListItemComponent implements OnInit {
       case questionType.MCSLIDER:
         // Use group size if available (from the grouping logic)
         if (this.contentElementData.mcSliderGroupSize) {
-          return this.contentElementData.mcSliderGroupSize > 1 
-            ? `MC Slider Quiz (${this.contentElementData.mcSliderGroupSize} Fragen)` 
+          return this.contentElementData.mcSliderGroupSize > 1
+            ? `MC Slider Quiz (${this.contentElementData.mcSliderGroupSize} Fragen)`
             : 'MC Slider Quiz';
         }
-        
+
         // Fallback to old logic for compatibility
         const mcSliderCount = this.getAllMCSliderQuestions().length;
         return mcSliderCount > 1 ? `MC Slider Quiz (${mcSliderCount} Fragen)` : 'MC Slider Quiz';
@@ -498,19 +498,19 @@ export class ContentListItemComponent implements OnInit {
     // If we have a group key, filter by the same group
     if (this.contentElementData.mcSliderGroupKey) {
       const targetGroupKey = this.contentElementData.mcSliderGroupKey;
-      
+
       return this.allContentElements
         .filter(element => {
           if (element.question?.type !== questionType.MCSLIDER) return false;
           if (!element.question?.name) return false;
-          
+
           // Determine group key for this element
           let elementGroupKey = 'MCSlider: Komplettquiz'; // Default: alle gehen ins Komplettquiz
           if (element.question.name.includes('Strukturmechanik')) {
             elementGroupKey = 'MCSlider: Strukturmechanik';
           }
           // Alle anderen MCSlider-Fragen (Standard, Geografie, Mathematik, etc.) gehen ins Komplettquiz
-          
+
           return elementGroupKey === targetGroupKey;
         })
         .sort((a, b) => {
@@ -522,7 +522,7 @@ export class ContentListItemComponent implements OnInit {
         .map(element => element.question)
         .filter(question => question != null);
     }
-    
+
     // Fallback to old logic for compatibility
     return this.allContentElements
       .filter(element => element.question?.type === questionType.MCSLIDER)
@@ -545,7 +545,7 @@ export class ContentListItemComponent implements OnInit {
       if (this.contentElementData.mcSliderGroupKey) {
         return this.contentElementData.mcSliderGroupKey;
       }
-      
+
       // Fallback to old logic for compatibility
       const mcSliderCount = this.getAllMCSliderQuestions().length;
       if (mcSliderCount > 1) {

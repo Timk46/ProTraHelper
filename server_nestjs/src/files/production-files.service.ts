@@ -54,7 +54,7 @@ export class ProductionFilesService {
     // TODO: Implement module association properly when modules are in place
     const module = await this.prisma.module.findFirst({});
 
-    const fileUpload =await this.prisma.fileUpload.create({
+    const fileUpload = await this.prisma.fileUpload.create({
       data: {
         file: { connect: { id: file.id } },
         user: { connect: { id: userId } },
@@ -159,7 +159,11 @@ export class ProductionFilesService {
    */
   async hasAccess(fileUploadId: number, user: any): Promise<boolean> {
     const productionFile = await this.getProductionFile(fileUploadId);
-    if (productionFile.file.privacy === filePrivacy.PUBLIC || user.globalRole === 'ADMIN' || user.globalRole === 'TEACHER') {
+    if (
+      productionFile.file.privacy === filePrivacy.PUBLIC ||
+      user.globalRole === 'ADMIN' ||
+      user.globalRole === 'TEACHER'
+    ) {
       return true;
     }
     if (productionFile.user.id === user.id) {

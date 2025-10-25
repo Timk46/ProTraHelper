@@ -132,14 +132,17 @@ export class SubmissionAuthorizationGuard implements CanActivate {
       });
 
       throw new BadRequestException(
-        `${source === 'body' ? 'Body property' : 'Route parameter'} '${metadata.paramName}' is required for submission authorization`,
+        `${source === 'body' ? 'Body property' : 'Route parameter'} '${
+          metadata.paramName
+        }' is required for submission authorization`,
       );
     }
 
     // Parse and validate submission ID (handle both string and number)
-    const submissionId = typeof submissionIdValue === 'number'
-      ? submissionIdValue
-      : parseInt(String(submissionIdValue), 10);
+    const submissionId =
+      typeof submissionIdValue === 'number'
+        ? submissionIdValue
+        : parseInt(String(submissionIdValue), 10);
 
     if (isNaN(submissionId) || submissionId <= 0) {
       this.logger.error('Invalid submission ID format', {

@@ -125,3 +125,26 @@ export interface SetupPackageInfo {
   description?: string;
   platform?: 'windows' | 'mac' | 'linux';
 }
+
+// Direct Rhino Service DTOs
+export interface DirectRhinoLaunchRequest {
+  filePath: string;
+  rhinoPath?: string;
+  batchMode?: boolean;
+  showViewport?: boolean;
+}
+
+export interface DirectRhinoLaunchResponseDTO {
+  success: boolean;
+  message: string;
+  processId?: number;
+  commandUsed?: string;
+  rhinoPath?: string;
+  executionMethod: 'direct' | 'registry' | 'fallback';
+}
+
+export interface SystemRhinoInfoDTO {
+  installations: RhinoInstallation[];
+  defaultPath?: string;
+  registryAvailable: boolean;
+}

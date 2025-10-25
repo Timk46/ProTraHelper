@@ -184,7 +184,7 @@ export class EvaluationRatingService {
           ratingDto.categoryId,
           userId,
           ratingDto.comment.trim(),
-          ratingDto.score
+          ratingDto.score,
         );
       } catch (error) {
         // Log error but don't fail the rating operation
@@ -198,12 +198,12 @@ export class EvaluationRatingService {
     // Invalidate cache for this submission (both old and new patterns)
     this.cacheService.invalidateByPattern(`ratings:${ratingDto.submissionId}:.*`);
     this.cacheService.invalidateByPattern(`rating-status-batch:${ratingDto.submissionId}:.*`);
-    
+
     // BUGFIX: Also invalidate the specific user's cache key to ensure immediate freshness
     const specificCacheKey = this.utilsService.generateCacheKey(
       'rating-status-batch',
       ratingDto.submissionId,
-      userId.toString()
+      userId.toString(),
     );
     this.cacheService.delete(specificCacheKey);
 
@@ -271,7 +271,7 @@ export class EvaluationRatingService {
           rating.categoryId,
           userId,
           updateDto.comment.trim(),
-          updateDto.score
+          updateDto.score,
         );
       } catch (error) {
         // Log error but don't fail the rating operation
@@ -299,11 +299,7 @@ export class EvaluationRatingService {
    * @throws {ForbiddenException} When user doesn't own the rating
    * @memberof EvaluationRatingService
    */
-  async deleteUserRating(
-    submissionId: number,
-    categoryId: number,
-    userId: number,
-  ): Promise<void> {
+  async deleteUserRating(submissionId: number, categoryId: number, userId: number): Promise<void> {
     // Find the existing rating
     const existingRating = await this.prisma.evaluationRating.findUnique({
       where: {
@@ -334,12 +330,12 @@ export class EvaluationRatingService {
     // Invalidate cache for this submission (both old and new patterns)
     this.cacheService.invalidateByPattern(`ratings:${submissionId}:.*`);
     this.cacheService.invalidateByPattern(`rating-status-batch:${submissionId}:.*`);
-    
+
     // Also invalidate the specific user's cache key to ensure immediate freshness
     const specificCacheKey = this.utilsService.generateCacheKey(
       'rating-status-batch',
       submissionId,
-      userId.toString()
+      userId.toString(),
     );
     this.cacheService.delete(specificCacheKey);
   }
@@ -419,7 +415,11 @@ export class EvaluationRatingService {
   }
 
   async getRatingSummary(submissionId: number) {
-    const cacheKey = this.utilsService.generateCacheKey('ratings', submissionId.toString(), 'summary');
+    const cacheKey = this.utilsService.generateCacheKey(
+      'ratings',
+      submissionId.toString(),
+      'summary',
+    );
 
     return this.cacheService.getOrSet(
       cacheKey,
@@ -641,9 +641,9 @@ export class EvaluationRatingService {
         categoryName: sessionCategory.category.name,
         displayName: sessionCategory.category.displayName,
         hasRated,
-        rating: categoryRating?.rating ?? null,
-        ratedAt: categoryRating?.createdAt ?? null,
-        lastUpdatedAt: categoryRating?.updatedAt ?? new Date(), // Always provide lastUpdatedAt for cache validation
+        rating: categoryRating.rating ?? null,
+        ratedAt: categoryRating.createdAt ?? null,
+        lastUpdatedAt: categoryRating.updatedAt ?? new Date(), // Always provide lastUpdatedAt for cache validation
         canAccessDiscussion: hasRated, // User can access discussion if they've rated
         isRequired: true, // All categories require rating for discussion access
       };
@@ -702,7 +702,6 @@ export class EvaluationRatingService {
       300000,
     ); // 5 minutes cache
   }
-
 
   private validateRatingScore(score: number): void {
     if (score < 0 || score > 15) {

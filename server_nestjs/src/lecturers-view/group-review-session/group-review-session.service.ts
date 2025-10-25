@@ -119,10 +119,15 @@ export class GroupReviewSessionService {
                 await tx.evaluationSessionCategory.createMany({
                   data: categoryLinks,
                 });
-                this.logger.log(`Linked ${categoryLinks.length} categories to session ${session.id}.`);
+                this.logger.log(
+                  `Linked ${categoryLinks.length} categories to session ${session.id}.`,
+                );
               }
             } catch (jsonError) {
-              this.logger.error(`Failed to parse linkedCategories for gate ${gateId}. Invalid JSON: ${gate.linkedCategories}`, jsonError.stack);
+              this.logger.error(
+                `Failed to parse linkedCategories for gate ${gateId}. Invalid JSON: ${gate.linkedCategories}`,
+                jsonError.stack,
+              );
             }
           }
 
@@ -131,27 +136,27 @@ export class GroupReviewSessionService {
             where: {
               userAnswer: {
                 some: {
-                  questionId: gate.linkedQuestionId
-                }
-              }
+                  questionId: gate.linkedQuestionId,
+                },
+              },
             },
             include: {
               userAnswer: {
                 where: {
                   questionId: gate.linkedQuestionId,
                   NOT: {
-                    UserUploadAnswer: { none: {} }
-                  }
+                    UserUploadAnswer: { none: {} },
+                  },
                 },
                 include: {
                   UserUploadAnswer: true,
                 },
                 orderBy: {
-                  createdAt: 'desc'
+                  createdAt: 'desc',
                 },
-                take: 1
+                take: 1,
               },
-            }
+            },
           });
 
           if (userUploads.length === 0) {

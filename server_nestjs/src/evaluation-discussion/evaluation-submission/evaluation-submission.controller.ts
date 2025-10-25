@@ -251,7 +251,10 @@ export class EvaluationSubmissionController {
    */
   @Delete(':id')
   @roles('STUDENT', 'TEACHER', 'ADMIN')
-  async remove(@Param('id', ParseIntPipe) id: number, @Req() req: AuthenticatedRequest): Promise<void> {
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<void> {
     return this.evaluationSubmissionService.remove(id, req.user.id);
   }
 

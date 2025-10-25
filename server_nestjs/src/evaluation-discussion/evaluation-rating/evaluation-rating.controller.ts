@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Req, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+  Logger,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
@@ -84,7 +96,9 @@ export class EvaluationRatingController {
     @Param('submissionId', ParseIntPipe) submissionId: number,
     @Param('categoryId', ParseIntPipe) categoryId: number,
   ): Promise<any> {
-    this.logger.debug(`Getting category stats for submission: ${submissionId}, category: ${categoryId}`);
+    this.logger.debug(
+      `Getting category stats for submission: ${submissionId}, category: ${categoryId}`,
+    );
     return this.evaluationRatingService.getCategoryStats(submissionId, categoryId);
   }
 
@@ -157,18 +171,15 @@ export class EvaluationRatingController {
     @Param('categoryId', ParseIntPipe) categoryId: number,
     @Req() req: AuthenticatedRequest,
   ): Promise<{ success: boolean; message: string }> {
-    await this.evaluationRatingService.deleteUserRating(
-      submissionId,
-      categoryId,
-      req.user.id,
-    );
+    await this.evaluationRatingService.deleteUserRating(submissionId, categoryId, req.user.id);
 
-    this.logger.log(`Rating deleted: submission=${submissionId}, category=${categoryId}, user=${req.user.id}`);
+    this.logger.log(
+      `Rating deleted: submission=${submissionId}, category=${categoryId}, user=${req.user.id}`,
+    );
 
     return {
       success: true,
       message: 'Rating deleted successfully',
     };
   }
-
 }

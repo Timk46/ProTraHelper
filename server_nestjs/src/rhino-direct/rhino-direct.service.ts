@@ -9,36 +9,18 @@ import { spawn, execFile } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  DirectRhinoLaunchRequest,
+  DirectRhinoLaunchResponseDTO,
+  RhinoInstallation,
+  SystemRhinoInfoDTO,
+} from '@DTOs/index';
 
 const execFileAsync = promisify(execFile);
 
-export interface DirectRhinoLaunchRequest {
-  filePath: string;
-  rhinoPath?: string;
-  showViewport?: boolean;
-  batchMode?: boolean;
-}
-
-export interface DirectRhinoLaunchResponse {
-  success: boolean;
-  message: string;
-  processId?: number;
-  commandUsed?: string;
-  rhinoPath?: string;
-  executionMethod: 'direct' | 'registry' | 'fallback';
-}
-
-export interface RhinoInstallation {
-  version: string;
-  path: string;
-  isDefault: boolean;
-}
-
-export interface SystemRhinoInfo {
-  installations: RhinoInstallation[];
-  defaultPath?: string;
-  registryAvailable: boolean;
-}
+// Type aliases for backward compatibility
+export type DirectRhinoLaunchResponse = DirectRhinoLaunchResponseDTO;
+export type SystemRhinoInfo = SystemRhinoInfoDTO;
 
 @Injectable()
 export class RhinoDirectService {

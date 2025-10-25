@@ -39,12 +39,22 @@ export class ProductionFilesController {
   @Post('upload')
   @Post('upload/:privacy')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadProductionFile(@UploadedFile() file: Express.Multer.File, @Req() req: any, @Param('privacy') privacy: filePrivacy = filePrivacy.PRIVATE) {
+  async uploadProductionFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
+    @Param('privacy') privacy: filePrivacy = filePrivacy.PRIVATE,
+  ) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
     const fileType = mimetype.split('/')[1];
 
-    return await this.productionFilesService.uploadProductionFile(buffer, fileName, fileType, privacy, req.user.id);
+    return await this.productionFilesService.uploadProductionFile(
+      buffer,
+      fileName,
+      fileType,
+      privacy,
+      req.user.id,
+    );
   }
 
   /**

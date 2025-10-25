@@ -578,41 +578,43 @@ export class EvaluationSubmissionService {
 
     // Map through EvaluationSessionCategory (with nested category) to get stats
     // Type assertion needed because TypeScript doesn't infer included relations automatically
-    const categories: CategoryStatsDTO[] = submission.session.categories.map((sessionCategory: any) => {
-      // Use default limits since CommentLimit model is not yet in schema
-      const availableComments = DEFAULT_COMMENTS_PER_CATEGORY;
-      const usedComments = discussionCountsMap.get(sessionCategory.categoryId) || 0;
-      const isLimitReached = usedComments >= availableComments;
+    const categories: CategoryStatsDTO[] = submission.session.categories.map(
+      (sessionCategory: any) => {
+        // Use default limits since CommentLimit model is not yet in schema
+        const availableComments = DEFAULT_COMMENTS_PER_CATEGORY;
+        const usedComments = discussionCountsMap.get(sessionCategory.categoryId) || 0;
+        const isLimitReached = usedComments >= availableComments;
 
-      totalAvailable += availableComments;
-      totalUsed += usedComments;
+        totalAvailable += availableComments;
+        totalUsed += usedComments;
 
-      let indicatorColor: 'success' | 'warn' | 'error' | 'primary';
-      let availabilityIcon: 'add' | 'remove' | 'block';
+        let indicatorColor: 'success' | 'warn' | 'error' | 'primary';
+        let availabilityIcon: 'add' | 'remove' | 'block';
 
-      if (isLimitReached) {
-        indicatorColor = 'error';
-        availabilityIcon = 'block';
-      } else if (usedComments >= availableComments * 0.8) {
-        indicatorColor = 'warn';
-        availabilityIcon = 'remove';
-      } else {
-        indicatorColor = 'success';
-        availabilityIcon = 'add';
-      }
+        if (isLimitReached) {
+          indicatorColor = 'error';
+          availabilityIcon = 'block';
+        } else if (usedComments >= availableComments * 0.8) {
+          indicatorColor = 'warn';
+          availabilityIcon = 'remove';
+        } else {
+          indicatorColor = 'success';
+          availabilityIcon = 'add';
+        }
 
-      return {
-        categoryId: sessionCategory.category.id,
-        categoryName: sessionCategory.category.displayName,
-        availableComments,
-        usedComments,
-        isLimitReached,
-        lastCommentAt: undefined, // Will be available when CommentLimit model is added
-        indicatorColor,
-        availabilityText: `${usedComments}/${availableComments} verwendet`,
-        availabilityIcon,
-      };
-    });
+        return {
+          categoryId: sessionCategory.category.id,
+          categoryName: sessionCategory.category.displayName,
+          availableComments,
+          usedComments,
+          isLimitReached,
+          lastCommentAt: undefined, // Will be available when CommentLimit model is added
+          indicatorColor,
+          availabilityText: `${usedComments}/${availableComments} verwendet`,
+          availabilityIcon,
+        };
+      },
+    );
 
     const overallProgress = totalAvailable > 0 ? (totalUsed / totalAvailable) * 100 : 0;
     const averageUsage =
@@ -753,7 +755,7 @@ export class EvaluationSubmissionService {
             globalRole: updatedSession.createdBy.globalRole as globalRole, // Cast Prisma enum to DTO enum
           }
         : undefined,
-    submissions: updatedSession.submissions.map(sub => ({
+      submissions: updatedSession.submissions.map(sub => ({
         ...sub,
         phase: updatedSession.phase as EvaluationPhase, // Use session phase for submissions
         status: sub.status as EvaluationStatus, // Cast Prisma enum to DTO enum
