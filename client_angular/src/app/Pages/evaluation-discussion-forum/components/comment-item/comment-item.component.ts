@@ -400,7 +400,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // Fallback to backend call only if local extraction yields 0
     this.evaluationStateService
-      .evaluationService
       .getUserVoteCountForComment(this.comment.id.toString())
       .pipe(
         catchError((error) => {
@@ -1195,7 +1194,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Last resort: try backend call if still uncertain
     if (finalCount === 0 && this._cachedUserVote === 'UP') {
       this.evaluationStateService
-        .evaluationService
         .getUserVoteCountForComment(this.comment.id.toString())
         .pipe(
           catchError(() => of(0)),

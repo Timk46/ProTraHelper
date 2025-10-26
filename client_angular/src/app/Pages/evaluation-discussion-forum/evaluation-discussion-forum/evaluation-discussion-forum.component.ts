@@ -186,7 +186,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // Core data streams
   submission$!: Observable<EvaluationSubmissionDTO | null>;
   categories$!: Observable<EvaluationCategoryDTO[]>;
-  activeCategory$!: Observable<number>;
+  activeCategory$!: Observable<number | null>;
   activeCategoryInfo$!: Observable<EvaluationCategoryDTO | null>;
   discussions$!: Observable<EvaluationDiscussionDTO[]>;
   commentStats$!: Observable<CommentStatsDTO | null>;
@@ -209,7 +209,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   viewModel$!: Observable<{
     submission: EvaluationSubmissionDTO | null;
     categories: EvaluationCategoryDTO[];
-    activeCategory: number;
+    activeCategory: number | null;
     activeCategoryInfo: EvaluationCategoryDTO | null;
     discussions: EvaluationDiscussionDTO[];
     commentStats: CommentStatsDTO | null;
@@ -429,8 +429,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       this.stateService.activeDiscussions$ // Include discussions to calculate vote limits
     ]).pipe(
       map(([activeCategory, isDiscussionPhase, voteLimitStatusMap, discussions]) => {
-        // Get dynamic vote limit status for current category
-        const voteLimitStatus = voteLimitStatusMap.get(activeCategory);
+        // Get dynamic vote limit status for current category (handle null category)
+        const voteLimitStatus = activeCategory !== null ? voteLimitStatusMap.get(activeCategory) : undefined;
         
         // 🎯 CALCULATE: Vote limit based on comment count (2 votes per comment)
         const maxVotes = this.calculateVoteLimits(discussions);
@@ -856,7 +856,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // Setup rating status checking and vote limit loading when active category changes
     this.activeCategory$
       .pipe(
-        filter(categoryId => categoryId > 0), // Only check valid category IDs
+        filter((categoryId): categoryId is number => categoryId !== null && categoryId > 0), // Only check valid category IDs
         takeUntil(this.destroy$)
       )
       .subscribe(categoryId => {
@@ -919,7 +919,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         next: () => {
           // Transition completed successfully
           // Update panel expansion state based on rating/comment status
-          this.activeCategory$.pipe(take(1)).subscribe(categoryId => {
+          this.activeCategory$.pipe(
+            take(1),
+            filter((categoryId): categoryId is number => categoryId !== null)
+          ).subscribe(categoryId => {
             this.updatePanelExpansionState(categoryId);
             this.cdr.markForCheck();
           });
@@ -1099,6 +1102,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.stateService.activeCategory$
       .pipe(
         take(1),
+        filter((activeCategory): activeCategory is number => activeCategory !== null),
         switchMap(activeCategory =>
           this.stateService.addComment(this.submissionId!, activeCategory, content)
         ),
@@ -1842,8 +1846,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       take(1),
       switchMap(currentCategory => {
         console.log('🎯 Current category for navigation:', currentCategory);
-        // Convert Promise to Observable for proper RxJS cleanup
-        return from(this.navigationService.navigateToAdjacentSubmission('previous', currentCategory));
+        // Convert Promise to Observable for proper RxJS cleanup (convert null to undefined)
+        return from(this.navigationService.navigateToAdjacentSubmission('previous', currentCategory ?? undefined));
       }),
       takeUntil(this.destroy$),
       finalize(() => {
@@ -1883,8 +1887,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       take(1),
       switchMap(currentCategory => {
         console.log('🎯 Current category for navigation:', currentCategory);
-        // Convert Promise to Observable for proper RxJS cleanup
-        return from(this.navigationService.navigateToAdjacentSubmission('next', currentCategory));
+        // Convert Promise to Observable for proper RxJS cleanup (convert null to undefined)
+        return from(this.navigationService.navigateToAdjacentSubmission('next', currentCategory ?? undefined));
       }),
       takeUntil(this.destroy$),
       finalize(() => {

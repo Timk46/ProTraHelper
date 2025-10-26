@@ -275,11 +275,11 @@ $nord15: #b48ead; // Aurora (purple)
 .option-item {
   background-color: rgba($nord5, 0.1);
   border-left: none;
-  border-radius: $radius-md; // 8px (was 4px)
-  padding: $space-sm $space-md; // 13px × 21px (was 6px × 8px) - 162% increase!
-  margin-bottom: $space-sm; // 13px (was 6px)
+  border-radius: $radius-md; // 8px
+  padding: $space-sm; // 13px (Fibonacci) - kompakter für Collection Mode
+  margin-bottom: $space-sm; // 13px
   cursor: pointer;
-  min-height: $font-3xl; // 68px (touch-friendly, Fibonacci)
+  min-height: 55px; // 55px (Fibonacci) - reduziert von 68px für kompaktere Darstellung
 
   transition: all $transition-normal ease; // 324ms φ-based timing
   position: relative;
@@ -313,16 +313,16 @@ $nord15: #b48ead; // Aurora (purple)
 
       .mat-icon {
         color: $nord9;
-        font-size: $font-xl; // 26px (was 24px) - more prominent
-        width: $font-xl;
-        height: $font-xl;
+        font-size: 20px; // Kompakter für Collection Mode
+        width: 20px;
+        height: 20px;
       }
     }
 
     .item-text {
       flex-grow: 1;
-      font-size: $font-base; // 16px
-      line-height: $line-height-relaxed; // 1.618 (Golden Ratio!)
+      font-size: $font-sm; // 14px - kompakter für bessere Platznutzung
+      line-height: $line-height-normal; // 1.4 - kompakter
 
       ::ng-deep * {
         margin: 0;
@@ -468,8 +468,8 @@ $nord15: #b48ead; // Aurora (purple)
 .feedback-section {
   background-color: rgba($nord6, 0.05);
   border-left: none;
-  padding: 10px 0;
-  margin-top: 16px;
+  padding: $space-sm; // 13px (Fibonacci) - kompakter
+  margin-top: $space-md; // 21px (Fibonacci)
   border-radius: 0;
   animation: slideIn 0.5s ease-out;
   transition: background-color 0.3s ease;
@@ -490,13 +490,19 @@ $nord15: #b48ead; // Aurora (purple)
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 6px;
+    margin-bottom: $space-xs; // 8px (Fibonacci)
 
     &-icon {
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
+
+      mat-icon {
+        font-size: 34px; // 34px (Fibonacci) - kompakter
+        width: 34px;
+        height: 34px;
+      }
 
       &--success {
         background-color: rgba($nord14, 0.2);
@@ -515,7 +521,7 @@ $nord15: #b48ead; // Aurora (purple)
     }
 
     &-title {
-      font-size: 1rem;
+      font-size: $font-md; // 18px (Golden Ratio) - reduziert von 1rem
       font-weight: 500;
       color: $nord0;
       margin: 0;
@@ -565,7 +571,7 @@ $nord15: #b48ead; // Aurora (purple)
     }
 
     &-text {
-      font-size: 0.9rem;
+      font-size: $font-sm; // 14px - kompakter
       flex-shrink: 0;
       color: $nord3;
       white-space: nowrap;
@@ -573,14 +579,14 @@ $nord15: #b48ead; // Aurora (purple)
   }
 
   &__message {
-    font-size: 1rem;
-    line-height: 1.5;
+    font-size: $font-sm; // 14px - kompakter
+    line-height: $line-height-normal; // 1.4
     color: $nord0;
     margin: 0;
 
     &--compact {
-      font-size: 0.9rem;
-      line-height: 1.3;
+      font-size: $font-xs; // 12px
+      line-height: $line-height-tight; // 1.272
     }
   }
 }

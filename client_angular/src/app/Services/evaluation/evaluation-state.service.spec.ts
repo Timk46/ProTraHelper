@@ -136,7 +136,7 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
       service['categoryRatingStatusSubject'].next(initialStatusMap);
 
       let transitionLoadingStates: boolean[] = [];
-      let categoryStates: number[] = [];
+      let categoryStates: (number | null)[] = [];
       let ratingStatusStates: Map<number, CategoryRatingStatus>[] = [];
 
       // Monitor all state changes during transition
@@ -144,7 +144,7 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
         transitionLoadingStates.push(loading);
       });
 
-      service.activeCategory$.subscribe(categoryId => {
+      service.activeCategory$.subscribe((categoryId: number | null) => {
         categoryStates.push(categoryId);
       });
 
@@ -179,9 +179,9 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
       service['categoryRatingStatusSubject'].next(statusMap);
 
       let completedTransitions = 0;
-      let activeCategories: number[] = [];
+      let activeCategories: (number | null)[] = [];
 
-      service.activeCategory$.subscribe(categoryId => {
+      service.activeCategory$.subscribe((categoryId: number | null) => {
         activeCategories.push(categoryId);
       });
 
@@ -239,7 +239,7 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
     });
 
     it('should handle rating status loading errors gracefully', (done) => {
-      // Arrange: Setup API error
+      // Arrange: Setup API error (plain Error = silent handling, no error popup)
       mockEvaluationService.getUserRatingStatus.and.returnValue(
         throwError(() => new Error('Network error'))
       );
@@ -251,8 +251,8 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
 
       // Act: Attempt transition with API error
       service.transitionToCategory(1).subscribe(() => {
-        // Assert: Should still complete transition but set error state
-        expect(errorOccurred).toBe(true);
+        // Assert: Should still complete transition but NOT set error state for plain errors (silent handling)
+        expect(errorOccurred).toBe(false); // Plain errors are handled silently
         expect(service['activeCategorySubject'].value).toBe(1); // Category still changed
         done();
       });
@@ -284,10 +284,10 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
       // Arrange: Setup for concurrent operations
       service['activeCategorySubject'].next(1);
       
-      let stateSnapshots: { category: number; loading: boolean; ratingStatus: Map<number, CategoryRatingStatus> }[] = [];
+      let stateSnapshots: { category: number | null; loading: boolean; ratingStatus: Map<number, CategoryRatingStatus> }[] = [];
 
       // Monitor all state changes
-      service.activeCategory$.pipe(take(5)).subscribe(category => {
+      service.activeCategory$.pipe(take(5)).subscribe((category: number | null) => {
         const loading = service['categoryTransitionLoadingSubject'].value;
         const ratingStatus = service['categoryRatingStatusSubject'].value;
         stateSnapshots.push({ category, loading, ratingStatus });
@@ -308,10 +308,10 @@ describe('EvaluationStateService - Race Condition Prevention', () => {
         }
       });
 
-      // Act: Trigger rapid category changes
-      service.transitionToCategory(2);
-      setTimeout(() => service.transitionToCategory(3), 10);
-      setTimeout(() => service.transitionToCategory(4), 20);
+      // Act: Trigger rapid category changes (must subscribe for observables to execute)
+      service.transitionToCategory(2).subscribe();
+      setTimeout(() => service.transitionToCategory(3).subscribe(), 10);
+      setTimeout(() => service.transitionToCategory(4).subscribe(), 20);
     });
 
   });

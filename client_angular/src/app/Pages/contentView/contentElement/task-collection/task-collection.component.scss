@@ -72,7 +72,7 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
   width: 90vw; // Slightly wider on large screens
   max-width: $modal-max-width; // 880px (Golden Rectangle optimized)
   min-height: min(75vh, 544px); // Maintains φ aspect ratio
-  max-height: 90vh; // Limit height to enable scrolling
+  max-height: 95vh; // Erhöht von 90vh für mehr Platz
   padding: $modal-padding; // 34px (Fibonacci)
   padding-bottom: $footer-height; // 144px (Fibonacci) for footer
   overflow: hidden; // Prevent wrapper overflow
@@ -89,8 +89,8 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
 // Close Button
 .close-button {
   position: absolute;
-  top: $space-md; // 21px (Fibonacci)
-  right: $space-md; // 21px (Fibonacci)
+  top: 5px; // Weiter nach außen, verdeckt "x von y abgeschlossen" nicht mehr
+  right: 5px; // Weiter nach außen
   z-index: 10;
 }
 
@@ -108,7 +108,7 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
 
   .progress-info {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; // Links und rechts ausrichten
     font-size: $font-xs; // 12px (smaller, less prominent)
     color: $nord-polar-night-2;
     opacity: 0.8; // Subtle, less dominant
@@ -120,6 +120,21 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
 
     &__completed {
       font-weight: 400;
+    }
+  }
+
+  // Fragestellung im Header
+  .question-text-header {
+    margin-top: $space-sm; // 13px
+    padding: $space-sm 0; // 13px vertikal
+    text-align: center;
+
+    .question-title {
+      font-size: $font-lg; // 21px (Golden Ratio)
+      font-weight: 500;
+      color: $nord-polar-night-1;
+      margin: 0;
+      line-height: $line-height-normal; // 1.4
     }
   }
 }
@@ -186,12 +201,12 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
   flex-grow: 1;
   display: flex;
   justify-content: center;
-  align-items: flex-start; // Changed from center to allow content to flow
+  align-items: center; // Wieder zentriert (kein Scroll mehr)
   min-height: 40vh;
-  max-height: calc(90vh - $footer-height - 200px); // Account for header, dots, and footer
+  max-height: none; // Keine Begrenzung
   position: relative; // For loading overlay
   padding: $space-md; // 21px all around
-  overflow-y: auto; // Enable vertical scrolling
+  overflow-y: hidden; // KEIN SCROLL
   overflow-x: hidden; // Prevent horizontal overflow
 
   // Smooth Transitions with φ-based timing
@@ -200,30 +215,6 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
   &.loading {
     opacity: 0.5;
   }
-
-  // Custom Scrollbar Styling (Nord Theme)
-  &::-webkit-scrollbar {
-    width: 8px; // Fibonacci base unit
-  }
-
-  &::-webkit-scrollbar-track {
-    background: $nord-snow-storm-2;
-    border-radius: $radius-sm; // 5px
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: $nord-frost-3;
-    border-radius: $radius-sm; // 5px
-    transition: background $transition-fast ease;
-
-    &:hover {
-      background: $nord-frost-2;
-    }
-  }
-
-  // Firefox scrollbar styling
-  scrollbar-width: thin;
-  scrollbar-color: $nord-frost-3 $nord-snow-storm-2;
 }
 
 // Fixed Footer (Golden Ratio optimized)

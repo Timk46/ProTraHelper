@@ -29,6 +29,7 @@
 
     <!-- Progress Header - Compact -->
     <div class="progress-header progress-header--compact">
+      <!-- Info-Zeile mit Aufgabenzähler -->
       <div class="progress-info" *ngIf="sortedTasks.length > 0">
         <span class="progress-info__current">
           Aufgabe {{ currentIndex + 1 }} von {{ sortedTasks.length }}
@@ -36,6 +37,11 @@
         <span class="progress-info__completed">
           {{ getCompletedTasksCount() }} von {{ sortedTasks.length }} abgeschlossen
         </span>
+      </div>
+
+      <!-- Fragestellung -->
+      <div class="question-text-header" *ngIf="currentQuestionText">
+        <h2 class="question-title" [innerHTML]="currentQuestionText"></h2>
       </div>
     </div>
 

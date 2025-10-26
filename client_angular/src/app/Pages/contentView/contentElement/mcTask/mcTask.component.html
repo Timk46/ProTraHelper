@@ -15,13 +15,13 @@
   </div>
 
   <!-- Question header -->
-  <div *ngIf="dataLoaded" class="content-section__header" [class.celebrate]="justAnsweredCorrectly">
+  <div *ngIf="dataLoaded && !collectionMode" class="content-section__header" [class.celebrate]="justAnsweredCorrectly">
     <h2 class="content-section__header-title">
       <span [innerHTML]="questionData.text" aria-live="polite"></span>
     </h2>
   </div>
   <!-- Score information -->
-  <div *ngIf="dataLoaded" class="content-section__score">
+  <div *ngIf="dataLoaded && !collectionMode" class="content-section__score">
     <mat-icon class="score-icon" aria-hidden="true">grade</mat-icon>
     <span
       >{{ mcQuestion.isSC ? 'Einfachauswahl' : 'Mehrfachauswahl' }} - Maximale Punktzahl:

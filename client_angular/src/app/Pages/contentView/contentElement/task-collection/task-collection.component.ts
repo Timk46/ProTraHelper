@@ -66,6 +66,7 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
   isCurrentTaskCompleted = false;
   showStartPage = false;
   isLoading = false; // New from plan
+  currentQuestionText = ''; // Question text for header display
 
   // update this if new question types are added
   private componentMap: { [key: string]: any } = {
@@ -187,6 +188,11 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
         progress: currentTaskElement.userProgress ?? 0,
         contentNodeId: this.taskViewData.contentNodeId,
       };
+
+      // Load question text for header display
+      this.questionService.getQuestionData(currentTaskElement.questionId).subscribe(data => {
+        this.currentQuestionText = data.text || '';
+      });
 
       this.componentRef.instance.collectionMode = true;
       this.componentRef.instance.taskViewData = taskViewDataForComponent;

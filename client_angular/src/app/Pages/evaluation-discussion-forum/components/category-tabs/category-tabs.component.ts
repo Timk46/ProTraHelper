@@ -38,7 +38,7 @@ export class CategoryTabsComponent {
   // =============================================================================
 
   @Input() categories: EvaluationCategoryDTO[] = [];
-  @Input() activeCategory: number = 1;
+  @Input() activeCategory: number | null = null;
   @Input() commentStats: CommentStatsDTO | null = null;
 
   // 🔧 NEW: Disable category switching during transitions

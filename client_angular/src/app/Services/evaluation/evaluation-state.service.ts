@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { BehaviorSubject, Observable, combineLatest, forkJoin, of } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, forkJoin, of, Subject } from 'rxjs';
 import { LRUCache } from '../../utils/lru-cache';
 import {
   map,
@@ -12,6 +12,8 @@ import {
   take,
   tap,
   retry,
+  filter,
+  takeUntil,
 } from 'rxjs/operators';
 
 import {
@@ -62,8 +64,27 @@ interface ReplyAdditionResult {
 @Injectable({
   providedIn: 'root',
 })
-export class EvaluationStateService {
+export class EvaluationStateService implements OnDestroy {
   private readonly log = this.logger.scope('EvaluationStateService');
+
+  // Lifecycle management
+  private destroy$ = new Subject<void>();
+
+  // Service-level configuration constants
+  private readonly CONFIG = {
+    CACHE_SIZES: {
+      DISCUSSIONS: 20,
+      RATING_STATS: 20,
+      VOTE_STATUS: 200,
+      VOTE_LOADING: 200,
+    },
+    TIMEOUTS: {
+      FRESHNESS_THRESHOLD_MS: 2 * 60 * 1000, // 2 minutes
+    },
+    VOTE_LIMITS: {
+      MAX_VOTES_PER_CATEGORY: 10,
+    },
+  } as const;
 
   // Core state subjects
   private submissionSubject = new BehaviorSubject<EvaluationSubmissionDTO | null>(null);
@@ -76,7 +97,7 @@ export class EvaluationStateService {
 
   // Discussion state by category (caching with LRU for memory management)
   private discussionCache = new LRUCache<number, BehaviorSubject<EvaluationDiscussionDTO[]>>(
-    20, // Max 20 categories in cache
+    this.CONFIG.CACHE_SIZES.DISCUSSIONS,
     (categoryId, subject) => {
       // Cleanup: Complete BehaviorSubject to prevent memory leaks
       subject.complete();
@@ -86,7 +107,7 @@ export class EvaluationStateService {
   // Rating state
   private ratingsSubject = new BehaviorSubject<EvaluationRatingDTO[]>([]);
   private ratingStatsCache = new LRUCache<number, BehaviorSubject<RatingStatsDTO>>(
-    20, // Max 20 categories with rating stats
+    this.CONFIG.CACHE_SIZES.RATING_STATS,
     (categoryId, subject) => {
       subject.complete();
     }
@@ -120,18 +141,50 @@ export class EvaluationStateService {
   private commentStatusStorageKey = 'evaluation_commented_categories';
 
   constructor(
-    public evaluationService: EvaluationDiscussionService,
+    private evaluationService: EvaluationDiscussionService,
     private userservice: UserService,
     private logger: LoggerService
   ) {
-    // Warte auf das Laden der Kategorien und setze die erste verfügbare als aktiv
-    this.categories$.subscribe(categories => {
-      if (categories.length > 0 && this.activeCategorySubject.value === null) {
-        // Setze die erste Kategorie als Standard-aktive Kategorie
+    // FIXED: Moved subscription to separate method with proper cleanup
+    this.initializeDefaultCategory();
+  }
+
+  /**
+   * Initializes default category selection with proper subscription management
+   * FIXED: Prevents memory leak from constructor subscription
+   */
+  private initializeDefaultCategory(): void {
+    this.categories$
+      .pipe(
+        filter(categories => categories.length > 0 && this.activeCategorySubject.value === null),
+        take(1), // Auto-complete after first emission
+        takeUntil(this.destroy$)
+      )
+      .subscribe(categories => {
         const firstCategory = categories[0];
         this.activeCategorySubject.next(firstCategory.id);
-      }
-    });
+        this.log.debug('Default category set', { categoryId: firstCategory.id });
+      });
+  }
+
+  /**
+   * Cleanup on service destruction
+   * Prevents memory leaks by completing all subscriptions and clearing caches
+   */
+  ngOnDestroy(): void {
+    this.log.debug('Service destroying - cleanup started');
+
+    // Complete all subjects
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    // Clear all caches (calls onEvict for each entry)
+    this.discussionCache.clear();
+    this.ratingStatsCache.clear();
+    this.commentVoteStatusCache.clear();
+    this.commentVoteLoadingCache.clear();
+
+    this.log.debug('Service destroyed - cleanup completed');
   }
 
   // =============================================================================
@@ -148,15 +201,16 @@ export class EvaluationStateService {
 
   /**
    * Observable for the currently active category ID
-   * @returns Observable<number> The active category ID
+   * FIXED: Returns null instead of magic number 1 when no categories available
+   * @returns Observable<number | null> The active category ID or null
    */
-  get activeCategory$(): Observable<number> {
+  get activeCategory$(): Observable<number | null> {
     return this.activeCategorySubject.asObservable().pipe(
       map(categoryId => {
         // Fallback: Falls keine Kategorie gesetzt ist, nutze die erste verfügbare
         if (categoryId === null) {
           const categories = this.categoriesSubject.value;
-          return categories.length > 0 ? categories[0].id : 1; // 1 als letzter Fallback
+          return categories.length > 0 ? categories[0].id : null; // FIXED: null statt 1
         }
         return categoryId;
       }),
@@ -269,7 +323,9 @@ export class EvaluationStateService {
     this.setLoading(true);
     this.clearError();
 
-    this.evaluationService.getSubmission(submissionId).subscribe({
+    this.evaluationService.getSubmission(submissionId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: submission => {
         this.log.info(' Submission loaded:', submission);
         this.submissionSubject.next(submission);
@@ -347,7 +403,9 @@ export class EvaluationStateService {
         );
 
         // Wait for ALL parallel operations to complete
-        forkJoin(parallelOps).subscribe({
+        forkJoin(parallelOps).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
           next: results => {
             this.log.info(' All parallel operations completed:', results);
 
@@ -393,7 +451,9 @@ export class EvaluationStateService {
       return;
     }
 
-    this.evaluationService.getCategories(sessionId).subscribe({
+    this.evaluationService.getCategories(sessionId).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: categories => {
         this.categoriesSubject.next(categories);
       },
@@ -460,7 +520,9 @@ export class EvaluationStateService {
 
         // 🔧 CRITICAL FIX: Load vote limits for the new category to sync "x/x verfügbar" display
         if (submissionId) {
-          this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
+          this.loadVoteLimitStatus(String(submissionId), categoryId).pipe(
+            takeUntil(this.destroy$)
+          ).subscribe({
             next: () => this.log.info(' Vote limits loaded for category transition:', categoryId),
             error: (error) => this.log.error('❌ Failed to load vote limits for category', { categoryId, error })
           });
@@ -538,7 +600,7 @@ export class EvaluationStateService {
     backendStatuses: CategoryRatingStatus[],
     currentStatusMap: Map<number, CategoryRatingStatus>
   ): Map<number, CategoryRatingStatus> {
-    const FRESHNESS_THRESHOLD_MS = 2 * 60 * 1000; // 2 minutes
+    const FRESHNESS_THRESHOLD_MS = this.CONFIG.TIMEOUTS.FRESHNESS_THRESHOLD_MS;
     const mergedStatusMap = new Map<number, CategoryRatingStatus>();
 
     // Convert backend array to map for efficient lookup (more idiomatic)
@@ -626,7 +688,9 @@ export class EvaluationStateService {
     // Mark category as loading
     this.categoryLoadingStates.set(categoryId, true);
 
-    this.evaluationService.getDiscussionsByCategory(submissionId, categoryId.toString()).subscribe({
+    this.evaluationService.getDiscussionsByCategory(submissionId, categoryId.toString()).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: discussions => {
         const subject = this.discussionCache.get(cacheKey);
         if (subject) {
@@ -688,7 +752,7 @@ export class EvaluationStateService {
   get activeDiscussions$(): Observable<EvaluationDiscussionDTO[]> {
     return combineLatest([this.submission$, this.activeCategory$]).pipe(
       map(([submission, categoryId]) => {
-        if (!submission) return [];
+        if (!submission || categoryId === null) return of([]);
         return this.getDiscussionsForCategory(String(submission.id), categoryId);
       }),
       switchMap(discussions$ => discussions$),
@@ -1208,13 +1272,13 @@ export class EvaluationStateService {
 
   // Comment-specific vote status cache (LRU for memory management)
   private commentVoteStatusCache = new LRUCache<string, BehaviorSubject<VoteType | null>>(
-    200, // Max 200 comments with vote status tracking
+    this.CONFIG.CACHE_SIZES.VOTE_STATUS,
     (commentId, subject) => {
       subject.complete();
     }
   );
   private commentVoteLoadingCache = new LRUCache<string, BehaviorSubject<boolean>>(
-    200, // Max 200 comments with loading state tracking
+    this.CONFIG.CACHE_SIZES.VOTE_LOADING,
     (commentId, subject) => {
       subject.complete();
     }
@@ -1426,6 +1490,16 @@ export class EvaluationStateService {
     );
   }
 
+  /**
+   * Gets the user's vote count for a specific comment
+   * WRAPPER METHOD: Provides public access to evaluationService method
+   * @param commentId - The comment ID
+   * @returns Observable<number> - The user's vote count
+   */
+  getUserVoteCountForComment(commentId: string): Observable<number> {
+    return this.evaluationService.getUserVoteCountForComment(commentId);
+  }
+
   // voteComment() removed - use voteCommentWithEnhancedLimits() instead
 
   /**
@@ -1614,7 +1688,9 @@ export class EvaluationStateService {
   private loadRatingStats(submissionId: string, categoryId: number): void {
     const cacheKey = categoryId;
 
-    this.evaluationService.getRatingStats(submissionId, categoryId.toString()).subscribe({
+    this.evaluationService.getRatingStats(submissionId, categoryId.toString()).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: stats => {
         const subject = this.ratingStatsCache.get(cacheKey);
         if (subject) {
@@ -1867,14 +1943,14 @@ export class EvaluationStateService {
   loadVoteLimitStatus(submissionId: string, categoryId: number): Observable<void> {
     this.voteLimitLoadingSubject.next(true);
 
-    // Use local default vote limits (10 votes per category)
+    // Use local default vote limits (from CONFIG)
     // Backend endpoint not yet implemented, using frontend-calculated limits
     const defaultVoteLimitStatus: VoteLimitStatusDTO = {
-      maxVotes: 10,
-      remainingVotes: 10,
+      maxVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
+      remainingVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
       votedCommentIds: [],
       canVote: true,
-      displayText: '10/10 verfügbar',
+      displayText: `${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY}/${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY} verfügbar`,
     };
 
     const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
@@ -2016,7 +2092,9 @@ export class EvaluationStateService {
           // 🚀 FALLBACK SYNC: If backend doesn't provide voteLimitStatus, load it explicitly
           const submissionId = this.submissionSubject.value?.id;
           if (submissionId) {
-            this.loadVoteLimitStatus(String(submissionId), categoryId).subscribe({
+            this.loadVoteLimitStatus(String(submissionId), categoryId).pipe(
+              takeUntil(this.destroy$)
+            ).subscribe({
               next: () => this.log.info(' Fallback vote limit status loaded successfully'),
               error: (error) => this.log.error('❌ Fallback vote limit status loading failed:', error)
             });
