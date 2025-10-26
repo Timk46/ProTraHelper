@@ -287,6 +287,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       startWith(),
       takeUntil(this.destroy$)
     );
+    this.currentPhase$ = this.stateService.currentPhase$.pipe(
+      startWith(null),
+      takeUntil(this.destroy$)
+    );
     this.loading$ = this.stateService.loading$.pipe(
       takeUntil(this.destroy$)
     );

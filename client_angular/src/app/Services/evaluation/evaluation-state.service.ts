@@ -227,6 +227,17 @@ export class EvaluationStateService implements OnDestroy {
   }
 
   /**
+   * Observable for the current evaluation phase
+   * @returns Observable<EvaluationPhase | null> The current phase derived from submission
+   */
+  get currentPhase$(): Observable<EvaluationPhase | null> {
+    return this.submission$.pipe(
+      map(submission => submission?.phase ?? null),
+      distinctUntilChanged()
+    );
+  }
+
+  /**
    * Gets the current anonymous user ID for rating operations
    * @returns The anonymous user ID or null if not available
    */
