@@ -10,6 +10,7 @@ import {
   tap,
   catchError,
   finalize,
+  filter,
 } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -253,11 +254,11 @@ export class EvaluationStateService implements OnDestroy {
   private initializeDefaultCategory(): void {
     this.categories$
       .pipe(
-        filter(categories => categories.length > 0 && this.activeCategorySubject.value === null),
+        filter((categories: EvaluationCategoryDTO[]) => categories.length > 0 && this.activeCategorySubject.value === null),
         take(1),
         takeUntil(this.destroy$)
       )
-      .subscribe(categories => {
+      .subscribe((categories: EvaluationCategoryDTO[]) => {
         const firstCategory = categories[0];
         this.activeCategorySubject.next(firstCategory.id);
         this.log.debug('Default category set', { categoryId: firstCategory.id });
@@ -300,7 +301,7 @@ export class EvaluationStateService implements OnDestroy {
       },
       error: error => {
         this.log.error('Submission loading failed', { error });
-        this.setError('Fehler beim Laden der Abgabe');
+        this.setError('Error loading submission');
         this.setLoading(false);
       },
     });
@@ -323,18 +324,18 @@ export class EvaluationStateService implements OnDestroy {
     });
 
     // Load anonymous user
-    this.evaluationService.getOrCreateAnonymousUser(String(submission.id), userId).pipe(
+    this.evaluationService.getOrCreateAnonymousUser(String(submission.id)).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: user => this.anonymousUserSubject.next(user),
       error: error => {
         this.log.error('Anonymous user loading failed', { error });
-        this.setError('Fehler beim Laden des anonymen Benutzers');
+        this.setError('Error loading anonymous user');
       },
     });
 
     // Load categories
-    this.evaluationService.getCategories(String(submission.sessionId)).pipe(
+    this.evaluationService.getCategories(submission.sessionId).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: categories => {
@@ -343,12 +344,12 @@ export class EvaluationStateService implements OnDestroy {
       },
       error: error => {
         this.log.error('Categories loading failed', { error });
-        this.setError('Fehler beim Laden der Kategorien');
+        this.setError('Error loading categories');
       },
     });
 
     // Load rating status (delegated to RatingStateService)
-    this.ratingState.loadCategoryRatingStatus(String(submission.id), userId);
+    this.ratingState.loadCategoryRatingStatus(String(submission.id), Number(userId));
 
     this.setLoading(false);
   }
@@ -417,7 +418,7 @@ export class EvaluationStateService implements OnDestroy {
 
         // Handle errors intelligently
         if (error instanceof HttpErrorResponse && error.status >= 400) {
-          this.setError('Fehler beim Laden des Bewertungsstatus. Bitte aktualisieren Sie die Seite.');
+          this.setError('Error loading rating status. Please refresh the page.');
         }
 
         return of(void 0);
@@ -567,7 +568,7 @@ export class EvaluationStateService implements OnDestroy {
    * Checks if user has commented in a category
    * Delegated to: EvaluationDiscussionStateService
    */
-  hasCommentedInCategory(categoryId: number): Observable<boolean> {
+  hasCommentedInCategory$(categoryId: number): Observable<boolean> {
     return this.discussionState.hasCommentedInCategory(categoryId);
   }
 
@@ -585,6 +586,37 @@ export class EvaluationStateService implements OnDestroy {
 
   private clearError(): void {
     this.errorSubject.next(null);
+  }
+
+  // =============================================================================
+  // PUBLIC STATE ACCESSORS (for Facade)
+  // =============================================================================
+
+  /**
+   * Gets the current submission synchronously
+   *
+   * @returns The current submission or null if not loaded
+   */
+  getCurrentSubmission(): EvaluationSubmissionDTO | null {
+    return this.submissionSubject.value;
+  }
+
+  /**
+   * Gets the current active category ID synchronously
+   *
+   * @returns The current active category ID or null if not set
+   */
+  getCurrentActiveCategory(): number | null {
+    return this.activeCategorySubject.value;
+  }
+
+  /**
+   * Gets the current anonymous user synchronously
+   *
+   * @returns The current anonymous user or null if not loaded
+   */
+  getCurrentAnonymousUser(): AnonymousEvaluationUserDTO | null {
+    return this.anonymousUserSubject.value;
   }
 
   // =============================================================================

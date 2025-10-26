@@ -135,7 +135,7 @@ export class EvaluationCommentStateService implements OnDestroy {
     const operationKey = `${submissionId}-${categoryId}`;
     if (this.commentCreationInProgress.has(operationKey)) {
       this.log.warn('Comment creation already in progress', { categoryId });
-      throw new Error('Ein Kommentar wird bereits erstellt. Bitte warten Sie einen Moment.');
+      throw new Error('Comment creation already in progress. Please wait a moment.');
     }
 
     const createCommentDto: CreateEvaluationCommentDTO = {

@@ -2114,6 +2114,37 @@ export class EvaluationStateService implements OnDestroy {
   // resetCategoryVotes() removed - unused
 
   // =============================================================================
+  // PUBLIC STATE ACCESSORS (for Facade compatibility)
+  // =============================================================================
+
+  /**
+   * Gets the current submission synchronously
+   *
+   * @returns The current submission or null if not loaded
+   */
+  getCurrentSubmission(): EvaluationSubmissionDTO | null {
+    return this.submissionSubject.value;
+  }
+
+  /**
+   * Gets the current active category ID synchronously
+   *
+   * @returns The current active category ID or null if not set
+   */
+  getCurrentActiveCategory(): number | null {
+    return this.activeCategorySubject.value;
+  }
+
+  /**
+   * Gets the current anonymous user synchronously
+   *
+   * @returns The current anonymous user or null if not loaded
+   */
+  getCurrentAnonymousUser(): AnonymousEvaluationUserDTO | null {
+    return this.anonymousUserSubject.value;
+  }
+
+  // =============================================================================
   // SUBMISSION LIST MANAGEMENT FOR NAVIGATION - REMOVED
   // =============================================================================
   // Navigation functionality moved to EvaluationNavigationService

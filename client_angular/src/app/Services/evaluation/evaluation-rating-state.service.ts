@@ -419,7 +419,7 @@ export class EvaluationRatingStateService implements OnDestroy {
         this.cache.setRatingStatsCache(categoryId, stats);
         this.log.info('Rating stats loaded successfully', {
           categoryId,
-          averageRating: stats.averageRating,
+          averageScore: stats.averageScore,
           totalRatings: stats.totalRatings,
         });
       },

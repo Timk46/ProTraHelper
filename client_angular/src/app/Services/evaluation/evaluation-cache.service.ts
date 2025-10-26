@@ -8,7 +8,7 @@ import { EvaluationDiscussionDTO, RatingStatsDTO, VoteType } from '@DTOs/index';
 import { LoggerService } from '../logger/logger.service';
 
 // Utils
-import { LRUCache } from '../../utils/LRUCache';
+import { LRUCache } from '../../utils/lru-cache';
 
 /**
  * Centralized cache management service for evaluation data
@@ -66,7 +66,7 @@ export class EvaluationCacheService {
    */
   private discussionCache = new LRUCache<number, BehaviorSubject<EvaluationDiscussionDTO[]>>(
     this.CONFIG.CACHE_SIZES.DISCUSSIONS,
-    (categoryId, subject) => {
+    (categoryId: number, subject: BehaviorSubject<EvaluationDiscussionDTO[]>) => {
       subject.complete();
       this.log.debug('LRU evicted discussion cache', { categoryId });
     }
@@ -78,7 +78,7 @@ export class EvaluationCacheService {
    */
   private ratingStatsCache = new LRUCache<number, BehaviorSubject<RatingStatsDTO>>(
     this.CONFIG.CACHE_SIZES.RATING_STATS,
-    (categoryId, subject) => {
+    (categoryId: number, subject: BehaviorSubject<RatingStatsDTO>) => {
       subject.complete();
       this.log.debug('LRU evicted rating stats cache', { categoryId });
     }
@@ -90,7 +90,7 @@ export class EvaluationCacheService {
    */
   private commentVoteStatusCache = new LRUCache<string, BehaviorSubject<VoteType | null>>(
     this.CONFIG.CACHE_SIZES.VOTE_STATUS,
-    (commentId, subject) => {
+    (commentId: string, subject: BehaviorSubject<VoteType | null>) => {
       subject.complete();
       this.log.debug('LRU evicted vote status cache', { commentId });
     }
@@ -102,7 +102,7 @@ export class EvaluationCacheService {
    */
   private commentVoteLoadingCache = new LRUCache<string, BehaviorSubject<boolean>>(
     this.CONFIG.CACHE_SIZES.VOTE_LOADING,
-    (commentId, subject) => {
+    (commentId: string, subject: BehaviorSubject<boolean>) => {
       subject.complete();
       this.log.debug('LRU evicted vote loading cache', { commentId });
     }
@@ -186,10 +186,12 @@ export class EvaluationCacheService {
   getRatingStatsCache(categoryId: number): BehaviorSubject<RatingStatsDTO> {
     if (!this.ratingStatsCache.has(categoryId)) {
       const defaultStats: RatingStatsDTO = {
+        submissionId: 0,
         categoryId,
-        averageRating: 0,
+        averageScore: 0,
         totalRatings: 0,
-        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0 },
+        scoreDistribution: [],
+        userHasRated: false,
       };
       const newSubject = new BehaviorSubject<RatingStatsDTO>(defaultStats);
       this.ratingStatsCache.set(categoryId, newSubject);
@@ -366,19 +368,31 @@ export class EvaluationCacheService {
    */
   clearAll(): void {
     // Clear discussion cache
-    this.discussionCache.forEach((subject) => subject.complete());
+    this.discussionCache.keys().forEach(key => {
+      const subject = this.discussionCache.get(key);
+      if (subject) subject.complete();
+    });
     this.discussionCache.clear();
 
     // Clear rating stats cache
-    this.ratingStatsCache.forEach((subject) => subject.complete());
+    this.ratingStatsCache.keys().forEach(key => {
+      const subject = this.ratingStatsCache.get(key);
+      if (subject) subject.complete();
+    });
     this.ratingStatsCache.clear();
 
     // Clear vote status cache
-    this.commentVoteStatusCache.forEach((subject) => subject.complete());
+    this.commentVoteStatusCache.keys().forEach(key => {
+      const subject = this.commentVoteStatusCache.get(key);
+      if (subject) subject.complete();
+    });
     this.commentVoteStatusCache.clear();
 
     // Clear vote loading cache
-    this.commentVoteLoadingCache.forEach((subject) => subject.complete());
+    this.commentVoteLoadingCache.keys().forEach(key => {
+      const subject = this.commentVoteLoadingCache.get(key);
+      if (subject) subject.complete();
+    });
     this.commentVoteLoadingCache.clear();
 
     this.log.info('All caches cleared');

@@ -70,17 +70,22 @@ describe('EvaluationCacheService', () => {
 
       cache.subscribe(stats => {
         expect(stats.categoryId).toBe(1);
-        expect(stats.averageRating).toBe(0);
+        expect(stats.averageScore).toBe(0);
         expect(stats.totalRatings).toBe(0);
       });
     });
 
     it('should update rating stats cache', () => {
       const stats = {
+        submissionId: 123,
         categoryId: 1,
-        averageRating: 7.5,
+        averageScore: 7.5,
         totalRatings: 10,
-        distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 5, 8: 5, 9: 0, 10: 0 },
+        scoreDistribution: [
+          { score: 7, count: 5 },
+          { score: 8, count: 5 }
+        ],
+        userHasRated: true,
       };
       service.setRatingStatsCache(1, stats);
 

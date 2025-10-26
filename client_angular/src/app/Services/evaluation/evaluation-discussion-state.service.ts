@@ -139,11 +139,10 @@ export class EvaluationDiscussionStateService implements OnDestroy {
     activeCategory$: Observable<number | null>
   ): Observable<EvaluationDiscussionDTO[]> {
     return combineLatest([submission$, activeCategory$]).pipe(
-      map(([submission, categoryId]) => {
+      switchMap(([submission, categoryId]) => {
         if (!submission || categoryId === null) return of([]);
         return this.getDiscussions(String(submission.id), categoryId);
       }),
-      switchMap(discussions$ => discussions$),
       shareReplay(1),
     );
   }
@@ -249,8 +248,8 @@ export class EvaluationDiscussionStateService implements OnDestroy {
 
     // Find and update the affected discussion
     const updatedDiscussions = currentDiscussions.map(discussion => {
-      if (String(discussion.id) === discussionId) {
-        const newDiscussion = newDiscussions.find(d => String(d.id) === discussionId);
+      if (discussion.id === Number(discussionId)) {
+        const newDiscussion = newDiscussions.find(d => d.id === Number(discussionId));
         return newDiscussion || discussion;
       }
       return discussion;
@@ -333,36 +332,6 @@ export class EvaluationDiscussionStateService implements OnDestroy {
         this.categoryLoadingStates.set(categoryId, false);
       },
     });
-  }
-
-  /**
-   * Detects if user has commented in loaded discussions
-   *
-   * @description
-   * Scans discussions for comments by the anonymous user.
-   * Updates comment status if user has commented.
-   *
-   * @param discussions - The discussions to scan
-   * @param categoryId - The category ID
-   * @param anonymousUserId - The anonymous user ID
-   * @param submissionId - The submission ID (for logging)
-   * @private
-   */
-  detectUserComment(
-    discussions: EvaluationDiscussionDTO[],
-    categoryId: number,
-    anonymousUserId: string,
-    submissionId: string
-  ): void {
-    if (discussions.length === 0) return;
-
-    const hasUserCommented = discussions.some(discussion =>
-      discussion.comments.some(comment => comment.authorId === anonymousUserId)
-    );
-
-    if (hasUserCommented) {
-      this.markCategoryAsCommented(categoryId, submissionId);
-    }
   }
 
   // =============================================================================

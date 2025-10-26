@@ -194,7 +194,7 @@ export class EvaluationFacade {
    * @returns Observable<boolean> True if commented, false otherwise
    */
   hasCommentedInCategory$(categoryId: number): Observable<boolean> {
-    return this.state.hasCommentedInCategory(categoryId);
+    return this.state.hasCommentedInCategory$(categoryId);
   }
 
   // =============================================================================
@@ -212,8 +212,8 @@ export class EvaluationFacade {
    * @returns Observable<EvaluationCommentDTO> The created comment
    */
   submitComment(content: string): Observable<EvaluationCommentDTO> {
-    const submission = this.state['submissionSubject'].value;
-    const categoryId = this.state['activeCategorySubject'].value;
+    const submission = this.state.getCurrentSubmission();
+    const categoryId = this.state.getCurrentActiveCategory();
 
     if (!submission || categoryId === null) {
       this.log.error('Cannot submit comment: Invalid state', { submission, categoryId });
@@ -235,8 +235,8 @@ export class EvaluationFacade {
    * @returns Observable<EvaluationCommentDTO> The created reply
    */
   submitReply(parentCommentId: string, content: string): Observable<EvaluationCommentDTO> {
-    const submission = this.state['submissionSubject'].value;
-    const categoryId = this.state['activeCategorySubject'].value;
+    const submission = this.state.getCurrentSubmission();
+    const categoryId = this.state.getCurrentActiveCategory();
 
     if (!submission || categoryId === null) {
       this.log.error('Cannot submit reply: Invalid state', { submission, categoryId });
@@ -262,8 +262,8 @@ export class EvaluationFacade {
    * @returns Observable<EvaluationRatingDTO> The created rating
    */
   submitRating(score: number): Observable<EvaluationRatingDTO> {
-    const submission = this.state['submissionSubject'].value;
-    const categoryId = this.state['activeCategorySubject'].value;
+    const submission = this.state.getCurrentSubmission();
+    const categoryId = this.state.getCurrentActiveCategory();
 
     if (!submission || categoryId === null) {
       this.log.error('Cannot submit rating: Invalid state', { submission, categoryId });
@@ -281,7 +281,7 @@ export class EvaluationFacade {
    * @returns Observable<RatingStatsDTO> The rating statistics
    */
   getRatingStats(categoryId: number): Observable<RatingStatsDTO> {
-    const submission = this.state['submissionSubject'].value;
+    const submission = this.state.getCurrentSubmission();
 
     if (!submission) {
       this.log.error('Cannot get rating stats: No submission loaded');
@@ -301,7 +301,7 @@ export class EvaluationFacade {
    * @returns The current submission ID or null
    */
   getCurrentSubmissionId(): string | null {
-    const submission = this.state['submissionSubject'].value;
+    const submission = this.state.getCurrentSubmission();
     return submission ? String(submission.id) : null;
   }
 
@@ -311,7 +311,7 @@ export class EvaluationFacade {
    * @returns The current active category ID or null
    */
   getCurrentCategoryId(): number | null {
-    return this.state['activeCategorySubject'].value;
+    return this.state.getCurrentActiveCategory();
   }
 
   /**
@@ -320,6 +320,6 @@ export class EvaluationFacade {
    * @returns The current anonymous user or null
    */
   getCurrentAnonymousUser(): AnonymousEvaluationUserDTO | null {
-    return this.state['anonymousUserSubject'].value;
+    return this.state.getCurrentAnonymousUser();
   }
 }
