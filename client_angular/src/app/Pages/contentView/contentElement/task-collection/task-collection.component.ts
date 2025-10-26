@@ -19,6 +19,9 @@ import {
   QuestionCollectionDto,
   questionType,
 } from '@DTOs/index';
+import { Subject } from 'rxjs';
+import { takeUntil, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 // Import all possible task components
 import { McTaskComponent } from '../mcTask/mcTask.component';
@@ -45,6 +48,11 @@ export interface ITaskComponent {
   submitClicked: EventEmitter<number>;
 }
 
+// Interface for dialog data
+interface TaskCollectionDialogData {
+  taskViewData?: TaskViewData;
+}
+
 @Component({
   selector: 'app-task-collection',
   templateUrl: './task-collection.component.html',
@@ -68,6 +76,9 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
   isLoading = false; // New from plan
   currentQuestionText = ''; // Question text for header display
 
+  // RxJS subscription management
+  private readonly destroy$ = new Subject<void>();
+
   // update this if new question types are added
   private componentMap: { [key: string]: any } = {
     [questionType.SINGLECHOICE]: McTaskComponent,
@@ -83,11 +94,11 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
 
   constructor(
     public dialogRef: DialogRef,
-    @Inject(MAT_DIALOG_DATA) public data: any,
+    @Inject(MAT_DIALOG_DATA) public data: TaskCollectionDialogData,
     private readonly questionService: QuestionDataService,
     private readonly logger: LoggerService,
   ) {
-    if (data && data.taskViewData) {
+    if (data?.taskViewData) {
       this.taskViewData = data.taskViewData;
     }
   }
@@ -103,6 +114,11 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    // Complete all subscriptions
+    this.destroy$.next();
+    this.destroy$.complete();
+
+    // Destroy dynamically loaded component
     this.componentRef?.destroy();
   }
 
@@ -189,10 +205,22 @@ export class TaskCollectionComponent implements OnDestroy, AfterViewInit {
         contentNodeId: this.taskViewData.contentNodeId,
       };
 
-      // Load question text for header display
-      this.questionService.getQuestionData(currentTaskElement.questionId).subscribe(data => {
-        this.currentQuestionText = data.text || '';
-      });
+      // Load question text for header display with proper subscription management
+      this.questionService
+        .getQuestionData(currentTaskElement.questionId)
+        .pipe(
+          takeUntil(this.destroy$),
+          catchError(error => {
+            this.log.error('Failed to load question text', {
+              questionId: currentTaskElement.questionId,
+              error,
+            });
+            return of({ text: 'Frage konnte nicht geladen werden' } as any);
+          }),
+        )
+        .subscribe(data => {
+          this.currentQuestionText = data?.text ?? 'Unbekannte Frage';
+        });
 
       this.componentRef.instance.collectionMode = true;
       this.componentRef.instance.taskViewData = taskViewDataForComponent;
