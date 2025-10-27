@@ -679,8 +679,6 @@ export class EvaluationNavigationService {
   private updateNavigationContext(url: string): void {
     const context = this.parseUrl(url);
     this.navigationStateSubject.next(context);
-    
-    console.log('🧭 Navigation context updated:', context);
   }
 }
 

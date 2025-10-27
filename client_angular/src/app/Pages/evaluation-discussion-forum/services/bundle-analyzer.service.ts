@@ -561,21 +561,28 @@ export class BundleAnalyzerService {
    * Initializes bundle monitoring
    */
   private initializeBundleMonitoring(): void {
-    console.log('📦 Initializing bundle monitoring...');
-    
-    // Analyze bundle on page load
+    // ⚡ PERFORMANCE: Skip in production
+    if ((typeof window !== 'undefined' &&
+         window.location.hostname !== 'localhost' &&
+         !window.location.hostname.includes('dev'))) {
+      return;
+    }
+
+    // Analyze bundle on page load with significant delay
     if (document.readyState === 'complete') {
-      setTimeout(() => this.analyzeBundleStructure(), 1000);
+      setTimeout(() => this.analyzeBundleStructure(), 5000);
     } else {
       window.addEventListener('load', () => {
-        setTimeout(() => this.analyzeBundleStructure(), 1000);
+        setTimeout(() => this.analyzeBundleStructure(), 5000);
       });
     }
 
-    // Re-analyze periodically
-    setInterval(() => {
-      this.analyzeBundleStructure();
-    }, 60000); // Every minute
+    // Re-analyze periodically (less frequently)
+    setTimeout(() => {
+      setInterval(() => {
+        this.analyzeBundleStructure();
+      }, 60000); // Every minute
+    }, 60000); // Start after 60 seconds
   }
 
   // =============================================================================

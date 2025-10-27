@@ -201,12 +201,12 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
   flex-grow: 1;
   display: flex;
   justify-content: center;
-  align-items: center; // Wieder zentriert (kein Scroll mehr)
+  align-items: flex-start; // Oben ausrichten für Scroll
   min-height: 40vh;
-  max-height: none; // Keine Begrenzung
+  max-height: calc(95vh - 200px); // Feste Höhenbegrenzung für Scroll
   position: relative; // For loading overlay
   padding: $space-md; // 21px all around
-  overflow-y: hidden; // KEIN SCROLL
+  overflow-y: auto; // SCROLLBAR AKTIVIERT!
   overflow-x: hidden; // Prevent horizontal overflow
 
   // Smooth Transitions with φ-based timing
@@ -215,6 +215,30 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
   &.loading {
     opacity: 0.5;
   }
+
+  // Custom Scrollbar (Nord Theme)
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $nord-snow-storm-2;
+    border-radius: $radius-sm;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $nord-frost-3;
+    border-radius: $radius-sm;
+    transition: background $transition-normal ease;
+
+    &:hover {
+      background: $nord-frost-2;
+    }
+  }
+
+  // Firefox scrollbar styling
+  scrollbar-width: thin;
+  scrollbar-color: $nord-frost-3 $nord-snow-storm-2;
 }
 
 // Fixed Footer (Golden Ratio optimized)

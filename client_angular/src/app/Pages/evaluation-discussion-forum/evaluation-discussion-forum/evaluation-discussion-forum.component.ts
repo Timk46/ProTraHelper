@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { Observable, Subject, combineLatest, BehaviorSubject, of, interval, from } from 'rxjs';
+import { Observable, Subject, combineLatest, BehaviorSubject, of, interval, from, timer } from 'rxjs';
 import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged, shareReplay, finalize, tap, catchError } from 'rxjs/operators';
 
 // Angular Material Imports
@@ -50,6 +50,7 @@ import { EvaluationNavigationService } from '../services/evaluation-navigation.s
 import { EvaluationPerformanceService } from '../services/evaluation-performance.service';
 import { BundleAnalyzerService } from '../services/bundle-analyzer.service';
 import { MemoryLeakDetectorService } from '../services/memory-leak-detector.service';
+import { LoggerService } from '../../../Services/logger/logger.service';
 
 // Child Components
 import { CategoryTabsComponent } from '../components/category-tabs/category-tabs.component';
@@ -95,6 +96,8 @@ import { PdfSimpleViewerPanelComponent } from '../components/pdf-simple-viewer-p
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
+  // Scoped logger for this component
+  private readonly log = this.logger.scope('EvaluationForum');
 
   constructor(
     private route: ActivatedRoute,
@@ -109,9 +112,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     private navigationService: EvaluationNavigationService,
     private performanceService: EvaluationPerformanceService,
     private bundleAnalyzer: BundleAnalyzerService,
-    private memoryLeakDetector: MemoryLeakDetectorService
+    private memoryLeakDetector: MemoryLeakDetectorService,
+    private logger: LoggerService
   ) {
-    console.log('🏗️ EvaluationDiscussionForumComponent constructor called');
   }
   // =============================================================================
   // TEMPLATE UTILITIES
@@ -171,11 +174,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   // Submission navigation support
   public submissionNavigationInfo$ = this.navigationService.navigationContext$.pipe(
-    map(() => {
-      const navInfo = this.navigationService.getSubmissionNavigationInfo();
-      console.log('🧭 Submission Navigation Info Updated:', navInfo);
-      return navInfo;
-    }),
+    map(() => this.navigationService.getSubmissionNavigationInfo()),
     shareReplay(1)
   );
 
@@ -272,29 +271,28 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     );
     this.activeCategoryInfo$ = this.stateService.activeCategoryInfo$.pipe(
-      startWith(),
       takeUntil(this.destroy$)
     );
     this.discussions$ = this.stateService.activeDiscussions$.pipe(
-      startWith([]),
       takeUntil(this.destroy$)
     );
     this.commentStats$ = this.stateService.commentStats$.pipe(
-      startWith(),
       takeUntil(this.destroy$)
     );
     this.anonymousUser$ = this.stateService.anonymousUser$.pipe(
-      startWith(),
       takeUntil(this.destroy$)
     );
     this.currentPhase$ = this.stateService.currentPhase$.pipe(
-      startWith(null),
       takeUntil(this.destroy$)
     );
+    // ⚡ PERFORMANCE: startWith() for UI-critical observables only
+    // These ensure the template renders immediately with loading spinner
     this.loading$ = this.stateService.loading$.pipe(
+      startWith(true), // ✅ Critical: Shows loading spinner immediately
       takeUntil(this.destroy$)
     );
     this.error$ = this.stateService.error$.pipe(
+      startWith(null), // ✅ Critical: No error message initially
       takeUntil(this.destroy$)
     );
 
@@ -315,7 +313,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         categoryId ? this.stateService.isCategoryRated$(categoryId) : of(false)
       ),
       distinctUntilChanged(),
-      startWith(false),
       takeUntil(this.destroy$)
     );
 
@@ -325,7 +322,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         categoryId ? this.stateService.hasCommentedInCategory$(categoryId) : of(false)
       ),
       distinctUntilChanged(),
-      startWith(false),
       takeUntil(this.destroy$)
     );
 
@@ -446,15 +442,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         };
       }),
       // 🚨 REMOVED distinctUntilChanged to ensure vote updates always propagate
-      tap(voteStatus => console.log('🗳️ Vote status update:', voteStatus)),
       shareReplay(1),
       takeUntil(this.destroy$) // 🔧 MEMORY SAFE: Prevent memory leak
     );
   }
 
   ngOnInit(): void {
-    console.log('🎆 EvaluationDiscussionForumComponent initialized');
-
     // 🚀 PHASE 5: Enhanced initialization with global state management
     this.initializeGlobalStateManagement();
     this.handleRouteParams();
@@ -462,17 +455,17 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.loadInitialData();
     this.setupEventHandling();
     this.setupDeepLinkingSupport();
-    this.setupPerformanceMonitoring();
+
+    // ⚡ PERFORMANCE: Defer monitoring setup to browser idle time
+    this.schedulePerformanceMonitoring();
+
     // this.loadSubmissionList(); // FIXME: Disabled - requires backend API integration
 
     // 🚀 SESSION VOTE TRACKING: Reset global session votes when forum is loaded/reloaded
     this.voteSessionService.resetSessionVotes();
-    console.log('🔄 Global session votes reset on forum initialization');
   }
 
   ngOnDestroy(): void {
-    console.log('🧹 EvaluationDiscussionForumComponent cleanup');
-
     this.destroy$.next();
     this.destroy$.complete();
 
@@ -482,7 +475,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   private cleanup(): void {
     // 🚀 PHASE 6: Enhanced cleanup with performance monitoring
-    console.log('🧹 Starting enhanced cleanup with performance monitoring...');
 
     // Stop performance monitoring
     this.performanceService.stopComponentProfiling('evaluation-discussion-forum');
@@ -500,8 +492,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // Update last activity
     this.globalStateService.updateLastActivity();
-
-    console.log('✅ Enhanced cleanup completed');
   }
 
   // =============================================================================
@@ -510,8 +500,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   // 🚀 PHASE 5: Initialize global state management integration
   private initializeGlobalStateManagement(): void {
-    console.log('🌐 Initializing global state management');
-
     // Initialize observables
     this.initializeObservableStreams();
 
@@ -558,7 +546,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     ).subscribe(() => {
       const loadTime = performance.now() - startTime;
       this.globalStateService.updatePerformanceMetrics(loadTime, true);
-      console.log(`⏱️ Component initialization completed in ${loadTime.toFixed(2)}ms`);
     });
   }
 
@@ -577,8 +564,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   // 🚀 PHASE 5: Enhanced deep linking support
   private setupDeepLinkingSupport(): void {
-    console.log('🔗 Setting up deep linking support');
-
     // Handle highlighted comment from URL
     this.highlightedCommentId$.pipe(
       takeUntil(this.destroy$),
@@ -603,9 +588,23 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * ⚡ PERFORMANCE: Schedule monitoring setup for browser idle time
+   * This prevents blocking the critical rendering path during component initialization
+   */
+  private schedulePerformanceMonitoring(): void {
+    if (!environment.enableProfiling) return;
+
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => this.setupPerformanceMonitoring(), { timeout: 2000 });
+    } else {
+      setTimeout(() => this.setupPerformanceMonitoring(), 1000);
+    }
+  }
+
   private setupPerformanceMonitoring(): void {
     // 🚀 PHASE 6: Enhanced Performance Monitoring & Optimization
-    console.log('🎯 Setting up comprehensive performance monitoring...');
 
     // Register component for memory leak detection
     this.memoryLeakDetector.registerComponent(
@@ -625,8 +624,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       sampleRate: 1.0 // Profile all render cycles for main component
     });
 
-    // Analyze bundle structure
-    this.bundleAnalyzer.analyzeBundleStructure();
+    // ⚡ PERFORMANCE: Defer bundle analysis to avoid blocking initialization
+    if (!environment.production) {
+      setTimeout(() => {
+        this.bundleAnalyzer.analyzeBundleStructure();
+      }, 10000); // 10 seconds delay
+    }
 
     // Monitor component performance and report to global state
     const startTime = performance.now();
@@ -646,7 +649,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
       // Log slow renders with more context
       if (renderTime > 100) {
-        console.warn(`⚠️ Slow render detected: ${renderTime.toFixed(2)}ms in evaluation forum`);
+        this.log.warn('Slow render detected', {
+          renderTime: renderTime.toFixed(2) + 'ms',
+          component: 'evaluation-forum',
+          threshold: '100ms'
+        });
 
         // Report to performance service
         this.performanceService.updatePerformanceMetrics(renderTime, true);
@@ -685,15 +692,13 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Log performance report periodically
-    interval(30000).pipe( // Every 30 seconds
+    // ⚡ PERFORMANCE: Start periodic reports after 60s, then every 30s
+    timer(60000, 30000).pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
       this.performanceService.logPerformanceReport();
       this.bundleAnalyzer.logBundleReport();
     });
-
-    console.log('✅ Performance monitoring setup completed');
   }
 
   // =============================================================================
@@ -705,7 +710,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    */
   togglePerformanceDashboard(): void {
     this.showPerformanceDashboard = !this.showPerformanceDashboard;
-    console.log(`📊 Performance dashboard ${this.showPerformanceDashboard ? 'shown' : 'hidden'}`);
 
     if (this.showPerformanceDashboard) {
       // Force a performance scan when dashboard is opened
@@ -740,12 +744,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    */
   private calculateVoteLimits(discussions: EvaluationDiscussionDTO[]): number {
     const maxVotes = 10; // Fixed limit: 10 votes per user
-    
-    console.log('🎯 Vote limit calculation:', {
-      fixedLimit: maxVotes,
-      discussions: discussions.length
-    });
-    
     return maxVotes;
   }
 
@@ -769,8 +767,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   private scrollToComment(commentId: string): void {
-    console.log('🎯 Scrolling to comment:', commentId);
-
     // Use requestAnimationFrame to ensure DOM is ready
     requestAnimationFrame(() => {
       const element = document.getElementById(`comment-${commentId}`);
@@ -798,17 +794,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         map(params => params.get('submissionId')),
       )
       .subscribe(submissionId => {
-        console.log('🎯 Route submissionId extracted:', submissionId);
-
         if (submissionId) {
           this.submissionId = submissionId;
 
           // Load submission from backend
-          console.log('📡 Loading submission from backend...', submissionId);
           this.stateService.loadSubmission(submissionId, Number(this.userservice.getTokenID()));
-
-          // Comment status is now loaded automatically from backend in loadSubmission()
-          console.log('📝 Loaded comment status for submission:', submissionId);
         } else {
           // No submission ID provided - show empty state
           console.warn('⚠️ No submission ID provided');
@@ -864,16 +854,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(categoryId => {
-        console.log('🔄 Active category changed to:', categoryId, '- rating status tracked reactively');
         // Rating status is now handled automatically by hasRatedCurrentCategory$ observable
 
         // Load vote limits for the new category
         if (this.submissionId) {
-          console.log('📊 Loading vote limits for category:', categoryId);
-          this.stateService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe({
-            next: () => console.log('✅ Vote limits loaded for category:', categoryId),
-            error: (error) => console.error('❌ Failed to load vote limits:', error)
-          });
+          this.stateService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe();
         }
       });
 
@@ -890,8 +875,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         // ✅ SWITCHMAP: Cancel old requests when new category is selected
         // This is the KEY fix - ensures only the latest request completes
         switchMap(categoryId => {
-          console.log('🔄 Category selection triggered:', categoryId);
-
           // Set loading state to block UI
           this.isCategoryTransitionLoading = true;
 
@@ -901,10 +884,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
           // Perform atomic category transition
           return this.stateService.transitionToCategory(categoryId).pipe(
-            // Handle errors per transition
-            tap(() => {
-              console.log('✅ Category transition completed:', categoryId);
-            }),
             catchError(error => {
               console.error('❌ Category transition failed:', error);
               this.showSnackBar('Kategoriewechsel fehlgeschlagen', 'OK', 3000, true);
@@ -933,7 +912,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           // This should never happen due to catchError above, but handle it anyway
-          console.error('❌ Unexpected error in category selection stream:', error);
           this.isCategoryTransitionLoading = false;
           this.cdr.markForCheck();
         }
@@ -948,13 +926,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // Set rating panel expansion based on rating status
     this.stateService.isCategoryRated$(categoryId).pipe(take(1)).subscribe(isRated => {
       this.isRatingPanelExpanded = !isRated; // Expand if not rated
-      console.log(`📋 Rating panel ${isRated ? 'collapsed' : 'expanded'} for category ${categoryId} (rated: ${isRated})`);
     });
 
     // Set discussion panel expansion based on comment status
     this.stateService.hasCommentedInCategory$(categoryId).pipe(take(1)).subscribe(hasCommented => {
       this.isDiscussionHeaderExpanded = false; // Always collapsed by default
-      console.log(`🗨️ Discussion panel ${hasCommented ? 'expanded' : 'collapsed'} for category ${categoryId} (commented: ${hasCommented})`);
     });
   }
 
@@ -971,8 +947,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * in setupEventHandling() with switchMap to prevent concurrent requests.
    */
   onCategorySelected(categoryId: number): void {
-    console.log('🎯 Category selected:', categoryId);
-
     // Emit category selection to centralized stream
     // The switchMap in setupEventHandling() will handle:
     // - Debouncing rapid clicks
@@ -989,12 +963,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @param commentData - Contains content, isInitialComment flag, and categoryId
    */
   onInitialCommentSubmitted(commentData: { content: string; isInitialComment: boolean; categoryId: number }): void {
-    console.log('📝 Initial comment received:', {
-      categoryId: commentData.categoryId,
-      isInitialComment: commentData.isInitialComment,
-      contentLength: commentData.content.length,
-    });
-
     // Process the initial comment immediately (no debouncing needed)
     this.processCommentSubmission(commentData.content, true);
   }
@@ -1027,12 +995,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('📝 Reply submitted:', {
-      parentCommentId: data.parentCommentId,
-      content: data.content.substring(0, 50) + '...',
-      submissionId: this.submissionId,
-    });
-
     // Set loading state
     this.isSubmittingComment$.next(true);
 
@@ -1044,8 +1006,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           if (!activeCategory) {
             throw new Error('Keine aktive Kategorie verfügbar');
           }
-
-          console.log('📝 Submitting reply to category:', activeCategory);
 
           return this.stateService.addReply(
             this.submissionId!,
@@ -1065,7 +1025,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: reply => {
-          console.log('✅ Reply created successfully:', reply);
           this.showSnackBar('Antwort wurde erfolgreich erstellt', 'OK', 2000, false);
         },
         error: error => {
@@ -1100,8 +1059,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.isSubmittingComment$.next(true);
     this.lastSubmittedContent = content;
 
-    console.log('🎬 Processing comment submission:', { submissionId: this.submissionId, isInitialComment });
-
     // Submit comment via backend
     this.stateService.activeCategory$
       .pipe(
@@ -1120,8 +1077,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: comment => {
-          console.log('✅ Comment added successfully:', comment);
-
           // Show success message
           const message = isInitialComment
             ? 'Schriftliche Bewertung erfolgreich abgegeben - Diskussion freigeschaltet!'
@@ -1143,8 +1098,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   onCommentVoted(data: { commentId: string; voteType: 'UP' | null }): void {
-    console.log('🗳️ Vote action triggered:', data);
-
     // Prevent voting if already in progress for this comment
     if (this.isVotingComment.get(data.commentId)) {
       return;
@@ -1163,15 +1116,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         return;
       }
 
-      console.log('📊 Voting in category:', categoryId);
-
       this.stateService
         .voteCommentWithEnhancedLimits(data.commentId, data.voteType, categoryId)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: result => {
-            console.log('✅ Vote successful:', result);
-
             const action =
               data.voteType === 'UP'
                 ? 'positiv bewertet'
@@ -1187,10 +1136,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
             // 🚨 CRITICAL FIX: Force refresh vote status to ensure UI updates
             if (result.voteLimitStatus && this.submissionId) {
-              console.log('🔄 Forcing vote status refresh after successful vote');
               this.stateService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe({
                 next: () => {
-                  console.log('✅ Vote status refreshed successfully');
                   this.cdr.markForCheck(); // Force change detection
                 },
                 error: (error) => console.error('❌ Failed to refresh vote status:', error)
@@ -1221,21 +1168,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Enhanced validation and logging
-    console.log('📊 Processing rating submission:', {
-      categoryId: data.categoryId,
-      score: data.score,
-      submissionId: this.submissionId,
-      timestamp: new Date().toISOString()
-    });
-
     this.stateService
       .submitRating(this.submissionId, data.categoryId, data.score)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: rating => {
-          console.log('✅ Rating submitted successfully:', rating);
-
           // Update rating status in state service for reactive updates
           // This triggers the centralized state update with category isolation
           this.stateService.updateCategoryRatingStatus(this.submissionId!, data.categoryId, data.score);
@@ -1245,7 +1182,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             if (this.submissionId) {
               const anonymousUser = this.stateService.getUserId();
               if (anonymousUser) {
-                console.log('🔄 Refreshing rating status from backend after submission');
                 this.stateService.refreshRatingStatus(this.submissionId, anonymousUser);
               }
             }
@@ -1303,17 +1239,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('🗑️ Processing rating deletion:', {
-      categoryId: data.categoryId,
-      submissionId: this.submissionId,
-      timestamp: new Date().toISOString()
-    });
-
     // Call backend to delete rating from database
     this.stateService.deleteCategoryRating(this.submissionId!, data.categoryId).subscribe({
       next: () => {
-        console.log('✅ Rating deletion completed successfully');
-
         // Show success message
         this.snackBar.open(
           `Bewertung wurde erfolgreich gelöscht`,
@@ -1354,8 +1282,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @memberof EvaluationDiscussionForumComponent
    */
   onDiscussionAccessGranted(data: { categoryId: number }): void {
-    console.log('🔓 Discussion access granted for category:', data.categoryId);
-
     // State is now automatically updated through reactive observables
 
     // Show success message
@@ -1508,8 +1434,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @param categoryId - Optional category to select
    */
   navigateToSubmission(submissionId: string, categoryId?: number): void {
-    console.log('🧩 Navigating to submission:', { submissionId, categoryId });
-
     this.navigationService.navigateToSubmission(submissionId, categoryId)
       .then(success => {
         if (success) {
@@ -1627,13 +1551,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   onResetRating(): void {
     this.activeCategory$.pipe(take(1)).subscribe(activeCategory => {
       if (activeCategory && this.submissionId) {
-        console.log('🔄 Deleting rating for category:', activeCategory);
-
         // Call the backend to actually delete the rating from database
         this.stateService.deleteCategoryRating(this.submissionId, activeCategory).subscribe({
           next: () => {
-            console.log('✅ Rating deletion completed successfully');
-
             // Wait for the state to propagate, then update UI
             setTimeout(() => {
               // Enable rating panel for new input and expand it
@@ -1644,13 +1564,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               // Reset the rating slider state to unrated
               if (this.ratingSlider) {
                 this.ratingSlider.resetSliderState();
-                console.log('🔄 Rating slider state reset completed');
               }
 
               // Force change detection
               this.cdr.markForCheck();
-
-              console.log('🔄 UI states updated after rating deletion');
             }, 100); // Small delay to ensure state propagation
 
             // Show success message immediately
@@ -1729,12 +1646,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   ): void {
     // Close any existing SnackBar first
     if (this.currentSnackBarRef) {
-      console.log('🔄 Closing existing SnackBar');
       this.currentSnackBarRef.dismiss();
     }
 
     // Open new SnackBar with explicit reference
-    console.log('📢 Opening SnackBar:', { message, action, duration, isError });
     this.currentSnackBarRef = this.snackBar.open(message, action, {
       duration: duration,
       horizontalPosition: 'center',
@@ -1744,13 +1659,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // Explicit action handler
     this.currentSnackBarRef.onAction().subscribe(() => {
-      console.log('🔘 SnackBar action clicked');
       this.currentSnackBarRef = null;
     });
 
     // Auto-dismiss handler
     this.currentSnackBarRef.afterDismissed().subscribe(() => {
-      console.log('📴 SnackBar dismissed');
       this.currentSnackBarRef = null;
     });
   }
@@ -1764,8 +1677,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * Handles PDF download from the main header button
    */
   onDownloadPdf(): void {
-    console.log('📄 Download PDF requested');
-    
     // Get current view model data
     this.viewModel$.pipe(take(1)).subscribe(vm => {
       if (vm.submission?.pdfMetadata?.downloadUrl) {
@@ -1792,8 +1703,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      console.log('✅ PDF download initiated for:', title);
+
       this.showSnackBar('PDF-Download gestartet', 'OK', 2000, false);
     } catch (error) {
       console.error('❌ PDF download failed:', error);
@@ -1841,15 +1751,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @memberof EvaluationDiscussionForumComponent
    */
   onNavigateToPrevious(): void {
-    console.log('⬅️ Forum Component: Navigating to previous submission');
-
     // Set loading state
     this.globalStateService.setGlobalLoading(true);
 
     this.activeCategory$.pipe(
       take(1),
       switchMap(currentCategory => {
-        console.log('🎯 Current category for navigation:', currentCategory);
         // Convert Promise to Observable for proper RxJS cleanup (convert null to undefined)
         return from(this.navigationService.navigateToAdjacentSubmission('previous', currentCategory ?? undefined));
       }),
@@ -1882,15 +1789,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @memberof EvaluationDiscussionForumComponent
    */
   onNavigateToNext(): void {
-    console.log('➡️ Forum Component: Navigating to next submission');
-
     // Set loading state
     this.globalStateService.setGlobalLoading(true);
 
     this.activeCategory$.pipe(
       take(1),
       switchMap(currentCategory => {
-        console.log('🎯 Current category for navigation:', currentCategory);
         // Convert Promise to Observable for proper RxJS cleanup (convert null to undefined)
         return from(this.navigationService.navigateToAdjacentSubmission('next', currentCategory ?? undefined));
       }),

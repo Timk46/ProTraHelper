@@ -185,7 +185,6 @@ export class EvaluationPerformanceService {
     };
 
     this.componentProfilingMap.set(componentName, profiling);
-    console.log(`🚀 Started profiling component: ${componentName}`);
   }
 
   /**
@@ -538,13 +537,14 @@ export class EvaluationPerformanceService {
    * Initializes performance monitoring systems
    */
   private initializePerformanceMonitoring(): void {
-    console.log('🚀 Initializing performance monitoring for evaluation forum');
     this.isProfilingActive = true;
 
-    // Set up performance mark cleanup
-    setInterval(() => {
-      this.cleanupPerformanceMarks();
-    }, 60000); // Cleanup every minute
+    // ⚡ PERFORMANCE: Defer cleanup interval start
+    setTimeout(() => {
+      setInterval(() => {
+        this.cleanupPerformanceMarks();
+      }, 60000); // Cleanup every minute
+    }, 60000); // Start after 60 seconds
   }
 
   /**

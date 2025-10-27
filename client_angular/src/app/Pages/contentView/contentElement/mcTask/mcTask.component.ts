@@ -7,8 +7,6 @@ import {
   Output,
   Optional,
   ChangeDetectionStrategy,
-  ViewChild,
-  ElementRef,
 } from '@angular/core';
 import {
   MCOptionViewDTO,
@@ -54,8 +52,6 @@ export class McTaskComponent implements OnInit, OnDestroy {
   @Input() isSelfAssessment: boolean = false;
   @Input() taskViewData!: TaskViewData;
   @Input() collectionMode: boolean = false;
-
-  @ViewChild('feedbackSection') feedbackSection?: ElementRef<HTMLElement>;
 
   // Track component state
   componentState: McTaskState = McTaskState.LOADING;
@@ -291,25 +287,7 @@ export class McTaskComponent implements OnInit, OnDestroy {
         }
 
         this.cdr.detectChanges();
-
-        // Auto-scroll to feedback section after DOM update
-        setTimeout(() => {
-          this.scrollToFeedback();
-        }, 100);
       });
-  }
-
-  /**
-   * Scrolls to the feedback section with smooth animation
-   */
-  private scrollToFeedback(): void {
-    if (this.feedbackSection?.nativeElement) {
-      this.feedbackSection.nativeElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'nearest',
-      });
-    }
   }
 
   /**
