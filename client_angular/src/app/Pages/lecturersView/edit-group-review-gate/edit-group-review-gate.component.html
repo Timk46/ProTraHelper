@@ -113,9 +113,20 @@
               </div>
             </div>
 
-            <mat-hint
-              >Bitte vier Kategorien angeben.</mat-hint
-            >
+            <!-- Validierung: Mindestens 4 Kategorien erforderlich -->
+            <div class="category-validation-message"
+                 [class.error]="selectedCategories.length < MIN_REQUIRED_CATEGORIES"
+                 [class.success]="selectedCategories.length >= MIN_REQUIRED_CATEGORIES">
+              <mat-icon *ngIf="selectedCategories.length < MIN_REQUIRED_CATEGORIES" class="validation-icon">error</mat-icon>
+              <mat-icon *ngIf="selectedCategories.length >= MIN_REQUIRED_CATEGORIES" class="validation-icon">check_circle</mat-icon>
+              <span *ngIf="selectedCategories.length < MIN_REQUIRED_CATEGORIES">
+                Mindestens {{ MIN_REQUIRED_CATEGORIES }} Kategorien erforderlich
+                ({{ selectedCategories.length }}/{{ MIN_REQUIRED_CATEGORIES }})
+              </span>
+              <span *ngIf="selectedCategories.length >= MIN_REQUIRED_CATEGORIES">
+                {{ selectedCategories.length }} Kategorien ausgewählt ✓
+              </span>
+            </div>
           </div>
         </form>
 
@@ -160,18 +171,23 @@
       diameter="20"
       mode="indeterminate"
     ></mat-progress-spinner>
-    <button mat-raised-button [disabled]="isSaving" color="primary" (click)="onOverwrite()">
+    <button
+      mat-raised-button
+      [disabled]="!canSave() || isSaving"
+      color="primary"
+      (click)="onOverwrite()"
+      [matTooltip]="!isCategorySelectionValid() ? 'Mindestens ' + MIN_REQUIRED_CATEGORIES + ' Kategorien erforderlich' : ''">
       Speichern (aktualisieren)
     </button>
     <div
-      matTooltip="Die aktuelle Version hat noch keine Daten."
-      [matTooltipDisabled]="!!detailedQuestionData?.freetextQuestion"
+      [matTooltip]="!canSave() && !isCategorySelectionValid() ? 'Mindestens ' + MIN_REQUIRED_CATEGORIES + ' Kategorien erforderlich' :
+                    !detailedQuestionData?.freetextQuestion ? 'Die aktuelle Version hat noch keine Daten.' : ''"
     >
       <button
         mat-raised-button
         color="primary"
         (click)="onSaveNewVersion()"
-        [disabled]="!detailedQuestionData?.freetextQuestion || isSaving || true"
+        [disabled]="!canSave() || !detailedQuestionData?.freetextQuestion || isSaving || true"
       >
         Als neue Version speichern
       </button>

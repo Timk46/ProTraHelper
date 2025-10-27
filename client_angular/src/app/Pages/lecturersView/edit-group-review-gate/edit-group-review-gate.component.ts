@@ -32,6 +32,7 @@ export class EditGroupReviewGateComponent {
   selectedCategories: EvaluationCategoryDTO[] = [];
   selectedCategoryToAdd: EvaluationCategoryDTO | null = null;
   availableCategories: EvaluationCategoryDTO[] = [];
+  readonly MIN_REQUIRED_CATEGORIES = 4;
 
   editorConfig = {
     readonly: false,
@@ -191,6 +192,22 @@ export class EditGroupReviewGateComponent {
     const b = parseInt(hex.substr(4, 2), 16);
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     return brightness > 128 ? '#000000' : '#ffffff';
+  }
+
+  /**
+   * Validates if enough categories are selected
+   * @returns true if validation passes (>= 4 categories), false otherwise
+   */
+  protected isCategorySelectionValid(): boolean {
+    return this.selectedCategories.length >= this.MIN_REQUIRED_CATEGORIES;
+  }
+
+  /**
+   * Checks if the form can be saved
+   * @returns true if form is valid AND enough categories are selected
+   */
+  protected canSave(): boolean {
+    return this.grgForm.valid && this.isCategorySelectionValid();
   }
 
   protected onOverwrite() {
