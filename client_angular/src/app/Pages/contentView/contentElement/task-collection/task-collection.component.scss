@@ -38,8 +38,8 @@ $radius-lg: 13px;
 $radius-xl: 21px;
 
 // Component-Specific Tokens
-$dot-size: 48px;
-$dot-gap: 21px;
+$dot-size: 40px; // Reduziert von 48px für kompakteres Design
+$dot-gap: 26px; // Erhöht von 21px für bessere Klickbarkeit (16 × φ = 26)
 $dot-border-width: 3px;
 $button-height-sm: 48px;
 $button-height-md: 55px;
@@ -143,8 +143,8 @@ $nord-aurora-4: #a3be8c; // Green for completed tasks
 .progress-dots {
   display: flex;
   justify-content: center;
-  gap: $dot-gap; // 21px (Fibonacci) - more breathing room
-  margin: $space-xl 0 $space-lg 0; // 55px top, 34px bottom (increased top margin)
+  gap: $dot-gap; // 26px (Golden Ratio: 16 × φ)
+  margin: $space-lg 0 $space-xs 0; // 34px top, 8px bottom (optimiert für kompaktes Design)
   flex-wrap: wrap; // Allow dots to wrap on smaller screens
 
   .progress-dot {
