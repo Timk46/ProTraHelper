@@ -1433,11 +1433,8 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       commentLength: commentContent.length,
     });
 
-    // Mark this category as commented in the state service
-    this.stateService.markCategoryAsCommented(
-      this.currentCategory.id,
-      this.submissionId.toString()
-    );
+    // Status will be automatically set via tap() after successful backend call
+    // No premature optimistic update to prevent inconsistent state on errors
 
     // Emit the comment to parent for actual submission
     this.commentSubmitted.emit({

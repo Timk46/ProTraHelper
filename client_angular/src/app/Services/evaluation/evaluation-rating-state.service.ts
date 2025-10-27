@@ -203,6 +203,14 @@ export class EvaluationRatingStateService implements OnDestroy {
   }
 
   /**
+   * Gets the current category rating status map synchronously
+   * @returns The current Map of category rating statuses
+   */
+  getCurrentCategoryRatingStatusMap(): Map<number, CategoryRatingStatus> {
+    return this.categoryRatingStatusSubject.value;
+  }
+
+  /**
    * Updates rating status for a category after rating submission
    *
    * @description
@@ -332,6 +340,67 @@ export class EvaluationRatingStateService implements OnDestroy {
         const rating = ratings.find(r => r.categoryId === categoryId);
         return rating || null;
       })
+    );
+  }
+
+  /**
+   * Deletes a category rating both locally and on the backend
+   *
+   * @description
+   * This method calls the backend to delete the rating from the database,
+   * then updates the local state to reflect the deletion. This ensures the
+   * rating is completely removed and can be re-submitted.
+   *
+   * @param submissionId - The submission ID
+   * @param categoryId - The category ID to delete rating for
+   * @returns Observable<void> that completes when deletion is successful
+   * @since 2.0.0
+   */
+  deleteCategoryRating(submissionId: string, categoryId: number): Observable<void> {
+    this.log.info('Deleting category rating', { submissionId, categoryId });
+
+    // Call backend to delete rating from database
+    return this.evaluationService.deleteUserRating(submissionId, categoryId).pipe(
+      tap(response => {
+        this.log.info('Backend deletion successful', { response });
+
+        // Update local state after successful backend deletion
+        const currentStatusMap = this.categoryRatingStatusSubject.value;
+        const existingStatus = currentStatusMap.get(categoryId);
+
+        if (existingStatus) {
+          // Create updated status with rating removed
+          const updatedStatus: CategoryRatingStatus = {
+            ...existingStatus,
+            hasRated: false,
+            rating: null,
+            ratedAt: null,
+            lastUpdatedAt: new Date(),
+            canAccessDiscussion: false, // Remove discussion access when rating is deleted
+          };
+
+          // Create new map to ensure immutability
+          const newStatusMap = new Map(currentStatusMap);
+          newStatusMap.set(categoryId, updatedStatus);
+
+          // Atomic update
+          this.categoryRatingStatusSubject.next(newStatusMap);
+
+          // Also update ratingsSubject to remove the deleted rating
+          const currentRatings = this.ratingsSubject.value;
+          const updatedRatings = currentRatings.filter(
+            rating => !(rating.categoryId === categoryId && String(rating.submissionId) === submissionId)
+          );
+          this.ratingsSubject.next(updatedRatings);
+
+          this.log.info('Local state updated after rating deletion', {
+            deletedCategoryId: categoryId,
+            totalCategoriesInMap: newStatusMap.size,
+            ratingsRemoved: currentRatings.length - updatedRatings.length
+          });
+        }
+      }),
+      map(() => void 0) // Convert to void observable
     );
   }
 

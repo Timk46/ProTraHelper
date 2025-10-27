@@ -64,8 +64,10 @@ export class EvaluationDiscussionStateService implements OnDestroy {
   /**
    * Tracks whether user has commented in each category
    * Key: categoryId, Value: hasCommented (boolean)
+   *
+   * @access public - Accessible by EvaluationStateService for direct backend loading
    */
-  private categoryCommentStatusSubject = new BehaviorSubject<Map<number, boolean>>(new Map());
+  readonly categoryCommentStatusSubject = new BehaviorSubject<Map<number, boolean>>(new Map());
 
   /**
    * Observable stream of comment status per category
@@ -110,14 +112,15 @@ export class EvaluationDiscussionStateService implements OnDestroy {
    *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
+   * @param anonymousUserId - Optional anonymous user ID for comment status detection
    * @returns Observable<EvaluationDiscussionDTO[]> Stream of discussions
    */
-  getDiscussions(submissionId: string, categoryId: number): Observable<EvaluationDiscussionDTO[]> {
+  getDiscussions(submissionId: string, categoryId: number, anonymousUserId?: number): Observable<EvaluationDiscussionDTO[]> {
     const subject = this.cache.getDiscussionCache(categoryId);
 
     // Load discussions if cache is empty
     if (subject.value.length === 0) {
-      this.loadDiscussionsForCategory(submissionId, categoryId);
+      this.loadDiscussionsForCategory(submissionId, categoryId, anonymousUserId);
     }
 
     return subject.asObservable();
@@ -132,12 +135,26 @@ export class EvaluationDiscussionStateService implements OnDestroy {
    *
    * @param submission$ - Observable of current submission
    * @param activeCategory$ - Observable of active category ID
+   * @param anonymousUserId$ - Optional observable of anonymous user ID for comment status detection
    * @returns Observable<EvaluationDiscussionDTO[]> Stream of active discussions
    */
   getActiveDiscussions$(
     submission$: Observable<{ id: string | number } | null>,
-    activeCategory$: Observable<number | null>
+    activeCategory$: Observable<number | null>,
+    anonymousUserId$?: Observable<number | null>
   ): Observable<EvaluationDiscussionDTO[]> {
+    // If anonymousUserId$ is provided, combine it with submission and category
+    if (anonymousUserId$) {
+      return combineLatest([submission$, activeCategory$, anonymousUserId$]).pipe(
+        switchMap(([submission, categoryId, userId]) => {
+          if (!submission || categoryId === null) return of([]);
+          return this.getDiscussions(String(submission.id), categoryId, userId ?? undefined);
+        }),
+        shareReplay(1),
+      );
+    }
+
+    // Fallback to original behavior without anonymousUserId
     return combineLatest([submission$, activeCategory$]).pipe(
       switchMap(([submission, categoryId]) => {
         if (!submission || categoryId === null) return of([]);
@@ -152,11 +169,12 @@ export class EvaluationDiscussionStateService implements OnDestroy {
    *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
+   * @param anonymousUserId - Optional anonymous user ID for comment status detection
    */
-  refreshDiscussions(submissionId: string, categoryId: number): void {
+  refreshDiscussions(submissionId: string, categoryId: number, anonymousUserId?: number): void {
     this.log.info('Refreshing discussions', { submissionId, categoryId });
     this.cache.clearDiscussionCache(categoryId);
-    this.loadDiscussionsForCategory(submissionId, categoryId);
+    this.loadDiscussionsForCategory(submissionId, categoryId, anonymousUserId);
   }
 
   /**
@@ -223,6 +241,42 @@ export class EvaluationDiscussionStateService implements OnDestroy {
     });
   }
 
+  /**
+   * Detects if user has already commented by analyzing loaded discussions
+   *
+   * @description
+   * Scans through discussions to check if any comment was authored by the given user.
+   * If found, automatically updates the comment status for the category.
+   * This method is called after discussions are loaded to sync state with backend data.
+   *
+   * @param categoryId - The category ID to check
+   * @param discussions - Loaded discussions to analyze
+   * @param anonymousUserId - The anonymous user ID to check for
+   */
+  detectCommentStatusFromDiscussions(
+    categoryId: number,
+    discussions: EvaluationDiscussionDTO[],
+    anonymousUserId: number
+  ): void {
+    const hasUserCommented = discussions.some(discussion =>
+      discussion.comments.some(comment => comment.authorId === anonymousUserId)
+    );
+
+    if (hasUserCommented) {
+      const currentStatusMap = new Map(this.categoryCommentStatusSubject.value);
+      // Only update if not already marked to avoid unnecessary emissions
+      if (!currentStatusMap.get(categoryId)) {
+        currentStatusMap.set(categoryId, true);
+        this.categoryCommentStatusSubject.next(currentStatusMap);
+        this.log.info('Comment status detected from discussions', {
+          categoryId,
+          anonymousUserId,
+          discussionCount: discussions.length,
+        });
+      }
+    }
+  }
+
   // =============================================================================
   // PUBLIC API - DISCUSSION UPDATES
   // =============================================================================
@@ -284,9 +338,10 @@ export class EvaluationDiscussionStateService implements OnDestroy {
    *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
+   * @param anonymousUserId - Optional anonymous user ID for comment status detection
    * @private
    */
-  private loadDiscussionsForCategory(submissionId: string, categoryId: number): void {
+  private loadDiscussionsForCategory(submissionId: string, categoryId: number, anonymousUserId?: number): void {
     // Prevent concurrent loading of the same category
     if (this.categoryLoadingStates.get(categoryId)) {
       this.log.debug('Category already loading, skipping', { categoryId });
@@ -310,6 +365,12 @@ export class EvaluationDiscussionStateService implements OnDestroy {
             this.commentIdToCategoryIdMap.set(String(comment.id), categoryId);
           });
         });
+
+        // Detect comment status from loaded discussions (like DEPRECATED version)
+        // This ensures status is set immediately after discussions are loaded from backend
+        if (anonymousUserId && discussions.length > 0) {
+          this.detectCommentStatusFromDiscussions(categoryId, discussions, anonymousUserId);
+        }
 
         this.log.info('Discussions loaded successfully', {
           categoryId,
