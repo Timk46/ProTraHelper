@@ -641,9 +641,9 @@ export class EvaluationRatingService {
         categoryName: sessionCategory.category.name,
         displayName: sessionCategory.category.displayName,
         hasRated,
-        rating: categoryRating.rating ?? null,
-        ratedAt: categoryRating.createdAt ?? null,
-        lastUpdatedAt: categoryRating.updatedAt ?? new Date(), // Always provide lastUpdatedAt for cache validation
+        rating: categoryRating?.rating ?? null,
+        ratedAt: categoryRating?.createdAt ?? null,
+        lastUpdatedAt: categoryRating?.updatedAt ?? null, // null when not rated (semantically correct)
         canAccessDiscussion: hasRated, // User can access discussion if they've rated
         isRequired: true, // All categories require rating for discussion access
       };

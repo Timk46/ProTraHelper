@@ -13,6 +13,31 @@
     <button mat-raised-button color="primary" (click)="onRefresh()">Erneut versuchen</button>
   </div>
 
+  <!-- Backend Health Warning Banner -->
+  <div class="backend-health-warning" *ngIf="!vm.loading && !vm.error && !vm.backendHealth.isHealthy">
+    <mat-icon class="warning-icon">warning</mat-icon>
+    <div class="warning-content">
+      <h3>Verbindungsprobleme erkannt</h3>
+      <p>
+        Die Bewertungsstatus-Daten konnten nicht vollständig geladen werden.
+        Ihre bereits abgegebenen Bewertungen sind gespeichert, werden aber möglicherweise nicht korrekt angezeigt.
+      </p>
+      <p class="error-details" *ngIf="vm.backendHealth.lastError">
+        <strong>Fehlerdetails:</strong> {{ vm.backendHealth.lastError }}
+      </p>
+      <div class="warning-actions">
+        <button mat-raised-button color="primary" (click)="onRetryRatingStatusLoad()">
+          <mat-icon>refresh</mat-icon>
+          Erneut versuchen
+        </button>
+        <button mat-stroked-button (click)="onRefresh()">
+          <mat-icon>cached</mat-icon>
+          Seite neu laden
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Main Content -->
   <div class="evaluation-forum-container" *ngIf="!vm.loading && !vm.error">
     <!-- Header Section -->

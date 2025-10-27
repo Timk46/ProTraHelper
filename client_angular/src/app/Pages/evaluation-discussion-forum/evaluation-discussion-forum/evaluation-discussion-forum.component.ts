@@ -35,11 +35,9 @@ import {
   EvaluationDiscussionDTO,
   EvaluationCommentDTO,
   EvaluationPhase,
-  EvaluationStatus,
   CommentStatsDTO,
   AnonymousEvaluationUserDTO,
   RatingStatsDTO,
-  globalRole,
 } from '@DTOs/index';
 
 // Services
@@ -221,6 +219,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     loading: boolean;
     error: string | null;
     isSubmittingComment: boolean;
+    backendHealth: {
+      isHealthy: boolean;
+      lastError: string | null;
+      lastChecked: Date | null;
+    };
   }>;
 
   // 🛠️ NEW: Separate observable for vote-related data
@@ -296,6 +299,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     );
 
+    // Backend health stream for rating status monitoring
+    const backendHealth$ = this.stateService.backendHealth$.pipe(
+      startWith({ isHealthy: true, lastError: null, lastChecked: null }),
+      takeUntil(this.destroy$)
+    );
+
     // 🔧 MEMORY SAFE: Derived streams with proper cleanup
     this.isDiscussionPhase$ = this.currentPhase$.pipe(
       map(phase => phase === EvaluationPhase.DISCUSSION),
@@ -350,6 +359,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       this.loading$,
       this.error$,
       this.isSubmittingComment$,
+      backendHealth$,
     ]).pipe(
       map(
         ([
@@ -368,6 +378,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           loading,
           error,
           isSubmittingComment,
+          backendHealth,
         ]) => {
           return {
             submission,
@@ -385,16 +396,17 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             loading,
             error,
             isSubmittingComment,
+            backendHealth,
           };
         }
       ),
-      // 🚀 OPTIMIZED: Enhanced distinctUntilChanged comparing ALL 15 fields
+      // 🚀 OPTIMIZED: Enhanced distinctUntilChanged comparing ALL 16 fields
       //
       // BEFORE: Only 5 of 15 fields compared
       //   - Unnecessary re-renders when unchanged fields emit
       //   - Performance: ~40-60% of renders were unnecessary
       //
-      // AFTER: All 15 fields compared for complete equality check
+      // AFTER: All 16 fields compared for complete equality check (including backendHealth)
       //   - Only re-renders when actual meaningful changes occur
       //   - Performance: ~40-50% fewer render cycles
       //
@@ -415,7 +427,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
                prev.canRate === curr.canRate &&
                prev.loading === curr.loading &&
                prev.error === curr.error &&
-               prev.isSubmittingComment === curr.isSubmittingComment;
+               prev.isSubmittingComment === curr.isSubmittingComment &&
+               prev.backendHealth.isHealthy === curr.backendHealth.isHealthy &&
+               prev.backendHealth.lastError === curr.backendHealth.lastError;
       }),
       shareReplay(1), // Avoid multiple subscriptions
       takeUntil(this.destroy$) // 🔧 MEMORY SAFE: Prevent memory leak
@@ -1177,15 +1191,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           // This triggers the centralized state update with category isolation
           this.stateService.updateCategoryRatingStatus(this.submissionId!, data.categoryId, data.score);
 
-          // BUGFIX: Force refresh from backend after a brief delay to ensure cache consistency
-          setTimeout(() => {
-            if (this.submissionId) {
-              const anonymousUser = this.stateService.getUserId();
-              if (anonymousUser) {
-                this.stateService.refreshRatingStatus(this.submissionId, anonymousUser);
-              }
-            }
-          }, 500); // 500ms delay to allow backend cache invalidation to complete
+          // ✅ NO REFRESH NEEDED: Backend refresh removed to avoid 500 errors
+          // Rating is persisted in DB and will be loaded on next category switch
+          // or page reload (with retry mechanism)
 
           // Hide rating panel and collapse to show completed state
           this.showRatingPanel = false;
@@ -1828,5 +1836,25 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    */
   getSubmissionNavigationInfo(): Observable<any> {
     return this.submissionNavigationInfo$;
+  }
+
+  /**
+   * Retries loading rating status after backend health issue
+   *
+   * @description Called by user action (retry button click) to attempt
+   * reloading rating status data from the backend after a failure
+   * @memberof EvaluationDiscussionForumComponent
+   */
+  onRetryRatingStatusLoad(): void {
+    const submissionId = this.submissionId;
+    const anonymousUser = this.stateService.getUserId();
+
+    if (!submissionId || !anonymousUser) {
+      this.showErrorMessage('Kann Rating Status nicht neu laden. Bitte Seite aktualisieren.', 'OK');
+      return;
+    }
+
+    this.stateService.retryRatingStatusLoad(submissionId, anonymousUser);
+    this.showInfoMessage('Rating Status wird neu geladen...', 'OK');
   }
 }

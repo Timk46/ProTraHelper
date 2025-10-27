@@ -235,23 +235,23 @@ enum filePrivacy {
 }
 
 model File {
-  id                   Int                   @id @default(autoincrement())
-  uniqueIdentifier     String                @unique
-  name                 String
-  path                 String
-  type                 String
-  privacy              filePrivacy           @default(PRIVATE)
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  questionId           Int?
-  mCAnswerId           Int?
-  contentElementId     Int?
-  contentElement       ContentElement?
-  MCAnswer             MCOption?             @relation(fields: [mCAnswerId], references: [id])
-  question             Question?             @relation(fields: [questionId], references: [id])
-  TranscriptEmbeddings TranscriptEmbedding[]
-  fileUploads          FileUpload[]
-  conceptNodesWithRhino ConceptNode[]        @relation("ConceptRhinoFile")
+  id                    Int                   @id @default(autoincrement())
+  uniqueIdentifier      String                @unique
+  name                  String
+  path                  String
+  type                  String
+  privacy               filePrivacy           @default(PRIVATE)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+  questionId            Int?
+  mCAnswerId            Int?
+  contentElementId      Int?
+  contentElement        ContentElement?
+  MCAnswer              MCOption?             @relation(fields: [mCAnswerId], references: [id])
+  question              Question?             @relation(fields: [questionId], references: [id])
+  TranscriptEmbeddings  TranscriptEmbedding[]
+  fileUploads           FileUpload[]
+  conceptNodesWithRhino ConceptNode[]         @relation("ConceptRhinoFile")
 }
 
 model ContentView {

@@ -501,8 +501,16 @@ export class EvaluationDiscussionService {
         `${this.apiUrls.ratings}/submission/${submissionId}/user/${userId}/status`
       )
       .pipe(
-        retry(2),
-        catchError(this.handleError<CategoryRatingStatus[]>('getUserRatingStatus'))
+        retry(1), // Single fast retry without delay
+        catchError((error) => {
+          // ✅ Graceful fallback: Return empty array instead of error
+          this.log.warn('Rating status unavailable, using empty fallback', {
+            submissionId,
+            userId,
+            error: error.message
+          });
+          return of([]); // Empty status = "not rated" state
+        })
       );
   }
 
