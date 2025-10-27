@@ -50,7 +50,7 @@
       <div *ngIf="hasDiscussions()" class="discussion-viewport-debug">
         <!-- Flattened Comment Items WITHOUT Virtual Scrolling -->
         <div
-          *ngFor="let item of flattenedComments; trackBy: trackByFlattenedComment"
+          *ngFor="let item of flattenedComments; let i = index; trackBy: trackByFlattenedComment"
           class="virtual-item"
           [ngSwitch]="item.type"
         >
@@ -61,12 +61,13 @@
             </p>
           </div>
 
-          <!-- Individual Comment -->
+          <!-- Individual Comment - WITH VISIBILITY CONTROL -->
           <!-- Only render the container div when we actually have content to show -->
           <div
             *ngSwitchCase="'comment'"
             class="comment-item-container"
             [style.margin-left.px]="getCommentIndentation(item.depth)"
+            [hidden]="!shouldShowReply(item, i)"
           >
             <app-comment-item
               [comment]="item.comment!"
@@ -81,11 +82,12 @@
             </app-comment-item>
           </div>
 
-          <!-- 🚀 PHASE 3: Reply Input Case -->
+          <!-- 🚀 PHASE 3: Reply Input Case - WITH VISIBILITY CONTROL -->
           <div
             *ngSwitchCase="'comment-input'"
             class="reply-input-item-container"
             [style.margin-left.px]="getCommentIndentation(item.depth)"
+            [hidden]="!shouldShowReply(item, i)"
           >
             <app-comment-input
               [parentCommentId]="item.parentCommentId!.toString()"

@@ -823,17 +823,11 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
         comment,
       });
 
-      // Add replies if they exist AND the panel is expanded (using Backend replies[])
+      // Add replies if they exist (visibility controlled by template/CSS)
       const backendReplies = comment.replies || [];
       if (backendReplies.length > 0) {
-        // Check if the panel for this comment is expanded
-        const isPanelExpanded = this.commentPanelStateService.isPanelExpanded(comment.id.toString());
-
-        if (isPanelExpanded) {
-          const flattenedReplies = this.flattenCommentsFromBackend(backendReplies, depth + 1);
-          flattened.push(...flattenedReplies);
-        }
-
+        const flattenedReplies = this.flattenCommentsFromBackend(backendReplies, depth + 1);
+        flattened.push(...flattenedReplies);
       }
 
       // 🚀 PHASE 2: Add reply-input item if active for this comment
@@ -1028,6 +1022,51 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
    */
   getCommentIndentation(depth: number): number {
     return Math.min(depth * 24, 120); // Max 5 levels deep
+  }
+
+  /**
+   * Determines if a reply should be visible based on parent panel state
+   *
+   * @description
+   * - Top-level comments (depth = 0): Always visible
+   * - Discussion headers: Always visible
+   * - Replies (depth > 0): Only visible if parent comment's panel is expanded
+   *
+   * This method enables the expand/collapse functionality for reply panels by
+   * controlling visibility based on the CommentPanelStateService state.
+   *
+   * @param item The flattened comment item to check
+   * @param index Current index in flattenedComments array (used to find parent)
+   * @returns True if item should be visible, false otherwise
+   */
+  shouldShowReply(item: FlattenedComment, index: number): boolean {
+    // Top-level comments are always visible
+    if (item.depth === 0) {
+      return true;
+    }
+
+    // Discussion headers are always visible
+    if (item.type === 'discussion-header') {
+      return true;
+    }
+
+    // For replies (depth > 0), check if parent panel is expanded
+    // Find parent comment by looking backwards in array until we find a comment at depth - 1
+    for (let i = index - 1; i >= 0; i--) {
+      const potentialParent = this.flattenedComments[i];
+
+      // Parent must be exactly one depth level above current item
+      if (potentialParent.depth === item.depth - 1 && potentialParent.type === 'comment') {
+        const parentCommentId = potentialParent.comment!.id.toString();
+        const isExpanded = this.commentPanelStateService.isPanelExpanded(parentCommentId);
+
+        return isExpanded;
+      }
+    }
+
+    // Fallback: Hide orphaned replies (no parent found)
+    // This should never happen in normal operation, but provides safety
+    return false;
   }
 
   /**

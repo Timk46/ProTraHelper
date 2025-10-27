@@ -31,9 +31,10 @@ type PrismaTransaction = Omit<
 >;
 
 /**
- * Type definition for comment with all required relations for DTO mapping
+ * Type definition for nested reply structure (level 2)
+ * Used for replies to replies (grandchildren)
  */
-type CommentWithRelations = Prisma.EvaluationCommentGetPayload<{
+type NestedReply = Prisma.EvaluationCommentGetPayload<{
   include: {
     user: {
       select: {
@@ -52,7 +53,130 @@ type CommentWithRelations = Prisma.EvaluationCommentGetPayload<{
 }>;
 
 /**
+ * Type definition for direct reply structure (level 1)
+ * Includes nested replies up to 1 level deep
+ */
+type DirectReply = Prisma.EvaluationCommentGetPayload<{
+  include: {
+    user: {
+      select: {
+        id: true;
+        firstname: true;
+        lastname: true;
+      };
+    };
+    EvaluationCommentVote: true;
+    _count: {
+      select: {
+        replies: true;
+      };
+    };
+    replies: {
+      include: {
+        user: {
+          select: {
+            id: true;
+            firstname: true;
+            lastname: true;
+          };
+        };
+        EvaluationCommentVote: true;
+        _count: {
+          select: {
+            replies: true;
+          };
+        };
+      };
+    };
+  };
+}>;
+
+/**
+ * Type definition for top-level comment with all required relations for DTO mapping
+ * Includes nested replies up to 2 levels deep (Comment → Reply → Reply-on-Reply)
+ */
+type CommentWithRelations = Prisma.EvaluationCommentGetPayload<{
+  include: {
+    user: {
+      select: {
+        id: true;
+        firstname: true;
+        lastname: true;
+      };
+    };
+    EvaluationCommentVote: true;
+    _count: {
+      select: {
+        replies: true;
+      };
+    };
+    replies: {
+      include: {
+        user: {
+          select: {
+            id: true;
+            firstname: true;
+            lastname: true;
+          };
+        };
+        EvaluationCommentVote: true;
+        _count: {
+          select: {
+            replies: true;
+          };
+        };
+        replies: {
+          include: {
+            user: {
+              select: {
+                id: true;
+                firstname: true;
+                lastname: true;
+              };
+            };
+            EvaluationCommentVote: true;
+            _count: {
+              select: {
+                replies: true;
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}>;
+
+/**
+ * Include pattern for nested replies (2 levels deep for performance)
+ * Used recursively to load reply chains: Comment → Reply → Reply-on-Reply
+ */
+const NESTED_REPLY_INCLUDE = {
+  user: {
+    select: {
+      id: true,
+      firstname: true,
+      lastname: true,
+    },
+  },
+  EvaluationCommentVote: true,
+  _count: {
+    select: {
+      replies: true,
+    },
+  },
+};
+
+/**
  * Standard include pattern for fetching comments with all required relations
+ * Including nested replies up to 2 levels deep (Comment → Reply → Reply-on-Reply)
+ *
+ * @description
+ * - Level 0: Top-level comments with votes and user
+ * - Level 1: Direct replies to comments (with votes and user)
+ * - Level 2: Replies to replies (with votes and user)
+ *
+ * Performance: Max 2 levels to prevent excessive data loading
  */
 const COMMENT_INCLUDE_WITH_RELATIONS = {
   user: {
@@ -68,7 +192,27 @@ const COMMENT_INCLUDE_WITH_RELATIONS = {
       replies: true,
     },
   },
-} as const;
+  replies: {
+    include: {
+      user: {
+        select: {
+          id: true,
+          firstname: true,
+          lastname: true,
+        },
+      },
+      EvaluationCommentVote: true,
+      _count: {
+        select: {
+          replies: true,
+        },
+      },
+      replies: {
+        include: NESTED_REPLY_INCLUDE,
+      },
+    },
+  },
+};
 
 @Injectable()
 export class EvaluationCommentService {
@@ -217,7 +361,7 @@ export class EvaluationCommentService {
     return replies.map(reply => this.mapToCommentDTO(reply, userId));
   }
 
-  private mapToCommentDTO(comment: CommentWithRelations, userId: number): EvaluationCommentDTO {
+  private mapToCommentDTO(comment: CommentWithRelations | DirectReply | NestedReply, userId: number): EvaluationCommentDTO {
     // Calculate vote statistics for ranking system
     // In ranking system, all votes are positive (upvotes), so sum all voteCount values
     const upVotes =
@@ -269,7 +413,11 @@ export class EvaluationCommentService {
         score: upVotes,
       },
       userVoteCount,
-      replies: [], // Will be populated by caller if needed
+      // Recursively map nested replies (up to 2 levels deep from include)
+      // Type assertion needed because NestedReply doesn't have replies property
+      replies: ('replies' in comment && Array.isArray(comment.replies))
+        ? comment.replies.map(reply => this.mapToCommentDTO(reply, userId))
+        : [],
       replyCount: comment._count?.replies || 0,
     };
   }

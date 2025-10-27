@@ -3,8 +3,6 @@ import { Observable, BehaviorSubject, Subject, combineLatest, of } from 'rxjs';
 import {
   map,
   distinctUntilChanged,
-  switchMap,
-  shareReplay,
   takeUntil,
   take,
   tap,
@@ -24,12 +22,8 @@ import {
   VoteLimitStatusDTO,
   EvaluationDiscussionDTO,
   EvaluationCommentDTO,
-  CreateEvaluationCommentDTO,
   EvaluationRatingDTO,
-  CreateEvaluationRatingDTO,
-  RatingStatsDTO,
-  EvaluationPhase,
-  VoteType,
+  RatingStatsDTO
 } from '@DTOs/index';
 
 // Services
