@@ -329,6 +329,22 @@ export class VoteUIStateService implements OnDestroy {
     console.log(`${isVoting ? '⏳' : '✅'} VoteUIStateService: Voting state for ${commentId} = ${isVoting}`);
   }
 
+  /**
+   * Clears debounce state for a comment to allow immediate voting
+   *
+   * @description
+   * Removes the timestamp entry from clickDebouncer Map so that
+   * shouldDebounce() will not block subsequent vote attempts.
+   * This should be called when a vote operation completes to
+   * prevent the debouncer from blocking immediate re-votes.
+   *
+   * @param commentId - Comment identifier (number)
+   */
+  clearDebounceState(commentId: number): void {
+    this.clickDebouncer.delete(commentId);
+    console.log(`🧹 VoteUIStateService: Cleared debounce state for ${commentId}`);
+  }
+
   // =============================================================================
   // PUBLIC API - UI HELPERS (Layer 4)
   // =============================================================================

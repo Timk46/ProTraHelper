@@ -4,7 +4,7 @@ import { retry, catchError, takeUntil } from 'rxjs/operators';
 
 // Services
 import { EvaluationStateService } from './evaluation-state.service';
-import { LegacyVoteAdapter } from './legacy-vote.adapter';
+import { VoteUIStateService } from './vote-ui-state.service';
 
 // DTOs
 import { VoteType, VoteLimitResponseDTO, EvaluationCommentDTO } from '@DTOs/index';
@@ -29,10 +29,8 @@ interface CommentVoteState {
   error: BehaviorSubject<string | null>;
   pendingOperations: number;
   expectedVoteCount: number;
-  operationLock: boolean;
-  operationTimeout: any;
-  refCount: number; // 🔧 BLOCKER 1 FIX: Reference counting for lifecycle management
-  lastAccessed: number; // 🔧 BLOCKER 1 FIX: Timestamp for stale state detection
+  refCount: number; // Reference counting for lifecycle management
+  lastAccessed: number; // Timestamp for stale state detection
 }
 
 /**
@@ -83,9 +81,9 @@ export class CommentVoteManagerService {
 
   constructor(
     private evaluationStateService: EvaluationStateService,
-    private legacyVoteAdapter: LegacyVoteAdapter,
+    private voteUIStateService: VoteUIStateService,
   ) {
-    // 🔧 BLOCKER 1 FIX: Start auto-cleanup interval
+    // Start auto-cleanup interval
     this.cleanupInterval = setInterval(() => {
       this.cleanupStaleStates();
     }, 5 * 60 * 1000); // Every 5 minutes
@@ -159,37 +157,24 @@ export class CommentVoteManagerService {
   async addVote(commentId: string, anonymousUserId: string | number, submissionId: number, categoryId: number): Promise<VoteResult> {
     const state = this.getOrCreateState(commentId);
 
-    // 🔒 Race Prevention: Check debouncing
-    if (!this.legacyVoteAdapter.shouldAllowClick(Number(commentId))) {
+    // Single lock check - modern approach using VoteUIStateService
+    if (this.voteUIStateService.shouldDebounce(Number(commentId))) {
       console.log('🚫 Vote blocked by debouncer');
       return { success: false, error: 'Vote blocked by debouncer' };
     }
 
-    // 🔒 Race Prevention: Check atomic lock
-    if (state.operationLock) {
-      console.warn('🔒 Vote operation already in progress, blocking duplicate');
-      return { success: false, error: 'Operation already in progress' };
-    }
-
-    // 🔒 Race Prevention: Start operation
-    if (!this.legacyVoteAdapter.startOperation(Number(commentId))) {
-      console.log('🚫 Vote blocked - operation already pending');
-      return { success: false, error: 'Operation already pending' };
-    }
-
-    // Set atomic lock
-    state.operationLock = true;
+    // Set voting state (lock)
+    this.voteUIStateService.setVoting(Number(commentId), true);
     state.loading.next(true);
 
     try {
       const result = await this.performVoteOperation(commentId, 'UP', anonymousUserId, submissionId, categoryId);
       return result;
     } finally {
-      // Clear lock after delay
-      state.operationTimeout = setTimeout(() => {
-        state.operationLock = false;
-      }, 200);
+      // Clear states immediately - NO setTimeout delay
       state.loading.next(false);
+      this.voteUIStateService.setVoting(Number(commentId), false);
+      // Let debounce timestamp expire naturally (300ms) - DO NOT manually clear
     }
   }
 
@@ -205,42 +190,29 @@ export class CommentVoteManagerService {
   async removeVote(commentId: string, anonymousUserId: string | number, submissionId: number, categoryId: number): Promise<VoteResult> {
     const state = this.getOrCreateState(commentId);
 
-    // 🔒 Race Prevention: Check debouncing
-    if (!this.legacyVoteAdapter.shouldAllowClick(Number(commentId))) {
+    // Single lock check - modern approach using VoteUIStateService
+    if (this.voteUIStateService.shouldDebounce(Number(commentId))) {
       console.log('🚫 Vote removal blocked by debouncer');
       return { success: false, error: 'Vote removal blocked by debouncer' };
     }
 
-    // 🔒 Race Prevention: Check if vote count is zero
+    // Check if vote count is zero
     if (state.voteCount.value === 0) {
       return { success: false, error: 'No votes to remove' };
     }
 
-    // 🔒 Race Prevention: Check atomic lock
-    if (state.operationLock) {
-      console.warn('🔒 Vote removal operation already in progress');
-      return { success: false, error: 'Operation already in progress' };
-    }
-
-    // 🔒 Race Prevention: Start operation
-    if (!this.legacyVoteAdapter.startOperation(Number(commentId))) {
-      console.log('🚫 Vote removal blocked - operation already pending');
-      return { success: false, error: 'Operation already pending' };
-    }
-
-    // Set atomic lock
-    state.operationLock = true;
+    // Set voting state (lock)
+    this.voteUIStateService.setVoting(Number(commentId), true);
     state.loading.next(true);
 
     try {
       const result = await this.performVoteOperation(commentId, null, anonymousUserId, submissionId, categoryId);
       return result;
     } finally {
-      // Clear lock after delay
-      state.operationTimeout = setTimeout(() => {
-        state.operationLock = false;
-      }, 200);
+      // Clear states immediately - NO setTimeout delay
       state.loading.next(false);
+      this.voteUIStateService.setVoting(Number(commentId), false);
+      // Let debounce timestamp expire naturally (300ms) - DO NOT manually clear
     }
   }
 
@@ -285,11 +257,6 @@ export class CommentVoteManagerService {
   resetCommentState(commentId: string): void {
     const state = this.commentStates.get(commentId);
     if (state) {
-      // Clear timeout
-      if (state.operationTimeout) {
-        clearTimeout(state.operationTimeout);
-      }
-
       // Complete subjects
       state.voteStatus.complete();
       state.voteCount.complete();
@@ -299,8 +266,8 @@ export class CommentVoteManagerService {
       // Remove from map
       this.commentStates.delete(commentId);
 
-      // Reset legacy adapter state
-      this.legacyVoteAdapter.resetCommentState(Number(commentId));
+      // Clear voting state in VoteUIStateService
+      this.voteUIStateService.setVoting(Number(commentId), false);
 
       console.log('🧹 Comment state cleaned up:', commentId);
     }
@@ -399,13 +366,11 @@ export class CommentVoteManagerService {
         error: new BehaviorSubject<string | null>(null),
         pendingOperations: 0,
         expectedVoteCount: 0,
-        operationLock: false,
-        operationTimeout: null,
-        refCount: 1, // 🔧 BLOCKER 1 FIX: Initial reference
-        lastAccessed: Date.now() // 🔧 BLOCKER 1 FIX: Track access time
+        refCount: 1, // Initial reference
+        lastAccessed: Date.now() // Track access time
       });
     } else {
-      // 🔧 BLOCKER 1 FIX: Update lastAccessed on every access
+      // Update lastAccessed on every access
       const state = this.commentStates.get(commentId)!;
       state.lastAccessed = Date.now();
     }

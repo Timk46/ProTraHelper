@@ -30,7 +30,6 @@ import { FormsModule } from '@angular/forms';
 import { CommentPanelStateService } from '../../../../Services/evaluation/comment-panel-state.service';
 import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
 import { VoteSessionService } from '../../../../Services/evaluation/vote-session.service';
-import { LegacyVoteAdapter } from '../../../../Services/evaluation/legacy-vote.adapter';
 import { CommentVoteManagerService } from '../../../../Services/evaluation/comment-vote-manager.service';
 import { MatDialog } from '@angular/material/dialog';
 import { VoteLimitDialogComponent, VoteLimitDialogData } from '../vote-limit-dialog/vote-limit-dialog.component';
@@ -72,10 +71,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   @Input() isReadOnly: boolean = false;
 
   // =============================================================================
-  // VIEW REFERENCES - 🚀 PHASE 5: Cleaned up - inline reply removed
-  // =============================================================================
-
-  // =============================================================================
   // OUTPUTS - EVENTS TO PARENT COMPONENT
   // =============================================================================
 
@@ -90,7 +85,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   isContentExpanded: boolean = false;
   readonly maxContentLength = 300;
 
-  // 🚀 PHASE 2.3: Cached computed properties for better template performance
+  // Cached computed properties for better template performance
   private _cachedUserVote: VoteType | null = null;
   private _cachedIsCurrentUser: boolean | null = null;
   private _cachedAuthorDisplayName: string = '';
@@ -98,33 +93,21 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   private _cachedFormattedContent: string = '';
   private _cachedUpvoteTooltip: string = '';
 
-  // 🔧 PHASE 2 REFACTOR: BehaviorSubjects REMOVED - now using VoteManagerService
-  // OLD: private _userVoteLoadingState = new BehaviorSubject<boolean>(false);
-  // OLD: private _userVoteStatusCache = new BehaviorSubject<VoteType | null>(null);
   private destroy$ = new Subject<void>();
-
-  // 🚀 PHASE 5: Reply state removed - now handled by separate reply-input items
 
   // Panel state
   isPanelExpanded: boolean = false;
 
-  // 🔧 PHASE 2 REFACTOR: Observables now from VoteManagerService
-  userVoteStatus$!: Observable<VoteType | null>; // Initialized in ngOnInit
-  userVoteLoading$!: Observable<boolean>; // Initialized in ngOnInit
-  localVoteCount$!: Observable<number>; // 🔧 NEW: From service
+  // Vote state from VoteManagerService
+  userVoteStatus$!: Observable<VoteType | null>;
+  userVoteLoading$!: Observable<boolean>;
+  localVoteCount$!: Observable<number>;
 
-  // 🚀 LOCAL VOTE TRACKING: Track actual number of votes given to this comment
+  // Track actual number of votes given to this comment
   private localVoteCount: number = 0;
 
-  // 🚀 SMART SYNC: Track pending operations to prevent race conditions
-  private pendingVoteOperations: number = 0;
-  private expectedVoteCount: number = 0;
-
-  // 🚨 ATOMIC LOCKS: Prevent race conditions from rapid clicking
-  private voteOperationLock: boolean = false;
-  private voteOperationTimeout: any = null;
-
-  // 🚀 SESSION VOTE TRACKING: Now handled globally via VoteSessionService
+  // Track pending operations synchronously for canAddMoreVotes()
+  private hasPendingOperations: boolean = false;
 
   // Public getters for templates (avoid function calls)
   get cachedUserVote(): VoteType | null { return this._cachedUserVote; }
@@ -148,8 +131,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     private commentPanelStateService: CommentPanelStateService,
     private evaluationStateService: EvaluationStateService,
     private voteSessionService: VoteSessionService,
-    private legacyVoteAdapter: LegacyVoteAdapter,
-    private voteManagerService: CommentVoteManagerService, // 🔧 PHASE 2: New vote manager service
+    private voteManagerService: CommentVoteManagerService,
     private dialog: MatDialog,
   ) {}
 
@@ -158,19 +140,17 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // =============================================================================
 
   ngOnInit(): void {
-    // 🚨 SECURITY FIX: Only set cachedIsCurrentUser if anonymousUser is available
+    // Only set cachedIsCurrentUser if anonymousUser is available
     if (this.anonymousUser && this.comment?.author) {
       this._cachedIsCurrentUser = this.isCurrentUser();
     } else {
       this._cachedIsCurrentUser = null; // Unknown state
     }
 
-
     this.formatCommentTime();
-    // 🚀 PHASE 2.3: Initialize cached values for performance
     this.updateCachedValues();
 
-    // 🔧 PHASE 2 REFACTOR: Initialize VoteManagerService
+    // Initialize VoteManagerService
     this.voteManagerService.initializeComment(
       this.comment.id.toString(),
       this.comment,
@@ -178,28 +158,27 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     );
     this.voteManagerService.incrementRefCount(this.comment.id.toString());
 
-    // 🔧 PHASE 2 REFACTOR: Get observables from service
+    // Get observables from service
     this.userVoteStatus$ = this.voteManagerService.getVoteStatus$(this.comment.id.toString());
     this.userVoteLoading$ = this.voteManagerService.getLoadingState$(this.comment.id.toString());
     this.localVoteCount$ = this.voteManagerService.getLocalVoteCount$(this.comment.id.toString());
 
-    // 🔧 PHASE 2 REFACTOR: Subscribe to localVoteCount$ to update legacy localVoteCount
-    // (Needed for backward compatibility until all methods are refactored)
+    // Subscribe to localVoteCount$ for backward compatibility
     this.localVoteCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
       this.localVoteCount = count;
       this.cdr.markForCheck();
     });
 
-    // 🔧 PHASE 2 REFACTOR: OLD CODE REMOVED
-    // OLD: const initialVoteStatus = this.getUserVoteFromLocal();
-    // OLD: this.setVoteStatus(initialVoteStatus, 'initialization');
-    // OLD: this.loadUserVoteStatus();
-    // OLD: this.initializeLocalVoteCount();
-    // OLD: this.setupVoteEventListeners();
+    // Subscribe to hasPendingOperations$ for synchronous access in canAddMoreVotes()
+    this.voteManagerService.hasPendingOperations$(this.comment.id.toString())
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(pending => {
+        this.hasPendingOperations = pending;
+        this.cdr.markForCheck();
+      });
 
     // Initialize panel state
     this.initializePanelState();
-
   }
 
   ngAfterViewInit(): void {
@@ -207,24 +186,16 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   ngOnDestroy(): void {
-    // 🔧 PHASE 2 REFACTOR: Decrement refCount in VoteManagerService
     this.voteManagerService.decrementRefCount(this.comment.id.toString());
-
-    // 🚨 CLEANUP: Clear atomic lock timeout
-    if (this.voteOperationTimeout) {
-      clearTimeout(this.voteOperationTimeout);
-      this.voteOperationTimeout = null;
-    }
-
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // 🚨 SECURITY FIX: Update cachedIsCurrentUser when anonymousUser changes
+    // Update cachedIsCurrentUser when anonymousUser changes
     if (changes['anonymousUser'] || changes['comment']) {
       const wasUnknown = this._cachedIsCurrentUser === null;
-      
+
       if (this.anonymousUser && this.comment?.author) {
         this._cachedIsCurrentUser = this.isCurrentUser();
 
@@ -236,43 +207,33 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       }
     }
 
-    // 🚀 PHASE 2.3 + PHASE 3: Update cached values when inputs change
+    // Update cached values when inputs change
     if (changes['comment'] || changes['anonymousUser'] || changes['canVote'] || changes['availableVotes']) {
       this.updateCachedValues();
-
-      // 🚀 PHASE 3: Reload vote status if comment or anonymousUser changed
-      if (changes['comment'] && !changes['comment'].firstChange) {
-        this.loadUserVoteStatus();
-      }
     }
 
-    // 🚀 SESSION VOTE RESET: Reset session votes when availableVotes changes from parent
+    // Reset session votes when availableVotes changes from parent
     if (changes['availableVotes'] && !changes['availableVotes'].firstChange) {
       const currentValue = changes['availableVotes'].currentValue;
       const previousValue = changes['availableVotes'].previousValue;
-      
+
       // Reset session votes when parent state updates (indicates backend sync)
       if (currentValue !== previousValue) {
         // Note: Session votes are now handled globally and don't reset per component
-        
-        // 🚀 OPTIMISTIC UI UPDATE: Force UI update after session reset
         this.cdr.detectChanges();
       }
     }
 
-    // 🚀 PHASE 1.3: Aggressive change detection for immediate UI updates
+    // Aggressive change detection for immediate UI updates
     if (changes['comment'] || changes['isVoting'] || changes['canVote'] || changes['availableVotes']) {
-
-      // 🚀 PHASE 1: Use detectChanges() for immediate update when voting state changes
       if (changes['isVoting'] && changes['isVoting'].currentValue !== changes['isVoting'].previousValue) {
         this.cdr.detectChanges();
       } else {
-        // 🚀 PHASE 1: Use detectChanges() for consistent immediate UI updates
         this.cdr.detectChanges();
       }
     }
 
-    // 🚀 PHASE 1.3: Also trigger on comment vote stats changes
+    // Also trigger on comment vote stats changes
     if (changes['comment'] && changes['comment'].currentValue && changes['comment'].previousValue) {
       const currentVoteStats = changes['comment'].currentValue.voteStats;
       const previousVoteStats = changes['comment'].previousValue.voteStats;
@@ -285,218 +246,18 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   // =============================================================================
-  // CACHED VALUE MANAGEMENT - 🚀 PHASE 2.3 + PHASE 3
+  // CACHED VALUE MANAGEMENT
   // =============================================================================
 
   /**
-   * Updates all cached values to avoid repeated function calls in templates
-   * Called on ngOnInit and when relevant inputs change
-   * 🚀 PHASE 4: Removed vote caching - now handled by Observable
+   * Updates all cached values to avoid repeated function calls in templates.
+   * Called on ngOnInit and when relevant inputs change.
    */
   private updateCachedValues(): void {
-    // 🚨 REMOVED: _cachedIsCurrentUser is now handled separately in ngOnInit/ngOnChanges
-    // Cache author display name
     this._cachedAuthorDisplayName = this.getAuthorDisplayName();
-
-    // Cache display content and formatted content (complex chain)
     this._cachedDisplayContent = this.getDisplayContent();
     this._cachedFormattedContent = this.formatContent(this.sanitizeContent(this._cachedDisplayContent));
-
-    // Cache upvote tooltip only (ranking system)
     this._cachedUpvoteTooltip = this.getUpvoteTooltip();
-  }
-
-  /**
-   * 🚀 PHASE 4: Load user vote status with fallback system - unified state management
-   * First try local comment.votes array, then API call if needed
-   */
-  private loadUserVoteStatus(): void {
-    // First attempt: Try to get vote from local data
-    const localVote = this.getUserVoteFromLocal();
-
-    if (localVote !== null) {
-      // Found vote in local data
-      this.setVoteStatus(localVote, 'local-data');
-      return;
-    }
-
-    // Second attempt: Load from API if not found locally
-    this._userVoteLoadingState.next(true);
-
-    this.evaluationStateService
-      .getUserVoteStatus(this.comment.id.toString())
-      .pipe(
-        // 🚀 PHASE 5: Add retry mechanism with exponential backoff
-        retry({ count: 2, delay: (error, retryCount) => timer(Math.pow(2, retryCount) * 1000) }),
-        // 🚀 PHASE 5: Handle errors gracefully with enhanced logging
-        catchError((error: any) => {
-          console.error('❌ Failed to load user vote status after retries:', {
-            commentId: this.comment.id,
-            error: error,
-            errorMessage: error?.message,
-            errorStatus: error?.status,
-            errorUrl: error?.url,
-            errorDetails: error?.error
-          });
-          this._userVoteLoadingState.next(false);
-          // Return null to indicate no vote status available
-          return of(null);
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe({
-        next: (voteType: VoteType | null) => {
-
-          this._userVoteLoadingState.next(false);
-          this.setVoteStatus(voteType, 'api-fallback');
-        },
-      });
-  }
-
-  /**
-   * 🚀 PHASE 3: Gets user vote from local comment.votes array (fallback system)
-   * This is the local fallback before API call
-   */
-  private getUserVoteFromLocal(): VoteType | null {
-    if (!this.anonymousUser) return null;
-
-    // Fix: vote.userId is number, anonymousUser.id is number
-    // Ensure both are compared as numbers
-    const userVote = this.comment.votes.find(
-      (vote: any) => vote.userId === Number(this.anonymousUser!.id),
-    );
-
-    return userVote ? userVote.voteType : null;
-  }
-
-  /**
-   * 🚀 PHASE 4: Unified method for updating vote status - single source of truth
-   * @param voteStatus The new vote status to set
-   * @param source Optional source description for logging
-   */
-  private setVoteStatus(voteStatus: VoteType | null, source: string = 'unknown'): void {
-
-    // Update the Observable (primary source of truth)
-    this._userVoteStatusCache.next(voteStatus);
-
-    // Update cached value for backward compatibility
-    this._cachedUserVote = voteStatus;
-
-    // Update upvote tooltip based on new vote status
-    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
-
-    // Force immediate UI update
-    this.cdr.detectChanges();
-  }
-
-  /**
-   * Updates cached upvote tooltip when vote status changes (ranking system)
-   */
-  private updateCachedTooltips(): void {
-    this._cachedUpvoteTooltip = this.getUpvoteTooltip();
-  }
-
-  /**
-   * Initializes local vote count by loading from backend
-   */
-  private initializeLocalVoteCount(): void {
-    if (!this.anonymousUser) {
-      this.localVoteCount = 0;
-      return;
-    }
-
-    // 🚀 FAST INIT: First try local extraction (fastest source)
-    const localExtracted = this.extractVoteCountFromLocalData();
-    if (localExtracted > 0) {
-      this.localVoteCount = localExtracted;
-      this.cdr.detectChanges(); // Immediate UI update!
-      console.log('🚀 ✅ Fast initialization from local data:', {
-        commentId: this.comment.id,
-        voteCount: this.localVoteCount,
-        source: 'local-extraction'
-      });
-      return;
-    }
-
-    // Fallback to backend call only if local extraction yields 0
-    this.evaluationStateService
-      .getUserVoteCountForComment(this.comment.id.toString())
-      .pipe(
-        catchError((error) => {
-          return of(0);
-        }),
-        takeUntil(this.destroy$)
-      )
-      .subscribe((count: number) => {
-        // 🚀 IMPROVED RACE-CONDITION PREVENTION
-        if (this.pendingVoteOperations === 0 && this.localVoteCount === 0) {
-          this.localVoteCount = count;
-          this.cdr.detectChanges(); // Immediate UI update
-        }
-      });
-  }
-
-  /**
-   * Extracts the actual vote count from local comment data
-   * This is used as fallback when backend call fails
-   */
-  private extractVoteCountFromLocalData(): number {
-    if (!this.anonymousUser || !this.comment) {
-      return 0;
-    }
-
-    // 🚀 PRIORITY 1: Direct userVoteCount in comment (highest priority)
-    if (typeof this.comment.userVoteCount === 'number') {
-      return this.comment.userVoteCount;
-    }
-
-    // 🚀 PRIORITY 2: voteDetails.userVoteCounts (specific user vote count)
-    try {
-      const voteDetails = (this.comment as any).voteDetails;
-      if (voteDetails?.userVoteCounts) {
-        const userId = this.anonymousUser.id.toString();
-        if (voteDetails.userVoteCounts[userId] !== undefined) {
-          const count = voteDetails.userVoteCounts[userId];
-          return count;
-        }
-      }
-    } catch (error) {
-    }
-
-    // 🚀 PRIORITY 3: voteStats.userVoteCount (legacy support)
-    if ((this.comment.voteStats as any)?.userVoteCount !== undefined) {
-      const count = (this.comment.voteStats as any).userVoteCount;
-      return count;
-    }
-
-    // 🚀 PRIORITY 4: Count votes array (last resort estimate)
-    try {
-      const userVotes = this.comment.votes.filter(vote =>
-        vote.userId === this.anonymousUser!.id && vote.voteType === 'UP'
-      );
-
-      if (userVotes.length > 0) {
-        return userVotes.length; // Minimum estimate
-      }
-    } catch (error) {
-    }
-
-    // Method 4: Legacy fallback (original logic)
-    const legacyCount = this._cachedUserVote === 'UP' ? 1 : 0;
-    return legacyCount;
-  }
-
-  /**
-   * 🔧 LOCAL VOTE MANAGEMENT: Removed global vote event listeners
-   * Local vote operations handle their own completion/error events
-   * This prevents interference from global state updates
-   */
-  private setupVoteEventListeners(): void {
-
-    // 🔧 Note: Global vote listeners removed to prevent cascade updates
-    // Vote operations are now handled entirely locally in performLocalVoteOperation()
-
-    // Only keep panel state listeners as they don't trigger re-rendering cascades
   }
 
   // =============================================================================
@@ -519,8 +280,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this.isPanelExpanded = this.commentPanelStateService.isPanelExpanded(this.comment.id.toString());
   }
 
-  // 🚀 PHASE 5: Old reply textarea helper methods removed - handled by separate reply-input component
-
   /**
    * Toggles the panel expansion state
    */
@@ -529,11 +288,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return; // Don't toggle if no replies
     }
 
-    // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
     this.triggerHapticFeedback('light');
-
     const newState = this.commentPanelStateService.togglePanelState(this.comment.id.toString());
-
 
     // The panel state will be updated via the subscription in initializePanelState
     // No need to manually update isPanelExpanded here
@@ -581,11 +337,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // =============================================================================
 
   /**
-   * 🔧 PHASE 2 REFACTOR: Adds a vote using VoteManagerService
-   * Service handles atomic locking, race prevention, and security checks
+   * Adds a vote using VoteManagerService.
+   * Service handles atomic locking, race prevention, and security checks.
    */
   async addVote(): Promise<void> {
-    // 🚨 CRITICAL SECURITY: Check ownership FIRST
+    // Check ownership FIRST
     if (this._cachedIsCurrentUser === true) {
       console.error('🚨 SECURITY VIOLATION: Attempted self-vote blocked!', {
         commentId: this.comment.id,
@@ -611,10 +367,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
-    // 🚀 Haptic feedback for mobile
     this.triggerHapticFeedback('light');
 
-    // 🔧 PHASE 2 REFACTOR: Use VoteManagerService
     const result = await this.voteManagerService.addVote(
       this.comment.id.toString(),
       this.anonymousUser!.id,
@@ -628,39 +382,16 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
-    // 🚀 Success feedback
     this.triggerVoteSuccessAnimation();
     this.triggerHapticFeedback('medium');
   }
 
   /**
-   * 🚨 INTERNAL: Performs the actual vote operation with proper state management
-   * ENHANCED: Uses VoteOperationsService for consistent session tracking and limits
-   */
-  private async performVoteOperation(voteType: 'UP' | null): Promise<void> {
-    // Track operation
-    this.pendingVoteOperations++;
-    this.expectedVoteCount = voteType === 'UP' ? this.localVoteCount + 1 : Math.max(0, this.localVoteCount - 1);
-
-    // Haptic feedback
-    this.triggerHapticFeedback('light');
-
-
-    // Optimistic update
-    this.localVoteCount = this.expectedVoteCount;
-    this.setVoteStatus(voteType === 'UP' ? 'UP' : null, 'atomic-vote-operation');
-    this.cdr.detectChanges();
-
-    // API call with session tracking handled by VoteOperationsService
-    await this.performLocalVoteOperation(voteType);
-  }
-
-  /**
-   * 🔧 PHASE 2 REFACTOR: Removes a vote using VoteManagerService
-   * Service handles atomic locking and race prevention
+   * Removes a vote using VoteManagerService.
+   * Service handles atomic locking and race prevention.
    */
   async removeVote(): Promise<void> {
-    // 🚨 CRITICAL SECURITY: Check ownership FIRST (even for removal)
+    // Check ownership FIRST (even for removal)
     if (this._cachedIsCurrentUser === true) {
       console.error('🚨 SECURITY VIOLATION: Attempted self-vote removal blocked!', {
         commentId: this.comment.id,
@@ -685,10 +416,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
-    // 🚀 Haptic feedback for mobile
     this.triggerHapticFeedback('light');
 
-    // 🔧 PHASE 2 REFACTOR: Use VoteManagerService
     const result = await this.voteManagerService.removeVote(
       this.comment.id.toString(),
       this.anonymousUser!.id,
@@ -701,13 +430,12 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
-    // 🚀 Success feedback
     this.triggerHapticFeedback('medium');
   }
 
   /**
-   * Legacy method - kept for backward compatibility
-   * Now delegates to addVote() and removeVote() methods
+   * Legacy method - kept for backward compatibility.
+   * Now delegates to addVote() and removeVote() methods.
    */
   async onVote(voteType: VoteType): Promise<void> {
     if (voteType === 'UP') {
@@ -718,131 +446,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     }
   }
 
-
-  /**
-   * 🔧 LOCAL VOTE MANAGEMENT: Uses VoteOperationsService for consistent vote handling
-   * Prevents the re-rendering cascade by handling votes locally with proper error handling
-   */
-  private async performLocalVoteOperation(voteType: VoteType | null): Promise<void> {
-
-    try {
-      // Use LegacyVoteAdapter for consistent vote handling with limits
-      const result = await this.legacyVoteAdapter.performVoteOperation(
-        this.comment,
-        voteType,
-        this.comment.submissionId,
-        this.comment.categoryId || 0,
-        this.anonymousUser?.id
-      );
-
-
-      this.onLocalVoteCompleted(result);
-
-    } catch (error: any) {
-      console.error('❌ Local vote operation failed via VoteOperationsService:', {
-        commentId: this.comment.id,
-        voteType,
-        error: error
-      });
-
-      // Handle VoteOperationError with user-friendly messages
-      if (error?.code === 'VOTE_LIMIT_EXCEEDED') {
-        // Could show a toast or dialog here
-      } else if (error?.code === 'SELF_VOTE_ATTEMPT') {
-      }
-
-      this.onLocalVoteError();
-    }
-  }
-
-  /**
-   * 🔧 LOCAL VOTE MANAGEMENT: Handles successful local vote completion
-   * Updates local state without triggering parent re-render
-   * Now handles VoteLimitResponseDTO from VoteOperationsService
-   */
-  private onLocalVoteCompleted(result: unknown): void {
-    // Decrease pending operations counter
-    this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
-
-    // Extract vote count from VoteLimitResponseDTO or fallback extraction
-    const backendVoteCount = this.legacyVoteAdapter.extractVoteCountFromResponse(result);
-
-    if (backendVoteCount !== undefined) {
-
-      this.localVoteCount = backendVoteCount;
-      this.setVoteStatus(backendVoteCount > 0 ? 'UP' : null, 'local-api-completion');
-    } else {
-
-      // Use expected count if backend doesn't provide one
-      this.localVoteCount = this.expectedVoteCount;
-      this.setVoteStatus(this.expectedVoteCount > 0 ? 'UP' : null, 'local-api-expected');
-    }
-
-    // Update vote limit status if available
-    if (result && typeof result === 'object' && 'voteLimitStatus' in result) {
-      // Could update local vote limit displays here if needed
-    }
-
-    // Trigger success animation
-    this.triggerVoteSuccessAnimation();
-    this.triggerHapticFeedback('medium');
-
-    // Perform final sync if all operations are complete
-    if (this.pendingVoteOperations === 0) {
-      setTimeout(() => this.performFinalSynchronization(), 100);
-    }
-  }
-
-  /**
-   * 🔧 LOCAL VOTE MANAGEMENT: Handles failed local vote operation
-   * Reverts optimistic updates and provides user feedback
-   */
-  private onLocalVoteError(): void {
-
-    // Decrease pending operations counter
-    this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
-
-    // Reload vote status from local data first (faster fallback)
-    const localVote = this.getUserVoteFromLocal();
-    const localCount = this.extractVoteCountFromLocalData();
-
-    if (localCount > 0) {
-      this.localVoteCount = localCount;
-      this.setVoteStatus(localVote, 'error-revert-local');
-    } else {
-      // If no local data, reload from API to get correct state
-      this.loadUserVoteStatus();
-    }
-  }
-
-  /**
-   * 🚀 PHASE 5: Called when vote operation fails - enhanced error handling
-   * Reverts optimistic updates and provides user feedback
-   */
-  onVoteError(): void {
-
-    // Reload vote status from local data first (faster fallback)
-    const localVote = this.getUserVoteFromLocal();
-    if (localVote !== null) {
-      this.setVoteStatus(localVote, 'error-revert-local');
-    } else {
-      // If no local data, reload from API to get correct state
-      this.loadUserVoteStatus();
-    }
-  }
-
   onReply(): void {
-    // 🚀 PHASE 4: Trigger haptic feedback for mobile devices
     this.triggerHapticFeedback('medium');
-
-    // 🚀 PHASE 5: Simplified - only emit event, reply input handled by parent
     this.replyRequested.emit(this.comment.id.toString());
-
   }
-
-  // 🚀 PHASE 5: Old reply submission methods removed - handled by separate reply-input component
-
-  // 🚀 PHASE 5: Old reply keyboard handler removed - handled by separate reply-input component
 
   onToggleContent(): void {
     this.isContentExpanded = !this.isContentExpanded;
@@ -993,34 +600,29 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * 🛠️ IMPROVED: Gets the number of votes the current user has given to this comment
-   * Enhanced with better race condition handling and stability during operations
+   * Gets the number of votes the current user has given to this comment.
+   * Enhanced with better race condition handling and stability during operations.
    */
   getUserVoteCount(): number {
     if (!this.anonymousUser) return 0;
-    
-    // 🎯 SIMPLIFIED: Verwende immer localVoteCount als Single Source of Truth
     return this.localVoteCount;
   }
 
   /**
-   * 🚨 SECURITY FIX: Enhanced vote limit check with session vote tracking
-   * Prevents unlimited voting by considering both available votes and session votes
+   * Enhanced vote limit check with session vote tracking.
+   * Prevents unlimited voting by considering both available votes and session votes.
+   * Now uses hasPendingOperations from VoteManagerService.
    */
   canAddMoreVotes(): boolean {
-    // 🚀 CRITICAL FIX: Account for votes given in current session
     const effectiveAvailableVotes = this.availableVotes - this.voteSessionService.getSessionVotes();
 
-    // Handle pending operations with projected votes
-    if (this.pendingVoteOperations > 0) {
-      const projectedAvailableVotes = effectiveAvailableVotes - this.pendingVoteOperations;
-      return projectedAvailableVotes > 0;
+    // Handle pending operations - block voting if any operation is in progress
+    if (this.hasPendingOperations) {
+      return false;
     }
 
     // Check if we have any votes remaining after session votes
     const hasVotesRemaining = effectiveAvailableVotes > 0;
-
-
     return hasVotesRemaining;
   }
 
@@ -1067,32 +669,30 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * Shows a user-friendly warning about vote limits
-   * ENHANCED: Now considers session votes for accurate limit detection
+   * Shows a user-friendly warning about vote limits.
+   * Now considers session votes for accurate limit detection.
    */
   private showVoteLimitWarning(): void {
-    // 🚀 CRITICAL FIX: Use effective available votes that account for session votes
     const effectiveAvailableVotes = this.availableVotes - this.voteSessionService.getSessionVotes();
-    
+
     if (effectiveAvailableVotes <= 0) {
-      
       // Calculate total comment count for dialog
       const totalComments = this.getTotalCommentCount();
       const maxVotes = totalComments * 2;
-      
+
       const dialogData: VoteLimitDialogData = {
         maxVotes: maxVotes,
         commentCount: totalComments,
         currentCategory: 'aktuelle Kategorie'
       };
-      
+
       const dialogRef = this.dialog.open(VoteLimitDialogComponent, {
         width: '500px',
         data: dialogData,
         disableClose: false,
         autoFocus: true
       });
-      
+
       dialogRef.afterClosed().subscribe(result => {
         if (result === 'reset') {
           console.log('User requested vote reset');
@@ -1100,7 +700,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
           // this.resetAllVotes();
         }
       });
-    } else {
     }
   }
 
@@ -1115,29 +714,27 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * 🛠️ ENHANCED: Vote-Display-Methode mit Session-Vote-Tracking
-   * Zeigt effektive verfügbare Votes nach Session-Votes an
+   * Gets vote display text with session vote tracking.
+   * Shows effective available votes after session votes.
    */
   getVoteDisplayText(): string {
     const currentVoteCount = this.getUserVoteCount();
-    
-    // 🎯 SIMPLIFIED: Einfache, klare Logik ohne komplexe Fallbacks
+
     if (currentVoteCount > 0) {
       return `${currentVoteCount} vergeben`;
     }
-    
-    // 🚀 CRITICAL FIX: Show effective available votes considering session votes
+
     const effectiveAvailableVotes = Math.max(0, this.availableVotes - this.voteSessionService.getSessionVotes());
-    
+
     if (effectiveAvailableVotes > 0) {
       return `${effectiveAvailableVotes} verfügbar`;
     }
-    
+
     return 'Keine Votes verfügbar';
   }
 
   /**
-   * 🛠️ ENHANCED: ARIA-Label mit Session-Vote-Berücksichtigung
+   * Gets ARIA label with session vote consideration.
    */
   getVoteDisplayAriaLabel(): string {
     const currentVoteCount = this.getUserVoteCount();
@@ -1153,20 +750,17 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * 🚀 CRITICAL FIX: Fallback method to show vote count when getUserVoteCount() fails
-   * Tries multiple methods to extract the actual vote count
+   * Fallback method to show vote count when getUserVoteCount() fails.
+   * Uses VoteManagerService for accurate count.
    */
   getFallbackVoteDisplay(): string {
-    // Try to extract actual vote count from various sources
-    const extractedCount = this.extractVoteCountFromLocalData();
-
-    if (extractedCount > 0) {
-      return `${extractedCount} vergeben`;
+    // Use localVoteCount which is synced with VoteManagerService
+    if (this.localVoteCount > 0) {
+      return `${this.localVoteCount} vergeben`;
     }
 
     // Try to derive from available votes if all were used
     if (this.availableVotes === 0) {
-      // If no votes available, user might have used them all on this comment
       return 'Votes vollständig vergeben';
     }
 
@@ -1177,51 +771,6 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
 
     // Last resort fallback
     return 'Synchronisation ausstehend...';
-  }
-
-  /**
-   * 🚀 FINAL SYNC: Performs final synchronization after all vote operations complete
-   * Ensures localVoteCount is accurate by checking all possible sources
-   */
-  private performFinalSynchronization(): void {
-    if (this.pendingVoteOperations > 0) {
-      return;
-    }
-
-
-    // Try to get accurate count from all sources
-    const extractedCount = this.extractVoteCountFromLocalData();
-    let finalCount = this.localVoteCount;
-    let source = 'current-local';
-
-    if (extractedCount > 0 && extractedCount !== this.localVoteCount) {
-      finalCount = extractedCount;
-      source = 'extracted-local-data';
-    }
-
-    // Last resort: try backend call if still uncertain
-    if (finalCount === 0 && this._cachedUserVote === 'UP') {
-      this.evaluationStateService
-        .getUserVoteCountForComment(this.comment.id.toString())
-        .pipe(
-          catchError(() => of(0)),
-          takeUntil(this.destroy$)
-        )
-        .subscribe((backendCount: number) => {
-          if (backendCount > 0 && backendCount !== this.localVoteCount) {
-            this.localVoteCount = backendCount;
-            this.cdr.detectChanges();
-          }
-        });
-      return;
-    }
-
-    // Update if we found a better value
-    if (finalCount !== this.localVoteCount) {
-      this.localVoteCount = finalCount;
-      this.cdr.detectChanges();
-    } else {
-    }
   }
 
   /**
@@ -1259,11 +808,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * 🚀 PHASE 3: Gets the user vote - now uses cached value for performance
+   * Gets the user vote using cached value for performance.
    * @returns VoteType The user's vote type or null if no vote exists
    */
   getUserVote(): VoteType | null {
-    // Return cached value for immediate access
     return this._cachedUserVote;
   }
 
@@ -1345,11 +893,11 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   // =============================================================================
-  // 🚀 PHASE 4: HAPTIC FEEDBACK SUPPORT FOR MOBILE DEVICES
+  // HAPTIC FEEDBACK SUPPORT FOR MOBILE DEVICES
   // =============================================================================
 
   /**
-   * Triggers haptic feedback on supported mobile devices
+   * Triggers haptic feedback on supported mobile devices.
    * @param intensity - The intensity of the haptic feedback ('light', 'medium', 'heavy')
    */
   private triggerHapticFeedback(intensity: 'light' | 'medium' | 'heavy' = 'light'): void {
@@ -1428,138 +976,8 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * Handles vote completion with Smart Sync race condition prevention
-   *
-   * @description Processes backend vote response and synchronizes local state
-   * using multiple fallback strategies for robust data extraction. Implements
-   * Smart Sync logic to prevent race conditions from delayed backend responses
-   * that could overwrite more recent optimistic updates.
-   *
-   * @param {VoteLimitResponseDTO | unknown} voteResult - Backend response containing vote data
-   * Can be either a properly typed VoteLimitResponseDTO or unknown for edge cases
-   *
-   * @returns {void}
-   *
-   * @memberof CommentItemComponent
-   *
-   * @example
-   * ```typescript
-   * // Called automatically via vote completion event
-   * this.onVoteCompleted({
-   *   success: true,
-   *   userVoteCount: 3,
-   *   voteLimitStatus: { remainingVotes: 7, maxVotes: 10 }
-   * });
-   * ```
-   *
-   * @since 1.0.0
-   * @see {@link https://docs.hefl.eti.uni-siegen.de/voting-system} HEFL Voting Documentation
-   */
-  /**
-   * 🛠️ IMPROVED: Enhanced vote completion handler with better race condition management
-   * Optimized synchronization logic and fallback strategies
-   */
-  onVoteCompleted(voteResult: VoteLimitResponseDTO | unknown): void {
-
-    // 🛠️ SMART SYNC: Sicheres Decrement der pending operations
-    this.pendingVoteOperations = Math.max(0, this.pendingVoteOperations - 1);
-
-    // 🛠️ FINAL SYNC: Planen der finalen Synchronisation wenn alle Operationen abgeschlossen
-    const wasLastOperation = this.pendingVoteOperations === 0;
-    if (wasLastOperation) {
-      // Leichte Verzögerung für bessere Stabilität
-      setTimeout(() => this.performFinalSynchronization(), 150);
-    }
-
-    // 🛠️ ENHANCED EXTRACTION: Robuste userVoteCount Extraktion mit Priorisierung
-    let backendVoteCount: number | undefined;
-
-    // Methode 1: Direkte VoteLimitResponseDTO Zugriff (höchste Priorität)
-    if (this.isVoteLimitResponseDTO(voteResult) && voteResult.userVoteCount !== undefined) {
-      backendVoteCount = voteResult.userVoteCount;
-    }
-
-    // Methode 2: Verschachtelte Strukturen (mittlere Priorität)
-    if (backendVoteCount === undefined && typeof voteResult === 'object' && voteResult !== null) {
-      const result = voteResult as any;
-      backendVoteCount = result.userVoteCount ||
-                        result.data?.userVoteCount ||
-                        result.fullResult?.userVoteCount;
-      if (backendVoteCount !== undefined) {
-      }
-    }
-
-    // Methode 3: Legacy Extraktion als letzter Ausweg
-    if (backendVoteCount === undefined) {
-      backendVoteCount = this.extractVoteCountFromResponse(voteResult);
-      if (backendVoteCount !== undefined) {
-      }
-    }
-
-    // 🛠️ ENHANCED SMART SYNC: Intelligente Synchronisation mit verbesserter Race-Condition-Erkennung
-    if (backendVoteCount !== undefined) {
-      this.handleBackendVoteCountUpdate(backendVoteCount);
-    } else {
-      this.handleVoteCountFallback(voteResult);
-    }
-
-    // 🛠️ IMPROVED: Bessere Vote Status Ableitung
-    this.updateVoteStatusFromCount();
-
-    // 🚀 PHASE 4: Trigger success animation and haptic feedback
-    this.triggerVoteSuccessAnimation();
-    this.triggerHapticFeedback('medium');
-  }
-
-  /**
-   * 🛠️ NEU: Behandelt Backend Vote Count Updates mit verbesserter Logik
-   */
-  private handleBackendVoteCountUpdate(backendVoteCount: number): void {
-    if (this.pendingVoteOperations === 0) {
-      // Keine weiteren Operations - Backend-Antwort sicher akzeptieren
-      this.localVoteCount = backendVoteCount;
-      this.cdr.detectChanges();
-    } else if (Math.abs(backendVoteCount - this.expectedVoteCount) <= 1) {
-      // Backend-Antwort stimmt mit Erwartung überein (Toleranz: ±1)
-      this.localVoteCount = backendVoteCount;
-      this.cdr.detectChanges();
-    } else {
-      // Race Condition erkannt - optimistischen Wert beibehalten
-    }
-  }
-
-  /**
-   * 🛠️ NEU: Fallback-Behandlung wenn Backend Vote Count nicht extrahiert werden kann
-   */
-  private handleVoteCountFallback(voteResult: unknown): void {
-
-    if (this.pendingVoteOperations === 0 && this.expectedVoteCount !== undefined) {
-      this.localVoteCount = this.expectedVoteCount;
-      this.cdr.detectChanges();
-    } else {
-      // Versuche lokale Extraktion als letzten Ausweg
-      const localExtracted = this.extractVoteCountFromLocalData();
-      if (localExtracted !== this.localVoteCount && (localExtracted > 0 || this.localVoteCount > 0)) {
-        this.localVoteCount = localExtracted;
-        this.cdr.detectChanges();
-      }
-    }
-  }
-
-  /**
-   * 🛠️ NEU: Aktualisiert Vote Status basierend auf aktuellem Vote Count
-   */
-  private updateVoteStatusFromCount(): void {
-    // Leite Vote Status vom aktuellen Vote Count ab
-    const currentCount = this.localVoteCount;
-    let userVote: VoteType | null = currentCount > 0 ? 'UP' : null;
-
-    this.setVoteStatus(userVote, 'vote-completed');
-  }
-
-  /**
-   * 🚀 NEW: Extract userVoteCount from complex response structures
-   * Last resort fallback method for edge cases
+   * Extracts userVoteCount from complex response structures.
+   * Last resort fallback method for edge cases.
    */
   private extractVoteCountFromResponse(voteResult: unknown): number | undefined {
     try {
@@ -1586,7 +1004,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * Type guard for VoteLimitResponseDTO
+   * Type guard for VoteLimitResponseDTO.
    * @private
    */
   private isVoteLimitResponseDTO(value: unknown): value is VoteLimitResponseDTO {
@@ -1599,7 +1017,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * Type guard helper for checking nested userVoteCount property
+   * Type guard helper for checking nested userVoteCount property.
    * @private
    */
   private hasNestedUserVoteCount(obj: Record<string, unknown>, property: string): boolean {
