@@ -386,15 +386,21 @@ export class EvaluationStateService implements OnDestroy {
       },
     });
 
-    // Load categories and preload vote limits for first 3
+    // Load categories and preload vote limits for first 3 + last 2
     this.evaluationService.getCategories(submission.sessionId).pipe(
       takeUntil(this.destroy$),
       switchMap(categories => {
         this.categoriesSubject.next(categories);
         this.log.info('Categories loaded', { count: categories.length });
 
-        // PRELOAD: Load vote limits for first 3 categories immediately
-        const categoryIdsToPreload = categories.slice(0, 3).map(cat => cat.id);
+        // PRELOAD: Load vote limits for first 3 + last 2 categories immediately
+        // This covers both forward navigation and jumps to the last category
+        const first3 = categories.slice(0, 3).map(cat => cat.id);
+        const last2 = categories.length > 3 ? categories.slice(-2).map(cat => cat.id) : [];
+
+        // Combine and deduplicate (in case of small category lists)
+        const categoryIdsToPreload = [...new Set([...first3, ...last2])];
+
         if (categoryIdsToPreload.length > 0) {
           return this.preloadVoteLimitStatus(String(submission.id), categoryIdsToPreload);
         }
