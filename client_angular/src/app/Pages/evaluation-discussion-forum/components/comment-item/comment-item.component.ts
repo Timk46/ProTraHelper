@@ -15,7 +15,7 @@ import {
   Inject,
 } from '@angular/core';
 import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
-import { BehaviorSubject, takeUntil, Subject, filter, retry, catchError, of, timer } from 'rxjs';
+import { BehaviorSubject, takeUntil, Subject, filter, retry, catchError, of, timer, Observable } from 'rxjs';
 
 // Angular Material Imports (reduced set for chat bubbles)
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -31,6 +31,7 @@ import { CommentPanelStateService } from '../../../../Services/evaluation/commen
 import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
 import { VoteSessionService } from '../../../../Services/evaluation/vote-session.service';
 import { LegacyVoteAdapter } from '../../../../Services/evaluation/legacy-vote.adapter';
+import { CommentVoteManagerService } from '../../../../Services/evaluation/comment-vote-manager.service';
 import { MatDialog } from '@angular/material/dialog';
 import { VoteLimitDialogComponent, VoteLimitDialogData } from '../vote-limit-dialog/vote-limit-dialog.component';
 
@@ -97,9 +98,9 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   private _cachedFormattedContent: string = '';
   private _cachedUpvoteTooltip: string = '';
 
-  // 🚀 PHASE 3: Vote status cache and loading state
-  private _userVoteLoadingState = new BehaviorSubject<boolean>(false);
-  private _userVoteStatusCache = new BehaviorSubject<VoteType | null>(null);
+  // 🔧 PHASE 2 REFACTOR: BehaviorSubjects REMOVED - now using VoteManagerService
+  // OLD: private _userVoteLoadingState = new BehaviorSubject<boolean>(false);
+  // OLD: private _userVoteStatusCache = new BehaviorSubject<VoteType | null>(null);
   private destroy$ = new Subject<void>();
 
   // 🚀 PHASE 5: Reply state removed - now handled by separate reply-input items
@@ -107,9 +108,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // Panel state
   isPanelExpanded: boolean = false;
 
-  // 🚀 PHASE 2: Public observables for reactive programming with template
-  userVoteStatus$ = this._userVoteStatusCache.asObservable();
-  userVoteLoading$ = this._userVoteLoadingState.asObservable();
+  // 🔧 PHASE 2 REFACTOR: Observables now from VoteManagerService
+  userVoteStatus$!: Observable<VoteType | null>; // Initialized in ngOnInit
+  userVoteLoading$!: Observable<boolean>; // Initialized in ngOnInit
+  localVoteCount$!: Observable<number>; // 🔧 NEW: From service
 
   // 🚀 LOCAL VOTE TRACKING: Track actual number of votes given to this comment
   private localVoteCount: number = 0;
@@ -147,6 +149,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     private evaluationStateService: EvaluationStateService,
     private voteSessionService: VoteSessionService,
     private legacyVoteAdapter: LegacyVoteAdapter,
+    private voteManagerService: CommentVoteManagerService, // 🔧 PHASE 2: New vote manager service
     private dialog: MatDialog,
   ) {}
 
@@ -161,24 +164,38 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     } else {
       this._cachedIsCurrentUser = null; // Unknown state
     }
-    
+
 
     this.formatCommentTime();
     // 🚀 PHASE 2.3: Initialize cached values for performance
     this.updateCachedValues();
 
-    // 🚀 PHASE 4: Initialize vote status with unified state management
-    const initialVoteStatus = this.getUserVoteFromLocal();
-    this.setVoteStatus(initialVoteStatus, 'initialization');
+    // 🔧 PHASE 2 REFACTOR: Initialize VoteManagerService
+    this.voteManagerService.initializeComment(
+      this.comment.id.toString(),
+      this.comment,
+      this.anonymousUser?.id
+    );
+    this.voteManagerService.incrementRefCount(this.comment.id.toString());
 
-    // 🚀 PHASE 3: Initialize async vote status loading
-    this.loadUserVoteStatus();
+    // 🔧 PHASE 2 REFACTOR: Get observables from service
+    this.userVoteStatus$ = this.voteManagerService.getVoteStatus$(this.comment.id.toString());
+    this.userVoteLoading$ = this.voteManagerService.getLoadingState$(this.comment.id.toString());
+    this.localVoteCount$ = this.voteManagerService.getLocalVoteCount$(this.comment.id.toString());
 
-    // 🚀 LOCAL VOTE TRACKING: Initialize local vote count immediately
-    this.initializeLocalVoteCount();
+    // 🔧 PHASE 2 REFACTOR: Subscribe to localVoteCount$ to update legacy localVoteCount
+    // (Needed for backward compatibility until all methods are refactored)
+    this.localVoteCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
+      this.localVoteCount = count;
+      this.cdr.markForCheck();
+    });
 
-    // 🚀 PHASE 4: Listen to vote completion events for cache synchronization
-    this.setupVoteEventListeners();
+    // 🔧 PHASE 2 REFACTOR: OLD CODE REMOVED
+    // OLD: const initialVoteStatus = this.getUserVoteFromLocal();
+    // OLD: this.setVoteStatus(initialVoteStatus, 'initialization');
+    // OLD: this.loadUserVoteStatus();
+    // OLD: this.initializeLocalVoteCount();
+    // OLD: this.setupVoteEventListeners();
 
     // Initialize panel state
     this.initializePanelState();
@@ -190,12 +207,15 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   ngOnDestroy(): void {
+    // 🔧 PHASE 2 REFACTOR: Decrement refCount in VoteManagerService
+    this.voteManagerService.decrementRefCount(this.comment.id.toString());
+
     // 🚨 CLEANUP: Clear atomic lock timeout
     if (this.voteOperationTimeout) {
       clearTimeout(this.voteOperationTimeout);
       this.voteOperationTimeout = null;
     }
-    
+
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -561,61 +581,56 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   // =============================================================================
 
   /**
-   * 🚨 SECURITY FIX: Adds a vote with atomic locking to prevent race conditions
-   * Prevents self-voting and unlimited voting attacks
+   * 🔧 PHASE 2 REFACTOR: Adds a vote using VoteManagerService
+   * Service handles atomic locking, race prevention, and security checks
    */
   async addVote(): Promise<void> {
-    // 🚨 ATOMIC LOCK: Check and set in one operation
-    if (this.voteOperationLock) {
-      console.warn('🔒 Vote operation already in progress, blocking duplicate');
+    // 🚨 CRITICAL SECURITY: Check ownership FIRST
+    if (this._cachedIsCurrentUser === true) {
+      console.error('🚨 SECURITY VIOLATION: Attempted self-vote blocked!', {
+        commentId: this.comment.id,
+        userId: this.anonymousUser?.id,
+        authorId: this.comment.author?.id
+      });
       return;
     }
 
-    // Immediately lock to prevent concurrent operations
-    this.voteOperationLock = true;
-
-    // Clear any existing timeout
-    if (this.voteOperationTimeout) {
-      clearTimeout(this.voteOperationTimeout);
-      this.voteOperationTimeout = null;
+    if (this._cachedIsCurrentUser === null) {
+      console.warn('⏳ User ownership unknown, blocking vote until determined');
+      return;
     }
 
-    try {
-      // 🚨 CRITICAL SECURITY: Check ownership FIRST
-      if (this._cachedIsCurrentUser === true) {
-        console.error('🚨 SECURITY VIOLATION: Attempted self-vote blocked!', {
-          commentId: this.comment.id,
-          userId: this.anonymousUser?.id,
-          authorId: this.comment.author?.id
-        });
-        return;
-      }
-
-      if (this._cachedIsCurrentUser === null) {
-        console.warn('⏳ User ownership unknown, blocking vote until determined');
-        return;
-      }
-
-      // Additional safety checks
-      if (!this.canVoteOnComment || this.isVoting) {
-        return;
-      }
-
-      // Check vote limits
-      if (!this.canAddMoreVotes()) {
-        this.showVoteLimitWarning();
-        return;
-      }
-
-      // Proceed with vote operation
-      await this.performVoteOperation('UP');
-
-    } finally {
-      // Always release lock after short delay to prevent rapid re-clicks
-      this.voteOperationTimeout = setTimeout(() => {
-        this.voteOperationLock = false;
-      }, 200);
+    // Additional safety checks
+    if (!this.canVoteOnComment || this.isVoting) {
+      return;
     }
+
+    // Check vote limits
+    if (!this.canAddMoreVotes()) {
+      this.showVoteLimitWarning();
+      return;
+    }
+
+    // 🚀 Haptic feedback for mobile
+    this.triggerHapticFeedback('light');
+
+    // 🔧 PHASE 2 REFACTOR: Use VoteManagerService
+    const result = await this.voteManagerService.addVote(
+      this.comment.id.toString(),
+      this.anonymousUser!.id,
+      this.comment.submissionId,
+      this.comment.categoryId || 0
+    );
+
+    if (!result.success) {
+      console.error('❌ Vote operation failed:', result.error);
+      // Show error to user
+      return;
+    }
+
+    // 🚀 Success feedback
+    this.triggerVoteSuccessAnimation();
+    this.triggerHapticFeedback('medium');
   }
 
   /**
@@ -641,60 +656,53 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   }
 
   /**
-   * 🚨 SECURITY FIX: Removes a vote with atomic locking to prevent race conditions
-   * Allows vote removal even when vote limit is reached (important for UX)
+   * 🔧 PHASE 2 REFACTOR: Removes a vote using VoteManagerService
+   * Service handles atomic locking and race prevention
    */
   async removeVote(): Promise<void> {
-    // 🚨 ATOMIC LOCK: Check and set in one operation
-    if (this.voteOperationLock) {
-      console.warn('🔒 Vote operation already in progress, blocking duplicate');
+    // 🚨 CRITICAL SECURITY: Check ownership FIRST (even for removal)
+    if (this._cachedIsCurrentUser === true) {
+      console.error('🚨 SECURITY VIOLATION: Attempted self-vote removal blocked!', {
+        commentId: this.comment.id,
+        userId: this.anonymousUser?.id,
+        authorId: this.comment.author?.id
+      });
       return;
     }
 
-    // Immediately lock
-    this.voteOperationLock = true;
-
-    // Clear any existing timeout
-    if (this.voteOperationTimeout) {
-      clearTimeout(this.voteOperationTimeout);
-      this.voteOperationTimeout = null;
+    if (this._cachedIsCurrentUser === null) {
+      console.warn('⏳ User ownership unknown, blocking vote removal until determined');
+      return;
     }
 
-    try {
-      // 🚨 CRITICAL SECURITY: Check ownership FIRST (even for removal)
-      if (this._cachedIsCurrentUser === true) {
-        console.error('🚨 SECURITY VIOLATION: Attempted self-vote removal blocked!', {
-          commentId: this.comment.id,
-          userId: this.anonymousUser?.id,
-          authorId: this.comment.author?.id
-        });
-        return;
-      }
-
-      if (this._cachedIsCurrentUser === null) {
-        console.warn('⏳ User ownership unknown, blocking vote removal until determined');
-        return;
-      }
-
-      // Check if user has votes to remove
-      if (this.getUserVoteCount() === 0) {
-        return;
-      }
-
-      // Additional safety checks (but allow removal even if voting is disabled)
-      if (this.isVoting) {
-        return;
-      }
-
-      // Proceed with vote removal operation
-      await this.performVoteOperation(null);
-
-    } finally {
-      // Always release lock after short delay
-      this.voteOperationTimeout = setTimeout(() => {
-        this.voteOperationLock = false;
-      }, 200);
+    // Check if user has votes to remove
+    if (this.getUserVoteCount() === 0) {
+      return;
     }
+
+    // Additional safety checks (but allow removal even if voting is disabled)
+    if (this.isVoting) {
+      return;
+    }
+
+    // 🚀 Haptic feedback for mobile
+    this.triggerHapticFeedback('light');
+
+    // 🔧 PHASE 2 REFACTOR: Use VoteManagerService
+    const result = await this.voteManagerService.removeVote(
+      this.comment.id.toString(),
+      this.anonymousUser!.id,
+      this.comment.submissionId,
+      this.comment.categoryId || 0
+    );
+
+    if (!result.success) {
+      console.error('❌ Vote removal failed:', result.error);
+      return;
+    }
+
+    // 🚀 Success feedback
+    this.triggerHapticFeedback('medium');
   }
 
   /**
