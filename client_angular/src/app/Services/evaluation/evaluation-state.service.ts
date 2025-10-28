@@ -31,7 +31,6 @@ import {
 
 // Services
 import { EvaluationDiscussionService } from './evaluation-discussion.service';
-import { UserService } from '../auth/user.service';
 import { LoggerService } from '../logger/logger.service';
 import { EvaluationCacheService } from './evaluation-cache.service';
 import { EvaluationDiscussionStateService } from './evaluation-discussion-state.service';
@@ -271,7 +270,6 @@ export class EvaluationStateService implements OnDestroy {
 
   constructor(
     private evaluationService: EvaluationDiscussionService,
-    private userservice: UserService,
     private logger: LoggerService,
     private cache: EvaluationCacheService,
     private discussionState: EvaluationDiscussionStateService,
