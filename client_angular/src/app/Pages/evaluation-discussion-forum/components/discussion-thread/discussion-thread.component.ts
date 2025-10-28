@@ -44,7 +44,6 @@ import {
 
 // Child Components
 import { CommentItemComponent } from '../comment-item/comment-item.component';
-import { CommentItemCleanComponent } from '../comment-item/comment-item-clean.component';
 import { CommentInputComponent } from '../comment-input/comment-input.component';
 
 // Services
@@ -68,7 +67,6 @@ import { PerformanceProfilingDirective } from '../../directives/performance-prof
     MatTooltipModule,
     ScrollingModule,
     CommentItemComponent,
-    CommentItemCleanComponent,
     CommentInputComponent,
     PerformanceProfilingDirective,
   ],
