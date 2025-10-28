@@ -635,21 +635,35 @@ export class EvaluationStateService implements OnDestroy {
   loadVoteLimitStatus(submissionId: string, categoryId: number): Observable<void> {
     this.voteLimitLoadingSubject.next(true);
 
-    // Use default vote limits (backend endpoint not yet implemented)
-    const defaultVoteLimitStatus: VoteLimitStatusDTO = {
-      maxVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
-      remainingVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
-      votedCommentIds: [],
-      canVote: true,
-      displayText: `${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY}/${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY} verfügbar`,
-    };
+    // Load actual vote status from backend
+    return this.evaluationService.getVoteLimitStatus(submissionId, String(categoryId)).pipe(
+      tap(voteLimitStatus => {
+        // Update status map with actual data from backend
+        const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
+        currentStatusMap.set(categoryId, voteLimitStatus);
+        this.voteLimitStatusSubject.next(currentStatusMap);
+      }),
+      catchError(error => {
+        this.log.error('Failed to load vote limit status, using defaults', { submissionId, categoryId, error });
 
-    const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
-    currentStatusMap.set(categoryId, defaultVoteLimitStatus);
-    this.voteLimitStatusSubject.next(currentStatusMap);
+        // Fallback to defaults only on error
+        const defaultVoteLimitStatus: VoteLimitStatusDTO = {
+          maxVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
+          remainingVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
+          votedCommentIds: [],
+          canVote: true,
+          displayText: `${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY}/${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY} verfügbar`,
+        };
 
-    this.voteLimitLoadingSubject.next(false);
-    return of(void 0);
+        const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
+        currentStatusMap.set(categoryId, defaultVoteLimitStatus);
+        this.voteLimitStatusSubject.next(currentStatusMap);
+
+        return of(void 0);
+      }),
+      finalize(() => this.voteLimitLoadingSubject.next(false)),
+      map(() => void 0)
+    );
   }
 
   // =============================================================================

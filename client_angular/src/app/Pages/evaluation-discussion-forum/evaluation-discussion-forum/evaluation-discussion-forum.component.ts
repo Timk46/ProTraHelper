@@ -475,8 +475,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // this.loadSubmissionList(); // FIXME: Disabled - requires backend API integration
 
-    // 🚀 SESSION VOTE TRACKING: Reset global session votes when forum is loaded/reloaded
-    this.voteSessionService.resetSessionVotes();
+    // Initialize session votes from backend data after voteLimitStatus loads
+    this.initializeSessionVotesFromBackend();
   }
 
   ngOnDestroy(): void {
@@ -485,6 +485,28 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // 🚀 PHASE 5: Enhanced cleanup with global state management
     this.cleanup();
+  }
+
+  /**
+   * Initialize session votes from backend vote limit status
+   * This ensures the vote counter shows correct values after page refresh
+   */
+  private initializeSessionVotesFromBackend(): void {
+    combineLatest([
+      this.stateService.voteLimitStatus$,
+      this.activeCategory$
+    ]).pipe(
+      take(1),
+      filter(([statusMap, activeCategory]) => statusMap.size > 0 && activeCategory !== null)
+    ).subscribe(([statusMap, activeCategory]) => {
+      if (activeCategory !== null) {
+        const status = statusMap.get(activeCategory);
+        if (status) {
+          const votedCount = status.maxVotes - status.remainingVotes;
+          this.voteSessionService.initializeFromBackend(votedCount);
+        }
+      }
+    });
   }
 
   private cleanup(): void {

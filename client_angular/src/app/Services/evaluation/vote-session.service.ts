@@ -83,6 +83,17 @@ export class VoteSessionService {
   }
 
   /**
+   * Initialize session votes from backend data
+   * Called on component init with actual vote count from database
+   * @param votedCommentCount Number of votes already given (from backend)
+   */
+  initializeFromBackend(votedCommentCount: number): void {
+    this.sessionVotesGivenSubject.next(votedCommentCount);
+    this.saveSessionVotes(votedCommentCount);
+    console.log(`📊 Session votes initialized from backend: ${votedCommentCount}`);
+  }
+
+  /**
    * Calculate effective available votes considering session votes
    * @param baseAvailableVotes Base available votes from server
    * @returns Effective available votes after session votes
