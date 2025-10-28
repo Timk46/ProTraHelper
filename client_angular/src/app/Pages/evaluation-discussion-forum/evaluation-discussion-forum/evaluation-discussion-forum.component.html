@@ -137,8 +137,11 @@
               <mat-panel-description *ngIf="vm.isDiscussionPhase && (voteStatus$ | async) as voteStatus">
                 <div class="vote-counter-compact">
                   <span class="vote-icon">🗳️</span>
-                  <span class="vote-text">{{ voteStatus.availableVotes }}/{{ voteStatus.totalVotes }} verfügbar</span>
-                  <span class="vote-status-text" [class.warning]="voteStatus.availableVotes === 0">
+                  <!-- Show loading indicator while fetching vote data -->
+                  <span class="vote-text" *ngIf="voteStatus.isLoading">Laden...</span>
+                  <!-- Show vote counts when data is available -->
+                  <span class="vote-text" *ngIf="!voteStatus.isLoading">{{ voteStatus.availableVotes }}/{{ voteStatus.totalVotes }} verfügbar</span>
+                  <span class="vote-status-text" *ngIf="!voteStatus.isLoading" [class.warning]="voteStatus.availableVotes === 0">
                     {{ voteStatus.availableVotes > 0 ? 'Sie können noch ' + voteStatus.availableVotes + ' Kommentare bewerten' : 'Alle Bewertungen vergeben' }}
                   </span>
                 </div>
@@ -149,9 +152,9 @@
             <div class="discussion-content">
               <!-- Vote Progress Bar -->
               <div class="vote-stats" *ngIf="vm.isDiscussionPhase && (hasCommentedCurrentCategory$ | async) && (voteStatus$ | async) as voteStatus">
-                <div class="vote-progress-container">
+                <div class="vote-progress-container" *ngIf="!voteStatus.isLoading">
                   <div class="vote-progress-bar">
-                    <div class="vote-progress-fill" 
+                    <div class="vote-progress-fill"
                          [style.width.%]="((voteStatus.totalVotes - voteStatus.availableVotes) / voteStatus.totalVotes) * 100">
                     </div>
                   </div>

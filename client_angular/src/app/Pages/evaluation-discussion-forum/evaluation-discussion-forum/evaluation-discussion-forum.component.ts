@@ -231,6 +231,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     canVote: boolean;
     availableVotes: number;
     totalVotes: number;
+    isLoading: boolean;
   }>;
 
   // =============================================================================
@@ -440,22 +441,34 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       this.activeCategory$,
       this.isDiscussionPhase$,
       this.stateService.voteLimitStatus$,
-      this.stateService.activeDiscussions$ // Include discussions to calculate vote limits
+      this.stateService.activeDiscussions$, // Include discussions to calculate vote limits
+      this.stateService.voteLimitLoading$ // Include loading state to prevent flicker
     ]).pipe(
-      map(([activeCategory, isDiscussionPhase, voteLimitStatusMap, discussions]) => {
+      map(([activeCategory, isDiscussionPhase, voteLimitStatusMap, discussions, isLoading]) => {
         // Get dynamic vote limit status for current category (handle null category)
         const voteLimitStatus = activeCategory !== null ? voteLimitStatusMap.get(activeCategory) : undefined;
-        
+
         // 🎯 CALCULATE: Vote limit based on comment count (2 votes per comment)
         const maxVotes = this.calculateVoteLimits(discussions);
+
+        // FIX: Show loading ONLY when:
+        // 1. Global loading flag is true AND
+        // 2. No cached data exists for current category
+        const isDataLoading = isLoading && voteLimitStatus === undefined;
 
         return {
           canVote: isDiscussionPhase && (voteLimitStatus?.canVote ?? true),
           availableVotes: voteLimitStatus?.remainingVotes ?? maxVotes,
           totalVotes: maxVotes, // Always based on comment count
+          isLoading: isDataLoading, // FIXED: Only true when actually loading without cache
         };
       }),
-      // 🚨 REMOVED distinctUntilChanged to ensure vote updates always propagate
+      distinctUntilChanged((prev, curr) =>
+        prev.canVote === curr.canVote &&
+        prev.availableVotes === curr.availableVotes &&
+        prev.totalVotes === curr.totalVotes &&
+        prev.isLoading === curr.isLoading
+      ),
       shareReplay(1),
       takeUntil(this.destroy$) // 🔧 MEMORY SAFE: Prevent memory leak
     );
@@ -477,6 +490,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // Initialize session votes from backend data after voteLimitStatus loads
     this.initializeSessionVotesFromBackend();
+
+    // Eager load vote limits for active category to prevent flicker
+    this.eagerLoadVoteLimitsForActiveCategory();
   }
 
   ngOnDestroy(): void {
@@ -505,6 +521,52 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           const votedCount = status.maxVotes - status.remainingVotes;
           this.voteSessionService.initializeFromBackend(votedCount);
         }
+      }
+    });
+  }
+
+  /**
+   * Eager load vote limits for active category + next 2 categories on init
+   * FIXED: Use switchMap to ensure vote limits are loaded BEFORE template evaluation
+   * This prevents visual flicker and race conditions
+   */
+  private eagerLoadVoteLimitsForActiveCategory(): void {
+    combineLatest([
+      this.activeCategory$,
+      this.categories$,
+      this.submission$
+    ]).pipe(
+      take(1),
+      filter(([activeCategory, categories, submission]) =>
+        activeCategory !== null && categories.length > 0 && submission !== null
+      ),
+      switchMap(([activeCategory, categories, submission]) => {
+        // Find index of active category
+        const activeCategoryIndex = categories.findIndex(cat => cat.id === activeCategory);
+
+        if (activeCategoryIndex === -1) {
+          return of(void 0);
+        }
+
+        // Preload active category + next 2 categories
+        const categoriesToPreload = [
+          categories[activeCategoryIndex],
+          categories[activeCategoryIndex + 1],
+          categories[activeCategoryIndex + 2]
+        ].filter(cat => cat !== undefined).map(cat => cat.id);
+
+        console.log(`⚡ Eager loading vote limits for categories: ${categoriesToPreload.join(', ')}`);
+
+        // Use service's preload method for optimized parallel loading
+        return this.stateService.preloadVoteLimitStatus(String(submission!.id), categoriesToPreload);
+      })
+    ).subscribe({
+      next: () => {
+        console.log('✅ Vote limits eager-loaded successfully');
+        this.cdr.markForCheck(); // Force change detection to update template
+      },
+      error: (error) => {
+        console.error('❌ Failed to eager-load vote limits:', error);
       }
     });
   }
@@ -883,20 +945,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         this.processCommentSubmission(content);
       });
 
-    // Setup rating status checking and vote limit loading when active category changes
-    this.activeCategory$
-      .pipe(
-        filter((categoryId): categoryId is number => categoryId !== null && categoryId > 0), // Only check valid category IDs
-        takeUntil(this.destroy$)
-      )
-      .subscribe(categoryId => {
-        // Rating status is now handled automatically by hasRatedCurrentCategory$ observable
-
-        // Load vote limits for the new category
-        if (this.submissionId) {
-          this.stateService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe();
-        }
-      });
+    // Rating status is now handled automatically by hasRatedCurrentCategory$ observable
+    // Vote limits are eagerly loaded on init and loaded as part of category transitions
 
     // 🔧 RACE CONDITION FIX: Centralized category selection with request cancellation
     // This prevents multiple concurrent requests when user rapidly switches categories

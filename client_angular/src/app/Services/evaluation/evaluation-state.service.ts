@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, BehaviorSubject, Subject, combineLatest, of } from 'rxjs';
+import { Observable, BehaviorSubject, Subject, combineLatest, of, forkJoin } from 'rxjs';
 import {
   map,
   distinctUntilChanged,
@@ -9,6 +9,7 @@ import {
   catchError,
   finalize,
   filter,
+  switchMap,
 } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -385,16 +386,26 @@ export class EvaluationStateService implements OnDestroy {
       },
     });
 
-    // Load categories
+    // Load categories and preload vote limits for first 3
     this.evaluationService.getCategories(submission.sessionId).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: categories => {
+      takeUntil(this.destroy$),
+      switchMap(categories => {
         this.categoriesSubject.next(categories);
         this.log.info('Categories loaded', { count: categories.length });
+
+        // PRELOAD: Load vote limits for first 3 categories immediately
+        const categoryIdsToPreload = categories.slice(0, 3).map(cat => cat.id);
+        if (categoryIdsToPreload.length > 0) {
+          return this.preloadVoteLimitStatus(String(submission.id), categoryIdsToPreload);
+        }
+        return of(void 0);
+      })
+    ).subscribe({
+      next: () => {
+        this.log.info('Initial vote limits preloaded');
       },
       error: error => {
-        this.log.error('Categories loading failed', { error });
+        this.log.error('Categories loading or preloading failed', { error });
         this.setError('Error loading categories');
       },
     });
@@ -470,21 +481,22 @@ export class EvaluationStateService implements OnDestroy {
           statusCount: statuses.length,
         });
 
-        // Atomic update: Set both category and rating status simultaneously
+        // Atomic update: Set category
         this.activeCategorySubject.next(categoryId);
 
-        // Update rating status via RatingStateService
-        // (This is a bit awkward - the service should handle this internally)
-        // For now, we'll let the transition complete
-
-        // Load vote limits for the new category
-        if (submissionId) {
+        // SMART CACHING: Only load vote limits if not already cached
+        // This prevents unnecessary backend calls during category switches
+        const currentStatusMap = this.voteLimitStatusSubject.value;
+        if (!currentStatusMap.has(categoryId)) {
+          this.log.debug('Vote limit not cached, loading from backend', { categoryId });
           this.loadVoteLimitStatus(String(submissionId), categoryId).pipe(
             takeUntil(this.destroy$)
           ).subscribe({
             next: () => this.log.info('Vote limits loaded for category transition', { categoryId }),
             error: (error) => this.log.error('Failed to load vote limits', { categoryId, error })
           });
+        } else {
+          this.log.debug('Vote limit found in cache, skipping backend call', { categoryId });
         }
 
         return void 0;
@@ -626,13 +638,20 @@ export class EvaluationStateService implements OnDestroy {
   // =============================================================================
 
   /**
-   * Loads vote limit status for a category
-   *
+   * Loads vote limit status for a category with smart caching
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
+   * @param forceReload - Force reload even if cached (default: false)
    * @returns Observable<void> Completes when loading is finished
    */
-  loadVoteLimitStatus(submissionId: string, categoryId: number): Observable<void> {
+  loadVoteLimitStatus(submissionId: string, categoryId: number, forceReload = false): Observable<void> {
+    // CACHE CHECK: Return immediately if data exists and not forcing reload
+    const currentStatusMap = this.voteLimitStatusSubject.value;
+    if (!forceReload && currentStatusMap.has(categoryId)) {
+      this.log.debug('Vote limit status found in cache', { categoryId });
+      return of(void 0);
+    }
+
     this.voteLimitLoadingSubject.next(true);
 
     // Load actual vote status from backend
@@ -642,6 +661,7 @@ export class EvaluationStateService implements OnDestroy {
         const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
         currentStatusMap.set(categoryId, voteLimitStatus);
         this.voteLimitStatusSubject.next(currentStatusMap);
+        this.log.debug('Vote limit status loaded and cached', { categoryId });
       }),
       catchError(error => {
         this.log.error('Failed to load vote limit status, using defaults', { submissionId, categoryId, error });
@@ -663,6 +683,37 @@ export class EvaluationStateService implements OnDestroy {
       }),
       finalize(() => this.voteLimitLoadingSubject.next(false)),
       map(() => void 0)
+    );
+  }
+
+  /**
+   * Preloads vote limit status for multiple categories in parallel
+   * @param submissionId - The submission ID
+   * @param categoryIds - Array of category IDs to preload
+   * @returns Observable<void> Completes when all categories are loaded
+   */
+  preloadVoteLimitStatus(submissionId: string, categoryIds: number[]): Observable<void> {
+    if (!categoryIds || categoryIds.length === 0) {
+      return of(void 0);
+    }
+
+    this.log.info('Preloading vote limits for categories', { categoryIds });
+
+    // Load all categories in parallel using forkJoin
+    const loadObservables = categoryIds.map(categoryId =>
+      this.loadVoteLimitStatus(submissionId, categoryId).pipe(
+        catchError(error => {
+          this.log.warn('Failed to preload vote limit for category', { categoryId, error });
+          return of(void 0); // Continue with other categories even if one fails
+        })
+      )
+    );
+
+    return forkJoin(loadObservables).pipe(
+      map(() => {
+        this.log.info('Vote limits preloaded successfully', { count: categoryIds.length });
+        return void 0;
+      })
     );
   }
 
