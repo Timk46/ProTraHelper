@@ -60,7 +60,8 @@
       "Bash(where cursor:*)",
       "Bash(cursor --help:*)",
       "Read(//c/Program Files/cursor/resources/app/bin/**)",
-      "Bash(Select-String -Pattern \"task|terminal|execute|run|command\")"
+      "Bash(Select-String -Pattern \"task|terminal|execute|run|command\")",
+      "WebSearch"
     ],
     "deny": [],
     "additionalDirectories": [
