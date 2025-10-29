@@ -42,6 +42,7 @@ import {
 
 // Services
 import { EvaluationStateService } from '../../../Services/evaluation/evaluation-state.service';
+import { EvaluationVoteLimitService } from '../../../Services/evaluation/evaluation-vote-limit.service';
 import { VoteSessionService } from '../../../Services/evaluation/vote-session.service';
 import { EvaluationGlobalStateService } from '../services/evaluation-global-state.service';
 import { EvaluationNavigationService } from '../services/evaluation-navigation.service';
@@ -104,6 +105,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private stateService: EvaluationStateService,
+    private voteLimitService: EvaluationVoteLimitService,
     private voteSessionService: VoteSessionService,
     private userservice: UserService,
     private globalStateService: EvaluationGlobalStateService,
@@ -440,9 +442,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.voteStatus$ = combineLatest([
       this.activeCategory$,
       this.isDiscussionPhase$,
-      this.stateService.voteLimitStatus$,
+      this.voteLimitService.voteLimitStatus$,
       this.stateService.activeDiscussions$, // Include discussions to calculate vote limits
-      this.stateService.voteLimitLoading$ // Include loading state to prevent flicker
+      this.voteLimitService.voteLimitLoading$ // Include loading state to prevent flicker
     ]).pipe(
       map(([activeCategory, isDiscussionPhase, voteLimitStatusMap, discussions, isLoading]) => {
         // Get dynamic vote limit status for current category (handle null category)
@@ -509,7 +511,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    */
   private initializeSessionVotesFromBackend(): void {
     combineLatest([
-      this.stateService.voteLimitStatus$,
+      this.voteLimitService.voteLimitStatus$,
       this.activeCategory$
     ]).pipe(
       take(1),
@@ -558,7 +560,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         console.log(`⚡ Eager loading vote limits for categories: ${categoriesToPreload.join(', ')}`);
 
         // Use service's preload method for optimized parallel loading
-        return this.stateService.preloadVoteLimitStatus(String(submission!.id), categoriesToPreload);
+        return this.voteLimitService.preloadVoteLimitStatus(String(submission!.id), categoriesToPreload);
       })
     ).subscribe({
       next: () => {
@@ -1202,11 +1204,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.stateService
-        .voteCommentWithEnhancedLimits(data.commentId, data.voteType, categoryId)
+      this.voteLimitService
+        .voteCommentWithEnhancedLimits(data.commentId, data.voteType, categoryId, this.submissionId ?? undefined)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: result => {
+          next: (result: any) => {
             const action =
               data.voteType === 'UP'
                 ? 'positiv bewertet'
@@ -1222,7 +1224,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
             // 🚨 CRITICAL FIX: Force refresh vote status to ensure UI updates
             if (result.voteLimitStatus && this.submissionId) {
-              this.stateService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe({
+              this.voteLimitService.loadVoteLimitStatus(this.submissionId, categoryId).subscribe({
                 next: () => {
                   this.cdr.markForCheck(); // Force change detection
                 },
@@ -1230,7 +1232,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               });
             }
           },
-          error: error => {
+          error: (error: any) => {
             console.error('❌ Vote failed:', error);
             const message = error.message || 'Fehler beim Bewerten des Kommentars';
             this.showSnackBar(message, 'Schließen', 5000, true);

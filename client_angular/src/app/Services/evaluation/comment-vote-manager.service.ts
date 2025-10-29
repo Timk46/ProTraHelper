@@ -4,6 +4,7 @@ import { retry, catchError, takeUntil } from 'rxjs/operators';
 
 // Services
 import { EvaluationStateService } from './evaluation-state.service';
+import { EvaluationVoteLimitService } from './evaluation-vote-limit.service';
 
 // DTOs
 import { VoteType, VoteLimitResponseDTO, EvaluationCommentDTO } from '@DTOs/index';
@@ -91,6 +92,7 @@ export class CommentVoteManagerService {
 
   constructor(
     private evaluationStateService: EvaluationStateService,
+    private voteLimitService: EvaluationVoteLimitService,
   ) {
     // Start auto-cleanup interval
     this.cleanupInterval = setInterval(() => {
@@ -444,12 +446,13 @@ export class CommentVoteManagerService {
     }
 
     try {
-      // 🔧 FIX: Use voteCommentWithEnhancedLimits instead of submitVote
-      // Note: Method signature is (commentId, voteType, categoryId) - no submissionId needed
-      const result = await this.evaluationStateService.voteCommentWithEnhancedLimits(
+      // Vote with enhanced limits - now uses dedicated VoteLimitService
+      // Provides submissionId for fallback vote limit loading if backend doesn't return it
+      const result = await this.voteLimitService.voteCommentWithEnhancedLimits(
         commentId,
         voteType,
-        categoryId
+        categoryId,
+        String(submissionId)
       ).toPromise();
 
       // Update state from result

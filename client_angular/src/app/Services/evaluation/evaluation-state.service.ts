@@ -20,8 +20,6 @@ import {
   CommentStatsDTO,
   AnonymousEvaluationUserDTO,
   CategoryRatingStatus,
-  VoteLimitStatusDTO,
-  VoteLimitResponseDTO,
   EvaluationDiscussionDTO,
   EvaluationCommentDTO,
   EvaluationRatingDTO,
@@ -37,6 +35,7 @@ import { EvaluationCacheService } from './evaluation-cache.service';
 import { EvaluationDiscussionStateService } from './evaluation-discussion-state.service';
 import { EvaluationCommentStateService } from './evaluation-comment-state.service';
 import { EvaluationRatingStateService } from './evaluation-rating-state.service';
+import { EvaluationVoteLimitService } from './evaluation-vote-limit.service';
 
 /**
  * Core evaluation state management service (Refactored)
@@ -81,9 +80,6 @@ export class EvaluationStateService implements OnDestroy {
   private readonly CONFIG = {
     TIMEOUTS: {
       FRESHNESS_THRESHOLD_MS: 2 * 60 * 1000, // 2 minutes
-    },
-    VOTE_LIMITS: {
-      MAX_VOTES_PER_CATEGORY: 10,
     },
   } as const;
 
@@ -132,16 +128,6 @@ export class EvaluationStateService implements OnDestroy {
   private categoryTransitionLoadingSubject = new BehaviorSubject<boolean>(false);
 
   /**
-   * Vote limit status per category
-   */
-  private voteLimitStatusSubject = new BehaviorSubject<Map<number, VoteLimitStatusDTO>>(new Map());
-
-  /**
-   * Vote limit loading state
-   */
-  private voteLimitLoadingSubject = new BehaviorSubject<boolean>(false);
-
-  /**
    * Backend health monitoring for rating status endpoint
    */
   private backendHealthSubject = new BehaviorSubject<{
@@ -165,8 +151,6 @@ export class EvaluationStateService implements OnDestroy {
   readonly loading$ = this.loadingSubject.asObservable();
   readonly error$ = this.errorSubject.asObservable();
   readonly categoryTransitionLoading$ = this.categoryTransitionLoadingSubject.asObservable();
-  readonly voteLimitStatus$ = this.voteLimitStatusSubject.asObservable();
-  readonly voteLimitLoading$ = this.voteLimitLoadingSubject.asObservable();
 
   /**
    * Observable for backend health status
@@ -275,7 +259,8 @@ export class EvaluationStateService implements OnDestroy {
     private cache: EvaluationCacheService,
     private discussionState: EvaluationDiscussionStateService,
     private commentState: EvaluationCommentStateService,
-    private ratingState: EvaluationRatingStateService
+    private ratingState: EvaluationRatingStateService,
+    private voteLimitService: EvaluationVoteLimitService
   ) {
     this.log.debug('EvaluationStateService initialized (Refactored)');
     this.initializeDefaultCategory();
@@ -402,7 +387,7 @@ export class EvaluationStateService implements OnDestroy {
         const categoryIdsToPreload = [...new Set([...first3, ...last2])];
 
         if (categoryIdsToPreload.length > 0) {
-          return this.preloadVoteLimitStatus(String(submission.id), categoryIdsToPreload);
+          return this.voteLimitService.preloadVoteLimitStatus(String(submission.id), categoryIdsToPreload);
         }
         return of(void 0);
       })
@@ -492,18 +477,12 @@ export class EvaluationStateService implements OnDestroy {
 
         // SMART CACHING: Only load vote limits if not already cached
         // This prevents unnecessary backend calls during category switches
-        const currentStatusMap = this.voteLimitStatusSubject.value;
-        if (!currentStatusMap.has(categoryId)) {
-          this.log.debug('Vote limit not cached, loading from backend', { categoryId });
-          this.loadVoteLimitStatus(String(submissionId), categoryId).pipe(
-            takeUntil(this.destroy$)
-          ).subscribe({
-            next: () => this.log.info('Vote limits loaded for category transition', { categoryId }),
-            error: (error) => this.log.error('Failed to load vote limits', { categoryId, error })
-          });
-        } else {
-          this.log.debug('Vote limit found in cache, skipping backend call', { categoryId });
-        }
+        this.voteLimitService.loadVoteLimitStatus(String(submissionId), categoryId).pipe(
+          takeUntil(this.destroy$)
+        ).subscribe({
+          next: () => this.log.info('Vote limits loaded for category transition', { categoryId }),
+          error: (error: any) => this.log.error('Failed to load vote limits', { categoryId, error })
+        });
 
         return void 0;
       }),
@@ -637,90 +616,6 @@ export class EvaluationStateService implements OnDestroy {
    */
   getRatingStats(submissionId: string, categoryId: number): Observable<RatingStatsDTO> {
     return this.ratingState.getRatingStats(submissionId, categoryId);
-  }
-
-  // =============================================================================
-  // VOTE LIMIT MANAGEMENT
-  // =============================================================================
-
-  /**
-   * Loads vote limit status for a category with smart caching
-   * @param submissionId - The submission ID
-   * @param categoryId - The category ID
-   * @param forceReload - Force reload even if cached (default: false)
-   * @returns Observable<void> Completes when loading is finished
-   */
-  loadVoteLimitStatus(submissionId: string, categoryId: number, forceReload = false): Observable<void> {
-    // CACHE CHECK: Return immediately if data exists and not forcing reload
-    const currentStatusMap = this.voteLimitStatusSubject.value;
-    if (!forceReload && currentStatusMap.has(categoryId)) {
-      this.log.debug('Vote limit status found in cache', { categoryId });
-      return of(void 0);
-    }
-
-    this.voteLimitLoadingSubject.next(true);
-
-    // Load actual vote status from backend
-    return this.evaluationService.getVoteLimitStatus(submissionId, String(categoryId)).pipe(
-      tap(voteLimitStatus => {
-        // Update status map with actual data from backend
-        const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
-        currentStatusMap.set(categoryId, voteLimitStatus);
-        this.voteLimitStatusSubject.next(currentStatusMap);
-        this.log.debug('Vote limit status loaded and cached', { categoryId });
-      }),
-      catchError(error => {
-        this.log.error('Failed to load vote limit status, using defaults', { submissionId, categoryId, error });
-
-        // Fallback to defaults only on error
-        const defaultVoteLimitStatus: VoteLimitStatusDTO = {
-          maxVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
-          remainingVotes: this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY,
-          votedCommentIds: [],
-          canVote: true,
-          displayText: `${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY}/${this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY} verfügbar`,
-        };
-
-        const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
-        currentStatusMap.set(categoryId, defaultVoteLimitStatus);
-        this.voteLimitStatusSubject.next(currentStatusMap);
-
-        return of(void 0);
-      }),
-      finalize(() => this.voteLimitLoadingSubject.next(false)),
-      map(() => void 0)
-    );
-  }
-
-  /**
-   * Preloads vote limit status for multiple categories in parallel
-   * @param submissionId - The submission ID
-   * @param categoryIds - Array of category IDs to preload
-   * @returns Observable<void> Completes when all categories are loaded
-   */
-  preloadVoteLimitStatus(submissionId: string, categoryIds: number[]): Observable<void> {
-    if (!categoryIds || categoryIds.length === 0) {
-      return of(void 0);
-    }
-
-    this.log.info('Preloading vote limits for categories', { categoryIds });
-
-    // Load all categories in parallel using forkJoin
-    const loadObservables = categoryIds.map(categoryId =>
-      this.loadVoteLimitStatus(submissionId, categoryId).pipe(
-        catchError(error => {
-          this.log.warn('Failed to preload vote limit for category', { categoryId, error });
-          return of(void 0); // Continue with other categories even if one fails
-        })
-      )
-    );
-
-    return forkJoin(loadObservables).pipe(
-      map(() => {
-        this.log.info('Vote limits preloaded successfully', { count: categoryIds.length });
-        return void 0;
-      })
-    );
   }
 
   // =============================================================================
@@ -932,119 +827,5 @@ export class EvaluationStateService implements OnDestroy {
    */
   updateCategoryRatingStatus(submissionId: string, categoryId: number, rating: number): void {
     this.ratingState.markCategoryAsRated(categoryId, rating, submissionId);
-  }
-
-  // =============================================================================
-  // VOTE LIMIT MANAGEMENT
-  // =============================================================================
-
-  /**
-   * Updates vote limit state for a category (optimistic updates)
-   *
-   * @param categoryId - The category ID
-   * @param isAdding - Whether vote is being added (true) or removed (false)
-   * @param commentId - Optional comment ID for tracking voted comments
-   * @private
-   */
-  private updateVoteLimitState(
-    categoryId: number,
-    isAdding: boolean,
-    commentId?: number
-  ): void {
-    const change = isAdding ? -1 : 1;
-
-    // Update voteLimitStatusSubject (primary state used by UI)
-    const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
-    const currentStatus = currentStatusMap.get(categoryId);
-
-    if (!currentStatus) {
-      this.log.warn('Vote limit status not found for category', { categoryId });
-      return;
-    }
-
-    // Track voted comment IDs if commentId provided (for optimistic updates)
-    const newVotedIds = new Set(currentStatus.votedCommentIds);
-    if (commentId !== undefined && isAdding) {
-      newVotedIds.add(commentId);
-    }
-
-    const remainingVotes = Math.max(0, Math.min(
-      currentStatus.maxVotes,
-      currentStatus.remainingVotes + change
-    ));
-
-    const updatedStatus: VoteLimitStatusDTO = {
-      ...currentStatus,
-      remainingVotes,
-      votedCommentIds: Array.from(newVotedIds),
-      canVote: remainingVotes > 0,
-      displayText: `${remainingVotes}/${currentStatus.maxVotes}`
-    };
-
-    currentStatusMap.set(categoryId, updatedStatus);
-    this.voteLimitStatusSubject.next(currentStatusMap);
-  }
-
-  /**
-   * Updates vote limit status from backend response
-   *
-   * @param categoryId - The category ID
-   * @param status - The vote limit status from backend
-   * @private
-   */
-  private updateVoteLimitStatus(categoryId: number, status: VoteLimitStatusDTO): void {
-    const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
-    currentStatusMap.set(categoryId, status);
-    this.voteLimitStatusSubject.next(currentStatusMap);
-  }
-
-  /**
-   * Enhanced vote method that integrates with the new backend API
-   *
-   * Handles vote submission with vote limit tracking and optimistic updates.
-   * Used by CommentVoteManagerService for atomic vote operations.
-   *
-   * @param commentId - The comment ID to vote on
-   * @param voteType - The vote type ('UP' or null to remove)
-   * @param categoryId - The category ID
-   * @returns Observable with vote limit response
-   * @since 2.0.0
-   */
-  voteCommentWithEnhancedLimits(
-    commentId: string,
-    voteType: 'UP' | null,
-    categoryId: number
-  ): Observable<VoteLimitResponseDTO> {
-    const isAdding = voteType !== null;
-
-    // Optimistic update for immediate UI feedback
-    this.updateVoteLimitState(categoryId, isAdding, Number(commentId));
-
-    return this.evaluationService.voteCommentWithLimits(commentId, voteType).pipe(
-      tap(response => {
-        // Update vote limit status from backend response
-        if (response.voteLimitStatus) {
-          this.updateVoteLimitStatus(categoryId, response.voteLimitStatus);
-          this.log.info('Updated vote limit status from backend', { voteLimitStatus: response.voteLimitStatus });
-        } else {
-          // Fallback: If backend doesn't provide voteLimitStatus, load it explicitly
-          const submissionId = this.submissionSubject.value?.id;
-          if (submissionId) {
-            this.loadVoteLimitStatus(String(submissionId), categoryId).pipe(
-              takeUntil(this.destroy$)
-            ).subscribe({
-              next: () => this.log.info('Fallback vote limit status loaded successfully'),
-              error: (error) => this.log.error('Failed to load vote limits', { categoryId, error })
-            });
-          }
-        }
-      }),
-      catchError(error => {
-        // Rollback optimistic update on error
-        this.updateVoteLimitState(categoryId, !isAdding, Number(commentId));
-        this.log.error('Failed to vote with enhanced limits, rolling back optimistic update', { error });
-        throw error;
-      })
-    );
   }
 }

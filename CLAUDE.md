@@ -5,7 +5,7 @@ This file provides comprehensive guidance to Claude Code (claude.ai/code) when w
 ## Project Overview
 
 **HEFL** (Hybrid E-Learning Framework) is a university adaptive learning platform featuring:
-- **Frontend**: Angular 18+ (standalone components, signals, Material Design, Tailwind CSS)
+- **Frontend**: Angular 18+ (standalone components, Material Design, Tailwind CSS)
 - **Backend**: NestJS with TypeScript strict mode
 - **Database**: PostgreSQL via Prisma ORM (87+ models)
 - **Architecture**: Knowledge graph-driven adaptive learning with multi-question engine
@@ -176,13 +176,12 @@ export class ContentService {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContentManagementPageComponent {
-  contents$ = signal<ContentDto[]>([]);
+  contents$: Observable<ContentDto[]>;
 
   constructor(private contentService: ContentService, private router: Router) {}
 
   ngOnInit() {
-    this.contentService.getContents().pipe(takeUntilDestroyed())
-      .subscribe(contents => this.contents$.set(contents));
+    this.contents$ = this.contentService.getContents();
   }
 
   onContentClick(id: string) { this.router.navigate(['/content', id]); }
@@ -273,7 +272,7 @@ After changes, update: `progress-logic.md` | `auth-flow.md` | `graph-navigation.
 ### Angular Performance Patterns
 - **OnPush:** Use `changeDetection: ChangeDetectionStrategy.OnPush` on all components
 - **TrackBy:** Add `trackBy: trackByItemId` in `*ngFor` loops (return `item.id`)
-- **Signals:** Simple state → `signal()`/`computed()` | Complex async → RxJS with `pipe()`
+- **State Management:** Use RxJS Observables + BehaviorSubject for component state | Prefer async pipe for automatic subscription management
 
 ### RxJS Subscription Cleanup
 **See Zero-Tolerance Rule #7** for unsubscribe patterns (takeUntil/async pipe) - memory leaks blocked
@@ -413,7 +412,7 @@ Before submitting ANY code, verify:
 - [ ] Prefer Logger for production code (console.log acceptable for debugging)
 
 **When in doubt, refer to the specialized agents:**
-- `angular-frontend-specialist` - Angular patterns & signals
+- `angular-frontend-specialist` - Angular patterns & best practices used in this project
 - `nestjs-backend-engineer` - NestJS architecture & APIs
 - `hefl-best-practice-checker` - Pre-implementation validation
 - `hefl-code-reviewer` - Post-implementation quality gate
