@@ -47,7 +47,20 @@
       "Bash(npx prisma migrate deploy:*)",
       "Bash(git ls-tree:*)",
       "Bash(git stash show:*)",
-      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\"; head -50 \"\"\"\"{}\"\"\"\"')"
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\"; head -50 \"\"\"\"{}\"\"\"\"')",
+      "Read(//c/dev/scripts/**)",
+      "Bash(Test-Path \"$PROFILE\")",
+      "Bash(echo:*)",
+      "Bash(git log:*)",
+      "Bash(test:*)",
+      "Bash(Test-Path \"C:\\dev\\a\\hefl\\.vscode\" -PathType Container)",
+      "Read(//c/Users/timkr/Documents/WindowsPowerShell/**)",
+      "Read(//c/Users/timkr/Documents/**)",
+      "Bash(Get-ExecutionPolicy -List)",
+      "Bash(where cursor:*)",
+      "Bash(cursor --help:*)",
+      "Read(//c/Program Files/cursor/resources/app/bin/**)",
+      "Bash(Select-String -Pattern \"task|terminal|execute|run|command\")"
     ],
     "deny": [],
     "additionalDirectories": [
