@@ -36,6 +36,9 @@ import { EvaluationDiscussionStateService } from './evaluation-discussion-state.
 import { EvaluationCommentStateService } from './evaluation-comment-state.service';
 import { EvaluationRatingStateService } from './evaluation-rating-state.service';
 import { EvaluationVoteLimitService } from './evaluation-vote-limit.service';
+import { EvaluationAnonymousUserService } from './evaluation-anonymous-user.service';
+import { EvaluationHealthMonitorService, BackendHealthStatus } from './evaluation-health-monitor.service';
+import { EvaluationCategoryNavigationService } from './evaluation-category-navigation.service';
 
 /**
  * Core evaluation state management service (Refactored)
@@ -50,16 +53,20 @@ import { EvaluationVoteLimitService } from './evaluation-vote-limit.service';
  * - Discussions: EvaluationDiscussionStateService
  * - Comments: EvaluationCommentStateService
  * - Ratings: EvaluationRatingStateService
+ * - Vote Limits: EvaluationVoteLimitService
+ * - Anonymous Users: EvaluationAnonymousUserService
+ * - Health Monitoring: EvaluationHealthMonitorService
+ * - Category Navigation: EvaluationCategoryNavigationService
  *
  * Core responsibilities (kept here):
  * - Submission state
- * - Category state and transitions
- * - Anonymous user management
+ * - Category transition orchestration (complex loading logic)
  * - Loading & error state
  * - Service orchestration
  *
  * @implements {OnDestroy}
  * @since 2.0.0 (Refactored from monolithic service)
+ * @since 3.0.0 (Extracted vote limits and anonymous user management)
  */
 @Injectable({
   providedIn: 'root',
@@ -98,19 +105,9 @@ export class EvaluationStateService implements OnDestroy {
   private categoriesSubject = new BehaviorSubject<EvaluationCategoryDTO[]>([]);
 
   /**
-   * Currently active category ID
-   */
-  private activeCategorySubject = new BehaviorSubject<number | null>(null);
-
-  /**
    * Comment statistics for the submission
    */
   private commentStatsSubject = new BehaviorSubject<CommentStatsDTO | null>(null);
-
-  /**
-   * Anonymous user for the current session
-   */
-  private anonymousUserSubject = new BehaviorSubject<AnonymousEvaluationUserDTO | null>(null);
 
   /**
    * Global loading state
@@ -122,24 +119,6 @@ export class EvaluationStateService implements OnDestroy {
    */
   private errorSubject = new BehaviorSubject<string | null>(null);
 
-  /**
-   * Category transition loading state
-   */
-  private categoryTransitionLoadingSubject = new BehaviorSubject<boolean>(false);
-
-  /**
-   * Backend health monitoring for rating status endpoint
-   */
-  private backendHealthSubject = new BehaviorSubject<{
-    isHealthy: boolean;
-    lastError: string | null;
-    lastChecked: Date | null;
-  }>({
-    isHealthy: true,
-    lastError: null,
-    lastChecked: null
-  });
-
   // =============================================================================
   // PUBLIC OBSERVABLES
   // =============================================================================
@@ -147,38 +126,42 @@ export class EvaluationStateService implements OnDestroy {
   readonly submission$ = this.submissionSubject.asObservable();
   readonly categories$ = this.categoriesSubject.asObservable();
   readonly commentStats$ = this.commentStatsSubject.asObservable();
-  readonly anonymousUser$ = this.anonymousUserSubject.asObservable();
   readonly loading$ = this.loadingSubject.asObservable();
   readonly error$ = this.errorSubject.asObservable();
-  readonly categoryTransitionLoading$ = this.categoryTransitionLoadingSubject.asObservable();
+
+  /**
+   * Anonymous user observable
+   * Delegated to: EvaluationAnonymousUserService
+   */
+  get anonymousUser$(): Observable<AnonymousEvaluationUserDTO | null> {
+    return this.anonymousUserService.anonymousUser$;
+  }
 
   /**
    * Observable for backend health status
    * Tracks if rating status endpoint is responding correctly
+   * Delegated to: EvaluationHealthMonitorService
    */
-  get backendHealth$(): Observable<{
-    isHealthy: boolean;
-    lastError: string | null;
-    lastChecked: Date | null;
-  }> {
-    return this.backendHealthSubject.asObservable();
+  get backendHealth$(): Observable<BackendHealthStatus> {
+    return this.healthMonitor.backendHealth$;
   }
 
   /**
    * Observable of active category ID
    * Returns null if no category is active or categories haven't loaded yet
+   * Delegated to: EvaluationCategoryNavigationService
    */
   get activeCategory$(): Observable<number | null> {
-    return this.activeCategorySubject.asObservable().pipe(
-      map(categoryId => {
-        if (categoryId === null) {
-          const categories = this.categoriesSubject.value;
-          return categories.length > 0 ? categories[0].id : null;
-        }
-        return categoryId;
-      }),
-      distinctUntilChanged()
-    );
+    return this.categoryNav.activeCategory$;
+  }
+
+  /**
+   * Observable for category transition loading state
+   * Emits true while transitioning between categories
+   * Delegated to: EvaluationCategoryNavigationService
+   */
+  get categoryTransitionLoading$(): Observable<boolean> {
+    return this.categoryNav.categoryTransitionLoading$;
   }
 
   /**
@@ -260,7 +243,10 @@ export class EvaluationStateService implements OnDestroy {
     private discussionState: EvaluationDiscussionStateService,
     private commentState: EvaluationCommentStateService,
     private ratingState: EvaluationRatingStateService,
-    private voteLimitService: EvaluationVoteLimitService
+    private voteLimitService: EvaluationVoteLimitService,
+    private anonymousUserService: EvaluationAnonymousUserService,
+    private healthMonitor: EvaluationHealthMonitorService,
+    private categoryNav: EvaluationCategoryNavigationService
   ) {
     this.log.debug('EvaluationStateService initialized (Refactored)');
     this.initializeDefaultCategory();
@@ -286,19 +272,18 @@ export class EvaluationStateService implements OnDestroy {
 
   /**
    * Initializes default category when categories are loaded
+   * Delegated to: EvaluationCategoryNavigationService
    * @private
    */
   private initializeDefaultCategory(): void {
     this.categories$
       .pipe(
-        filter((categories: EvaluationCategoryDTO[]) => categories.length > 0 && this.activeCategorySubject.value === null),
+        filter((categories: EvaluationCategoryDTO[]) => categories.length > 0),
         take(1),
         takeUntil(this.destroy$)
       )
       .subscribe((categories: EvaluationCategoryDTO[]) => {
-        const firstCategory = categories[0];
-        this.activeCategorySubject.next(firstCategory.id);
-        this.log.debug('Default category set', { categoryId: firstCategory.id });
+        this.categoryNav.initializeDefaultCategory(categories);
       });
   }
 
@@ -360,11 +345,11 @@ export class EvaluationStateService implements OnDestroy {
       error: () => this.commentStatsSubject.next(null),
     });
 
-    // Load anonymous user
-    this.evaluationService.getOrCreateAnonymousUser(String(submission.id)).pipe(
+    // Load anonymous user (delegated to EvaluationAnonymousUserService)
+    this.anonymousUserService.loadAnonymousUser(String(submission.id)).pipe(
       takeUntil(this.destroy$)
     ).subscribe({
-      next: user => this.anonymousUserSubject.next(user),
+      next: () => this.log.debug('Anonymous user loaded successfully'),
       error: error => {
         this.log.error('Anonymous user loading failed', { error });
         this.setError('Error loading anonymous user');
@@ -450,17 +435,17 @@ export class EvaluationStateService implements OnDestroy {
    * @returns Observable<void> Completes when transition is finished
    */
   transitionToCategory(categoryId: number): Observable<void> {
-    const currentCategory = this.activeCategorySubject.value;
+    const currentCategory = this.categoryNav.getCurrentActiveCategory();
     const submissionId = this.submissionSubject.value?.id;
-    const anonymousUserId = this.anonymousUserSubject.value?.id;
+    const anonymousUserId = this.anonymousUserService.getUserId();
 
     // Skip transition if same category or invalid data
     if (currentCategory === categoryId || !submissionId || !anonymousUserId) {
       return of(void 0);
     }
 
-    // Start transition loading state
-    this.categoryTransitionLoadingSubject.next(true);
+    // Start transition loading state (delegated to CategoryNavigationService)
+    this.categoryNav.startTransition();
 
     this.log.info('Transitioning to category', { from: currentCategory, to: categoryId });
 
@@ -472,8 +457,8 @@ export class EvaluationStateService implements OnDestroy {
           statusCount: statuses.length,
         });
 
-        // Atomic update: Set category
-        this.activeCategorySubject.next(categoryId);
+        // Atomic update: Set category (delegated to CategoryNavigationService)
+        this.categoryNav.setActiveCategory(categoryId);
 
         // SMART CACHING: Only load vote limits if not already cached
         // This prevents unnecessary backend calls during category switches
@@ -489,8 +474,8 @@ export class EvaluationStateService implements OnDestroy {
       catchError((error: unknown) => {
         this.log.error('Error during atomic category transition', { error, categoryId });
 
-        // Fallback: still transition to category
-        this.activeCategorySubject.next(categoryId);
+        // Fallback: still transition to category (delegated to CategoryNavigationService)
+        this.categoryNav.setActiveCategory(categoryId);
 
         // Handle errors intelligently
         if (error instanceof HttpErrorResponse && error.status >= 400) {
@@ -500,7 +485,8 @@ export class EvaluationStateService implements OnDestroy {
         return of(void 0);
       }),
       finalize(() => {
-        this.categoryTransitionLoadingSubject.next(false);
+        // End transition loading state (delegated to CategoryNavigationService)
+        this.categoryNav.endTransition();
         this.log.info('Atomic category transition completed', { categoryId });
       })
     );
@@ -520,7 +506,7 @@ export class EvaluationStateService implements OnDestroy {
     content: string,
     parentId?: string
   ): Observable<EvaluationCommentDTO> {
-    const anonymousUser = this.anonymousUserSubject.value;
+    const anonymousUser = this.anonymousUserService.getCurrentAnonymousUser();
 
     if (!anonymousUser) {
       throw new Error('Anonymous user not available. Please reload the page.');
@@ -550,7 +536,7 @@ export class EvaluationStateService implements OnDestroy {
     parentCommentId: string,
     content: string
   ): Observable<EvaluationCommentDTO> {
-    const anonymousUser = this.anonymousUserSubject.value;
+    const anonymousUser = this.anonymousUserService.getCurrentAnonymousUser();
 
     if (!anonymousUser) {
       throw new Error('Anonymous user not available. Please reload the page.');
@@ -669,30 +655,32 @@ export class EvaluationStateService implements OnDestroy {
 
   /**
    * Gets the current active category ID synchronously
+   * Delegated to: EvaluationCategoryNavigationService
    *
    * @returns The current active category ID or null if not set
    */
   getCurrentActiveCategory(): number | null {
-    return this.activeCategorySubject.value;
+    return this.categoryNav.getCurrentActiveCategory();
   }
 
   /**
    * Gets the current anonymous user synchronously
+   * Delegated to: EvaluationAnonymousUserService
    *
    * @returns The current anonymous user or null if not loaded
    */
   getCurrentAnonymousUser(): AnonymousEvaluationUserDTO | null {
-    return this.anonymousUserSubject.value;
+    return this.anonymousUserService.getCurrentAnonymousUser();
   }
 
   /**
    * Gets the current anonymous user ID for rating operations
+   * Delegated to: EvaluationAnonymousUserService
    *
    * @returns The anonymous user ID or null if not available
    */
   getUserId(): number | null {
-    const anonymousUser = this.anonymousUserSubject.value;
-    return anonymousUser ? anonymousUser.id : null;
+    return this.anonymousUserService.getUserId();
   }
 
   /**
@@ -714,27 +702,19 @@ export class EvaluationStateService implements OnDestroy {
     // Delegate to RatingStateService
     this.ratingState.loadCategoryRatingStatus(submissionId, userId);
 
-    // Monitor the rating status observable for backend health
+    // Monitor the rating status observable for backend health (delegated to HealthMonitorService)
     this.ratingState.categoryRatingStatus$.pipe(
       take(1),
       takeUntil(this.destroy$)
     ).subscribe({
       next: () => {
-        this.backendHealthSubject.next({
-          isHealthy: true,
-          lastError: null,
-          lastChecked: new Date()
-        });
+        this.healthMonitor.recordSuccess();
       },
       error: (error: unknown) => {
         const errorMessage = error instanceof HttpErrorResponse
           ? `HTTP ${error.status}: ${error.statusText}`
           : 'Unknown error';
-        this.backendHealthSubject.next({
-          isHealthy: false,
-          lastError: errorMessage,
-          lastChecked: new Date()
-        });
+        this.healthMonitor.recordFailure(errorMessage);
       }
     });
   }
@@ -782,8 +762,8 @@ export class EvaluationStateService implements OnDestroy {
    * Refreshes discussions for current submission
    */
   refreshDiscussions(submissionId: string): void {
-    const currentActiveCategory = this.activeCategorySubject.value;
-    const anonymousUser = this.anonymousUserSubject.value;
+    const currentActiveCategory = this.categoryNav.getCurrentActiveCategory();
+    const anonymousUser = this.anonymousUserService.getCurrentAnonymousUser();
 
     if (currentActiveCategory && currentActiveCategory > 0) {
       this.discussionState.refreshDiscussions(

@@ -54,6 +54,8 @@ These violations **prevent implementation** until resolved:
 - ❌ DTOs planned outside `shared/dtos/`
 - ❌ Using interfaces instead of DTOs for API contracts
 - ❌ Missing class-validator decorators in plan
+- ❌ Explicit undefined unions where optional properties should be used (`email: string | undefined` vs `email?: string`)
+- ❌ Inconsistent nullable patterns across related DTOs
 
 **Example:**
 ```
@@ -154,6 +156,7 @@ Execute these checks in order:
 2. Are new DTOs placed in `shared/dtos/[feature]/`?
 3. Do DTOs have validation decorators (`class-validator`)?
 4. Are path aliases (`@DTOs/...`) used in plan?
+5. Are nullable types handled consistently with optional properties (`?:`) instead of explicit undefined unions?
 
 **Common Issues:**
 - Creating new DTO when existing one works

@@ -605,6 +605,37 @@ function calculateScore(submissions, correctAnswers) {  // ❌ Missing types
 }
 ```
 
+### Nullable Type Patterns
+
+**HEFL Standard: Prefer optional properties over explicit undefined unions**
+
+```typescript
+// ✅ CORRECT
+interface UserDTO {
+  email?: string;
+  profile?: ProfileDTO;
+}
+
+function getUser(includeProfile?: boolean): UserDTO { }
+
+// ❌ WRONG - Unnecessarily verbose
+interface UserDTO {
+  email: string | undefined;
+  profile: ProfileDTO | undefined;
+}
+
+function getUser(includeProfile: boolean | undefined): UserDTO { }
+```
+
+**When explicit `| undefined` is acceptable:**
+- Property existence vs undefined value has distinct semantic meaning
+- Working with external APIs that require explicit undefined
+- **Justification required in code comments**
+
+**Blocking if:**
+- No clear semantic distinction between absent and undefined
+- Inconsistent pattern with other DTOs in same domain
+
 ---
 
 ## 7. DOCUMENTATION REQUIREMENTS
@@ -678,6 +709,7 @@ When writing code, execute this workflow:
 6. Has manual subscriptions without unsubscribe
 7. Lacks proper TypeScript typing
 8. Missing Compodoc documentation on public methods
+9. Uses explicit undefined unions where optional properties are appropriate (without justification)
 
 ---
 

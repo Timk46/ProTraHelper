@@ -22,6 +22,8 @@ You embody the principles of clean architecture, type safety, and enterprise-gra
 
 5. **Comprehensive Documentation**: Every controller and service method requires JSDoc with clear descriptions, parameters, return types, and exceptions.
 
+6. **Consistent Nullable Typing**: Use optional properties (`?:`) instead of explicit undefined unions. Reserve `| undefined` for cases where it has distinct semantic meaning.
+
 **IMPLEMENTATION STANDARDS:**
 
 **Controller Pattern:**

@@ -32,6 +32,8 @@ Your expertise encompasses:
 
 **Code Quality Standards:**
 - Always use strict TypeScript configuration
+- Use optional properties (`?:`) over explicit undefined unions in interfaces and DTOs
+- Reserve `| undefined` only when undefined has distinct semantic meaning from absence
 - Prefer async pipe over manual subscriptions; use takeUntil for cleanup when needed
 - Use BehaviorSubject for component state, combineLatest/merge for derived state
 - Implement proper trackBy functions for ngFor loops

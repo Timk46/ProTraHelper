@@ -82,8 +82,9 @@ export class CommentVoteManagerService {
   /**
    * 🔧 BLOCKER 1 FIX: Auto-cleanup interval for memory leak prevention
    * Runs every 5 minutes to clean up stale comment states
+   * Browser setInterval returns a number (timer ID)
    */
-  private cleanupInterval: any;
+  private cleanupInterval: number | null = null;
 
   /**
    * 🔧 BLOCKER 1 FIX: Cleanup threshold (10 minutes of inactivity)
@@ -343,23 +344,29 @@ export class CommentVoteManagerService {
 
   /**
    * Cleanup all states
+   *
+   * NOTE: This is a root service (providedIn: 'root') which should rarely be destroyed.
+   * If this is called, we only complete the destroy$ subject and clear the cleanup interval.
+   * We do NOT complete comment state subjects as they may still have active subscribers.
    */
   ngOnDestroy(): void {
-    // 🔧 BLOCKER 1 FIX: Clear auto-cleanup interval
+    // Log warning since root services shouldn't normally be destroyed
+    console.warn('⚠️ Root service CommentVoteManagerService is being destroyed - this is unexpected');
+
+    // 🔧 Clear auto-cleanup interval
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
       console.log('🛑 Auto-cleanup interval stopped');
     }
 
+    // Only complete the destroy$ subject
     this.destroy$.next();
     this.destroy$.complete();
 
-    // Cleanup all comment states
-    this.commentStates.forEach((state, commentId) => {
-      this.resetCommentState(commentId);
-    });
-    this.commentStates.clear();
+    // DON'T complete comment state subjects - they may still have active component subscriptions
+    // Just log the cleanup for debugging
+    console.log(`📊 CommentVoteManagerService destroyed with ${this.commentStates.size} active comment states`);
   }
 
   // =============================================================================

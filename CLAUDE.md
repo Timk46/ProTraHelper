@@ -66,6 +66,16 @@ hefl/
 // ✅ @UseGuards(JwtAuthGuard, RolesGuard) + @roles('...')  |  ❌ Endpoints without guards
 ```
 
+### 9. 🎯 NULLABLE TYPE CONSISTENCY
+```typescript
+// ✅ Optional property (preferred)
+interface ContentDto { description?: string; tags?: string[]; }
+
+// ❌ Explicit undefined union (avoid)
+interface ContentDto { description: string | undefined; tags: string[] | undefined; }
+```
+**Exception:** Only use `| undefined` when distinguishing "absent" from "explicitly undefined" matters
+
 ---
 
 ## 🎯 DTO-FIRST DEVELOPMENT
@@ -264,6 +274,61 @@ All public methods: JSDoc with `@param`, `@returns`, `@throws`, `@example`
 
 ### Update Policy
 After changes, update: `progress-logic.md` | `auth-flow.md` | `graph-navigation.md` | `api-endpoints.md`
+
+---
+
+## 🔒 TYPE SAFETY STANDARDS
+
+### Nullable Type Patterns
+
+**HEFL Standard: Prefer optional properties (`?:`) over explicit undefined unions**
+
+✅ **CORRECT - Optional property pattern:**
+```typescript
+interface UserDTO {
+  id: string;
+  email?: string;        // Property may be absent
+  profile?: ProfileDTO;
+}
+
+function getUserById(id: string, includeProfile?: boolean): UserDTO { }
+```
+
+❌ **AVOID - Explicit undefined union:**
+```typescript
+interface UserDTO {
+  id: string;
+  email: string | undefined;        // Unnecessarily verbose
+  profile: ProfileDTO | undefined;
+}
+
+function getUserById(id: string, includeProfile: boolean | undefined): UserDTO { }
+```
+
+**Rationale:**
+- `?:` is more concise and idiomatic TypeScript
+- Works seamlessly with object destructuring and default values
+- Clearer intent: property may not exist vs property exists with undefined value
+- Better JSON serialization behavior
+
+**When `| undefined` is acceptable (rare exceptions):**
+- Distinguishing "property absent" from "property explicitly set to undefined"
+- API responses where undefined has distinct semantic meaning
+- External library requirements for explicit undefined
+
+### Definite Assignment
+
+Use definite assignment assertion (`!`) sparingly and only when initialization is guaranteed:
+
+✅ **CORRECT:**
+```typescript
+@Input({ required: true }) content!: ContentDto;  // Angular guarantees initialization
+```
+
+❌ **AVOID:**
+```typescript
+private data!: string;  // No initialization guarantee
+```
 
 ---
 
