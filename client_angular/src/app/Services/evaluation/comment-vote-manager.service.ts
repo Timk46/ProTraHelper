@@ -4,7 +4,6 @@ import { retry, catchError, takeUntil } from 'rxjs/operators';
 
 // Services
 import { EvaluationStateService } from './evaluation-state.service';
-import { VoteUIStateService } from './vote-ui-state.service';
 
 // DTOs
 import { VoteType, VoteLimitResponseDTO, EvaluationCommentDTO } from '@DTOs/index';
@@ -64,6 +63,17 @@ export class CommentVoteManagerService {
   private commentStates = new Map<string, CommentVoteState>();
 
   /**
+   * Debouncing map - tracks last click timestamp per comment
+   * Used for preventing accidental double-clicks
+   */
+  private clickDebouncer = new Map<number, number>();
+
+  /**
+   * Debounce time in milliseconds
+   */
+  private readonly DEBOUNCE_TIME = 300;
+
+  /**
    * Global destroy subject for cleanup
    */
   private destroy$ = new Subject<void>();
@@ -81,7 +91,6 @@ export class CommentVoteManagerService {
 
   constructor(
     private evaluationStateService: EvaluationStateService,
-    private voteUIStateService: VoteUIStateService,
   ) {
     // Start auto-cleanup interval
     this.cleanupInterval = setInterval(() => {
@@ -142,6 +151,39 @@ export class CommentVoteManagerService {
   }
 
   // =============================================================================
+  // PRIVATE API - Debouncing
+  // =============================================================================
+
+  /**
+   * Checks if click should be debounced
+   *
+   * @description
+   * Returns true if last click was within DEBOUNCE_TIME (300ms),
+   * preventing accidental double-clicks and race conditions.
+   *
+   * @param commentId - Comment identifier (number)
+   * @returns true if click should be debounced (ignored)
+   */
+  private shouldDebounce(commentId: number): boolean {
+    const lastClick = this.clickDebouncer.get(commentId);
+
+    if (!lastClick) {
+      this.clickDebouncer.set(commentId, Date.now());
+      return false;
+    }
+
+    const timeSinceLastClick = Date.now() - lastClick;
+
+    if (timeSinceLastClick < this.DEBOUNCE_TIME) {
+      console.log(`⏱️ Debounced click for ${commentId} (${timeSinceLastClick}ms ago)`);
+      return true;
+    }
+
+    this.clickDebouncer.set(commentId, Date.now());
+    return false;
+  }
+
+  // =============================================================================
   // PUBLIC API - Vote Operations
   // =============================================================================
 
@@ -157,23 +199,21 @@ export class CommentVoteManagerService {
   async addVote(commentId: string, anonymousUserId: string | number, submissionId: number, categoryId: number): Promise<VoteResult> {
     const state = this.getOrCreateState(commentId);
 
-    // Single lock check - modern approach using VoteUIStateService
-    if (this.voteUIStateService.shouldDebounce(Number(commentId))) {
+    // Debounce check - prevent accidental double-clicks
+    if (this.shouldDebounce(Number(commentId))) {
       console.log('🚫 Vote blocked by debouncer');
       return { success: false, error: 'Vote blocked by debouncer' };
     }
 
     // Set voting state (lock)
-    this.voteUIStateService.setVoting(Number(commentId), true);
     state.loading.next(true);
 
     try {
       const result = await this.performVoteOperation(commentId, 'UP', anonymousUserId, submissionId, categoryId);
       return result;
     } finally {
-      // Clear states immediately - NO setTimeout delay
+      // Clear loading state immediately - NO setTimeout delay
       state.loading.next(false);
-      this.voteUIStateService.setVoting(Number(commentId), false);
       // Let debounce timestamp expire naturally (300ms) - DO NOT manually clear
     }
   }
@@ -190,8 +230,8 @@ export class CommentVoteManagerService {
   async removeVote(commentId: string, anonymousUserId: string | number, submissionId: number, categoryId: number): Promise<VoteResult> {
     const state = this.getOrCreateState(commentId);
 
-    // Single lock check - modern approach using VoteUIStateService
-    if (this.voteUIStateService.shouldDebounce(Number(commentId))) {
+    // Debounce check - prevent accidental double-clicks
+    if (this.shouldDebounce(Number(commentId))) {
       console.log('🚫 Vote removal blocked by debouncer');
       return { success: false, error: 'Vote removal blocked by debouncer' };
     }
@@ -202,16 +242,14 @@ export class CommentVoteManagerService {
     }
 
     // Set voting state (lock)
-    this.voteUIStateService.setVoting(Number(commentId), true);
     state.loading.next(true);
 
     try {
       const result = await this.performVoteOperation(commentId, null, anonymousUserId, submissionId, categoryId);
       return result;
     } finally {
-      // Clear states immediately - NO setTimeout delay
+      // Clear loading state immediately - NO setTimeout delay
       state.loading.next(false);
-      this.voteUIStateService.setVoting(Number(commentId), false);
       // Let debounce timestamp expire naturally (300ms) - DO NOT manually clear
     }
   }
@@ -266,8 +304,8 @@ export class CommentVoteManagerService {
       // Remove from map
       this.commentStates.delete(commentId);
 
-      // Clear voting state in VoteUIStateService
-      this.voteUIStateService.setVoting(Number(commentId), false);
+      // Clear debounce state
+      this.clickDebouncer.delete(Number(commentId));
 
       console.log('🧹 Comment state cleaned up:', commentId);
     }

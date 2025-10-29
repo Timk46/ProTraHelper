@@ -44,11 +44,14 @@
       "Bash(/dev/null)",
       "Bash(sed:*)",
       "Bash(ng serve:*)",
-      "Bash(npx prisma migrate dev:*)"
+      "Bash(npx prisma migrate deploy:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git stash show:*)",
+      "Bash(xargs -I {} sh -c 'echo \"\"\"\"=== {} ===\"\"\"\"; head -50 \"\"\"\"{}\"\"\"\"')"
     ],
     "deny": [],
     "additionalDirectories": [
-      "C:\\c\\Dev\\hefl"
+      "C:\\dev\\a\\hefl"
     ]
   },
   "enableAllProjectMcpServers": true

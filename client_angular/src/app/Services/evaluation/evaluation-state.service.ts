@@ -935,7 +935,7 @@ export class EvaluationStateService implements OnDestroy {
   }
 
   // =============================================================================
-  // VOTE LIMIT MANAGEMENT (Temporary - TODO: Extract to VoteStateService)
+  // VOTE LIMIT MANAGEMENT
   // =============================================================================
 
   /**
@@ -1001,8 +1001,8 @@ export class EvaluationStateService implements OnDestroy {
   /**
    * Enhanced vote method that integrates with the new backend API
    *
-   * NOTE: This method is temporarily included here. In a future refactoring,
-   * it should be moved to a dedicated VoteStateService for better separation of concerns.
+   * Handles vote submission with vote limit tracking and optimistic updates.
+   * Used by CommentVoteManagerService for atomic vote operations.
    *
    * @param commentId - The comment ID to vote on
    * @param voteType - The vote type ('UP' or null to remove)
