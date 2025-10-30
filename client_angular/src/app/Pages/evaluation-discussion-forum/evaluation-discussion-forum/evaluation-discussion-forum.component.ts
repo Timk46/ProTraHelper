@@ -309,6 +309,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     this.discussions$ = this.stateService.activeDiscussions$.pipe(
       takeUntil(this.destroy$)
     );
+    // Loading state for discussions to prevent flicker
+    const discussionsLoading$ = this.stateService.activeDiscussionsLoading$.pipe(
+      takeUntil(this.destroy$)
+    );
     this.commentStats$ = this.stateService.commentStats$.pipe(
       takeUntil(this.destroy$)
     );
@@ -391,6 +395,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       activeCategory$: this.activeCategory$,
       activeCategoryInfo$: this.activeCategoryInfo$,
       discussions$: this.discussions$,
+      discussionsLoading$: discussionsLoading$,
       commentStats$: this.commentStats$,
       anonymousUser$: this.anonymousUser$,
       currentPhase$: this.currentPhase$,

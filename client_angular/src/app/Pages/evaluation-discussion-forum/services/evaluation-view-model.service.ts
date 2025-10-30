@@ -32,6 +32,7 @@ export interface EvaluationViewModel {
   activeCategory: number | null;
   activeCategoryInfo: EvaluationCategoryDTO | null;
   discussions: EvaluationDiscussionDTO[];
+  discussionsLoading: boolean;
   commentStats: CommentStatsDTO | null;
   anonymousUser: AnonymousEvaluationUserDTO | null;
   currentPhase: EvaluationPhase | null;
@@ -61,6 +62,7 @@ export interface ViewModelInputs {
   activeCategory$: Observable<number | null>;
   activeCategoryInfo$: Observable<EvaluationCategoryDTO | null>;
   discussions$: Observable<EvaluationDiscussionDTO[]>;
+  discussionsLoading$: Observable<boolean>;
   commentStats$: Observable<CommentStatsDTO | null>;
   anonymousUser$: Observable<AnonymousEvaluationUserDTO | null>;
   currentPhase$: Observable<EvaluationPhase | null>;
@@ -212,17 +214,20 @@ export class EvaluationViewModelService implements OnDestroy {
     // ─────────────────────────────────────────────────────────
     const discussionData$ = combineLatest([
       inputs.discussions$,
+      inputs.discussionsLoading$,
       inputs.commentStats$,
     ]).pipe(
-      map(([discussions, commentStats]) => ({
+      map(([discussions, discussionsLoading, commentStats]) => ({
         discussions,
+        discussionsLoading,
         commentStats,
       })),
       // ✅ PERFORMANCE: Prevents re-emission when discussion data remains unchanged
-      // Compares discussions array and commentStats references
+      // Compares discussions array, loading state, and commentStats references
       // Expected impact: Blocks 40-60% of unnecessary emissions in this group
       distinctUntilChanged((prev, curr) =>
         prev.discussions === curr.discussions &&
+        prev.discussionsLoading === curr.discussionsLoading &&
         prev.commentStats === curr.commentStats
       ),
       // 📊 MONITORING: Track emissions for performance analysis
@@ -337,9 +342,10 @@ export class EvaluationViewModelService implements OnDestroy {
           prev.activeCategoryInfo === curr.activeCategoryInfo &&
           prev.anonymousUser === curr.anonymousUser;
 
-        // GROUP 2: Discussion data equality (discussions, stats)
+        // GROUP 2: Discussion data equality (discussions, loading, stats)
         const discussionEqual =
           prev.discussions === curr.discussions &&
+          prev.discussionsLoading === curr.discussionsLoading &&
           prev.commentStats === curr.commentStats;
 
         // GROUP 3: Phase permissions equality (phase, permissions)

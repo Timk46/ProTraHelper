@@ -113,6 +113,7 @@ export class DiscussionThreadComponent implements OnInit, OnChanges, AfterViewIn
   @Input() availableVotes: number = 0;
   @Input() isReadOnly: boolean = false;
   @Input() isSubmittingComment: boolean = false;
+  @Input() isLoadingDiscussions: boolean = false; // Loading state to prevent flicker
   @Input() trackByFn: ((index: number, item: EvaluationDiscussionDTO) => string) | null = null;
 
   // =============================================================================

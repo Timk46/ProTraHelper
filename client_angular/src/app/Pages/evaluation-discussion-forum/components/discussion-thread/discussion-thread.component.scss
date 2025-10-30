@@ -497,6 +497,37 @@
 }
 
 // =============================================================================
+// LOADING STATES
+// =============================================================================
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+
+  mat-spinner {
+    margin-bottom: 24px;
+  }
+
+  .loading-text {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  &.discussions-loading {
+    mat-spinner {
+      ::ng-deep circle {
+        stroke: #1976d2;
+      }
+    }
+  }
+}
+
+// =============================================================================
 // EMPTY STATES
 // =============================================================================
 

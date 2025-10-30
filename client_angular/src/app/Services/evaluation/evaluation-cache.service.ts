@@ -108,6 +108,12 @@ export class EvaluationCacheService {
     }
   );
 
+  /**
+   * Cache for discussion loading states per category
+   * Key: categoryId, Value: BehaviorSubject<boolean>
+   */
+  private discussionLoadingCache = new Map<number, BehaviorSubject<boolean>>();
+
   // =============================================================================
   // CONSTRUCTOR
   // =============================================================================
@@ -347,6 +353,61 @@ export class EvaluationCacheService {
   }
 
   // =============================================================================
+  // DISCUSSION LOADING STATE MANAGEMENT
+  // =============================================================================
+
+  /**
+   * Gets the discussion loading state for a category, creating if needed
+   *
+   * @param categoryId - The category ID
+   * @returns BehaviorSubject containing loading state for the category
+   */
+  getDiscussionLoadingState(categoryId: number): BehaviorSubject<boolean> {
+    if (!this.discussionLoadingCache.has(categoryId)) {
+      const newSubject = new BehaviorSubject<boolean>(false);
+      this.discussionLoadingCache.set(categoryId, newSubject);
+      this.log.debug('Discussion loading state created', { categoryId });
+    }
+    return this.discussionLoadingCache.get(categoryId)!;
+  }
+
+  /**
+   * Checks if discussion loading state exists for a category
+   *
+   * @param categoryId - The category ID
+   * @returns True if loading state exists, false otherwise
+   */
+  hasDiscussionLoadingState(categoryId: number): boolean {
+    return this.discussionLoadingCache.has(categoryId);
+  }
+
+  /**
+   * Sets discussion loading state for a category
+   *
+   * @param categoryId - The category ID
+   * @param loading - The loading state to set
+   */
+  setDiscussionLoadingState(categoryId: number, loading: boolean): void {
+    const subject = this.getDiscussionLoadingState(categoryId);
+    subject.next(loading);
+    this.log.debug('Discussion loading state updated', { categoryId, loading });
+  }
+
+  /**
+   * Clears discussion loading state for a category
+   *
+   * @param categoryId - The category ID
+   */
+  clearDiscussionLoadingState(categoryId: number): void {
+    if (this.discussionLoadingCache.has(categoryId)) {
+      const subject = this.discussionLoadingCache.get(categoryId)!;
+      subject.complete();
+      this.discussionLoadingCache.delete(categoryId);
+      this.log.debug('Discussion loading state cleared', { categoryId });
+    }
+  }
+
+  // =============================================================================
   // BULK OPERATIONS
   // =============================================================================
 
@@ -358,6 +419,7 @@ export class EvaluationCacheService {
   invalidateCategory(categoryId: number): void {
     this.clearDiscussionCache(categoryId);
     this.clearRatingStatsCache(categoryId);
+    this.clearDiscussionLoadingState(categoryId);
     this.log.info('Category cache invalidated', { categoryId });
   }
 
@@ -395,6 +457,12 @@ export class EvaluationCacheService {
     });
     this.commentVoteLoadingCache.clear();
 
+    // Clear discussion loading cache
+    this.discussionLoadingCache.forEach(subject => {
+      subject.complete();
+    });
+    this.discussionLoadingCache.clear();
+
     this.log.info('All caches cleared');
   }
 
@@ -428,6 +496,13 @@ export class EvaluationCacheService {
         size: this.commentVoteLoadingCache.size,
         maxSize: this.CONFIG.CACHE_SIZES.VOTE_LOADING,
         sampleKeys: Array.from(this.commentVoteLoadingCache.keys()).slice(0, 10), // First 10 for debugging
+      },
+      discussionLoading: {
+        size: this.discussionLoadingCache.size,
+        keys: Array.from(this.discussionLoadingCache.keys()),
+        currentlyLoading: Array.from(this.discussionLoadingCache.entries())
+          .filter(([_, subject]) => subject.value === true)
+          .map(([categoryId]) => categoryId),
       },
     };
   }
