@@ -217,6 +217,20 @@ export class EvaluationStateService implements OnDestroy {
   }
 
   /**
+   * Observable of loading state for active category discussions
+   * Delegated to: EvaluationDiscussionStateService
+   *
+   * @description
+   * Emits true when discussions are being loaded for the active category.
+   * Used to prevent UI flicker by showing loading state instead of empty state.
+   *
+   * @returns Observable<boolean> True when loading, false otherwise
+   */
+  get activeDiscussionsLoading$(): Observable<boolean> {
+    return this.discussionState.getActiveDiscussionsLoading$(this.activeCategory$);
+  }
+
+  /**
    * Observable of rating status per category
    * Delegated to: EvaluationRatingStateService
    */
@@ -418,6 +432,70 @@ export class EvaluationStateService implements OnDestroy {
     });
 
     this.setLoading(false);
+  }
+
+  /**
+   * Preloads discussions for the first 3 categories
+   *
+   * @description
+   * Used by route resolver to ensure initial discussions are loaded
+   * before component renders. Prevents UI flicker on page load.
+   *
+   * @param submissionId - The submission ID
+   * @returns Observable<void> Completes when initial discussions are loaded
+   */
+  preloadInitialDiscussions(submissionId: string): Observable<void> {
+    this.log.info('Preloading initial discussions', { submissionId });
+
+    return this.categories$.pipe(
+      filter(categories => categories.length > 0),
+      take(1),
+      switchMap(categories => {
+        // Preload first 3 categories (most likely to be viewed)
+        const first3 = categories.slice(0, 3);
+        this.log.debug('Preloading discussions for first 3 categories', {
+          categoryIds: first3.map(c => c.id)
+        });
+
+        // Get anonymous user ID for discussion loading
+        const anonymousUserId = this.anonymousUserService.getUserId();
+
+        // Load discussions in parallel
+        const loadRequests = first3.map(category =>
+          this.discussionState.getDiscussions(
+            submissionId,
+            category.id,
+            anonymousUserId ?? undefined
+          ).pipe(
+            take(1),
+            // Wait until loading completes (discussions are not empty OR loading is false)
+            switchMap(() =>
+              this.discussionState.getActiveDiscussionsLoading$(of(category.id)).pipe(
+                filter(loading => !loading),
+                take(1)
+              )
+            ),
+            catchError(error => {
+              this.log.error('Failed to preload discussions for category', {
+                categoryId: category.id,
+                error
+              });
+              return of(void 0);
+            })
+          )
+        );
+
+        return loadRequests.length > 0 ? forkJoin(loadRequests) : of([]);
+      }),
+      map(() => {
+        this.log.info('Initial discussions preloaded successfully');
+        return void 0;
+      }),
+      catchError(error => {
+        this.log.error('Failed to preload initial discussions', { error });
+        return of(void 0);
+      })
+    );
   }
 
   // =============================================================================

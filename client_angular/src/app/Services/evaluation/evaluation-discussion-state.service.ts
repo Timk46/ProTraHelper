@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subject, combineLatest, of } from 'rxjs';
-import { map, switchMap, shareReplay, takeUntil } from 'rxjs/operators';
+import { map, switchMap, shareReplay, takeUntil, finalize } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 
 // DTOs
@@ -110,6 +110,9 @@ export class EvaluationDiscussionStateService implements OnDestroy {
    * Returns an observable stream of discussions. If cache is empty,
    * triggers a load from the backend. Subsequent calls return cached data.
    *
+   * FIX: Sets loading state SYNCHRONOUSLY before returning observable
+   * to prevent race condition where template sees loading=false + discussions=[]
+   *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
    * @param anonymousUserId - Optional anonymous user ID for comment status detection
@@ -118,8 +121,17 @@ export class EvaluationDiscussionStateService implements OnDestroy {
   getDiscussions(submissionId: string, categoryId: number, anonymousUserId?: number): Observable<EvaluationDiscussionDTO[]> {
     const subject = this.cache.getDiscussionCache(categoryId);
 
-    // Load discussions if cache is empty
-    if (subject.value.length === 0) {
+    // 🔧 FIX: Check loading state to prevent duplicate loads and race conditions
+    const isCurrentlyLoading = this.categoryLoadingStates.get(categoryId);
+    const isCacheEmpty = subject.value.length === 0;
+
+    // Load discussions if cache is empty AND not already loading
+    if (isCacheEmpty && !isCurrentlyLoading) {
+      // ✅ CRITICAL: Set loading state FIRST (synchronously) to prevent UI flicker
+      // This ensures template never sees loading=false + discussions=[] simultaneously
+      this.cache.setDiscussionLoadingState(categoryId, true);
+
+      // Then trigger async load
       this.loadDiscussionsForCategory(submissionId, categoryId, anonymousUserId);
     }
 
@@ -161,6 +173,26 @@ export class EvaluationDiscussionStateService implements OnDestroy {
         return this.getDiscussions(String(submission.id), categoryId);
       }),
       shareReplay(1),
+    );
+  }
+
+  /**
+   * Gets loading state for active category
+   *
+   * @description
+   * Returns observable of loading state for the currently active category.
+   * Used to prevent UI flicker by hiding empty state while discussions are loading.
+   *
+   * @param activeCategory$ - Observable of active category ID
+   * @returns Observable<boolean> True when discussions are loading, false otherwise
+   */
+  getActiveDiscussionsLoading$(activeCategory$: Observable<number | null>): Observable<boolean> {
+    return activeCategory$.pipe(
+      switchMap(categoryId => {
+        if (categoryId === null) return of(false);
+        return this.cache.getDiscussionLoadingState(categoryId).asObservable();
+      }),
+      shareReplay(1)
     );
   }
 
@@ -335,6 +367,7 @@ export class EvaluationDiscussionStateService implements OnDestroy {
    * @description
    * Prevents concurrent loads for the same category. Updates cache,
    * comment-to-category mapping, and comment status after successful load.
+   * Sets loading state in cache to prevent UI flicker.
    *
    * @param submissionId - The submission ID
    * @param categoryId - The category ID
@@ -348,12 +381,18 @@ export class EvaluationDiscussionStateService implements OnDestroy {
       return;
     }
 
-    // Mark category as loading
+    // Mark category as loading in both tracking map and cache
     this.categoryLoadingStates.set(categoryId, true);
+    this.cache.setDiscussionLoadingState(categoryId, true);
     this.log.debug('Loading discussions for category', { submissionId, categoryId });
 
     this.evaluationService.getDiscussionsByCategory(submissionId, categoryId.toString()).pipe(
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
+      finalize(() => {
+        // Always clean up loading state (even on error or unsubscribe)
+        this.categoryLoadingStates.set(categoryId, false);
+        this.cache.setDiscussionLoadingState(categoryId, false);
+      })
     ).subscribe({
       next: discussions => {
         // Update cache
@@ -387,10 +426,6 @@ export class EvaluationDiscussionStateService implements OnDestroy {
         if (subject.value.length === 0) {
           subject.next([]);
         }
-      },
-      complete: () => {
-        // Always clean up loading state
-        this.categoryLoadingStates.set(categoryId, false);
       },
     });
   }

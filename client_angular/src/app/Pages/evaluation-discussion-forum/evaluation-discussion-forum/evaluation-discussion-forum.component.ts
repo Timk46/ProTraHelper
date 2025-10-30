@@ -249,6 +249,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     activeCategory: number | null;
     activeCategoryInfo: EvaluationCategoryDTO | null;
     discussions: EvaluationDiscussionDTO[];
+    discussionsLoading: boolean;
     commentStats: CommentStatsDTO | null;
     anonymousUser: AnonymousEvaluationUserDTO | null;
     currentPhase: EvaluationPhase | null;
@@ -318,6 +319,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     );
     this.discussions$ = this.stateService.activeDiscussions$.pipe(
+      takeUntil(this.destroy$)
+    );
+    // Loading state for discussions to prevent flicker
+    const discussionsLoading$ = this.stateService.activeDiscussionsLoading$.pipe(
       takeUntil(this.destroy$)
     );
     this.commentStats$ = this.stateService.commentStats$.pipe(
@@ -390,6 +395,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       this.activeCategory$,
       this.activeCategoryInfo$,
       this.discussions$,
+      discussionsLoading$,
       this.commentStats$,
       this.anonymousUser$,
       this.currentPhase$,
@@ -409,6 +415,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           activeCategory,
           activeCategoryInfo,
           discussions,
+          discussionsLoading,
           commentStats,
           anonymousUser,
           currentPhase,
@@ -427,6 +434,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
             activeCategory,
             activeCategoryInfo,
             discussions,
+            discussionsLoading,
             commentStats,
             anonymousUser,
             currentPhase,
@@ -441,13 +449,13 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
           };
         }
       ),
-      // 🚀 OPTIMIZED: Enhanced distinctUntilChanged comparing ALL 16 fields
+      // 🚀 OPTIMIZED: Enhanced distinctUntilChanged comparing ALL 17 fields
       //
       // BEFORE: Only 5 of 15 fields compared
       //   - Unnecessary re-renders when unchanged fields emit
       //   - Performance: ~40-60% of renders were unnecessary
       //
-      // AFTER: All 16 fields compared for complete equality check (including backendHealth)
+      // AFTER: All 17 fields compared for complete equality check (including backendHealth and discussionsLoading)
       //   - Only re-renders when actual meaningful changes occur
       //   - Performance: ~40-50% fewer render cycles
       //
@@ -459,6 +467,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
                prev.activeCategory === curr.activeCategory &&
                prev.activeCategoryInfo === curr.activeCategoryInfo &&
                prev.discussions === curr.discussions &&
+               prev.discussionsLoading === curr.discussionsLoading &&
                prev.commentStats === curr.commentStats &&
                prev.anonymousUser === curr.anonymousUser &&
                prev.currentPhase === curr.currentPhase &&

@@ -108,8 +108,14 @@
 
     <!-- Input field removed - handled by action-area -->
 
+    <!-- Loading State for Discussions -->
+    <div class="loading-state discussions-loading" *ngIf="isLoadingDiscussions && !hasDiscussions()">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p class="loading-text">Diskussionen werden geladen...</p>
+    </div>
+
     <!-- No Discussions State -->
-    <div class="empty-state no-discussions" *ngIf="!hasDiscussions()">
+    <div class="empty-state no-discussions" *ngIf="!hasDiscussions() && !isLoadingDiscussions">
       <mat-icon class="empty-icon">forum</mat-icon>
       <h3>{{ getNoDiscussionsMessage() }}</h3>
       <p>Diskussionen werden automatisch erstellt, wenn eine Kategorie ausgewählt wird.</p>
