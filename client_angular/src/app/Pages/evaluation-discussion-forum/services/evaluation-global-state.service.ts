@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay } from 'rxjs/operators';
-
-import { 
-  EvaluationSubmissionDTO, 
-  EvaluationCategoryDTO, 
-  AnonymousEvaluationUserDTO,
-  EvaluationPhase
-} from '@DTOs/index';
+import { map, shareReplay } from 'rxjs/operators';
 
 /**
  * Global state management service for the evaluation discussion forum
