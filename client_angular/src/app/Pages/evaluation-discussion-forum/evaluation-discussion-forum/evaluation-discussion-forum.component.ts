@@ -462,6 +462,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     // Eager load vote limits for active category to prevent flicker
     this.eagerLoadVoteLimitsForActiveCategory();
 
+    // 📊 PERFORMANCE: Expose console commands for performance validation
+    this.setupPerformanceConsoleCommands();
+
     // 📊 DEVELOPMENT: Expose performance monitor to browser console
     if (!environment.production) {
       (window as any).viewModelMonitor = {
@@ -1835,5 +1838,370 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     this.stateService.retryRatingStatusLoad(submissionId, anonymousUser);
     this.showInfoMessage('Rating Status wird neu geladen...', 'OK');
+  }
+
+  // =============================================================================
+  // 📊 PERFORMANCE VALIDATION - CONSOLE COMMANDS
+  // =============================================================================
+
+  /**
+   * Sets up browser console commands for manual performance validation
+   *
+   * @description Exposes window-level commands for testing the View Model Services optimization.
+   * Only available in development mode. Provides three commands:
+   * - performanceMetrics(): Main dashboard with baseline comparison
+   * - detailedMetrics(): Detailed component breakdown
+   * - resetPerformance(): Reset metrics and start fresh measurement
+   *
+   * Displays a welcome message with ASCII art showing available commands and optimization targets.
+   *
+   * @remarks
+   * **Console Commands:**
+   * - `window.performanceMetrics()` - Main performance dashboard
+   * - `window.detailedMetrics()` - Detailed component breakdown
+   * - `window.resetPerformance()` - Reset and start fresh measurement
+   *
+   * **Target:** 40-50% reduction in Change Detection cycles (150 → <90)
+   */
+  private setupPerformanceConsoleCommands(): void {
+    if (!environment.production) {
+      // Expose commands to window
+      (window as any).performanceMetrics = () => this.logPerformanceMetrics();
+      (window as any).detailedMetrics = () => this.logDetailedMetrics();
+      (window as any).resetPerformance = () => {
+        this.performanceService.resetMetrics();
+        console.log(
+          '%c✅ Performance metrics reset! Start using the forum to gather new data.',
+          'color: green; font-weight: bold; font-size: 14px'
+        );
+      };
+
+      // Log welcome message with ASCII art border
+      console.log(
+        '%c\n' +
+          '╔═══════════════════════════════════════════════════════════════════╗\n' +
+          '║     🚀  PERFORMANCE MONITORING ACTIVE  🚀                        ║\n' +
+          '║     View Model Services Architecture (Plan2)                     ║\n' +
+          '╠═══════════════════════════════════════════════════════════════════╣\n' +
+          '║  Available Console Commands:                                      ║\n' +
+          '║  📊 performanceMetrics()  - Main performance dashboard           ║\n' +
+          '║  📈 detailedMetrics()     - Detailed component breakdown         ║\n' +
+          '║  🔄 resetPerformance()    - Reset and start fresh measurement    ║\n' +
+          '║                                                                   ║\n' +
+          '║  🎯 TARGET: 40-50% reduction in Change Detection cycles          ║\n' +
+          '║  📉 BASELINE: ~150 cycles/5min → TARGET: <90 cycles/5min         ║\n' +
+          '╚═══════════════════════════════════════════════════════════════════╝\n',
+        'color: #00ff41; font-family: monospace; font-weight: bold; font-size: 11px'
+      );
+    }
+  }
+
+  /**
+   * Logs main performance metrics dashboard to console
+   *
+   * @description Displays a visually formatted performance dashboard with:
+   * - Overall health score (0-100) with status indicator
+   * - Key metrics comparison (Current vs Baseline vs Target)
+   * - Visual progress bars for each metric
+   * - Target achievement analysis with checkmarks
+   * - Success message if all targets achieved
+   *
+   * Uses ASCII art, color-coded console output, and Unicode progress bars
+   * for clear visual representation of performance data.
+   *
+   * **Baseline Values:**
+   * - Change Detection: 150 cycles → Target: <90 (40-50% reduction)
+   * - Render Count: 150 → Target: <90 (40-50% reduction)
+   * - Avg Render Time: 50ms → Target: <40ms (20% reduction)
+   *
+   * **Console Output Features:**
+   * - ASCII art headers and borders
+   * - Color-coded metrics (green/yellow/red)
+   * - Unicode progress bars (█▓░)
+   * - Tables for structured data
+   * - Comparison with baseline values
+   *
+   * @example
+   * ```typescript
+   * // In browser console:
+   * performanceMetrics()
+   * ```
+   */
+  private logPerformanceMetrics(): void {
+    const metrics = this.performanceService.getCurrentMetrics();
+    const componentMetrics = metrics.componentMetrics.get('evaluation-discussion-forum');
+
+    if (!componentMetrics) {
+      console.warn('%c⚠️  No performance metrics available yet. Use the forum for a few moments and try again.',
+        'color: orange; font-size: 14px; font-weight: bold');
+      return;
+    }
+
+    // Header with ASCII art
+    console.log('%c\n' +
+      '╔════════════════════════════════════════════════════════════════╗\n' +
+      '║                                                                ║\n' +
+      '║           📊  PERFORMANCE METRICS DASHBOARD  📊               ║\n' +
+      '║                                                                ║\n' +
+      '║          View Model Services Architecture (Plan2)              ║\n' +
+      '║                                                                ║\n' +
+      '╚════════════════════════════════════════════════════════════════╝',
+      'color: #00ff41; font-family: monospace; font-weight: bold; font-size: 12px'
+    );
+
+    // Overall Health Status
+    const healthScore = this.calculateHealthScore(componentMetrics, metrics);
+    const healthStatus = this.getHealthStatus(healthScore);
+    console.log(
+      `\n${healthStatus.icon} Overall Performance Health: %c${healthScore}/100 ${healthStatus.label}`,
+      `color: ${healthStatus.color}; font-weight: bold; font-size: 16px`
+    );
+    console.log(this.generateProgressBar(healthScore, 100, 50, '█', '░'));
+
+    // Key Metrics Table
+    console.log('\n%c┌─────────────────────────────────────────────────────────┐', 'color: cyan');
+    console.log('%c│  📈  KEY PERFORMANCE INDICATORS                         │', 'color: cyan; font-weight: bold');
+    console.log('%c└─────────────────────────────────────────────────────────┘', 'color: cyan');
+
+    const cdCycles = componentMetrics.changeDetectionCycles;
+    const avgRenderTime = componentMetrics.averageRenderTime;
+    const renderCount = componentMetrics.renderCount;
+    const memoryUsed = metrics.memoryMetrics.usedJSHeapSize / 1024 / 1024; // MB
+
+    // Baseline values for comparison
+    const baseline = {
+      cdCycles: 150,
+      avgRenderTime: 50,
+      renders: 150,
+      memoryUsed: 60
+    };
+
+    // Calculate improvements
+    const cdImprovement = ((baseline.cdCycles - cdCycles) / baseline.cdCycles * 100);
+    const renderImprovement = ((baseline.avgRenderTime - avgRenderTime) / baseline.avgRenderTime * 100);
+    const rendersImprovement = ((baseline.renders - renderCount) / baseline.renders * 100);
+
+    console.log('\n%c┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓', 'color: #00ff41');
+    console.log('%c┃  Metric                  Current  Baseline  Status   ┃', 'color: #00ff41; font-weight: bold');
+    console.log('%c┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫', 'color: #00ff41');
+
+    // Change Detection Cycles
+    const cdStatus = this.getMetricStatus(cdCycles, baseline.cdCycles, 90, true);
+    console.log(
+      `%c┃  ${cdStatus.icon} Change Detection    %c${this.padNumber(cdCycles, 7)}  ${this.padNumber(baseline.cdCycles, 8)}  %c${cdImprovement.toFixed(1)}%↓  %c┃`,
+      'color: white',
+      `color: ${cdStatus.color}; font-weight: bold`,
+      cdImprovement > 0 ? 'color: #00ff00; font-weight: bold' : 'color: red',
+      'color: white'
+    );
+    console.log(
+      '   ' + this.generateProgressBar(cdCycles, baseline.cdCycles, 30, '▓', '░')
+    );
+
+    // Render Time
+    const renderStatus = this.getMetricStatus(avgRenderTime, baseline.avgRenderTime, 40, true);
+    console.log(
+      `%c┃  ${renderStatus.icon} Render Time (ms)  %c${this.padNumber(avgRenderTime.toFixed(1), 7)}  ${this.padNumber(baseline.avgRenderTime, 8)}  %c${renderImprovement.toFixed(1)}%↓  %c┃`,
+      'color: white',
+      `color: ${renderStatus.color}; font-weight: bold`,
+      renderImprovement > 0 ? 'color: #00ff00; font-weight: bold' : 'color: red',
+      'color: white'
+    );
+    console.log(
+      '   ' + this.generateProgressBar(avgRenderTime, baseline.avgRenderTime, 30, '▓', '░')
+    );
+
+    // Render Count
+    const rendersStatus = this.getMetricStatus(renderCount, baseline.renders, 90, true);
+    console.log(
+      `%c┃  ${rendersStatus.icon} Render Count      %c${this.padNumber(renderCount, 7)}  ${this.padNumber(baseline.renders, 8)}  %c${rendersImprovement.toFixed(1)}%↓  %c┃`,
+      'color: white',
+      `color: ${rendersStatus.color}; font-weight: bold`,
+      rendersImprovement > 0 ? 'color: #00ff00; font-weight: bold' : 'color: red',
+      'color: white'
+    );
+    console.log(
+      '   ' + this.generateProgressBar(renderCount, baseline.renders, 30, '▓', '░')
+    );
+
+    // Memory Usage
+    const memStatus = this.getMetricStatus(memoryUsed, baseline.memoryUsed, 70, true);
+    console.log(
+      `%c┃  ${memStatus.icon} Memory (MB)       %c${this.padNumber(memoryUsed.toFixed(1), 7)}  ${this.padNumber(baseline.memoryUsed, 8)}  %c${this.getMemoryStatus(memoryUsed)}  %c┃`,
+      'color: white',
+      `color: ${memStatus.color}; font-weight: bold`,
+      memoryUsed < baseline.memoryUsed ? 'color: #00ff00' : 'color: orange',
+      'color: white'
+    );
+
+    console.log('%c┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛', 'color: #00ff41');
+
+    // Target Achievement Analysis
+    console.log('\n%c┌─────────────────────────────────────────────────────────┐', 'color: yellow');
+    console.log('%c│  🎯  OPTIMIZATION TARGET ACHIEVEMENT                     │', 'color: yellow; font-weight: bold');
+    console.log('%c└─────────────────────────────────────────────────────────┘', 'color: yellow');
+
+    const targetAchieved = cdImprovement >= 40 && renderImprovement >= 20 && rendersImprovement >= 40;
+
+    console.log('\n%cExpected Improvements (View Model Services):', 'color: cyan; font-weight: bold');
+    console.log(
+      `  ${cdImprovement >= 40 ? '✅' : '❌'} Change Detection: %c${cdImprovement.toFixed(1)}%↓ %c(Target: 40-50%↓)`,
+      cdImprovement >= 40 ? 'color: #00ff00; font-weight: bold' : 'color: orange; font-weight: bold',
+      'color: gray'
+    );
+    console.log(
+      `  ${renderImprovement >= 20 ? '✅' : '❌'} Render Time: %c${renderImprovement.toFixed(1)}%↓ %c(Target: 20-30%↓)`,
+      renderImprovement >= 20 ? 'color: #00ff00; font-weight: bold' : 'color: orange; font-weight: bold',
+      'color: gray'
+    );
+    console.log(
+      `  ${rendersImprovement >= 40 ? '✅' : '❌'} Render Count: %c${rendersImprovement.toFixed(1)}%↓ %c(Target: 40-50%↓)`,
+      rendersImprovement >= 40 ? 'color: #00ff00; font-weight: bold' : 'color: orange; font-weight: bold',
+      'color: gray'
+    );
+
+    if (targetAchieved) {
+      console.log('\n%c🎉 SUCCESS! Optimization targets achieved! 🎉',
+        'color: #00ff00; font-size: 16px; font-weight: bold; background: #004400; padding: 10px');
+    } else {
+      console.log('\n%c⚠️  Some targets not yet achieved. Continue using the forum to gather more data.',
+        'color: orange; font-size: 14px; font-weight: bold');
+    }
+
+    console.log('\n%c╔════════════════════════════════════════════════════════════════╗', 'color: #00ff41');
+    console.log('%c║  💡 Tip: Type "detailedMetrics()" for component breakdown    ║', 'color: #00ff41');
+    console.log('%c╚════════════════════════════════════════════════════════════════╝\n', 'color: #00ff41');
+  }
+
+  /**
+   * Logs detailed performance metrics including component breakdown
+   */
+  private logDetailedMetrics(): void {
+    const metrics = this.performanceService.getCurrentMetrics();
+
+    console.log('%c\n═══════════════════════════════════════════════════════════', 'color: cyan; font-weight: bold');
+    console.log('%c       📊 DETAILED PERFORMANCE ANALYSIS 📊', 'color: cyan; font-weight: bold; font-size: 14px');
+    console.log('%c═══════════════════════════════════════════════════════════\n', 'color: cyan; font-weight: bold');
+
+    // Component Profiling Details
+    console.log('%c🔍 Component Profiling:', 'color: yellow; font-weight: bold; font-size: 13px');
+    metrics.componentMetrics.forEach((profiling: any, componentName: string) => {
+      console.log(`\n%c  Component: ${componentName}`, 'color: white; font-weight: bold');
+      const minRenderTime = profiling.renderTimes.length > 0 ? Math.min(...profiling.renderTimes) : 0;
+      console.table({
+        'Total Renders': profiling.renderCount,
+        'Change Detections': profiling.changeDetectionCycles,
+        'Avg Render Time (ms)': profiling.averageRenderTime.toFixed(2),
+        'Min Render Time (ms)': minRenderTime.toFixed(2),
+        'Max Render Time (ms)': profiling.maxRenderTime.toFixed(2),
+        'Total Render Time (ms)': profiling.totalRenderTime.toFixed(2)
+      });
+    });
+
+    // Memory Metrics
+    console.log('\n%c💾 Memory Metrics:', 'color: yellow; font-weight: bold; font-size: 13px');
+    console.table({
+      'Used Heap (MB)': (metrics.memoryMetrics.usedJSHeapSize / 1024 / 1024).toFixed(2),
+      'Total Heap (MB)': (metrics.memoryMetrics.totalJSHeapSize / 1024 / 1024).toFixed(2),
+      'Heap Limit (MB)': (metrics.memoryMetrics.jsHeapSizeLimit / 1024 / 1024).toFixed(2),
+      'Memory Pressure': metrics.memoryMetrics.memoryPressure,
+      'Detected Leaks': metrics.memoryMetrics.leakCount
+    });
+
+    // Network Metrics
+    console.log('\n%c🌐 Network Metrics:', 'color: yellow; font-weight: bold; font-size: 13px');
+    console.table({
+      'Total Requests': metrics.networkMetrics.totalRequests,
+      'Failed Requests': metrics.networkMetrics.failedRequests,
+      'Avg Response Time (ms)': metrics.networkMetrics.averageResponseTime.toFixed(0),
+      'Cache Hit Rate (%)': (metrics.networkMetrics.cacheHitRate * 100).toFixed(1),
+      'Bandwidth Usage': this.formatBytes(metrics.networkMetrics.bandwidthUsage)
+    });
+
+    // Web Vitals
+    console.log('\n%c⚡ Web Vitals:', 'color: yellow; font-weight: bold; font-size: 13px');
+    console.table({
+      'LCP (ms)': metrics.webVitals.lcp > 0 ? metrics.webVitals.lcp.toFixed(0) : 'N/A',
+      'FID (ms)': metrics.webVitals.fid > 0 ? metrics.webVitals.fid.toFixed(0) : 'N/A',
+      'CLS': metrics.webVitals.cls > 0 ? metrics.webVitals.cls.toFixed(3) : 'N/A',
+      'FCP (ms)': metrics.webVitals.fcp > 0 ? metrics.webVitals.fcp.toFixed(0) : 'N/A',
+      'TTFB (ms)': metrics.webVitals.ttfb > 0 ? metrics.webVitals.ttfb.toFixed(0) : 'N/A'
+    });
+
+    console.log('\n%c═══════════════════════════════════════════════════════════\n', 'color: cyan; font-weight: bold');
+  }
+
+  /**
+   * Generates a visual progress bar for console output
+   */
+  private generateProgressBar(current: number, max: number, width: number, fillChar: string = '█', emptyChar: string = '░'): string {
+    const percentage = Math.min((current / max) * 100, 100);
+    const filled = Math.round((width * percentage) / 100);
+    const empty = width - filled;
+    const color = percentage < 60 ? '#00ff00' : percentage < 80 ? 'yellow' : 'red';
+    return `%c${fillChar.repeat(filled)}${emptyChar.repeat(empty)} %c${percentage.toFixed(0)}%`;
+  }
+
+  /**
+   * Calculates overall health score (0-100)
+   */
+  private calculateHealthScore(componentMetrics: any, allMetrics: any): number {
+    const cdScore = Math.max(0, 100 - (componentMetrics.changeDetectionCycles / 150 * 100));
+    const renderScore = Math.max(0, 100 - (componentMetrics.averageRenderTime / 50 * 100));
+    const renderCountScore = Math.max(0, 100 - (componentMetrics.renderCount / 150 * 100));
+    const memoryScore = Math.max(0, 100 - ((allMetrics.memoryMetrics.usedJSHeapSize / 1024 / 1024) / 60 * 100));
+
+    return Math.round((cdScore + renderScore + renderCountScore + memoryScore) / 4);
+  }
+
+  /**
+   * Gets health status indicator
+   */
+  private getHealthStatus(score: number): { icon: string; label: string; color: string } {
+    if (score >= 80) return { icon: '🟢', label: 'EXCELLENT', color: '#00ff00' };
+    if (score >= 60) return { icon: '🟡', label: 'GOOD', color: 'yellow' };
+    if (score >= 40) return { icon: '🟠', label: 'FAIR', color: 'orange' };
+    return { icon: '🔴', label: 'NEEDS IMPROVEMENT', color: 'red' };
+  }
+
+  /**
+   * Gets metric status indicator
+   */
+  private getMetricStatus(current: number, baseline: number, target: number, lowerIsBetter: boolean): { icon: string; color: string } {
+    const ratio = lowerIsBetter ? current / baseline : baseline / current;
+    const targetRatio = lowerIsBetter ? target / baseline : baseline / target;
+
+    if (lowerIsBetter && current <= target) return { icon: '✅', color: '#00ff00' };
+    if (!lowerIsBetter && current >= target) return { icon: '✅', color: '#00ff00' };
+    if (ratio > targetRatio * 0.8) return { icon: '🟡', color: 'yellow' };
+    return { icon: '❌', color: 'red' };
+  }
+
+  /**
+   * Pads a number for alignment in console tables
+   */
+  private padNumber(num: number | string, length: number): string {
+    return String(num).padStart(length, ' ');
+  }
+
+  /**
+   * Gets memory status text
+   */
+  private getMemoryStatus(memoryMB: number): string {
+    if (memoryMB < 50) return 'Optimal';
+    if (memoryMB < 70) return 'Good';
+    if (memoryMB < 100) return 'Fair';
+    return 'High';
+  }
+
+  /**
+   * Formats bytes to human-readable string
+   */
+  private formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 }

@@ -10,6 +10,54 @@
 
 ---
 
+## 🔀 Zwei Implementierungs-Ansätze
+
+Dieses Dokument beschreibt **zwei verschiedene Architektur-Ansätze** zur Performance-Optimierung:
+
+### Plan1: Direkte Observable Grouping
+**Branch**: `refactor/evaluation-discussion-forum_viewmodel_Plan1`
+
+**Architektur:**
+- 4 semantische Gruppen direkt in Component (coreData$, discussionData$, phasePermissions$, uiState$)
+- Keine separaten View Model Services
+- Performance Monitoring direkt über EvaluationPerformanceService
+
+**Vorteile:**
+- ✅ Einfachere Architektur (keine extra Services)
+- ✅ Bessere Debuggability (alles an einem Ort)
+- ✅ Direkter Zugriff auf Observables
+
+**Dokumentation:** `docs/performance/manual-performance-validation.md`
+
+### Plan2: View Model Services Architecture
+**Branch**: `refactor/evaluation-discsussion-forum_viewmodel_Plan2`
+
+**Architektur:**
+- `EvaluationViewModelService` für View Model Composition
+- `ViewModelPerformanceMonitorService` für Performance Tracking
+- Component delegiert an Services
+
+**Vorteile:**
+- ✅ "Fat Service" Pattern (HEFL Best Practice)
+- ✅ View Model Logik wiederverwendbar
+- ✅ Besser testbar (Services isoliert testbar)
+- ✅ Separation of Concerns
+
+**Dokumentation:** `docs/performance/manual-performance-validation-plan2.md`
+
+### Performance-Vergleich
+
+**Beide Ansätze** verwenden:
+- ✅ Semantic Observable Grouping (4 Gruppen)
+- ✅ distinctUntilChanged auf allen Ebenen
+- ✅ shareReplay mit refCount
+- ✅ Identische Baseline-Targets (40-50% Verbesserung)
+- ✅ Identische Console Commands (`performanceMetrics()`, `detailedMetrics()`, `resetPerformance()`)
+
+**Erwartung**: Ähnliche Performance, unterschiedliche Architektur-Trade-offs.
+
+---
+
 ## 🎯 Motivation
 
 ### Ausgangssituation

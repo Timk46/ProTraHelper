@@ -615,6 +615,61 @@ export class EvaluationPerformanceService {
     console.groupEnd();
   }
 
+  /**
+   * Gets current performance metrics snapshot
+   *
+   * @description Returns the current state of all performance metrics
+   * including component profiling, memory, network, and web vitals data.
+   *
+   * @returns Current performance metrics snapshot
+   */
+  getCurrentMetrics(): PerformanceMetrics {
+    return this.performanceMetricsSubject.value;
+  }
+
+  /**
+   * Resets all performance metrics and profiling data
+   *
+   * @description Clears all tracked metrics and component profiling data,
+   * resetting the performance monitoring to its initial state.
+   * Useful for starting fresh measurements after changes or optimizations.
+   */
+  resetMetrics(): void {
+    this.componentProfilingMap.clear();
+
+    this.performanceMetricsSubject.next({
+      componentMetrics: new Map(),
+      networkMetrics: {
+        totalRequests: 0,
+        averageResponseTime: 0,
+        failedRequests: 0,
+        cacheHitRate: 0,
+        bandwidthUsage: 0
+      },
+      memoryMetrics: {
+        usedJSHeapSize: 0,
+        totalJSHeapSize: 0,
+        jsHeapSizeLimit: 0,
+        memoryPressure: 'low',
+        leakCount: 0
+      },
+      webVitals: {
+        cls: 0,
+        lcp: 0,
+        fid: 0,
+        fcp: 0,
+        ttfb: 0
+      },
+      bundleMetrics: {
+        mainBundleSize: 0,
+        chunkCount: 0,
+        lazyLoadedModules: 0,
+        unusedCode: 0
+      },
+      timestamp: Date.now()
+    });
+  }
+
   // =============================================================================
   // PRIVATE METHODS
   // =============================================================================

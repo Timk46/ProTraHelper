@@ -1,5 +1,13 @@
 # View Model Performance Testing Guide
 
+> **⚠️ HINWEIS: Zwei Implementierungs-Varianten**
+>
+> Dieser Leitfaden gilt für **beide Architektur-Ansätze**:
+> - **Plan1**: Direkte Observable Grouping → `docs/performance/manual-performance-validation.md`
+> - **Plan2**: View Model Services → `docs/performance/manual-performance-validation-plan2.md`
+>
+> **Für manuelle Validierung** siehe die spezifischen Guides oben.
+
 ## 📋 Übersicht
 
 Dieser Leitfaden beschreibt, wie die Performance-Optimierungen des EvaluationDiscussionForumComponent gemessen und validiert werden können.
@@ -8,6 +16,7 @@ Dieser Leitfaden beschreibt, wie die Performance-Optimierungen des EvaluationDis
 **Komponente:** `EvaluationDiscussionForumComponent`
 **Optimierung:** Semantic Observable Grouping + distinctUntilChanged
 **Ziel:** 40-50% weniger Change Detection Cycles
+**Varianten:** Plan1 (direkt) + Plan2 (Services)
 
 ---
 
