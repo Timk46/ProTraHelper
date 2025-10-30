@@ -22,6 +22,7 @@ import {
   EvaluationCategoryDTO,
 } from '@DTOs/index';
 import { roles, RolesGuard } from '@/auth/common/guards/roles.guard';
+import { AuthenticatedRequest } from '@/auth/common/interfaces';
 import { QuestionDataChoiceService } from './question-data-choice/question-data-choice.service';
 import { QuestionDataFreetextService } from './question-data-freetext/question-data-freetext.service';
 import { QuestionDataFillinService } from './question-data-fillin/question-data-fillin.service';
@@ -64,7 +65,7 @@ export class QuestionDataController {
   @Post('detailed')
   async getDetailedQuestion(
     @Body() data: { questionId: number; questionType: string },
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<detailedQuestionDTO> {
     return this.questionDataService.getDetailedQuestion(
       data.questionId,
@@ -153,7 +154,7 @@ export class QuestionDataController {
   @Get('uploadQuestion/uploads/:uploadQuestionId')
   async getUploadQuestionUploads(
     @Param('uploadQuestionId', ParseIntPipe) questionId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<any> {
     return this.qdUploadService.getUploadsForUploadQuestion(questionId, req.user.id);
   }
@@ -183,7 +184,7 @@ export class QuestionDataController {
   @Get('groupReviewStatuses/:questionId')
   async getGroupReviewStatuses(
     @Param('questionId', ParseIntPipe) questionId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<GroupReviewStatusDTO[]> {
     const userId = req.user.id;
     return this.qdGroupReviewGateService.getStatuses(questionId, userId);
@@ -216,7 +217,7 @@ export class QuestionDataController {
   async getRelatedQuestionCollection(
     @Param('questionId', ParseIntPipe) questionId: number,
     @Param('contentNodeId', ParseIntPipe) contentNodeId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<QuestionCollectionDto> {
     const userId = req.user.id;
     return this.qdCollectionService.getRelatedCollection(questionId, contentNodeId, userId);
@@ -235,12 +236,12 @@ export class QuestionDataController {
   async getNewestUserAnswer(
     @Param('questionId') questionId: number,
     @Param('userId') userId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UserAnswerDataDTO> {
     if (isNaN(questionId) || isNaN(userId)) {
       throw new Error('Invalid questionId or userId');
     }
-    if (req.user.role == 'ADMIN' || req.user.role == 'TEACHER') {
+    if (req.user.globalRole == 'ADMIN' || req.user.globalRole == 'TEACHER') {
       return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
     } else {
       return this.questionDataService.getNewestUserAnswer(Number(questionId), Number(req.user.id));
@@ -251,7 +252,7 @@ export class QuestionDataController {
   @Get('/allUserUploadAnswers/:questionId?')
   async getAllUserUploadAnswers(
     @Param('questionId', ParseIntPipe) questionId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<UserUploadAnswerListItemDTO[]> {
     console.log('Fetching all user upload answers for questionId:', questionId);
     const temp = await this.qdUploadService.getAllUserUploadAnswers(questionId);
@@ -269,7 +270,7 @@ export class QuestionDataController {
   @Post('userAnswer/create')
   async createUserAnswer(
     @Body() data: UserAnswerDataDTO,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<userAnswerFeedbackDTO> {
     return this.questionDataService.createUserAnswer(req.user.id, data);
   }
@@ -295,7 +296,7 @@ export class QuestionDataController {
    */
   @roles('ADMIN')
   @Post('/createQuestion')
-  async createQuestion(@Body() question: QuestionDTO, @Req() req: any): Promise<QuestionDTO> {
+  async createQuestion(@Body() question: QuestionDTO, @Req() req: AuthenticatedRequest): Promise<QuestionDTO> {
     return this.questionDataService.createQuestion(question, req.user.id);
   }
 
@@ -309,7 +310,7 @@ export class QuestionDataController {
   @Post('updateWholeQuestion')
   async updateWholeQuestion(
     @Body() question: detailedQuestionDTO,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<detailedQuestionDTO> {
     return this.questionDataService.updateWholeQuestion(question, req.user.id);
   }
@@ -324,7 +325,7 @@ export class QuestionDataController {
   @Post('versionUpdateWholeQuestion')
   async versionUpdateWholeQuestion(
     @Body() question: detailedQuestionDTO,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<detailedQuestionDTO> {
     return this.questionDataService.updateWholeQuestion(question, req.user.id, true);
   }
@@ -339,7 +340,7 @@ export class QuestionDataController {
   @Get('progress/:questionId')
   async getProgress(
     @Param('questionId', ParseIntPipe) questionId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<{ progress: number }> {
     const userId = req.user.id;
     const progress = await this.questionDataService.getQuestionProgress(questionId, userId);

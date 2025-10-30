@@ -15,6 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductionFilesService } from './production-files.service';
 import { Response } from 'express';
 import { RolesGuard, roles } from '@/auth/common/guards/roles.guard';
+import { AuthenticatedRequest } from '@/auth/common/interfaces';
 import { filePrivacy } from '@DTOs/index';
 
 @UseGuards(RolesGuard)
@@ -41,7 +42,7 @@ export class ProductionFilesController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadProductionFile(
     @UploadedFile() file: Express.Multer.File,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Param('privacy') privacy: filePrivacy = filePrivacy.PRIVATE,
   ) {
     const { buffer, mimetype } = file;
@@ -72,7 +73,7 @@ export class ProductionFilesController {
   @Get('download/:fileUploadId')
   async downloadProductionFile(
     @Param('fileUploadId', ParseIntPipe) fileUploadId: number,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Res({ passthrough: true }) response: Response,
   ): Promise<StreamableFile> {
     const userId = req.user.id;

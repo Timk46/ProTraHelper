@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Public } from '@/public.decorator';
+import { AuthenticatedRequest } from '@/auth/common/interfaces';
 
 @Controller('users')
 export class UsersController {
@@ -12,7 +13,7 @@ export class UsersController {
    * @returns the total progress of the user
    */
   @Get(':totalProgress')
-  async getProgress(@Req() req: any) {
+  async getProgress(@Req() req: AuthenticatedRequest) {
     return this.usersService.getUserTotalProgress(req.user.id);
   }
 

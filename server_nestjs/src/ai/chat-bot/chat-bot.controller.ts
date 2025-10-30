@@ -1,16 +1,10 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Post, Body, Req, Res, Get, HttpStatus, HttpException } from '@nestjs/common';
 import { LlmBasicPromptService } from '../services/llmBasicPrompt.service';
-import { Request } from 'express';
 import { Response } from 'express';
 import { ChatBotRAGService } from './chatbot_rag.service';
 import { ChatBotMessageDTO } from '@DTOs/index';
-
-interface RequestWithUser extends Request {
-  user: {
-    id: number;
-  };
-}
+import { AuthenticatedRequest } from '../../auth/common/interfaces';
 
 class RatingDto {
   messageId: number;
@@ -30,7 +24,7 @@ export class ChatBotController {
    * @returns Array of chat sessions with their messages.
    */
   @Get('sessions')
-  async getChatSessions(@Req() req: RequestWithUser) {
+  async getChatSessions(@Req() req: AuthenticatedRequest) {
     try {
       return await this.chatBotRAGService.getChatSessions(req.user.id);
     } catch (error) {
@@ -67,7 +61,7 @@ export class ChatBotController {
     @Body('context') context: { role: string; content: string }[],
     @Body('question') question: string,
     @Body('dialogSessionId') dialogSessionId: string,
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Res() res: Response,
     @Body('url') url: string, // Added url parameter from body
     @Body('sessionId') sessionId?: number,
@@ -113,7 +107,7 @@ export class ChatBotController {
     @Body('context') context: { role: string; content: string }[],
     @Body('question') question: string,
     @Body('dialogSessionId') dialogSessionId: string,
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
     @Body('url') url: string, // Added url parameter from body
     @Body('sessionId') sessionId?: number,
   ): Promise<ChatBotMessageDTO> {
@@ -148,7 +142,7 @@ export class ChatBotController {
   @Post('rate')
   async rateChatbotMessage(
     @Body() ratingDto: RatingDto,
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
   ): Promise<{ message: string }> {
     try {
       await this.chatBotRAGService.saveOrUpdateRating(

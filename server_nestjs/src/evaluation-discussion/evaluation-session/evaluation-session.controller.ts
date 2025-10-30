@@ -14,6 +14,7 @@ import {
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
+import { AuthenticatedRequest } from '../../auth/common/interfaces';
 import { EvaluationSessionService } from './evaluation-session.service';
 import { EvaluationSessionDTO, EvaluationCategoryDTO } from '@DTOs/index';
 import { CreateEvaluationSessionDTO, UpdateEvaluationSessionDTO } from '@DTOs/index';
@@ -81,7 +82,7 @@ export class EvaluationSessionController {
   @roles('TEACHER', 'ADMIN')
   async create(
     @Body() createDto: CreateEvaluationSessionDTO,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<EvaluationSessionDTO> {
     return this.evaluationSessionService.create(createDto, req.user.id);
   }

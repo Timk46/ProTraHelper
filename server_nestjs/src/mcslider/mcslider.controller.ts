@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 // Swagger-Import entfernt
 import { JwtAuthGuard } from '../auth/common/guards/jwt-auth.guard';
+import { AuthenticatedRequest } from '../auth/common/interfaces';
 import { MCSliderService } from './mcslider.service';
 import {
   MCSliderQuestionResponseDTO,
@@ -27,12 +28,6 @@ import {
   UpdateMCSliderQuestionDTO,
 } from '@DTOs/mcslider.dto';
 
-interface RequestWithUser extends Request {
-  user: {
-    id: number;
-  };
-}
-
 // Swagger-Dekoratoren entfernt
 @Controller('mcslider')
 @UseGuards(JwtAuthGuard)
@@ -42,7 +37,7 @@ export class MCSliderController {
   @Post('questions')
   async createQuestion(
     @Body() createDto: CreateMCSliderQuestionDTO,
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
   ): Promise<MCSliderQuestionResponseDTO> {
     return this.mcSliderService.createMCSliderQuestion(req.user.id, createDto);
   }
@@ -83,7 +78,7 @@ export class MCSliderController {
   @Post('submit')
   async submitAnswer(
     @Body() submissionDto: MCSliderSubmissionDTO,
-    @Req() req: RequestWithUser,
+    @Req() req: AuthenticatedRequest,
   ): Promise<MCSliderSubmissionResultDTO> {
     return this.mcSliderService.submitMCSliderAnswer(req.user.id, submissionDto);
   }

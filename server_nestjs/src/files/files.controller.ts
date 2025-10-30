@@ -17,6 +17,7 @@ import { Response } from 'express';
 import * as fs from 'fs';
 import { filePrivacy } from '@DTOs/index';
 import { roles, RolesGuard } from '../auth/common/guards/roles.guard';
+import { AuthenticatedRequest } from '../auth/common/interfaces';
 
 @UseGuards(RolesGuard)
 @Controller('files')
@@ -35,7 +36,7 @@ export class FilesController {
   @roles('ADMIN', 'LECTURER')
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadPublicFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+  async uploadPublicFile(@UploadedFile() file: Express.Multer.File, @Req() req: AuthenticatedRequest) {
     const { buffer, mimetype } = file;
     const fileName = file.originalname;
 
@@ -66,7 +67,7 @@ export class FilesController {
   async downloadFile(
     @Param('uniqueIdentifier') uniqueIdentifier: string,
     @Res({ passthrough: true }) response: Response,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<StreamableFile> {
     if (!(await this.filesService.hasAccess(uniqueIdentifier, req.user))) {
       throw new Error('File access denied');
@@ -99,7 +100,7 @@ export class FilesController {
   async downloadFileByName(
     @Param('name') name: string,
     @Res({ passthrough: true }) response: Response,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<StreamableFile> {
     const file = await this.filesService.getFileByName(name);
 
@@ -122,7 +123,7 @@ export class FilesController {
    */
   @roles('ANY')
   @Get(':uniqueIdentifier')
-  async getFile(@Param('uniqueIdentifier') uniqueIdentifier: string, @Req() req: any) {
+  async getFile(@Param('uniqueIdentifier') uniqueIdentifier: string, @Req() req: AuthenticatedRequest) {
     if (!(await this.filesService.hasAccess(uniqueIdentifier, req.user))) {
       throw new Error('File access denied');
     }
@@ -144,7 +145,7 @@ export class FilesController {
   async downloadVideo(
     @Param('uniqueIdentifier') uniqueIdentifier: string, // Extracts the video's unique identifier from the URL.
     @Res({ passthrough: true }) response: Response, // Injects the response object for direct manipulation.
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
     @Headers('range') range: string, // Extracts the 'Range' header from the request.
   ): Promise<StreamableFile> {
     if (!(await this.filesService.hasAccess(uniqueIdentifier, req.user))) {

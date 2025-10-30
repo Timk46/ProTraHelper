@@ -11,26 +11,14 @@ import {
   Req,
   Logger,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/common/guards/roles.guard';
 import { roles } from '../../auth/common/guards/roles.guard';
+import { AuthenticatedRequest } from '../../auth/common/interfaces';
 import { EvaluationRatingService } from './evaluation-rating.service';
 import { EvaluationRatingDTO, CategoryRatingStatus } from '@DTOs/index';
 import { CreateEvaluationRatingDTO, UpdateEvaluationRatingDTO } from '@DTOs/index';
 import { ParseIntPipe } from '../../common/pipes/parse-int.pipe';
-
-/**
- * Type-safe authenticated request interface
- * Guaranteed by JwtAuthGuard at controller level
- */
-interface AuthenticatedRequest extends Request {
-  user: {
-    id: number;
-    email: string;
-    role: string;
-  };
-}
 
 @Controller('evaluation-ratings')
 @UseGuards(JwtAuthGuard, RolesGuard)

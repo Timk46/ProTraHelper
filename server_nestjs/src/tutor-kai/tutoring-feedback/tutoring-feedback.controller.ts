@@ -15,10 +15,10 @@ import {
   Logger,
   BadRequestException, // Added BadRequestException
 } from '@nestjs/common';
-import { Request } from 'express'; // Added Request
 import { PrismaService } from 'src/prisma/prisma.service'; // Added PrismaService
 import { IsIn, IsString } from 'class-validator'; // Added class-validator imports
 import { JwtAuthGuard } from '../../auth/common/guards/jwt-auth.guard'; // Add AuthGuard
+import { AuthenticatedRequest } from '../../auth/common/interfaces';
 import { TutoringFeedbackService } from './tutoring-feedback.service';
 import { FeedbackContextDto } from '@DTOs/tutorKaiDtos/feedbackContext.dto';
 import { FeedbackOutput } from './graph/schemas/feedback-output.schema';
@@ -31,12 +31,6 @@ interface EvaluateRequestDto {
   flavor?: string; // Optional based on reference
   feedbackLevel?: string; // Optional based on reference
   relatedCodeSubmissionResult: CodeSubmissionResultDto;
-}
-
-interface RequestWithUser extends Request {
-  user: {
-    id: number;
-  };
 }
 
 // DTO for the usage tracking request
@@ -152,7 +146,7 @@ export class TutoringFeedbackController {
 
   @Get('privacy/consent')
   @HttpCode(HttpStatus.OK)
-  async getPrivacyConsentStatus(@Req() req: RequestWithUser): Promise<{ hasAccepted: boolean }> {
+  async getPrivacyConsentStatus(@Req() req: AuthenticatedRequest): Promise<{ hasAccepted: boolean }> {
     const userId = req.user.id; // Extract userId from authenticated user
     if (!userId) {
       this.logger.error('User ID not found in request for privacy consent check.');
@@ -173,7 +167,7 @@ export class TutoringFeedbackController {
 
   @Post('privacy/consent')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async acceptPrivacyPolicy(@Req() req: RequestWithUser): Promise<void> {
+  async acceptPrivacyPolicy(@Req() req: AuthenticatedRequest): Promise<void> {
     const userId = req.user.id; // Extract userId from authenticated user
     if (!userId) {
       this.logger.error('User ID not found in request for accepting privacy policy.');
