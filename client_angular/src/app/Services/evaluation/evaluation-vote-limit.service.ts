@@ -12,7 +12,8 @@ import {
 import {
   VoteLimitStatusDTO,
   VoteLimitResponseDTO,
-  EvaluationSubmissionDTO
+  EvaluationSubmissionDTO,
+  EvaluationDiscussionDTO
 } from '@DTOs/index';
 
 // Services
@@ -366,6 +367,26 @@ export class EvaluationVoteLimitService implements OnDestroy {
     const currentStatusMap = new Map(this.voteLimitStatusSubject.value);
     currentStatusMap.set(categoryId, status);
     this.voteLimitStatusSubject.next(currentStatusMap);
+  }
+
+  // =============================================================================
+  // VOTE LIMIT CALCULATIONS
+  // =============================================================================
+
+  /**
+   * Calculates the maximum votes available for a category
+   *
+   * @description
+   * Returns the fixed vote limit per HEFL evaluation rules.
+   * Each user gets exactly 10 votes per category to distribute among comments.
+   *
+   * @param discussions - Array of discussions in category (parameter kept for future extensibility)
+   * @returns Maximum number of votes (always 10 per HEFL rules)
+   * @example
+   * const maxVotes = voteLimitService.calculateVoteLimits(discussions); // Returns 10
+   */
+  calculateVoteLimits(discussions: EvaluationDiscussionDTO[]): number {
+    return this.CONFIG.VOTE_LIMITS.MAX_VOTES_PER_CATEGORY;
   }
 
   // =============================================================================

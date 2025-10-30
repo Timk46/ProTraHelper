@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 /**
  * Global service to track session votes across all categories and components
@@ -8,20 +9,43 @@ import { BehaviorSubject, Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class VoteSessionService {
-  
+export class VoteSessionService implements OnDestroy {
+
   private readonly STORAGE_KEY = 'hefl_vote_session';
-  
+
   /**
    * Global session vote counter - tracks total votes given in current session
    * This persists across component instances and categories AND page refreshes
    */
   private sessionVotesGivenSubject = new BehaviorSubject<number>(this.loadSessionVotes());
-  
+
   /**
    * Observable stream of session votes for components to subscribe to
    */
   public sessionVotesGiven$: Observable<number> = this.sessionVotesGivenSubject.asObservable();
+
+  /**
+   * Debounced localStorage save stream to batch writes and prevent blocking
+   */
+  private saveDebouncer = new Subject<number>();
+
+  constructor() {
+    // Setup debounced localStorage writes (batch writes every 500ms)
+    this.saveDebouncer.pipe(
+      debounceTime(500),
+      distinctUntilChanged()
+    ).subscribe(count => {
+      try {
+        localStorage.setItem(this.STORAGE_KEY, count.toString());
+      } catch (error) {
+        console.warn('Failed to save session votes to localStorage:', error);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.saveDebouncer.complete();
+  }
 
   /**
    * Get current session vote count
@@ -45,13 +69,10 @@ export class VoteSessionService {
 
   /**
    * Save session votes to localStorage for persistence across page refreshes
+   * Uses debouncing to batch writes and prevent UI blocking
    */
   private saveSessionVotes(count: number): void {
-    try {
-      localStorage.setItem(this.STORAGE_KEY, count.toString());
-    } catch (error) {
-      console.warn('Failed to save session votes to localStorage:', error);
-    }
+    this.saveDebouncer.next(count);
   }
 
   /**

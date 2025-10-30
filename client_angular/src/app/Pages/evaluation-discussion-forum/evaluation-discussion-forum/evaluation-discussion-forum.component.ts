@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
-import { Observable, Subject, combineLatest, BehaviorSubject, of, interval, from, timer } from 'rxjs';
+import { Observable, Subject, combineLatest, BehaviorSubject, of, timer } from 'rxjs';
 import { takeUntil, map, filter, switchMap, take, startWith, debounceTime, distinctUntilChanged, shareReplay, finalize, tap, catchError } from 'rxjs/operators';
 
 // Angular Material Imports
@@ -18,7 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBarModule, MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -38,6 +38,7 @@ import {
   CommentStatsDTO,
   AnonymousEvaluationUserDTO,
   RatingStatsDTO,
+  EvaluationRatingDTO,
 } from '@DTOs/index';
 
 // Services
@@ -45,7 +46,10 @@ import { EvaluationStateService } from '../../../Services/evaluation/evaluation-
 import { EvaluationVoteLimitService } from '../../../Services/evaluation/evaluation-vote-limit.service';
 import { VoteSessionService } from '../../../Services/evaluation/vote-session.service';
 import { EvaluationGlobalStateService } from '../services/evaluation-global-state.service';
-import { EvaluationNavigationService } from '../services/evaluation-navigation.service';
+import {
+  EvaluationNavigationService,
+  NavigationContext
+} from '../services/evaluation-navigation.service';
 import { EvaluationPerformanceService } from '../services/evaluation-performance.service';
 import { BundleAnalyzerService } from '../services/bundle-analyzer.service';
 import { MemoryLeakDetectorService } from '../services/memory-leak-detector.service';
@@ -62,6 +66,44 @@ import { RatingGateComponent } from '../components/rating-gate/rating-gate.compo
 import { VotingMechanismDialogComponent } from '../components/voting-mechanism-dialog/voting-mechanism-dialog.component';
 import { UserService } from 'src/app/Services/auth/user.service';
 import { PdfSimpleViewerPanelComponent } from '../components/pdf-simple-viewer-panel/pdf-simple-viewer-panel.component';
+import { PdfExportService } from '../../../Services/pdf/pdf-export.service';
+
+// =============================================================================
+// TYPE DEFINITIONS
+// =============================================================================
+
+/**
+ * Event data for rating deletion
+ */
+interface RatingDeletionEvent {
+  categoryId: number;
+}
+
+/**
+ * Event data for discussion access granted
+ */
+interface DiscussionAccessEvent {
+  categoryId: number;
+}
+
+/**
+ * Configuration for message display
+ */
+interface MessageConfig {
+  title: string;
+  action: string;
+  duration: number;
+}
+
+/**
+ * Message type configurations for unified message display
+ */
+const MESSAGE_CONFIGS: Record<'error' | 'success' | 'warning' | 'info', MessageConfig> = {
+  error: { title: 'Fehler', action: 'Schließen', duration: 5000 },
+  success: { title: 'Erfolg', action: 'OK', duration: 3000 },
+  warning: { title: 'Warnung', action: 'OK', duration: 4000 },
+  info: { title: 'Information', action: 'OK', duration: 3000 }
+};
 
 @Component({
   selector: 'app-evaluation-discussion-forum',
@@ -113,7 +155,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     private performanceService: EvaluationPerformanceService,
     private bundleAnalyzer: BundleAnalyzerService,
     private memoryLeakDetector: MemoryLeakDetectorService,
-    private logger: LoggerService
+    private logger: LoggerService,
+    private pdfExportService: PdfExportService
   ) {
   }
   // =============================================================================
@@ -172,11 +215,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   public currentCategoryId$ = this.navigationService.categoryId$;
   public highlightedCommentId$ = this.navigationService.commentId$;
 
-  // Submission navigation support
-  public submissionNavigationInfo$ = this.navigationService.navigationContext$.pipe(
-    map(() => this.navigationService.getSubmissionNavigationInfo()),
-    shareReplay(1)
-  );
 
   // =============================================================================
   // COMPONENT STATE - REACTIVE STREAMS
@@ -248,7 +286,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   private commentSubmissionQueue$ = new Subject<string>();
   private lastSubmittedContent: string | null = null;
   currentMessageText: string = '';
-  private currentSnackBarRef: any = null;
+  private currentSnackBarRef: MatSnackBarRef<any> | null = null;
 
   // Rating gate access control - replaced with reactive state from stateService
 
@@ -450,8 +488,8 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         // Get dynamic vote limit status for current category (handle null category)
         const voteLimitStatus = activeCategory !== null ? voteLimitStatusMap.get(activeCategory) : undefined;
 
-        // 🎯 CALCULATE: Vote limit based on comment count (2 votes per comment)
-        const maxVotes = this.calculateVoteLimits(discussions);
+        // 🎯 CALCULATE: Vote limit based on HEFL rules (fixed 10 votes per user)
+        const maxVotes = this.voteLimitService.calculateVoteLimits(discussions);
 
         // FIX: Show loading ONLY when:
         // 1. Global loading flag is true AND
@@ -487,8 +525,6 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
     // ⚡ PERFORMANCE: Defer monitoring setup to browser idle time
     this.schedulePerformanceMonitoring();
-
-    // this.loadSubmissionList(); // FIXME: Disabled - requires backend API integration
 
     // Initialize session votes from backend data after voteLimitStatus loads
     this.initializeSessionVotesFromBackend();
@@ -703,9 +739,13 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Initializes comprehensive performance monitoring
+   *
+   * @description Sets up monitoring for render performance, memory usage, and bundle analysis.
+   * Uses the high-level monitorComponent() API for streamlined setup.
+   */
   private setupPerformanceMonitoring(): void {
-    // 🚀 PHASE 6: Enhanced Performance Monitoring & Optimization
-
     // Register component for memory leak detection
     this.memoryLeakDetector.registerComponent(
       'evaluation-discussion-forum',
@@ -717,61 +757,21 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       }
     );
 
-    // Start component profiling
-    this.performanceService.startComponentProfiling('evaluation-discussion-forum', {
-      trackMemory: true,
-      trackChangeDetection: true,
-      sampleRate: 1.0 // Profile all render cycles for main component
-    });
-
-    // ⚡ PERFORMANCE: Defer bundle analysis to avoid blocking initialization
-    if (!environment.production) {
-      setTimeout(() => {
-        this.bundleAnalyzer.analyzeBundleStructure();
-      }, 10000); // 10 seconds delay
-    }
-
-    // Monitor component performance and report to global state
-    const startTime = performance.now();
-
-    // Mark performance start for proper measurement
-    this.performanceService.markRenderStart('evaluation-discussion-forum');
-
-    // Track render performance with enhanced metrics
-    this.viewModel$.pipe(
-      takeUntil(this.destroy$),
-      debounceTime(100)
-    ).subscribe(() => {
-      const renderTime = performance.now() - startTime;
-
-      // Mark performance events
-      this.performanceService.markRenderEnd('evaluation-discussion-forum');
-
-      // Log slow renders with more context
-      if (renderTime > 100) {
-        this.log.warn('Slow render detected', {
-          renderTime: renderTime.toFixed(2) + 'ms',
-          component: 'evaluation-forum',
-          threshold: '100ms'
-        });
-
-        // Report to performance service
-        this.performanceService.updatePerformanceMetrics(renderTime, true);
+    // Use high-level monitoring API for streamlined setup
+    this.performanceService.monitorComponent('evaluation-discussion-forum', {
+      componentRef: this,
+      viewModel$: this.viewModel$,
+      destroy$: this.destroy$,
+      options: {
+        trackMemory: true,
+        trackChangeDetection: true,
+        trackRenderTime: true,
+        memoryThreshold: 100 * 1024 * 1024, // 100MB
+        renderTimeThreshold: 100 // ms
       }
     });
 
-    // Monitor critical performance metrics
-    this.performanceService.performanceMetrics$.pipe(
-      takeUntil(this.destroy$),
-      filter(metrics => metrics.componentMetrics.has('evaluation-discussion-forum'))
-    ).subscribe(metrics => {
-      const componentMetrics = metrics.componentMetrics.get('evaluation-discussion-forum');
-      if (componentMetrics && componentMetrics.averageRenderTime > 50) {
-        console.debug(`Component performance: Average render time ${componentMetrics.averageRenderTime.toFixed(2)}ms`);
-      }
-    });
-
-    // Monitor memory leaks
+    // Monitor memory leaks with user notifications
     this.memoryLeakDetector.leakDetectionReport$.pipe(
       takeUntil(this.destroy$),
       filter(report => report.detectedLeaks.length > 0)
@@ -781,9 +781,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       );
 
       if (criticalLeaks.length > 0) {
-        console.error('🚨 Critical memory leaks detected in evaluation forum:', criticalLeaks);
-
-        // Show user notification for critical issues
+        this.log.error('Critical memory leaks detected', { leakCount: criticalLeaks.length });
         this.snackBar.open(
           'Leistungsproblem erkannt - Seite wird optimiert',
           'OK',
@@ -792,13 +790,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       }
     });
 
-    // ⚡ PERFORMANCE: Start periodic reports after 60s, then every 30s
-    timer(60000, 30000).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      this.performanceService.logPerformanceReport();
-      this.bundleAnalyzer.logBundleReport();
-    });
+    // Bundle analysis (non-production only)
+    if (!environment.production) {
+      setTimeout(() => this.bundleAnalyzer.analyzeBundleStructure(), 10000);
+    }
   }
 
   // =============================================================================
@@ -807,6 +802,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Toggles the performance dashboard visibility
+   *
+   * @description Shows or hides the performance monitoring dashboard.
+   * When opened, triggers bundle analysis and memory leak detection.
+   * Only available in development mode.
    */
   togglePerformanceDashboard(): void {
     this.showPerformanceDashboard = !this.showPerformanceDashboard;
@@ -823,7 +822,11 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Checks if performance dashboard should be available
-   * (e.g., in development mode or for admin users)
+   *
+   * @description Determines dashboard availability based on environment.
+   * Available in development mode (localhost or dev domains) or non-production builds.
+   *
+   * @returns true if dashboard should be shown, false otherwise
    */
   isPerformanceDashboardAvailable(): boolean {
     return !environment.production || this.isDevelopmentMode();
@@ -839,15 +842,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
     );
   }
 
-  /**
-   * 🎯 Fixed vote limit: Each user gets exactly 10 votes
-   */
-  private calculateVoteLimits(discussions: EvaluationDiscussionDTO[]): number {
-    const maxVotes = 10; // Fixed limit: 10 votes per user
-    return maxVotes;
-  }
-
-  private updatePageMetadata(context: any): void {
+  private updatePageMetadata(context: NavigationContext): void {
     if (context.submissionId) {
       this.navigationService.updateMetaTags({
         title: `Evaluation Discussion - ${context.submissionId}`,
@@ -1048,7 +1043,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Handles initial comment submission from rating-gate component
-   * @param commentData - Contains content, isInitialComment flag, and categoryId
+   *
+   * @description Called when a user submits their first comment after rating a category.
+   * This unlocks the discussion section for that category. Processes immediately without debouncing.
+   *
+   * @param commentData - Comment submission data
+   * @param commentData.content - The comment text content
+   * @param commentData.isInitialComment - Flag indicating this is the first comment (always true)
+   * @param commentData.categoryId - The category ID for the comment
    */
   onInitialCommentSubmitted(commentData: { content: string; isInitialComment: boolean; categoryId: number }): void {
     // Process the initial comment immediately (no debouncing needed)
@@ -1056,7 +1058,15 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Handles regular comment submission (either from input or discussion thread)
+   * Handles regular comment submission from user input or discussion thread
+   *
+   * @description Queues comments for debounced processing to prevent duplicate submissions.
+   * Supports both string and object formats for different submission sources.
+   *
+   * @param content - Comment content (string) or submission data object
+   * @param content.content - The comment text when using object format
+   * @param content.isInitialComment - Optional flag for initial comment routing
+   * @param content.categoryId - Optional category ID for routing
    */
   onCommentSubmitted(content: string | { content: string; isInitialComment?: boolean; categoryId?: number }): void {
     if (typeof content === 'string') {
@@ -1075,7 +1085,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Handles reply submission from discussion-thread component
-   * @param data - Contains parentCommentId and content
+   *
+   * @description Creates a nested reply to an existing comment. Uses active category
+   * from state and submits to backend with proper error handling.
+   *
+   * @param data - Reply submission data
+   * @param data.parentCommentId - ID of the comment being replied to
+   * @param data.content - The reply text content
+   * @throws Error if no active category is available
    */
   onReplySubmitted(data: { parentCommentId: string; content: string }): void {
     if (!this.submissionId) {
@@ -1126,6 +1143,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Handles message submission from action area input field
+   *
+   * @description Submits comment from the bottom text input field.
+   * Validates content and clears input after successful queue.
    */
   onMessageSubmit(): void {
     const text = this.currentMessageText?.trim();
@@ -1185,6 +1205,17 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Handles comment voting with vote limit enforcement
+   *
+   * @description Processes upvote or vote removal with optimistic UI updates and backend sync.
+   * Enforces vote limits per category and provides user feedback via snackbar.
+   *
+   * @param data - Vote action data
+   * @param data.commentId - ID of the comment to vote on
+   * @param data.voteType - 'UP' for upvote, null to remove vote
+   * @throws Error if no active category is available
+   */
   onCommentVoted(data: { commentId: string; voteType: 'UP' | null }): void {
     // Prevent voting if already in progress for this comment
     if (this.isVotingComment.get(data.commentId)) {
@@ -1208,7 +1239,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
         .voteCommentWithEnhancedLimits(data.commentId, data.voteType, categoryId, this.submissionId ?? undefined)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: (result: any) => {
+          next: (result: { success: boolean; voteLimitStatus?: any }) => {
             const action =
               data.voteType === 'UP'
                 ? 'positiv bewertet'
@@ -1232,7 +1263,7 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
               });
             }
           },
-          error: (error: any) => {
+          error: (error: Error) => {
             console.error('❌ Vote failed:', error);
             const message = error.message || 'Fehler beim Bewerten des Kommentars';
             this.showSnackBar(message, 'Schließen', 5000, true);
@@ -1313,9 +1344,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @description Called when user clicks the "Zurücksetzen" button to delete their rating.
    * This will call the backend to delete the rating and update the local state.
    *
-   * @param {any} data - The deletion event data containing categoryId
+   * @param {RatingDeletionEvent} data - The deletion event data containing categoryId
    */
-  onRatingDeleted(data: { categoryId: number }): void {
+  onRatingDeleted(data: RatingDeletionEvent): void {
     if (!this.submissionId) {
       console.error('❌ Cannot delete rating: No submission ID');
       return;
@@ -1360,10 +1391,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
    * @description Called when the rating gate component grants access to discussion
    * after a user successfully rates a category. Updates UI state and shows success message.
    *
-   * @param {any} data - Event data containing categoryId
+   * @param {DiscussionAccessEvent} data - Event data containing categoryId
    * @memberof EvaluationDiscussionForumComponent
    */
-  onDiscussionAccessGranted(data: { categoryId: number }): void {
+  onDiscussionAccessGranted(data: DiscussionAccessEvent): void {
     // State is now automatically updated through reactive observables
 
     // Show success message
@@ -1384,6 +1415,14 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // UTILITY METHODS
   // =============================================================================
 
+  /**
+   * Refreshes all evaluation data from backend
+   *
+   * @description Reloads submission, categories, discussions, and ratings from backend.
+   * Useful after connectivity issues or to ensure data is up-to-date.
+   *
+   * @requires this.submissionId must be set
+   */
   onRefresh(): void {
     if (this.submissionId) {
       this.stateService.refreshAll(this.submissionId, Number(this.userservice.getTokenID()));
@@ -1406,14 +1445,45 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // TRACK BY FUNCTIONS FOR PERFORMANCE
   // =============================================================================
 
-  trackByCategory(index: number, category: EvaluationCategoryDTO): string {
-    return category.name;
+  /**
+   * TrackBy function for category list rendering optimization
+   *
+   * @description Used by Angular's *ngFor to track categories by their unique ID.
+   * Improves change detection performance by preventing unnecessary re-renders.
+   * Using ID instead of name ensures better tracking when categories have identical names.
+   *
+   * @param index - Array index (unused)
+   * @param category - Category DTO object
+   * @returns Unique category ID as number
+   */
+  trackByCategory(index: number, category: EvaluationCategoryDTO): number {
+    return category.id;
   }
 
+  /**
+   * TrackBy function for discussion list rendering optimization
+   *
+   * @description Used by Angular's *ngFor to track discussions by their ID.
+   * Prevents unnecessary DOM manipulation when discussions update.
+   *
+   * @param index - Array index (unused)
+   * @param discussion - Discussion DTO object
+   * @returns Unique discussion ID as string
+   */
   trackByDiscussion(index: number, discussion: EvaluationDiscussionDTO): string {
     return discussion.id.toString();
   }
 
+  /**
+   * TrackBy function for comment list rendering optimization
+   *
+   * @description Used by Angular's *ngFor to track comments by their ID.
+   * Essential for performance with large comment threads.
+   *
+   * @param index - Array index (unused)
+   * @param comment - Comment DTO object
+   * @returns Unique comment ID as string
+   */
   trackByComment(index: number, comment: EvaluationCommentDTO): string {
     return comment.id.toString();
   }
@@ -1423,86 +1493,84 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // =============================================================================
 
   /**
-   * Enhanced error message display using global state notifications
+   * Unified message display using global state notifications and snackbar
    *
+   * @description Displays messages with consistent styling based on type.
+   * Integrates with global state for notification management and shows immediate
+   * snackbar feedback. Automatically handles error tracking.
+   *
+   * @param type - Message type (error/success/warning/info)
+   * @param message - Message text to display
+   * @param action - Optional action button text (defaults to config)
+   *
+   * @example
+   * this.showMessage('success', 'Rating saved successfully');
+   * this.showMessage('error', 'Failed to load data', 'Retry');
+   */
+  private showMessage(
+    type: 'error' | 'success' | 'warning' | 'info',
+    message: string,
+    action?: string
+  ): void {
+    const config = MESSAGE_CONFIGS[type];
+
+    // Add to global state notifications
+    this.globalStateService.addNotification({
+      type,
+      title: config.title,
+      message,
+      autoClose: true,
+      duration: config.duration
+    });
+
+    // Show snackbar for immediate feedback
+    this.showSnackBar(
+      message,
+      action || config.action,
+      config.duration,
+      type === 'error'
+    );
+
+    // Track errors in system state
+    if (type === 'error') {
+      this.globalStateService.incrementPendingActions();
+    }
+  }
+
+  /**
+   * Convenience method for error messages
    * @param message - Error message to display
    * @param action - Optional action button text
    */
   private showErrorMessage(message: string, action?: string): void {
-    // Add to global state notifications
-    this.globalStateService.addNotification({
-      type: 'error',
-      title: 'Fehler',
-      message,
-      autoClose: true,
-      duration: 5000
-    });
-
-    // Also show snackbar for immediate feedback
-    this.showSnackBar(message, action || 'Schließen', 5000, true);
-
-    // Update system error count
-    this.globalStateService.incrementPendingActions();
+    this.showMessage('error', message, action);
   }
 
   /**
-   * Enhanced success message display using global state notifications
-   *
+   * Convenience method for success messages
    * @param message - Success message to display
    * @param action - Optional action button text
    */
   private showSuccessMessage(message: string, action?: string): void {
-    // Add to global state notifications
-    this.globalStateService.addNotification({
-      type: 'success',
-      title: 'Erfolg',
-      message,
-      autoClose: true,
-      duration: 3000
-    });
-
-    // Also show snackbar for immediate feedback
-    this.showSnackBar(message, action || 'OK', 3000, false);
+    this.showMessage('success', message, action);
   }
 
   /**
-   * Enhanced warning message display using global state notifications
-   *
+   * Convenience method for warning messages
    * @param message - Warning message to display
    * @param action - Optional action button text
    */
   private showWarningMessage(message: string, action?: string): void {
-    // Add to global state notifications
-    this.globalStateService.addNotification({
-      type: 'warning',
-      title: 'Warnung',
-      message,
-      autoClose: true,
-      duration: 4000
-    });
-
-    // Also show snackbar for immediate feedback
-    this.showSnackBar(message, action || 'OK', 4000, false);
+    this.showMessage('warning', message, action);
   }
 
   /**
-   * Enhanced info message display using global state notifications
-   *
+   * Convenience method for info messages
    * @param message - Info message to display
    * @param action - Optional action button text
    */
   private showInfoMessage(message: string, action?: string): void {
-    // Add to global state notifications
-    this.globalStateService.addNotification({
-      type: 'info',
-      title: 'Information',
-      message,
-      autoClose: true,
-      duration: 3000
-    });
-
-    // Also show snackbar for immediate feedback
-    this.showSnackBar(message, action || 'OK', 3000, false);
+    this.showMessage('info', message, action);
   }
 
   // =============================================================================
@@ -1591,6 +1659,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Converts EvaluationPhase enum to string for phase toggle component
+   *
+   * @description Maps the EvaluationPhase enum to string literals expected by UI components.
+   * Used in template bindings for phase-dependent UI elements.
+   *
+   * @param phase - The evaluation phase enum value (DISCUSSION or EVALUATION)
+   * @returns String literal 'discussion' or 'evaluation'
    */
   getPhaseString(phase: EvaluationPhase | null): 'discussion' | 'evaluation' {
     return phase === EvaluationPhase.DISCUSSION ? 'discussion' : 'evaluation';
@@ -1602,9 +1676,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   /**
    * Gets the current rating for a specific category
    * @param categoryId - The ID of the category
-   * @returns Observable<any> The current rating
+   * @returns Observable<EvaluationRatingDTO | null> The current rating
    */
-  getCurrentRating(categoryId: number): Observable<any> {
+  getCurrentRating(categoryId: number): Observable<EvaluationRatingDTO | null> {
     // This would need to be implemented in the state service
     // For now, return null to prevent template errors
     return this.stateService.getCurrentRating(categoryId);
@@ -1613,7 +1687,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   // Vote limits are now handled reactively in the viewModel$
 
   /**
-   * Navigiert zum Dashboard, wenn keine Abgabe verfügbar ist.
+   * Navigates to dashboard when no submission is available
+   *
+   * @description Fallback navigation when submission cannot be loaded.
+   * Redirects user to main dashboard page.
    */
   onNavigateToDashboard(): void {
     this.router.navigate(['/dashboard']);
@@ -1621,6 +1698,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Toggles the rating panel expansion state
+   *
+   * @description Expands or collapses the rating panel. Triggers change detection
+   * to update UI immediately.
    */
   onToggleRatingPanel(): void {
     this.isRatingPanelExpanded = !this.isRatingPanelExpanded;
@@ -1628,7 +1708,12 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Resets the rating by completely deleting it from database and enabling edit mode
+   * Resets the rating by deleting it from database
+   *
+   * @description Completely removes the user's rating for the current category from the database.
+   * Re-enables the rating input panel and resets the slider state for new rating.
+   *
+   * @requires Active category must be set
    */
   onResetRating(): void {
     this.activeCategory$.pipe(take(1)).subscribe(activeCategory => {
@@ -1676,7 +1761,10 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Cancels the rating reset and returns to collapsed state
+   * Cancels the rating reset operation
+   *
+   * @description Closes the rating input panel and returns to collapsed state
+   * without making any changes. User's existing rating remains unchanged.
    */
   onCancelReset(): void {
     this.showRatingPanel = false;
@@ -1687,8 +1775,9 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
   /**
    * Opens the vote explanation dialog
    *
-   * @description Shows a comprehensive dialog explaining the voting system,
-   * including how voting works, point calculation, and current user status
+   * @description Shows a comprehensive modal dialog explaining the voting system,
+   * including how voting works, vote limits, point calculation, and current user's vote status.
+   * Dialog is responsive and includes current vote statistics.
    */
   openVoteExplanationDialog(): void {
     // Get current vote limit status from the state service
@@ -1757,159 +1846,27 @@ export class EvaluationDiscussionForumComponent implements OnInit, OnDestroy {
 
   /**
    * Handles PDF download from the main header button
+   *
+   * @description Downloads the submission's PDF file using the PdfExportService
    */
   onDownloadPdf(): void {
-    // Get current view model data
     this.viewModel$.pipe(take(1)).subscribe(vm => {
       if (vm.submission?.pdfMetadata?.downloadUrl) {
-        this.downloadPdfFile(vm.submission.pdfMetadata.downloadUrl, vm.submission.title);
+        try {
+          this.pdfExportService.downloadPdf(
+            vm.submission.pdfMetadata.downloadUrl,
+            vm.submission.title
+          );
+          this.showSnackBar('PDF-Download gestartet', 'OK', 2000, false);
+        } catch (error) {
+          console.error('❌ PDF download failed:', error);
+          this.showSnackBar('Fehler beim PDF-Download', 'Schließen', 3000, true);
+        }
       } else {
         console.error('❌ No PDF download URL available');
         this.showSnackBar('PDF-Download nicht verfügbar', 'Schließen', 3000, true);
       }
     });
-  }
-
-  /**
-   * Downloads a PDF file programmatically
-   */
-  private downloadPdfFile(url: string, title: string): void {
-    try {
-      // Create a temporary link element
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = this.generateFilename(title);
-      link.target = '_blank';
-      
-      // Add to DOM, click, and remove
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      this.showSnackBar('PDF-Download gestartet', 'OK', 2000, false);
-    } catch (error) {
-      console.error('❌ PDF download failed:', error);
-      this.showSnackBar('Fehler beim PDF-Download', 'Schließen', 3000, true);
-    }
-  }
-
-  /**
-   * Generates a clean filename for the PDF download
-   */
-  private generateFilename(title: string): string {
-    // Clean the title and create a valid filename
-    const cleanTitle = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\-_]/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '');
-    
-    return `${cleanTitle || 'dokument'}.pdf`;
-  }
-
-  // =============================================================================
-  // SUBMISSION NAVIGATION METHODS
-  // =============================================================================
-
-  /**
-   * Loads the list of submissions for navigation
-   *
-   * @description Fetches all available submissions for the current user and initializes
-   * the navigation state for switching between submissions
-   * @memberof EvaluationDiscussionForumComponent
-   */
-  private loadSubmissionList(): void {
-    // FIXME: Submission navigation requires backend API integration
-    // See EvaluationNavigationService for implementation notes
-    console.warn('⚠️ loadSubmissionList() is deprecated - submission navigation not implemented');
-  }
-
-  /**
-   * Handles navigation to previous submission
-   *
-   * @description Navigates to the previous submission in the list while preserving
-   * the current category selection. Shows appropriate feedback messages to the user.
-   * Uses RxJS observables for proper cleanup and loading state management.
-   * @memberof EvaluationDiscussionForumComponent
-   */
-  onNavigateToPrevious(): void {
-    // Set loading state
-    this.globalStateService.setGlobalLoading(true);
-
-    this.activeCategory$.pipe(
-      take(1),
-      switchMap(currentCategory => {
-        // Convert Promise to Observable for proper RxJS cleanup (convert null to undefined)
-        return from(this.navigationService.navigateToAdjacentSubmission('previous', currentCategory ?? undefined));
-      }),
-      takeUntil(this.destroy$),
-      finalize(() => {
-        // Always clear loading state, regardless of success or error
-        this.globalStateService.setGlobalLoading(false);
-      })
-    ).subscribe({
-      next: (success) => {
-        if (success) {
-          this.showInfoMessage('Zur vorherigen Abgabe navigiert', 'OK');
-        } else {
-          this.showWarningMessage('Keine vorherige Abgabe verfügbar', 'OK');
-        }
-      },
-      error: (error) => {
-        console.error('❌ Navigation failed:', error);
-        this.showErrorMessage('Fehler bei der Navigation', 'Schließen');
-      }
-    });
-  }
-
-  /**
-   * Handles navigation to next submission
-   *
-   * @description Navigates to the next submission in the list while preserving
-   * the current category selection. Shows appropriate feedback messages to the user.
-   * Uses RxJS observables for proper cleanup and loading state management.
-   * @memberof EvaluationDiscussionForumComponent
-   */
-  onNavigateToNext(): void {
-    // Set loading state
-    this.globalStateService.setGlobalLoading(true);
-
-    this.activeCategory$.pipe(
-      take(1),
-      switchMap(currentCategory => {
-        // Convert Promise to Observable for proper RxJS cleanup (convert null to undefined)
-        return from(this.navigationService.navigateToAdjacentSubmission('next', currentCategory ?? undefined));
-      }),
-      takeUntil(this.destroy$),
-      finalize(() => {
-        // Always clear loading state, regardless of success or error
-        this.globalStateService.setGlobalLoading(false);
-      })
-    ).subscribe({
-      next: (success) => {
-        if (success) {
-          this.showInfoMessage('Zur nächsten Abgabe navigiert', 'OK');
-        } else {
-          this.showWarningMessage('Keine nächste Abgabe verfügbar', 'OK');
-        }
-      },
-      error: (error) => {
-        console.error('❌ Navigation failed:', error);
-        this.showErrorMessage('Fehler bei der Navigation', 'Schließen');
-      }
-    });
-  }
-
-  /**
-   * Gets navigation information for the current submission
-   *
-   * @description Returns an observable with navigation state including current position,
-   * total submissions, and whether previous/next navigation is available
-   * @returns Observable with submission navigation information
-   * @memberof EvaluationDiscussionForumComponent
-   */
-  getSubmissionNavigationInfo(): Observable<any> {
-    return this.submissionNavigationInfo$;
   }
 
   /**

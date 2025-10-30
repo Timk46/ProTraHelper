@@ -98,7 +98,7 @@ export class CommentVoteManagerService {
     // Start auto-cleanup interval
     this.cleanupInterval = setInterval(() => {
       this.cleanupStaleStates();
-    }, 5 * 60 * 1000); // Every 5 minutes
+    }, 5 * 60 * 1000) as unknown as number; // Every 5 minutes
 
     console.log('✅ CommentVoteManagerService initialized with auto-cleanup');
   }

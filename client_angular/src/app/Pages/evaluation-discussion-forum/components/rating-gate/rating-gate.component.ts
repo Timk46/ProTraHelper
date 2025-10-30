@@ -11,12 +11,10 @@ import {
 } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -28,6 +26,7 @@ import { DiscussionThreadComponent } from '../discussion-thread/discussion-threa
 import { CommentInputComponent } from '../comment-input/comment-input.component';
 import { EvaluationDiscussionService } from '../../../../Services/evaluation/evaluation-discussion.service';
 import { EvaluationStateService } from '../../../../Services/evaluation/evaluation-state.service';
+import { LocalStorageService } from '../../../../Services/storage/local-storage.service';
 import {
   CategoryRatingStatus,
   EvaluationCategoryDTO,
@@ -38,6 +37,53 @@ import {
   EvaluationRatingDTO,
 } from '@DTOs/index';
 import { BaseComponent } from '../../../../shared/base.component';
+
+/**
+ * Event interface for comment submission
+ */
+export interface CommentSubmittedEvent {
+  content: string;
+  isInitialComment?: boolean;
+  categoryId: number;
+}
+
+/**
+ * Event interface for comment voting
+ */
+export interface CommentVotedEvent {
+  commentId: string;
+  voteType: 'UP' | null;
+}
+
+/**
+ * Event interface for reply submission
+ */
+export interface ReplySubmittedEvent {
+  parentCommentId: string;
+  content: string;
+}
+
+/**
+ * Event interface for rating submission
+ */
+export interface RatingSubmittedEvent {
+  categoryId: number;
+  score: number;
+}
+
+/**
+ * Event interface for rating deletion
+ */
+export interface RatingDeletedEvent {
+  categoryId: number;
+}
+
+/**
+ * Event interface for access granted
+ */
+export interface AccessGrantedEvent {
+  categoryId: number;
+}
 
 /**
  * Interface for rating gate view model
@@ -75,7 +121,6 @@ interface RatingGateViewModel {
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatDialogModule,
     MatTooltipModule,
     MatExpansionModule,
     RatingSliderComponent,
@@ -192,18 +237,6 @@ interface RatingGateViewModel {
         class="discussion-access-granted"
         *ngIf="!vm.isLoading && !vm.error && vm.hasCommented && vm.canAccessDiscussion"
       >
-        <!-- Access Status Header -->
-        <!-- <div class="access-granted-header">
-          <mat-icon class="success-icon">check_circle</mat-icon>
-          <span class="access-text">
-            Diskussion freigeschaltet durch Ihren Kommentar
-            <span class="rating-value" *ngIf="vm.ratingStatus?.hasRated && vm.ratingStatus?.rating !== null && vm.ratingStatus?.rating !== undefined">
-              - Numerische Bewertung: {{ vm.ratingStatus?.rating }}/10 Punkte
-            </span>
-          </span>
-        </div> -->
-
-
         <!-- Collapsible Discussion Panel -->
         <div class="discussion-panel"
              [class.expanded]="isDiscussionExpanded"
@@ -1034,9 +1067,6 @@ interface RatingGateViewModel {
 
       // Nested Comment Input Panel Styles
       .comment-input-panel {
-        //margin: 1rem 0 0.5rem 0;
-        //border: 1px solid #bbdefb;
-        //border-radius: 8px;
         background: #fff;
         transition: all 0.3s ease;
 
@@ -1066,7 +1096,6 @@ interface RatingGateViewModel {
         }
 
         .comment-input-content {
-          //padding: 20px 8px 8px 8px;
           // Styles will be handled by the comment-input component
         }
       }
@@ -1175,32 +1204,32 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   /**
    * Emitted when a rating is successfully submitted
    */
-  @Output() ratingSubmitted = new EventEmitter<{ categoryId: number; score: number }>();
+  @Output() ratingSubmitted = new EventEmitter<RatingSubmittedEvent>();
 
   /**
    * Emitted when a rating is deleted/reset
    */
-  @Output() ratingDeleted = new EventEmitter<{ categoryId: number }>();
+  @Output() ratingDeleted = new EventEmitter<RatingDeletedEvent>();
 
   /**
    * Emitted when a comment is submitted
    */
-  @Output() commentSubmitted = new EventEmitter<any>();
+  @Output() commentSubmitted = new EventEmitter<CommentSubmittedEvent>();
 
   /**
    * Emitted when a comment is voted on
    */
-  @Output() commentVoted = new EventEmitter<any>();
+  @Output() commentVoted = new EventEmitter<CommentVotedEvent>();
 
   /**
    * Emitted when a reply is submitted
    */
-  @Output() replySubmitted = new EventEmitter<any>();
+  @Output() replySubmitted = new EventEmitter<ReplySubmittedEvent>();
 
   /**
    * Emitted when access is granted to discussions
    */
-  @Output() accessGranted = new EventEmitter<{ categoryId: number }>();
+  @Output() accessGranted = new EventEmitter<AccessGrantedEvent>();
 
   // Component state - only keeping error subject for local error handling
   private readonly errorSubject = new BehaviorSubject<string | null>(null);
@@ -1215,6 +1244,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     private readonly evaluationService: EvaluationDiscussionService,
     private readonly stateService: EvaluationStateService,
     private readonly snackBar: MatSnackBar,
+    private readonly storage: LocalStorageService,
   ) {
     super();
 
@@ -1312,10 +1342,8 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
           this.stateService.anonymousUser$.pipe(take(1)).subscribe(anonymousUser => {
             if (anonymousUser) {
               this.stateService.refreshRatingStatus(this.submissionId.toString(), anonymousUser.id);
-            } else {
             }
           });
-        } else {
         }
       }
     }
@@ -1383,12 +1411,12 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     this.ratingSubmitted.emit({
       categoryId: this.currentCategory.id,
       score: ratingEvent.rating || ratingEvent.score,
-    });
+    } as RatingSubmittedEvent);
 
     // Emit access granted event
     this.accessGranted.emit({
       categoryId: this.currentCategory.id,
-    });
+    } as AccessGrantedEvent);
 
     // Note: Local state update is no longer needed since we use centralized state
     // The viewModel$ will automatically update when the state service is updated
@@ -1415,7 +1443,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
     // Emit rating deletion event to parent component for backend deletion
     this.ratingDeleted.emit({
       categoryId: this.currentCategory.id,
-    });
+    } as RatingDeletedEvent);
 
   }
 
@@ -1441,12 +1469,12 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
       content: commentContent,
       isInitialComment: true,
       categoryId: this.currentCategory.id,
-    });
+    } as CommentSubmittedEvent);
 
     // Emit access granted event
     this.accessGranted.emit({
       categoryId: this.currentCategory.id,
-    });
+    } as AccessGrantedEvent);
   }
 
   /**
@@ -1495,19 +1523,17 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
   }
 
 
+  // =============================================================================
+  // EXPANSION STATE MANAGEMENT (Using LocalStorageService)
+  // =============================================================================
+
   /**
    * Loads expansion state from localStorage
    *
    * @returns boolean indicating if instructions should be expanded
    */
   private loadExpansionState(): boolean {
-    try {
-      const stored = localStorage.getItem(this.EXPANSION_STORAGE_KEY);
-      return stored ? stored === 'true' : false; // Default to collapsed for instructions
-    } catch (error) {
-      console.warn('Failed to load expansion state from localStorage:', error);
-      return false; // Default to collapsed
-    }
+    return this.storage.getBoolean(this.EXPANSION_STORAGE_KEY, false);
   }
 
   /**
@@ -1517,13 +1543,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   onExpansionChange(expanded: boolean): void {
     this.instructionsExpanded = expanded;
-
-    try {
-      localStorage.setItem(this.EXPANSION_STORAGE_KEY, String(expanded));
-      console.log('📝 Instructions expansion state saved:', expanded);
-    } catch (error) {
-      console.warn('Failed to save expansion state to localStorage:', error);
-    }
+    this.storage.set(this.EXPANSION_STORAGE_KEY, expanded);
   }
 
 
@@ -1533,13 +1553,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    * @returns boolean indicating if comment input panel should be expanded
    */
   private loadCommentInputState(): boolean {
-    try {
-      const stored = localStorage.getItem(this.COMMENT_INPUT_STORAGE_KEY);
-      return stored ? stored === 'true' : false; // Default to collapsed for comment input
-    } catch (error) {
-      console.warn('Failed to load comment input expansion state from localStorage:', error);
-      return false; // Default to collapsed
-    }
+    return this.storage.getBoolean(this.COMMENT_INPUT_STORAGE_KEY, false);
   }
 
 
@@ -1550,13 +1564,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   onCommentInputExpansionChange(expanded: boolean): void {
     this.commentInputExpanded = expanded;
-
-    try {
-      localStorage.setItem(this.COMMENT_INPUT_STORAGE_KEY, String(expanded));
-      console.log('📝 Comment input expansion state saved:', expanded);
-    } catch (error) {
-      console.warn('Failed to save comment input expansion state to localStorage:', error);
-    }
+    this.storage.set(this.COMMENT_INPUT_STORAGE_KEY, expanded);
   }
 
 
@@ -1631,13 +1639,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    * @returns boolean indicating if discussion panel should be expanded
    */
   private loadDiscussionPanelState(): boolean {
-    try {
-      const stored = localStorage.getItem(this.DISCUSSION_PANEL_STORAGE_KEY);
-      return stored ? stored === 'true' : false; // Default to collapsed
-    } catch (error) {
-      console.warn('Failed to load discussion panel expansion state from localStorage:', error);
-      return false; // Default to collapsed
-    }
+    return this.storage.getBoolean(this.DISCUSSION_PANEL_STORAGE_KEY, false);
   }
 
   /**
@@ -1645,12 +1647,7 @@ export class RatingGateComponent extends BaseComponent implements OnInit, OnDest
    */
   toggleDiscussionPanel(): void {
     this.isDiscussionExpanded = !this.isDiscussionExpanded;
-
-    try {
-      localStorage.setItem(this.DISCUSSION_PANEL_STORAGE_KEY, String(this.isDiscussionExpanded));
-    } catch (error) {
-      console.warn('Failed to save discussion panel expansion state to localStorage:', error);
-    }
+    this.storage.set(this.DISCUSSION_PANEL_STORAGE_KEY, this.isDiscussionExpanded);
   }
 
   /**

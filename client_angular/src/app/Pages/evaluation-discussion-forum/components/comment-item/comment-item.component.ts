@@ -92,6 +92,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   private _cachedDisplayContent: string = '';
   private _cachedFormattedContent: string = '';
   private _cachedUpvoteTooltip: string = '';
+  private _cachedRemoveVoteTooltip: string = '';
+  private _cachedVoteDisplayText: string = '';
+  private _cachedVoteDisplayAriaLabel: string = '';
+  private _cachedCanAddMoreVotes: boolean = false;
 
   private destroy$ = new Subject<void>();
 
@@ -115,6 +119,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
   get cachedAuthorDisplayName(): string { return this._cachedAuthorDisplayName; }
   get cachedFormattedContent(): string { return this._cachedFormattedContent; }
   get cachedUpvoteTooltip(): string { return this._cachedUpvoteTooltip; }
+  get cachedRemoveVoteTooltip(): string { return this._cachedRemoveVoteTooltip; }
+  get cachedVoteDisplayText(): string { return this._cachedVoteDisplayText; }
+  get cachedVoteDisplayAriaLabel(): string { return this._cachedVoteDisplayAriaLabel; }
+  get cachedCanAddMoreVotes(): boolean { return this._cachedCanAddMoreVotes; }
   
   // 🚨 CRITICAL SECURITY: Block voting if ownership unknown or if user owns comment
   get canVoteOnComment(): boolean { 
@@ -166,6 +174,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     // Subscribe to localVoteCount$ for backward compatibility
     this.localVoteCount$.pipe(takeUntil(this.destroy$)).subscribe(count => {
       this.localVoteCount = count;
+      this.updateCachedValues(); // Refresh cached properties when vote count changes
       this.cdr.markForCheck();
     });
 
@@ -174,6 +183,7 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       .pipe(takeUntil(this.destroy$))
       .subscribe(pending => {
         this.hasPendingOperations = pending;
+        this.updateCachedValues(); // Refresh cached properties when pending state changes
         this.cdr.markForCheck();
       });
 
@@ -258,6 +268,10 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
     this._cachedDisplayContent = this.getDisplayContent();
     this._cachedFormattedContent = this.formatContent(this.sanitizeContent(this._cachedDisplayContent));
     this._cachedUpvoteTooltip = this.getUpvoteTooltip();
+    this._cachedRemoveVoteTooltip = this.getRemoveVoteTooltip();
+    this._cachedVoteDisplayText = this.getVoteDisplayText();
+    this._cachedVoteDisplayAriaLabel = this.getVoteDisplayAriaLabel();
+    this._cachedCanAddMoreVotes = this.canAddMoreVotes();
   }
 
   // =============================================================================
@@ -367,23 +381,47 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
+    // 🚀 OPTIMISTIC UPDATE: Update UI immediately for instant feedback
+    const optimisticVoteCount = this.localVoteCount + 1;
+    this.localVoteCount = optimisticVoteCount;
+    this.updateCachedValues(); // Refresh cached properties for template
     this.triggerHapticFeedback('light');
-
-    const result = await this.voteManagerService.addVote(
-      this.comment.id.toString(),
-      this.anonymousUser!.id,
-      this.comment.submissionId,
-      this.comment.categoryId || 0
-    );
-
-    if (!result.success) {
-      console.error('❌ Vote operation failed:', result.error);
-      // Show error to user
-      return;
-    }
-
     this.triggerVoteSuccessAnimation();
-    this.triggerHapticFeedback('medium');
+    this.cdr.detectChanges(); // Force immediate UI update
+
+    // Backend call (non-blocking for UI)
+    try {
+      const result = await this.voteManagerService.addVote(
+        this.comment.id.toString(),
+        this.anonymousUser!.id,
+        this.comment.submissionId,
+        this.comment.categoryId || 0
+      );
+
+      if (!result.success) {
+        // Rollback on failure
+        console.error('❌ Vote operation failed:', result.error);
+        this.localVoteCount = optimisticVoteCount - 1;
+        this.updateCachedValues(); // Refresh cached properties after rollback
+        this.cdr.detectChanges();
+        return;
+      }
+
+      // Sync with backend if count differs
+      if (result.voteCount !== undefined && result.voteCount !== this.localVoteCount) {
+        this.localVoteCount = result.voteCount;
+        this.updateCachedValues(); // Refresh cached properties after sync
+        this.cdr.detectChanges();
+      }
+
+      this.triggerHapticFeedback('medium');
+    } catch (error) {
+      // Rollback on error
+      console.error('❌ Vote submission failed:', error);
+      this.localVoteCount = optimisticVoteCount - 1;
+      this.updateCachedValues(); // Refresh cached properties after rollback
+      this.cdr.detectChanges();
+    }
   }
 
   /**
@@ -416,21 +454,46 @@ export class CommentItemComponent implements OnInit, OnChanges, OnDestroy, After
       return;
     }
 
+    // 🚀 OPTIMISTIC UPDATE: Update UI immediately for instant feedback
+    const optimisticVoteCount = this.localVoteCount - 1;
+    this.localVoteCount = optimisticVoteCount;
+    this.updateCachedValues(); // Refresh cached properties for template
     this.triggerHapticFeedback('light');
+    this.cdr.detectChanges(); // Force immediate UI update
 
-    const result = await this.voteManagerService.removeVote(
-      this.comment.id.toString(),
-      this.anonymousUser!.id,
-      this.comment.submissionId,
-      this.comment.categoryId || 0
-    );
+    // Backend call (non-blocking for UI)
+    try {
+      const result = await this.voteManagerService.removeVote(
+        this.comment.id.toString(),
+        this.anonymousUser!.id,
+        this.comment.submissionId,
+        this.comment.categoryId || 0
+      );
 
-    if (!result.success) {
-      console.error('❌ Vote removal failed:', result.error);
-      return;
+      if (!result.success) {
+        // Rollback on failure
+        console.error('❌ Vote removal failed:', result.error);
+        this.localVoteCount = optimisticVoteCount + 1;
+        this.updateCachedValues(); // Refresh cached properties after rollback
+        this.cdr.detectChanges();
+        return;
+      }
+
+      // Sync with backend if count differs
+      if (result.voteCount !== undefined && result.voteCount !== this.localVoteCount) {
+        this.localVoteCount = result.voteCount;
+        this.updateCachedValues(); // Refresh cached properties after sync
+        this.cdr.detectChanges();
+      }
+
+      this.triggerHapticFeedback('medium');
+    } catch (error) {
+      // Rollback on error
+      console.error('❌ Vote removal failed:', error);
+      this.localVoteCount = optimisticVoteCount + 1;
+      this.updateCachedValues(); // Refresh cached properties after rollback
+      this.cdr.detectChanges();
     }
-
-    this.triggerHapticFeedback('medium');
   }
 
   /**

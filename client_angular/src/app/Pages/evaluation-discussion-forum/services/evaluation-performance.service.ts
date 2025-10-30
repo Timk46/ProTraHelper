@@ -189,7 +189,7 @@ export class EvaluationPerformanceService {
 
   /**
    * Stops profiling for a component
-   * 
+   *
    * @param componentName - Name of the component to stop profiling
    */
   stopComponentProfiling(componentName: string): ComponentProfiling | null {
@@ -206,6 +206,92 @@ export class EvaluationPerformanceService {
     this.updateComponentMetrics(componentName, profiling);
 
     return profiling;
+  }
+
+  /**
+   * Comprehensive component monitoring setup (high-level API)
+   *
+   * @description Automatically sets up complete monitoring for a component including:
+   * - Component profiling
+   * - Render time tracking
+   * - Memory monitoring
+   * - Change detection tracking
+   *
+   * This method orchestrates all monitoring tasks and provides a simple API for components.
+   *
+   * @param componentName - Unique identifier for the component
+   * @param config - Monitoring configuration
+   * @param config.componentRef - Reference to component instance
+   * @param config.viewModel$ - Observable for tracking view model updates
+   * @param config.destroy$ - Destroy subject for cleanup
+   * @param config.options - Optional monitoring settings
+   *
+   * @example
+   * ```typescript
+   * ngOnInit() {
+   *   this.performanceService.monitorComponent('my-component', {
+   *     componentRef: this,
+   *     viewModel$: this.viewModel$,
+   *     destroy$: this.destroy$,
+   *     options: {
+   *       trackMemory: true,
+   *       renderTimeThreshold: 100
+   *     }
+   *   });
+   * }
+   * ```
+   */
+  monitorComponent(componentName: string, config: {
+    componentRef: any;
+    viewModel$: Observable<any>;
+    destroy$: Observable<void>;
+    options?: {
+      trackMemory?: boolean;
+      trackChangeDetection?: boolean;
+      trackRenderTime?: boolean;
+      memoryThreshold?: number;
+      renderTimeThreshold?: number;
+    };
+  }): void {
+    const startTime = performance.now();
+
+    // Default options
+    const options = {
+      trackMemory: config.options?.trackMemory ?? true,
+      trackChangeDetection: config.options?.trackChangeDetection ?? true,
+      trackRenderTime: config.options?.trackRenderTime ?? true,
+      memoryThreshold: config.options?.memoryThreshold ?? 100 * 1024 * 1024, // 100MB
+      renderTimeThreshold: config.options?.renderTimeThreshold ?? 100 // ms
+    };
+
+    // Start component profiling
+    this.startComponentProfiling(componentName, {
+      trackMemory: options.trackMemory,
+      trackChangeDetection: options.trackChangeDetection,
+      sampleRate: 1.0
+    });
+
+    // Mark component initialization
+    this.markComponentInit(componentName, startTime);
+
+    // Track render performance via viewModel updates
+    if (options.trackRenderTime) {
+      config.viewModel$.subscribe(() => {
+        const renderTime = performance.now() - startTime;
+        this.markRenderEnd(componentName);
+
+        if (renderTime > options.renderTimeThreshold) {
+          console.warn(
+            `[Performance] Slow render detected in ${componentName}: ${renderTime.toFixed(2)}ms`
+          );
+        }
+      });
+    }
+
+    // Setup cleanup on component destroy
+    config.destroy$.subscribe(() => {
+      this.stopComponentProfiling(componentName);
+    });
   }
 
   /**

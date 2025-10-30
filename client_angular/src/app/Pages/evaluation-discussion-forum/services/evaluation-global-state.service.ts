@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
+import { LocalStorageService } from '../../../Services/storage/local-storage.service';
 
 /**
  * Global state management service for the evaluation discussion forum
@@ -121,7 +122,7 @@ export class EvaluationGlobalStateService {
     developmentMode: false
   });
 
-  constructor() {
+  constructor(private storage: LocalStorageService) {
     this.initializeListeners();
     this.initializeStateRestoration();
   }
@@ -522,39 +523,29 @@ export class EvaluationGlobalStateService {
    * Initializes state restoration from localStorage
    */
   private initializeStateRestoration(): void {
-    try {
-      // Restore user preferences
-      const savedPreferences = localStorage.getItem('evaluation-user-preferences');
-      if (savedPreferences) {
-        const preferences = JSON.parse(savedPreferences);
-        this.updateUserPreferences(preferences);
-      }
+    // Restore user preferences
+    const savedPreferences = this.storage.getObject<UserPreferences>('evaluation-user-preferences');
+    if (savedPreferences) {
+      this.updateUserPreferences(savedPreferences);
+    }
 
-      // Restore sidebar state
-      const savedSidebarState = localStorage.getItem('evaluation-sidebar-state');
-      if (savedSidebarState) {
-        const sidebarState = JSON.parse(savedSidebarState);
-        this.sidebarStateSubject.next({
-          ...this.sidebarStateSubject.value,
-          ...sidebarState
-        });
-      }
-    } catch (error) {
-      console.warn('Failed to restore state from localStorage:', error);
+    // Restore sidebar state
+    const savedSidebarState = this.storage.getObject<Partial<SidebarState>>('evaluation-sidebar-state');
+    if (savedSidebarState) {
+      this.sidebarStateSubject.next({
+        ...this.sidebarStateSubject.value,
+        ...savedSidebarState
+      });
     }
   }
 
   /**
    * Persists user preferences to localStorage
-   * 
+   *
    * @param preferences - Preferences to persist
    */
   private persistUserPreferences(preferences: UserPreferences): void {
-    try {
-      localStorage.setItem('evaluation-user-preferences', JSON.stringify(preferences));
-    } catch (error) {
-      console.warn('Failed to persist user preferences:', error);
-    }
+    this.storage.set('evaluation-user-preferences', preferences);
   }
 
   /**

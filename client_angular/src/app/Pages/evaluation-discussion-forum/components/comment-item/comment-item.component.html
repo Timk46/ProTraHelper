@@ -52,7 +52,7 @@
       <button
         class="vote-btn minus"
         [disabled]="getUserVoteCount() === 0 || isVoting"
-        [matTooltip]="getRemoveVoteTooltip()"
+        [matTooltip]="cachedRemoveVoteTooltip"
         (click)="removeVote()"
         type="button"
         role="button"
@@ -60,18 +60,18 @@
         [attr.data-action]="'remove-vote'">
         <mat-icon aria-hidden="true">remove</mat-icon>
       </button>
-      
+
       <!-- Vote Display -->
-      <span class="vote-display" 
-            [attr.aria-label]="getVoteDisplayAriaLabel()">
-        <span class="vote-status-text">{{ getVoteDisplayText() }}</span>
+      <span class="vote-display"
+            [attr.aria-label]="cachedVoteDisplayAriaLabel">
+        <span class="vote-status-text">{{ cachedVoteDisplayText }}</span>
       </span>
-      
+
       <!-- Plus Button (Add Vote) - Disabled when vote limit reached but ALWAYS visible -->
       <button
         class="vote-btn plus"
-        [disabled]="!canAddMoreVotes() || isVoting"
-        [matTooltip]="getEnhancedUpvoteTooltip()"
+        [disabled]="!cachedCanAddMoreVotes || isVoting"
+        [matTooltip]="cachedUpvoteTooltip"
         (click)="addVote()"
         type="button"
         role="button"

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { SessionStorageService } from '../../../Services/storage/session-storage.service';
 
 /**
  * Memory leak detection service for Angular components
@@ -54,7 +55,7 @@ export class MemoryLeakDetectorService {
   private weakMap = new WeakMap(); // For garbage collection tracking
   private isMonitoringActive = false;
 
-  constructor() {
+  constructor(private sessionStorage: SessionStorageService) {
     this.initializeMemoryMonitoring();
     this.setupDOMLeakDetection();
   }
@@ -612,20 +613,20 @@ export class MemoryLeakDetectorService {
 
   /**
    * Gets previous node count from storage
-   * 
+   *
    * @returns Previous node count
    */
   private getPreviousNodeCount(): number {
-    return parseInt(sessionStorage.getItem('hefl-previous-node-count') || '0', 10);
+    return this.sessionStorage.getNumber('hefl-previous-node-count', 0);
   }
 
   /**
    * Sets previous node count in storage
-   * 
+   *
    * @param count - Node count to store
    */
   private setPreviousNodeCount(count: number): void {
-    sessionStorage.setItem('hefl-previous-node-count', count.toString());
+    this.sessionStorage.set('hefl-previous-node-count', count);
   }
 
   // =============================================================================
