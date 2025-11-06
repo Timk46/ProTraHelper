@@ -1,6 +1,0 @@
-// Use a prebuilt theme instead of creating a custom one
-@use '@angular/material' as mat;
-@include mat.core();
-
-// Use the indigo-pink prebuilt theme
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
