@@ -94,8 +94,8 @@ const FILE_COMMAND_MAPPING = {
   'tutorial.gh': 'standard',                 // CLI: Legacy standard
   'test.gh': 'test_simple',                  // CLI: Legacy simple test
   
-  // Fallback für alle anderen Dateien (Python als Standard)
-  '*': 'python_basic'
+  // Fallback für alle anderen Dateien (COM Automation als Standard - zuverlässiger auf Remote Clients)
+  '*': 'com_basic'
 };
 
 /**
