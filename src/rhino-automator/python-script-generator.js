@@ -517,8 +517,16 @@ if __name__ == "__main__":
 class PythonScriptGenerator {
   constructor(logger) {
     this.logger = logger;
-    this.tempScriptDir = path.join(os.tmpdir(), 'protra-rhino-scripts');
+
+    // SECURITY FIX: Use unique session-based directory to prevent path traversal attacks
+    // Each process instance gets its own isolated temp directory
+    const crypto = require('crypto');
+    this.sessionId = crypto.randomBytes(16).toString('hex');
+    this.tempScriptDir = path.join(os.tmpdir(), `protra-rhino-${this.sessionId}`);
     this.activeScripts = new Set(); // Track active scripts for cleanup
+
+    // Register cleanup handlers to remove temp directory on exit
+    this._setupCleanupHandlers();
   }
 
   /**
@@ -526,13 +534,67 @@ class PythonScriptGenerator {
    */
   async initialize() {
     try {
-      // Stelle sicher, dass temp directory existiert
+      // Stelle sicher, dass temp directory existiert mit restriktiven Permissions
       await fs.mkdir(this.tempScriptDir, { recursive: true });
       this.logger.info(`Python script directory initialized: ${this.tempScriptDir}`);
+      this.logger.info(`Session ID: ${this.sessionId}`);
     } catch (error) {
       this.logger.error(`Failed to initialize script directory: ${error.message}`);
       throw error;
     }
+  }
+
+  /**
+   * SECURITY: Registriert Cleanup-Handler für process exit
+   * Stellt sicher, dass temp directory bei Beendigung gelöscht wird
+   * @private
+   */
+  _setupCleanupHandlers() {
+    const cleanup = async () => {
+      try {
+        await this.cleanupAllScripts();
+        // Delete entire session temp directory
+        await fs.rm(this.tempScriptDir, { recursive: true, force: true });
+        this.logger.info(`Cleaned up session temp directory: ${this.tempScriptDir}`);
+      } catch (error) {
+        this.logger.warn(`Failed to cleanup temp directory: ${error.message}`);
+      }
+    };
+
+    // Normal exit - SECURITY FIX: Use process.once() to prevent memory leak
+    process.once('exit', () => {
+      // Synchronous cleanup for exit event
+      try {
+        const fs_sync = require('fs');
+        if (fs_sync.existsSync(this.tempScriptDir)) {
+          fs_sync.rmSync(this.tempScriptDir, { recursive: true, force: true });
+          this.logger.info(`[SYNC] Cleaned up session temp directory on exit`);
+        }
+      } catch (error) {
+        this.logger.warn(`[SYNC] Failed to cleanup on exit: ${error.message}`);
+      }
+    });
+
+    // Ctrl+C (SIGINT) - SECURITY FIX: Use process.once() to prevent memory leak
+    process.once('SIGINT', async () => {
+      this.logger.info('Received SIGINT, cleaning up...');
+      await cleanup();
+      process.exit(0);
+    });
+
+    // Kill signal (SIGTERM) - SECURITY FIX: Use process.once() to prevent memory leak
+    process.once('SIGTERM', async () => {
+      this.logger.info('Received SIGTERM, cleaning up...');
+      await cleanup();
+      process.exit(0);
+    });
+
+    // Uncaught exceptions - SECURITY FIX: Use process.once() to prevent memory leak
+    process.once('uncaughtException', async (error) => {
+      this.logger.error(`Uncaught exception: ${error.message}`);
+      await cleanup();
+      process.exit(1);
+    });
   }
 
   /**

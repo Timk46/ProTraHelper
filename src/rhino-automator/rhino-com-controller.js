@@ -112,6 +112,7 @@ class RhinoCOMController {
 
   /**
    * Führt einen Rhino-Befehl via COM aus
+   * SECURITY: Verwendet Base64-Encoding um Command Injection zu verhindern
    * @param {string} command - Der auszuführende Rhino-Befehl
    * @param {number} timeoutMs - Timeout in Millisekunden
    * @returns {Promise<Object>} - Ergebnis {success, output, error}
@@ -123,22 +124,29 @@ class RhinoCOMController {
 
     try {
       this.logger.info(`COM: Executing command: ${command}`);
-      
+
       const { execSync } = require('child_process');
-      
+
+      // SECURITY FIX: Escape command using Base64 encoding to prevent PowerShell injection
+      // This ensures that no special characters in file paths can break out of the string
+      const commandBuffer = Buffer.from(command, 'utf16le');
+      const commandBase64 = commandBuffer.toString('base64');
+
       const commandScript = `
         try {
           $rhino = New-Object -ComObject "Rhino.Application"
-          $result = $rhino.RunScript("${command.replace(/"/g, '""')}")
+          $commandBytes = [System.Convert]::FromBase64String("${commandBase64}")
+          $command = [System.Text.Encoding]::Unicode.GetString($commandBytes)
+          $result = $rhino.RunScript($command, $true)
           Write-Output "COMMAND_SUCCESS: $result"
         } catch {
           Write-Output "COMMAND_ERROR: $($_.Exception.Message)"
         }
       `;
-      
-      const result = execSync(`powershell -Command "${commandScript.replace(/\n/g, '; ')}"`, 
+
+      const result = execSync(`powershell -Command "${commandScript.replace(/\n/g, '; ')}"`,
         { encoding: 'utf8', timeout: timeoutMs }).trim();
-      
+
       if (result.startsWith('COMMAND_SUCCESS:')) {
         const output = result.replace('COMMAND_SUCCESS:', '').trim();
         this.logger.info(`COM: Command executed successfully: ${output}`);
@@ -148,7 +156,7 @@ class RhinoCOMController {
         this.logger.error(`COM: Command failed: ${error}`);
         return { success: false, output: null, error };
       }
-      
+
     } catch (error) {
       this.logger.error(`COM: Command execution failed: ${error.message}`);
       return { success: false, output: null, error: error.message };
@@ -194,8 +202,8 @@ class RhinoCOMController {
       // Stelle sicher, dass Grasshopper läuft
       await this.startGrasshopper();
       
-      // Verwende den korrekten Grasshopper-Befehl zum Laden von Dateien
-      const loadCommand = `_GrasshopperLoadDocument "${filePath}"`;
+      // Verwende den bewährten Befehl aus bat-rhino.service.ts (mit Bindestrich!)
+      const loadCommand = `_-Grasshopper B D W L W H D O "${filePath}" W _MaxViewport _Enter`;
       const result = await this.executeCommand(loadCommand, 20000);
       
       if (result.success) {
@@ -394,14 +402,14 @@ class RhinoCOMController {
         }
       }
       
-      // Phase 3: Lade die Grasshopper-Datei
+      // Phase 3: Lade die Grasshopper-Datei mit bewährtem Befehl (mit Bindestrich!)
       this.logger.info(`COM: Loading file: ${filePath}`);
-      const loadCommand = `_GrasshopperLoadDocument "${filePath}"`;
+      const loadCommand = `_-Grasshopper B D W L W H D O "${filePath}" W _MaxViewport _Enter`;
       const loadResult = await this.executeCommand(loadCommand, 20000);
-      
+
       if (!loadResult.success) {
         // Fallback: Versuche alternativen Lade-Befehl
-        const altLoadCommand = `_DocumentOpen "${filePath}"`;
+        const altLoadCommand = `_-Grasshopper _DocumentOpen "${filePath}" _Enter`;
         await this.executeCommand(altLoadCommand, 20000);
       }
       

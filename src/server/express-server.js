@@ -32,8 +32,8 @@ class AppServer {
     this._configureMiddleware();
     this._configureRoutes();
 
-    // PHASE 1: Initialisiere RhinoLauncher mit Python Script Support
-    this._initializeRhinoLauncher();
+    // SECURITY FIX: RhinoLauncher initialization moved to start() method to prevent race condition
+    // (was: this._initializeRhinoLauncher() - called without await in constructor)
 
     // PHASE 2: Cleanup old temp files on startup
     this._cleanupOldTempFiles();
@@ -364,6 +364,16 @@ class AppServer {
   }
 
   async start() {
+    // SECURITY FIX: Await RhinoLauncher initialization before starting server
+    // This prevents race condition where server accepts requests before RhinoLauncher is ready
+    try {
+      await this._initializeRhinoLauncher();
+      this.logger.info('RhinoLauncher initialization completed before server start');
+    } catch (error) {
+      this.logger.error(`Failed to initialize RhinoLauncher: ${error.message}`);
+      throw error; // Prevent server start if initialization fails
+    }
+
     return new Promise((resolve, reject) => {
       this.server = this.app.listen(this.port, () => {
         this.logger.info(`Express-Server lauscht auf Port ${this.port}`);

@@ -159,8 +159,15 @@ app.whenReady().then(async () => {
   }
   logger.info(`CORS allowedOrigins geladen: ${allowedOrigins.join(', ')}`);
 
+  // SECURITY FIX: Create session-specific temp directory to prevent path traversal attacks
+  // Each app instance gets its own isolated temp directory for downloaded files
+  const sessionId = crypto.randomBytes(16).toString('hex');
+  const sessionTempDir = path.join(app.getPath('temp'), `protra-files-${sessionId}`);
+  logger.info(`Session temp directory: ${sessionTempDir}`);
+  logger.info(`Session ID: ${sessionId}`);
+
   // Initialisiere und starte den Express Server mit den geladenen allowedOrigins und dem API-Token
-  expressServer = new AppServer(logger, RhinoPathManager, app.getPath('temp'), allowedOrigins, apiSecretToken);
+  expressServer = new AppServer(logger, RhinoPathManager, sessionTempDir, allowedOrigins, apiSecretToken);
   try {
     await expressServer.start();
     logger.info(`Express-Server gestartet auf Port ${expressServer.getPort()}`);
@@ -192,6 +199,20 @@ app.whenReady().then(async () => {
      // Für eine reine Tray-Anwendung wollen wir das Standardverhalten (Beenden) verhindern.
     e.preventDefault();
     logger.info('Alle Fenster geschlossen, App läuft weiter im Tray.');
+  });
+
+  // SECURITY: Cleanup session temp directory on app quit
+  app.on('before-quit', async () => {
+    logger.info('App wird beendet, bereinige Session-Temp-Verzeichnis...');
+    try {
+      const fs = require('fs');
+      if (fs.existsSync(sessionTempDir)) {
+        fs.rmSync(sessionTempDir, { recursive: true, force: true });
+        logger.info(`Session temp directory bereinigt: ${sessionTempDir}`);
+      }
+    } catch (error) {
+      logger.warn(`Fehler beim Bereinigen des Temp-Verzeichnisses: ${error.message}`);
+    }
   });
 
 });
