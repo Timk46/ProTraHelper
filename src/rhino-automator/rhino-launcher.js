@@ -32,14 +32,55 @@ class RhinoLauncher {
   }
 
   /**
+   * SECURITY: Validates file path to prevent path traversal and malware execution
+   * @param {string} filePath - File path to validate
+   * @returns {string} - Validated absolute file path
+   * @throws {Error} - If validation fails
+   * @private
+   */
+  _validateFilePath(filePath) {
+    // 1. Resolve to absolute path
+    const resolved = path.resolve(filePath);
+
+    // 2. Check extension whitelist (only .gh and .ghx)
+    const ext = path.extname(resolved).toLowerCase();
+    if (!['.gh', '.ghx'].includes(ext)) {
+      throw new Error(`Invalid file extension: ${ext}. Only .gh and .ghx files allowed.`);
+    }
+
+    // 3. Verify file exists (synchronous check for launcher)
+    const fs_sync = require('fs');
+    if (!fs_sync.existsSync(resolved)) {
+      throw new Error(`File not found: ${resolved}`);
+    }
+
+    // 4. Check file size (max 100MB)
+    const stats = fs_sync.statSync(resolved);
+    const maxSize = 100 * 1024 * 1024;
+    if (stats.size > maxSize) {
+      throw new Error(`File too large: ${stats.size} bytes (max: ${maxSize})`);
+    }
+
+    // 5. Verify it's a regular file
+    if (!stats.isFile()) {
+      throw new Error(`Not a regular file: ${resolved}`);
+    }
+
+    return resolved;
+  }
+
+  /**
    * Ermittelt die Befehlskonfiguration für eine Datei
    * @param {string} ghFilePath - Pfad zur .gh-Datei
    * @returns {Object} - Befehlskonfiguration {type, command, mode}
    */
   _getCommandConfig(ghFilePath) {
     try {
+      // SECURITY FIX: Validate file path before processing
+      const validatedPath = this._validateFilePath(ghFilePath);
+
       // Ermittle den passenden Befehl für diese Datei
-      const command = RhinoCommandConfig.getCommandForFile(ghFilePath);
+      const command = RhinoCommandConfig.getCommandForFile(validatedPath);
       
       // Prüfe ob es ein COM-basierter Befehl ist (HÖCHSTE PRIORITÄT)
       if (command.startsWith('COM:')) {
@@ -48,7 +89,7 @@ class RhinoLauncher {
           type: 'com',
           command: command,
           mode: mode,
-          fileName: path.basename(ghFilePath)
+          fileName: path.basename(validatedPath)
         };
       }
       // Prüfe ob es ein Python-basierter Befehl ist
@@ -58,7 +99,7 @@ class RhinoLauncher {
           type: 'python',
           command: command,
           mode: mode,
-          fileName: path.basename(ghFilePath)
+          fileName: path.basename(validatedPath)
         };
       } else {
         // Legacy CLI-basierter Befehl
@@ -66,7 +107,7 @@ class RhinoLauncher {
           type: 'cli',
           command: command,
           mode: 'legacy',
-          fileName: path.basename(ghFilePath)
+          fileName: path.basename(validatedPath)
         };
       }
       

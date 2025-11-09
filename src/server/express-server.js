@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('node:path');
 const fs = require('node:fs');
+const rateLimit = require('express-rate-limit');
 const RhinoLauncher = require('../rhino-automator/rhino-launcher');
 const FileDownloader = require('./file-downloader');
 const PairingManager = require('./pairing-manager');
@@ -30,6 +31,7 @@ class AppServer {
     }
 
     this._configureMiddleware();
+    this._createRateLimiters();
     this._configureRoutes();
 
     // SECURITY FIX: RhinoLauncher initialization moved to start() method to prevent race condition
@@ -37,6 +39,33 @@ class AppServer {
 
     // PHASE 2: Cleanup old temp files on startup
     this._cleanupOldTempFiles();
+  }
+
+  /**
+   * SECURITY: Creates rate limiters to prevent DOS and brute-force attacks
+   * @private
+   */
+  _createRateLimiters() {
+    // General API limiter - max 100 requests per 15 minutes per IP
+    this.apiLimiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // Max 100 requests per windowMs
+      message: 'Too many requests from this IP, please try again later',
+      standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
+      legacyHeaders: false, // Disable `X-RateLimit-*` headers
+    });
+
+    // Strict pairing limiter - max 10 pairing attempts per hour
+    this.pairingLimiter = rateLimit({
+      windowMs: 60 * 60 * 1000, // 1 hour
+      max: 10, // Max 10 pairing attempts per hour
+      skipSuccessfulRequests: true, // Don't count successful pairings
+      message: 'Too many pairing attempts, please try again later',
+      standardHeaders: true,
+      legacyHeaders: false,
+    });
+
+    this.logger.info('Rate limiters configured: API (100/15min), Pairing (10/hour)');
   }
 
   _createAuthMiddleware() {
@@ -65,13 +94,36 @@ class AppServer {
   }
 
   _configureMiddleware() {
-    // CORS-Konfiguration - MAXIMAL OFFEN FÜR ENTWICKLUNG
+    // SECURITY FIX: CORS-Konfiguration mit Environment-Check
+    const isProduction = process.env.NODE_ENV === 'production';
+
     const corsOptions = {
-      origin: '*', // Erlaubt Anfragen von JEDER Quelle
+      origin: (origin, callback) => {
+        if (isProduction) {
+          // Production: Strikte Origin-Validierung
+          const allowedOrigins = this.allowedOrigins || [];
+
+          if (allowedOrigins.length === 0) {
+            this.logger.error('CRITICAL: Production mode requires configured allowedOrigins!');
+            callback(new Error('CORS not configured for production'));
+            return;
+          }
+
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            this.logger.warn(`CORS blocked request from origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+          }
+        } else {
+          // Development: Allow all origins
+          callback(null, true);
+        }
+      },
       methods: "GET,POST,OPTIONS",
       allowedHeaders: [
         "Content-Type",
-        "Authorization", 
+        "Authorization",
         "X-Protra-Helper-Token",
         "device-id",
         "Device-ID", // Unterstützt beide Schreibweisen für bessere Kompatibilität
@@ -81,8 +133,14 @@ class AppServer {
       preflightContinue: false,
       optionsSuccessStatus: 204
     };
+
     this.app.use(cors(corsOptions));
-    this.logger.info('CORS-Middleware konfiguriert (OFFENER MODUS FÜR ENTWICKLUNG).');
+
+    if (isProduction) {
+      this.logger.info(`CORS-Middleware konfiguriert (PRODUCTION MODE - Allowed origins: ${this.allowedOrigins.join(', ')})`);
+    } else {
+      this.logger.info('CORS-Middleware konfiguriert (DEVELOPMENT MODE - Alle Origins erlaubt)');
+    }
 
     // JSON Body Parser
     this.app.use(express.json({ limit: '1mb' })); // Limit für Request-Body-Größe
@@ -134,8 +192,8 @@ class AppServer {
       });
     });
 
-    // POST /launch-rhino - Geschützt durch Authentifizierungs-Middleware
-    this.app.post('/launch-rhino', authMiddleware, async (req, res) => {
+    // POST /launch-rhino - Geschützt durch Authentifizierungs-Middleware + Rate Limiting
+    this.app.post('/launch-rhino', this.apiLimiter, authMiddleware, async (req, res) => {
       this.logger.info('POST /launch-rhino aufgerufen (nach Authentifizierung).');
       const { ghFilePath } = req.body;
 
@@ -204,8 +262,8 @@ class AppServer {
       }
     });
 
-    // PHASE 2: POST /pair - Auto-Pairing Endpoint
-    this.app.post('/pair', async (req, res) => {
+    // PHASE 2: POST /pair - Auto-Pairing Endpoint + Strict Rate Limiting
+    this.app.post('/pair', this.pairingLimiter, async (req, res) => {
       this.logger.info('POST /pair aufgerufen (Auto-Pairing)');
       const { userJWT, deviceId, userAgent, backendUrl } = req.body;
 
@@ -254,17 +312,27 @@ class AppServer {
       });
     });
 
-    // PHASE 2: POST /launch-rhino-with-download - Launch Rhino mit Server-Download
-    this.app.post('/launch-rhino-with-download', async (req, res) => {
+    // PHASE 2: POST /launch-rhino-with-download - Launch Rhino mit Server-Download + Rate Limiting
+    this.app.post('/launch-rhino-with-download', this.apiLimiter, async (req, res) => {
       this.logger.info('POST /launch-rhino-with-download aufgerufen (Server-Download + Auto-Pairing)');
       const { fileId, userJWT, sessionToken, rhinoPath, showViewport, batchMode } = req.body;
 
-      // Validate fileId and authentication
+      // SECURITY FIX: Validate fileId format (alphanumeric, hyphens, underscores only)
+      const FILE_ID_PATTERN = /^[a-zA-Z0-9-_]{1,64}$/;
+
       if (!fileId || typeof fileId !== 'string') {
         this.logger.warn('/launch-rhino-with-download: Fehlender oder ungültiger fileId');
         return res.status(400).json({
           success: false,
           message: 'fileId ist erforderlich und muss ein String sein.'
+        });
+      }
+
+      if (!FILE_ID_PATTERN.test(fileId)) {
+        this.logger.warn(`/launch-rhino-with-download: Ungültiges fileId Format: ${fileId}`);
+        return res.status(400).json({
+          success: false,
+          message: 'Ungültiges fileId Format. Nur alphanumerische Zeichen, Bindestriche und Unterstriche erlaubt (max 64 Zeichen).'
         });
       }
 

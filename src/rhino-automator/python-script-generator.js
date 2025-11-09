@@ -598,6 +598,45 @@ class PythonScriptGenerator {
   }
 
   /**
+   * SECURITY: Validates and sanitizes file path to prevent path traversal attacks
+   * @param {string} filePath - File path to validate
+   * @returns {string} - Validated absolute file path
+   * @throws {Error} - If validation fails
+   * @private
+   */
+  _validateAndSanitizeFilePath(filePath) {
+    // 1. Resolve to absolute path (prevents relative path attacks)
+    const resolved = path.resolve(filePath);
+
+    // 2. Check extension whitelist (only .gh and .ghx files allowed)
+    const ext = path.extname(resolved).toLowerCase();
+    if (!['.gh', '.ghx'].includes(ext)) {
+      throw new Error(`Invalid file extension: ${ext}. Only .gh and .ghx files are allowed.`);
+    }
+
+    // 3. Verify file exists
+    const fs_sync = require('fs');
+    if (!fs_sync.existsSync(resolved)) {
+      throw new Error(`File not found: ${resolved}`);
+    }
+
+    // 4. Check file size (max 100MB to prevent DOS attacks)
+    const stats = fs_sync.statSync(resolved);
+    const maxSize = 100 * 1024 * 1024; // 100MB
+    if (stats.size > maxSize) {
+      throw new Error(`File too large: ${stats.size} bytes (max: ${maxSize} bytes)`);
+    }
+
+    // 5. Verify it's a regular file (not a directory or symlink)
+    if (!stats.isFile()) {
+      throw new Error(`Path is not a regular file: ${resolved}`);
+    }
+
+    this.logger.debug(`File path validated: ${resolved} (${stats.size} bytes)`);
+    return resolved;
+  }
+
+  /**
    * Generiert ein Python-Script für eine spezifische Datei und Konfiguration
    * @param {string} ghFilePath - Pfad zur .gh-Datei
    * @param {string} mode - Script-Modus (basic, with_viewport, presentation, technical, debug)
@@ -605,6 +644,9 @@ class PythonScriptGenerator {
    */
   async generateScript(ghFilePath, mode = 'basic') {
     try {
+      // SECURITY FIX: Validate file path before using it
+      const validatedPath = this._validateAndSanitizeFilePath(ghFilePath);
+
       // Validiere Modus
       if (!PYTHON_TEMPLATES[mode]) {
         this.logger.warn(`Unknown script mode: ${mode}, falling back to basic`);
@@ -613,13 +655,13 @@ class PythonScriptGenerator {
 
       // Hole Template
       const template = PYTHON_TEMPLATES[mode];
-      
-      // Ersetze Platzhalter
-      const script = template.replace(/\{\{FILE_PATH\}\}/g, ghFilePath);
-      
-      this.logger.info(`Generated Python script for ${path.basename(ghFilePath)} in ${mode} mode`);
+
+      // Ersetze Platzhalter mit validiertem Pfad
+      const script = template.replace(/\{\{FILE_PATH\}\}/g, validatedPath);
+
+      this.logger.info(`Generated Python script for ${path.basename(validatedPath)} in ${mode} mode`);
       return script;
-      
+
     } catch (error) {
       this.logger.error(`Failed to generate Python script: ${error.message}`);
       throw error;

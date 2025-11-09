@@ -25,6 +25,19 @@ class FileDownloader {
   }
 
   /**
+   * SECURITY: Redacts JWT token for logging (prevents token exposure in logs)
+   * @param {string} jwt - JWT token to redact
+   * @returns {string} - Redacted JWT (first 10 chars + [REDACTED])
+   * @private
+   */
+  _redactJWT(jwt) {
+    if (!jwt || jwt.length < 20) {
+      return '[INVALID_JWT]';
+    }
+    return `${jwt.substring(0, 10)}...[REDACTED]`;
+  }
+
+  /**
    * Downloads a Grasshopper file from HEFL backend
    *
    * @param {string} fileId - Unique identifier of the file
@@ -38,7 +51,8 @@ class FileDownloader {
       // IMPORTANT: Always get latest backend URL from store (in case it was updated during pairing)
       const currentBackendUrl = this.store?.get('backendUrl') || this.backendUrl;
 
-      this.logger.info(`Starte Download von Datei ${fileId} vom HEFL-Backend: ${currentBackendUrl}`);
+      // SECURITY FIX: Redact JWT token in logs
+      this.logger.info(`Starte Download von Datei ${fileId} vom HEFL-Backend: ${currentBackendUrl} (JWT: ${this._redactJWT(userJWT)})`);
 
       // Download URL
       const downloadUrl = `${currentBackendUrl}/files/grasshopper/download/${fileId}`;

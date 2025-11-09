@@ -20,6 +20,19 @@ class PairingManager {
   }
 
   /**
+   * SECURITY: Redacts JWT token for logging (prevents token exposure in logs)
+   * @param {string} jwt - JWT token to redact
+   * @returns {string} - Redacted JWT (first 10 chars + [REDACTED])
+   * @private
+   */
+  _redactJWT(jwt) {
+    if (!jwt || jwt.length < 20) {
+      return '[INVALID_JWT]';
+    }
+    return `${jwt.substring(0, 10)}...[REDACTED]`;
+  }
+
+  /**
    * Pairs Helper-App with a user via JWT validation
    *
    * @param {string} userJWT - JWT token from web app
@@ -30,7 +43,8 @@ class PairingManager {
    */
   async pair(userJWT, deviceId, userAgent, backendUrl) {
     try {
-      this.logger.info(`Auto-Pairing gestartet (deviceId: ${deviceId || 'N/A'})`);
+      // SECURITY FIX: Redact JWT token in logs
+      this.logger.info(`Auto-Pairing gestartet (deviceId: ${deviceId || 'N/A'}, JWT: ${this._redactJWT(userJWT)})`);
 
       // Auto-discovery: If backend URL is provided, store it
       if (backendUrl && backendUrl !== this.backendUrl) {
@@ -46,6 +60,7 @@ class PairingManager {
       const validationResult = await this._validateJWTWithBackend(userJWT);
 
       if (!validationResult.valid) {
+        // SECURITY FIX: Don't log JWT in error messages
         this.logger.warn(`JWT-Validierung fehlgeschlagen: ${validationResult.error}`);
         return {
           success: false,

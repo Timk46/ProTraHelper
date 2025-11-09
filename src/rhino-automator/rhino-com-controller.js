@@ -1,9 +1,13 @@
 /**
  * RhinoCOMController - COM Automation für zuverlässige Rhino-Steuerung
- * 
+ *
  * Löst /runscript Probleme durch direkte COM-Interface Kommunikation
  * Ersetzt unzuverlässige Command-Line Parameter
  */
+
+const { exec } = require('child_process');
+const { promisify } = require('util');
+const execAsync = promisify(exec);
 
 class RhinoCOMController {
   constructor(logger) {
@@ -15,19 +19,41 @@ class RhinoCOMController {
   }
 
   /**
+   * SECURITY: Executes PowerShell script using Base64 encoding to prevent injection attacks
+   * @param {string} script - PowerShell script to execute
+   * @param {number} timeout - Timeout in milliseconds
+   * @returns {Promise<string>} - Script output (stdout)
+   * @private
+   */
+  async _executePowerShellBase64(script, timeout = 5000) {
+    try {
+      // Convert script to Base64 for safe execution
+      const scriptBase64 = Buffer.from(script, 'utf16le').toString('base64');
+
+      // Use -EncodedCommand instead of -Command to prevent injection
+      const { stdout } = await execAsync(
+        `powershell -EncodedCommand ${scriptBase64}`,
+        { encoding: 'utf8', timeout }
+      );
+
+      return stdout.trim();
+    } catch (error) {
+      this.logger.debug(`PowerShell execution failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Wartet bis Rhino via COM verfügbar ist
    * @param {number} maxWaitSeconds - Maximale Wartezeit in Sekunden
    * @returns {Promise<boolean>} - True wenn Rhino bereit ist
    */
   async waitForRhinoReady(maxWaitSeconds = 30) {
     this.logger.info('COM: Waiting for Rhino to be ready for COM connection...');
-    
+
     for (let attempt = 1; attempt <= maxWaitSeconds; attempt++) {
       try {
-        // Versuche COM-Verbindung zu Rhino
-        const { execSync } = require('child_process');
-        
-        // PowerShell-Script zum Testen der COM-Verfügbarkeit
+        // SECURITY FIX: PowerShell-Script zum Testen der COM-Verfügbarkeit
         const testScript = `
           try {
             $rhino = New-Object -ComObject "Rhino.Application"
@@ -37,28 +63,28 @@ class RhinoCOMController {
             Write-Output "RHINO_NOT_READY"
           }
         `;
-        
-        const result = execSync(`powershell -Command "${testScript.replace(/\n/g, '; ')}"`, 
-          { encoding: 'utf8', timeout: 3000 }).trim();
-        
+
+        // Use Base64-encoded PowerShell execution to prevent injection
+        const result = await this._executePowerShellBase64(testScript, 3000);
+
         if (result === 'RHINO_READY') {
           this.logger.info(`COM: Rhino ready after ${attempt} seconds`);
           return true;
         }
-        
+
         if (attempt % 5 === 0) {
           this.logger.info(`COM: Still waiting for Rhino... (${attempt}/${maxWaitSeconds})`);
         }
-        
+
         // Warte 1 Sekunde vor nächstem Versuch
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
       } catch (error) {
         this.logger.debug(`COM: Connection attempt ${attempt} failed: ${error.message}`);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-    
+
     this.logger.error(`COM: Rhino not ready after ${maxWaitSeconds} seconds`);
     return false;
   }
@@ -75,10 +101,8 @@ class RhinoCOMController {
 
     try {
       this.logger.info('COM: Attempting to connect to Rhino via COM...');
-      
-      // Verwende PowerShell für COM-Verbindung (robuster als node-activex)
-      const { execSync } = require('child_process');
-      
+
+      // SECURITY FIX: PowerShell für COM-Verbindung (Base64-encoded)
       const connectScript = `
         try {
           $rhino = New-Object -ComObject "Rhino.Application"
@@ -91,10 +115,10 @@ class RhinoCOMController {
           Write-Output "CONNECTION_ERROR: $($_.Exception.Message)"
         }
       `;
-      
-      const result = execSync(`powershell -Command "${connectScript.replace(/\n/g, '; ')}"`, 
-        { encoding: 'utf8', timeout: 5000 }).trim();
-      
+
+      // Use Base64-encoded PowerShell execution to prevent injection
+      const result = await this._executePowerShellBase64(connectScript, 5000);
+
       if (result === 'CONNECTION_SUCCESS') {
         this.connected = true;
         this.logger.info('COM: Successfully connected to Rhino');
@@ -103,7 +127,7 @@ class RhinoCOMController {
         this.logger.error(`COM: Connection failed: ${result}`);
         return false;
       }
-      
+
     } catch (error) {
       this.logger.error(`COM: Failed to connect to Rhino: ${error.message}`);
       return false;
@@ -125,13 +149,15 @@ class RhinoCOMController {
     try {
       this.logger.info(`COM: Executing command: ${command}`);
 
-      const { execSync } = require('child_process');
+      // CRITICAL FIX: Use _executePowerShellBase64() to avoid quote escaping issues
+      // Previous implementation used nested quotes in -Command "..." which caused parsing errors
+      // on remote clients, preventing Grasshopper commands from reaching Rhino
 
-      // SECURITY FIX: Escape command using Base64 encoding to prevent PowerShell injection
-      // This ensures that no special characters in file paths can break out of the string
+      // Encode command to Base64 for safe PowerShell transmission
       const commandBuffer = Buffer.from(command, 'utf16le');
       const commandBase64 = commandBuffer.toString('base64');
 
+      // Build PowerShell script that decodes and executes the Rhino command
       const commandScript = `
         try {
           $rhino = New-Object -ComObject "Rhino.Application"
@@ -144,17 +170,22 @@ class RhinoCOMController {
         }
       `;
 
-      const result = execSync(`powershell -Command "${commandScript.replace(/\n/g, '; ')}"`,
-        { encoding: 'utf8', timeout: timeoutMs }).trim();
+      // Use _executePowerShellBase64() which encodes the ENTIRE script as Base64
+      // and uses -EncodedCommand instead of -Command "..." (no quote nesting issues!)
+      const result = await this._executePowerShellBase64(commandScript, timeoutMs);
 
       if (result.startsWith('COMMAND_SUCCESS:')) {
         const output = result.replace('COMMAND_SUCCESS:', '').trim();
         this.logger.info(`COM: Command executed successfully: ${output}`);
         return { success: true, output, error: null };
-      } else {
+      } else if (result.startsWith('COMMAND_ERROR:')) {
         const error = result.replace('COMMAND_ERROR:', '').trim();
         this.logger.error(`COM: Command failed: ${error}`);
         return { success: false, output: null, error };
+      } else {
+        // Handle unexpected output format
+        this.logger.warn(`COM: Unexpected command result format: ${result}`);
+        return { success: true, output: result, error: null };
       }
 
     } catch (error) {
@@ -322,8 +353,7 @@ class RhinoCOMController {
    */
   async isRhinoAvailable() {
     try {
-      const { execSync } = require('child_process');
-      
+      // SECURITY FIX: PowerShell-Script mit Base64-Encoding
       const testScript = `
         try {
           $rhino = New-Object -ComObject "Rhino.Application"
@@ -336,12 +366,12 @@ class RhinoCOMController {
           Write-Output "false"
         }
       `;
-      
-      const result = execSync(`powershell -Command "${testScript.replace(/\n/g, '; ')}"`, 
-        { encoding: 'utf8', timeout: 3000 }).trim();
-      
+
+      // Use Base64-encoded PowerShell execution to prevent injection
+      const result = await this._executePowerShellBase64(testScript, 3000);
+
       return result === 'true';
-      
+
     } catch (error) {
       return false;
     }
@@ -449,10 +479,8 @@ class RhinoCOMController {
   async bringRhinoToForeground() {
     try {
       this.logger.info('COM: Bringing Rhino window to foreground...');
-      
-      const { execSync } = require('child_process');
-      
-      // PowerShell-Script um Rhino-Fenster zu finden und in den Vordergrund zu bringen
+
+      // SECURITY FIX: PowerShell-Script um Rhino-Fenster zu finden (Base64-encoded)
       const foregroundScript = `
         Add-Type -TypeDefinition '
           using System;
@@ -465,7 +493,7 @@ class RhinoCOMController {
             public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
           }
         '
-        
+
         $rhinoProcess = Get-Process -Name "Rhino*" -ErrorAction SilentlyContinue | Select-Object -First 1
         if ($rhinoProcess) {
           [Win32]::ShowWindow($rhinoProcess.MainWindowHandle, 3)  # SW_MAXIMIZE
@@ -475,10 +503,10 @@ class RhinoCOMController {
           Write-Output "FOREGROUND_NO_PROCESS"
         }
       `;
-      
-      const result = execSync(`powershell -Command "${foregroundScript.replace(/\n/g, '; ')}"`, 
-        { encoding: 'utf8', timeout: 5000 }).trim();
-      
+
+      // Use Base64-encoded PowerShell execution to prevent injection
+      const result = await this._executePowerShellBase64(foregroundScript, 5000);
+
       if (result === 'FOREGROUND_SUCCESS') {
         this.logger.info('COM: Rhino window brought to foreground successfully');
         return { success: true, message: 'Window brought to foreground' };
@@ -486,7 +514,7 @@ class RhinoCOMController {
         this.logger.warn('COM: Could not bring Rhino window to foreground');
         return { success: false, message: 'Could not find Rhino process' };
       }
-      
+
     } catch (error) {
       this.logger.error(`COM: Error bringing window to foreground: ${error.message}`);
       return { success: false, message: `Error: ${error.message}` };

@@ -9,7 +9,7 @@
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac", 
+    "dist:mac": "electron-builder --mac",
     "dist:linux": "electron-builder --linux",
     "dist:all": "electron-builder --win --mac --linux",
     "build:installer": "electron-builder --win --x64 --publish=never",
@@ -28,7 +28,7 @@
     "Architecture"
   ],
   "author": {
-    "name": "HEFL-Entwicklungsteam", 
+    "name": "HEFL-Entwicklungsteam",
     "email": "support@hefl.de",
     "url": "https://hefl.de"
   },
@@ -45,7 +45,8 @@
     "cors": "^2.8.5",
     "electron-log": "^5.1.5",
     "electron-store": "^8.2.0",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.2.1"
   },
   "build": {
     "appId": "com.hefl.protra.helperapp",
@@ -53,8 +54,7 @@
     "artifactName": "${productName}-Setup-${version}.${ext}",
     "copyright": "Copyright © 2025 HEFL-Entwicklungsteam",
     "directories": {
-      "output": "dist",
-      "buildResources": "assets"
+      "output": "dist"
     },
     "files": [
       "**/*",
@@ -78,7 +78,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/rhino_tray.png",
@@ -118,16 +120,16 @@
       "perMachine": false,
       "differentialPackage": false,
       "displayLanguageSelector": false,
-      "installerLanguages": ["de-DE", "en-US"],
+      "installerLanguages": [
+        "de-DE",
+        "en-US"
+      ],
       "license": "LICENSE",
       "warningsAsErrors": false,
       "guid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       "menuCategory": "ProTra Tools",
       "artifactName": "${productName}-Setup-${version}.${ext}",
       "uninstallDisplayName": "${productName} ${version}"
-    },
-    "directories": {
-      "output": "dist"
     },
     "publish": {
       "provider": "generic",
