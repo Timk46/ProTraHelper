@@ -308,15 +308,24 @@ class RhinoLauncher {
         stdio: 'ignore',
         windowsHide: false
       });
-      
+
       rhinoProcess.unref();
-      
+
+      // FIX #2: CRITICAL - Add initial delay before attempting COM connection
+      // Rhino process starts immediately but COM server takes 5-15 seconds to initialize
+      // Without this delay, all connection attempts fail during startup window
+      this.logger.info('COM: Waiting 15 seconds for Rhino COM server to initialize...');
+      await new Promise(resolve => setTimeout(resolve, 15000));
+      this.logger.info('COM: Initial delay completed, attempting COM connection...');
+
       // Phase 2: Warte bis Rhino für COM bereit ist
       const comController = new RhinoCOMController(this.logger);
-      const rhinoReady = await comController.waitForRhinoReady(30);
-      
+      // FIX #7: Changed from maxWaitSeconds to maxAttempts (progressive timeout strategy)
+      // 10 attempts with 30s/45s/60s timeouts = up to ~7.5 minutes total wait time
+      const rhinoReady = await comController.waitForRhinoReady(10);
+
       if (!rhinoReady) {
-        throw new Error('Rhino not ready for COM connection after 30 seconds');
+        throw new Error('Rhino not ready for COM connection after 10 attempts');
       }
       
       // Phase 3: Verbinde via COM und führe Befehle aus
