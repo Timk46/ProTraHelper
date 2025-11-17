@@ -12,7 +12,7 @@ class AppServer {
     this.logger = logger;
     this.rhinoPathManager = rhinoPathManager;
     this.tempDir = tempDir; // Für temporäre Skriptdateien
-    this.allowedOrigins = allowedOrigins || ['http://localhost:4200']; // Fallback, falls undefined
+    this.allowedOrigins = allowedOrigins || ['https://protra.bshefl2.bs.informatik.uni-siegen.de']; // Fallback for production frontend
     this.apiSecretToken = apiSecretToken;
     this.app = express();
     this.server = null;

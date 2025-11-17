@@ -152,9 +152,9 @@ app.whenReady().then(async () => {
   // logger.debug(`Verwendetes API Secret Token: ${apiSecretToken}`); // In Produktion auskommentieren oder entfernen
 
   // Lade Konfiguration für CORS allowedOrigins
-  let allowedOrigins = store.get('corsAllowedOrigins', ['http://localhost:4200']);
+  let allowedOrigins = store.get('corsAllowedOrigins', ['https://protra.bshefl2.bs.informatik.uni-siegen.de']);
   if (!Array.isArray(allowedOrigins) || allowedOrigins.length === 0) {
-    allowedOrigins = ['http://localhost:4200']; // Fallback
+    allowedOrigins = ['https://protra.bshefl2.bs.informatik.uni-siegen.de']; // Fallback for production
     store.set('corsAllowedOrigins', allowedOrigins);
   }
   logger.info(`CORS allowedOrigins geladen: ${allowedOrigins.join(', ')}`);

@@ -1,6 +1,6 @@
 {
   "name": "protra-helper-app",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "description": "Desktop Helferanwendung für die ProTra-Webanwendung zur Rhino/Grasshopper-Integration.",
   "main": "main.js",
   "homepage": "https://protra.hefl.de",

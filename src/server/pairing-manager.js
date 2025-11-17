@@ -10,8 +10,8 @@ class PairingManager {
   constructor(logger, store) {
     this.logger = logger;
     this.store = store; // electron-store for persistent config
-    // Try to load backend URL from store, fallback to env var, then localhost
-    this.backendUrl = this.store?.get('backendUrl') || process.env.HEFL_BACKEND_URL || 'http://localhost:3000';
+    // Try to load backend URL from store, fallback to env var, then production URL
+    this.backendUrl = this.store?.get('backendUrl') || process.env.HEFL_BACKEND_URL || 'https://api-protra.bshefl2.bs.informatik.uni-siegen.de';
     this.pairedUser = null;
     this.sessionToken = null;
     this.sessionExpiry = null;
