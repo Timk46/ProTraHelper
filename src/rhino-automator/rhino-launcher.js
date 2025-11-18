@@ -314,8 +314,9 @@ class RhinoLauncher {
       // FIX #2: CRITICAL - Add initial delay before attempting COM connection
       // Rhino process starts immediately but COM server takes 5-15 seconds to initialize
       // Without this delay, all connection attempts fail during startup window
-      this.logger.info('COM: Waiting 15 seconds for Rhino COM server to initialize...');
-      await new Promise(resolve => setTimeout(resolve, 15000));
+      // OPTIMIZED: Reduced from 15s to 10s for faster UX (COM retry logic handles slower systems)
+      this.logger.info('COM: Waiting 10 seconds for Rhino COM server to initialize...');
+      await new Promise(resolve => setTimeout(resolve, 10000));
       this.logger.info('COM: Initial delay completed, attempting COM connection...');
 
       // Phase 2: Warte bis Rhino für COM bereit ist
