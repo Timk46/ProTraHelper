@@ -24,7 +24,17 @@ class TrayManager {
 
   _getIconPath(iconName) {
     let iconFile = `${iconName}.png`; // Standard ist .png
-    if (this.isWindows) {
+    if (this.isMac && iconName === this.iconNameNormal) {
+      // Auf macOS Template-Icon verwenden (Electron erkennt 'Template'-Suffix automatisch)
+      const templateName = `${iconName}Template.png`;
+      let basePath = path.join(this.app.getAppPath(), 'assets');
+      if (process.env.NODE_ENV !== 'production') {
+        basePath = path.join(__dirname, '..', '..', 'assets');
+      }
+      if (fs.existsSync(path.join(basePath, templateName))) {
+        iconFile = templateName;
+      }
+    } else if (this.isWindows) {
       // Unter Windows .ico bevorzugen, wenn vorhanden
       const icoPath = path.join(this.app.getAppPath(), 'assets', `${iconName}.ico`);
       const devIcoPath = path.join(__dirname, '..', '..', 'assets', `${iconName}.ico`);
@@ -59,34 +69,34 @@ class TrayManager {
         this.currentIconPath = fallbackPath;
       } else {
         this.logger.error(`Fallback-Tray-Icon auch nicht gefunden unter: ${fallbackPath}. Tray wird nicht erstellt.`);
+        this.dialog.showErrorBox('ProTra Helfer - Icon nicht gefunden',
+          'Das Tray-Icon konnte nicht gefunden werden. Bitte stellen Sie sicher, dass die App korrekt installiert ist.\n\nPfad: ' + iconPath);
         return;
       }
     }
 
     if (image.isEmpty()) {
       this.logger.error('Geladenes Tray-Icon ist leer. Tray wird nicht erstellt.');
+      this.dialog.showErrorBox('ProTra Helfer - Icon-Fehler',
+        'Das Tray-Icon konnte nicht geladen werden. Die App laeuft im Hintergrund, ist aber nicht in der Menuleiste sichtbar.');
       return;
     }
 
     if (this.isMac) {
-      // macOS Tray Icons sollten typischerweise 16x16 oder 32x32 sein und als Template-Image gesetzt werden,
-      // damit sie sich korrekt an helle/dunkle Menüleisten anpassen.
+      // macOS Tray Icons: 16x16 @1x / 32x32 @2x ist der Apple-Standard
       image = image.resize({ width: 16, height: 16 });
-      // tray.setPressedImage(pressedImage) // Optional für Klick-Effekt
+      // Template Image VOR Tray-Erstellung setzen (verhindert Icon-Flash)
+      image.setTemplateImage(true);
     }
 
     this.tray = new Tray(image);
     if (this.isMac) {
         this.tray.setIgnoreDoubleClickEvents(true);
-        // Für macOS Template Image setzen, damit es sich an Dark/Light Mode anpasst
-        // Dies erfordert, dass das Icon entsprechend gestaltet ist (einfarbig mit Transparenz).
-        // this.tray.setTemplateImage(image); // Wenn das Icon dafür geeignet ist
     }
-
 
     this.updateContextMenu();
     this.tray.setToolTip('ProTra Helferanwendung');
-    
+
     this.logger.info('Tray-Icon erfolgreich erstellt.');
   }
 
@@ -188,6 +198,7 @@ class TrayManager {
           }
           if (this.isMac) {
               image = image.resize({ width: 16, height: 16 });
+              image.setTemplateImage(true);
           }
           this.tray.setImage(image);
           this.currentIconPath = newIconPath;

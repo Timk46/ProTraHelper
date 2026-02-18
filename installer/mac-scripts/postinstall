@@ -1,0 +1,65 @@
+#!/bin/bash
+# ProTra Helfer - Post-Install Script
+# Erstellt LaunchAgent fuer Auto-Start, registriert App, startet App
+
+APP_NAME="ProTra Helfer"
+APP_PATH="/Applications/${APP_NAME}.app"
+BUNDLE_ID="com.hefl.protra.helperapp"
+LAUNCH_AGENT_LABEL="${BUNDLE_ID}"
+
+# PKG-Skripte laufen als root - $HOME zeigt auf /var/root statt User-Home
+# Daher den echten Console-User ermitteln
+CONSOLE_USER=$(stat -f "%Su" /dev/console 2>/dev/null || echo "$USER")
+USER_HOME=$(dscl . read /Users/"${CONSOLE_USER}" NFSHomeDirectory 2>/dev/null | sed 's/NFSHomeDirectory: //')
+if [ -z "${USER_HOME}" ]; then
+    USER_HOME="/Users/${CONSOLE_USER}"
+fi
+LAUNCH_AGENTS_DIR="${USER_HOME}/Library/LaunchAgents"
+LAUNCH_AGENT_PLIST="${LAUNCH_AGENTS_DIR}/${LAUNCH_AGENT_LABEL}.plist"
+
+echo "ProTra Helfer Post-Install: Konfiguriere Auto-Start..."
+
+# Sicherstellen, dass LaunchAgents-Verzeichnis existiert
+mkdir -p "${LAUNCH_AGENTS_DIR}"
+
+# LaunchAgent plist erstellen fuer Auto-Start bei Login
+cat > "${LAUNCH_AGENT_PLIST}" << PLIST_EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>${LAUNCH_AGENT_LABEL}</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/open</string>
+        <string>-a</string>
+        <string>${APP_PATH}</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+</dict>
+</plist>
+PLIST_EOF
+
+echo "LaunchAgent erstellt: ${LAUNCH_AGENT_PLIST}"
+
+# LaunchAgent laden (als echter User, nicht als root)
+sudo -u "${CONSOLE_USER}" launchctl load "${LAUNCH_AGENT_PLIST}" 2>/dev/null || true
+
+# App mit Launch Services registrieren (fuer URL-Schema rhinogh://)
+if [ -d "${APP_PATH}" ]; then
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "${APP_PATH}" 2>/dev/null || true
+    echo "App mit Launch Services registriert."
+fi
+
+# App nach Installation starten (als echter User, nicht als root)
+if [ -d "${APP_PATH}" ]; then
+    echo "Starte ${APP_NAME}..."
+    sudo -u "${CONSOLE_USER}" open -a "${APP_PATH}" &
+fi
+
+echo "Post-Install abgeschlossen."
+exit 0

@@ -8,12 +8,131 @@ const RhinoPathManager = require('./src/rhino-automator/rhino-path-manager'); //
 
 let trayManager = null;
 let expressServer = null;
-let appMenu = null; // Hinzugefügt für das macOS App-Menü
+let appMenu = null; // Hinzugefügt fuer das macOS App-Menue
+let setupWindow = null;
 
 // Globale Referenz auf das Hauptfenster-Objekt, um zu verhindern, dass es
-// automatisch geschlossen wird, wenn JavaScript die Garbage Collection durchführt.
-// Da wir primär eine Tray-Anwendung haben, ist ein sichtbares Hauptfenster nicht zwingend.
+// automatisch geschlossen wird, wenn JavaScript die Garbage Collection durchfuehrt.
+// Da wir primaer eine Tray-Anwendung haben, ist ein sichtbares Hauptfenster nicht zwingend.
 let mainWindow;
+
+// rhinogh:// Protokoll-Handler registrieren
+if (process.defaultApp) {
+  // Im Entwicklungsmodus: Pfad zum Script mit registrieren
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('rhinogh', process.execPath, [path.resolve(process.argv[1])]);
+  }
+} else {
+  app.setAsDefaultProtocolClient('rhinogh');
+}
+
+// Single-Instance Lock: Verhindert mehrere App-Instanzen
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+  // Windows/Linux: URL kommt via second-instance Event
+  app.on('second-instance', (event, commandLine) => {
+    // Suche nach rhinogh:// URL in den Kommandozeilen-Argumenten
+    const url = commandLine.find((arg) => arg.startsWith('rhinogh://'));
+    if (url) {
+      handleProtocolUrl(url);
+    }
+  });
+}
+
+// macOS: URL kommt via open-url Event (auch wenn App bereits laeuft)
+// Hinweis: Muss auch im second-instance Handler behandelt werden (Electron Bug #20088)
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  handleProtocolUrl(url);
+});
+
+// Windows Cold-Start: URL kommt via process.argv (App war nicht gestartet)
+if (process.platform === 'win32') {
+  const protocolUrl = process.argv.find((arg) => arg.startsWith('rhinogh://'));
+  if (protocolUrl) {
+    // Wird nach app.whenReady() verarbeitet, da Express-Server noch nicht laeuft
+    app.whenReady().then(() => {
+      // Polling: Warten bis Express-Server laeuft, dann Protocol-URL verarbeiten
+      let attempts = 0;
+      const maxAttempts = 20;
+      const pollInterval = setInterval(() => {
+        attempts++;
+        if (expressServer && expressServer.isRunning()) {
+          clearInterval(pollInterval);
+          handleProtocolUrl(protocolUrl);
+        } else if (attempts >= maxAttempts) {
+          clearInterval(pollInterval);
+          logger.error('Express-Server Timeout nach 10s - Protocol-URL nicht verarbeitet');
+        }
+      }, 500);
+    });
+  }
+}
+
+// Erlaubte Protokoll-Aktionen (Whitelist fuer Sicherheit)
+const ALLOWED_PROTOCOL_ACTIONS = ['status', 'launch', 'open'];
+
+/**
+ * Verarbeitet rhinogh:// URLs und dispatcht an Express-Server-Routen
+ * Format: rhinogh://action/param1/param2?key=value
+ * @param {string} url - Die rhinogh:// URL
+ */
+function handleProtocolUrl(url) {
+  logger.info(`Protokoll-URL empfangen: ${url}`);
+  try {
+    const parsed = new URL(url);
+    const action = parsed.hostname;
+
+    // SECURITY: Nur erlaubte Aktionen durchlassen
+    if (!ALLOWED_PROTOCOL_ACTIONS.includes(action)) {
+      logger.warn(`Protokoll-Aktion abgelehnt (nicht in Whitelist): ${action}`);
+      return;
+    }
+
+    // SECURITY: Pfad validieren - keine Path-Traversal-Angriffe
+    const urlPath = parsed.pathname;
+    if (urlPath.includes('..') || urlPath.includes('%2e') || urlPath.includes('%2E')) {
+      logger.warn(`Protokoll-Pfad abgelehnt (verdaechtige Zeichen): ${urlPath}`);
+      return;
+    }
+
+    logger.info(`Protokoll-Aktion: ${action}, Pfad: ${urlPath}`);
+
+    if (expressServer && expressServer.isRunning()) {
+      const http = require('http');
+      const serverPort = expressServer.getPort();
+      const requestPath = `/${action}${urlPath}?${parsed.searchParams.toString()}`;
+
+      // API-Token aus Store laden fuer authentifizierten Dispatch
+      const apiToken = RhinoPathManager.store
+        ? RhinoPathManager.store.get('apiSecretToken', '')
+        : '';
+
+      const req = http.request({
+        hostname: '127.0.0.1',
+        port: serverPort,
+        path: requestPath,
+        method: 'GET',
+        headers: {
+          'X-Protocol-Handler': 'true',
+          'x-protra-helper-token': apiToken
+        }
+      }, (res) => {
+        logger.info(`Protokoll-Dispatch Antwort: ${res.statusCode}`);
+      });
+      req.on('error', (err) => {
+        logger.error(`Protokoll-Dispatch Fehler: ${err.message}`);
+      });
+      req.end();
+    } else {
+      logger.warn('Express-Server nicht verfuegbar fuer Protokoll-Dispatch.');
+    }
+  } catch (error) {
+    logger.error(`Fehler beim Verarbeiten der Protokoll-URL: ${error.message}`);
+  }
+}
 
 function createWindow() {
   // Erstellt das Browser-Fenster.
@@ -109,7 +228,7 @@ function createAppMenu() {
         {
           label: 'Mehr erfahren (ProTra Webseite)', // Beispiel
           click: async () => {
-            await shell.openExternal('https:// Ihre-Protra-Webseite.de');
+            await shell.openExternal('https://protra.hefl.de');
           }
         }
       ]
@@ -119,8 +238,48 @@ function createAppMenu() {
   return Menu.buildFromTemplate(template);
 }
 
+/**
+ * Zeigt ein Setup-/Willkommensfenster beim ersten App-Start
+ * @param {string} apiToken - Das API-Token zur Anzeige
+ */
+async function showSetupWindow(apiToken) {
+  // Auf macOS: Dock-Icon temporaer einblenden, damit das Fenster sichtbar ist
+  // app.dock.show() gibt ein Promise zurueck
+  if (process.platform === 'darwin') {
+    await app.dock.show();
+  }
+
+  setupWindow = new BrowserWindow({
+    width: 520,
+    height: 560,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    title: 'ProTra Helfer - Einrichtung',
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+    },
+  });
+
+  // Token als URL-Parameter uebergeben (sicher, da lokale Datei)
+  const setupPath = path.join(__dirname, 'setup.html');
+  setupWindow.loadFile(setupPath, {
+    query: { token: apiToken }
+  });
+
+  setupWindow.on('closed', () => {
+    setupWindow = null;
+    // Auf macOS: Dock-Icon wieder ausblenden (reine Tray-App)
+    if (process.platform === 'darwin') {
+      app.dock.hide();
+    }
+  });
+}
+
 // Diese Methode wird aufgerufen, wenn Electron mit der Initialisierung fertig ist
-// und Browserfenster erstellen kann. Einige APIs können nur nach dem Auftreten dieses Events genutzt werden.
+// und Browserfenster erstellen kann. Einige APIs koennen nur nach dem Auftreten dieses Events genutzt werden.
 app.whenReady().then(async () => {
   logger.info('App ist bereit.');
 
@@ -177,12 +336,18 @@ app.whenReady().then(async () => {
     // Fürs Erste loggen wir nur.
   }
 
-  // Erstelle das Tray-Icon und Menü
+  // Erstelle das Tray-Icon und Menue
   trayManager = new TrayManager(app, logger, shell, dialog, RhinoPathManager, expressServer);
   trayManager.createTray();
   logger.info('Tray-Manager initialisiert und Tray-Icon erstellt.');
 
-  // createWindow(); // Nur wenn ein sichtbares Fenster benötigt wird
+  // Erststart-Feedback: Setup-Fenster beim ersten Start anzeigen
+  const isFirstRun = !store.get('setupCompleted');
+  if (isFirstRun) {
+    showSetupWindow(apiSecretToken);
+    store.set('setupCompleted', true);
+    logger.info('Erststart erkannt - Setup-Fenster wird angezeigt.');
+  }
 
   app.on('activate', () => {
     // Unter macOS ist es üblich, ein Fenster in der App wiederherzustellen,
@@ -193,12 +358,10 @@ app.whenReady().then(async () => {
 
   // Verhindere, dass die App standardmäßig beendet wird, wenn kein Fenster offen ist.
   // Dies ist typisch für Tray-Anwendungen.
-  app.on('window-all-closed', (e) => {
-     // Unter macOS ist es üblich, dass Anwendungen und ihre Menüleiste aktiv bleiben,
-     // bis der Benutzer sie explizit mit Cmd + Q beendet.
-     // Für eine reine Tray-Anwendung wollen wir das Standardverhalten (Beenden) verhindern.
-    e.preventDefault();
-    logger.info('Alle Fenster geschlossen, App läuft weiter im Tray.');
+  app.on('window-all-closed', () => {
+    // Tray-App: Nicht beenden wenn alle Fenster geschlossen werden.
+    // Kein app.quit() aufrufen genuegt, preventDefault() ist hier ein no-op.
+    logger.info('Alle Fenster geschlossen, App laeuft weiter im Tray.');
   });
 
   // SECURITY: Cleanup session temp directory on app quit

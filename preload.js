@@ -2,7 +2,7 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-logger.info('preload.js geladen.');
+console.log('preload.js geladen.');
 
 // Beispiel für das Exponieren von APIs an den Renderer-Prozess, falls benötigt.
 // Da wir primär eine Tray-Anwendung ohne sichtbares Hauptfenster-UI haben,

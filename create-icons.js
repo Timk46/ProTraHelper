@@ -1,78 +1,83 @@
 /**
- * Script zum Erstellen der fehlenden Icon-Dateien aus dem vorhandenen rhino_tray.png
- * Erstellt Placeholder-Icons bis echte Icons verfügbar sind
+ * Script zum Erstellen der Icon-Dateien aus dem vorhandenen rhino_tray.png
+ * Erzeugt valides ICNS (macOS), ICO (Windows), und zusätzliche PNG-Varianten
  */
 
 const fs = require('fs');
 const path = require('path');
-
-// SVG-Template für Icon-Generierung (als Placeholder)
-const createSvgIcon = (size) => `
-<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-  <rect width="${size}" height="${size}" fill="#2E7D32"/>
-  <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
-        font-family="Arial, sans-serif" font-size="${size/4}" fill="white" font-weight="bold">
-    ProTra
-  </text>
-  <circle cx="${size*0.8}" cy="${size*0.2}" r="${size*0.1}" fill="#4CAF50"/>
-</svg>
-`;
-
-// ICO-Placeholder für Windows (Base64-encoded minimal ICO)
-const createIcoPlaceholder = () => {
-  return Buffer.from('AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////ADE+VcAxPlXAMT5VwDE+VcAxPlXAMT5VwDE+VcAxPlXAMT5VwDE+VcD///8A////AP///wD///8A////ADE+VcD///8A////AP///wD///8A////AP///wD///8A////AP///wAxPlXA////AP///wD///8A////ADE+VcD///8A6urq/+rq6v/q6ur/6urq/+rq6v/q6ur/6urq/+rq6v////8AMT5VwP///wD///8A////ADE+VcD///8A6urq//////////////////////////////////////+GhoyAhoaM/////wAxPlXA////AP///wD///8AMT5VwP///wDq6ur//////////////////////////////+jo6P9mZmb/ZmZm/////wAxPlXA////AP///wD///8AMT5VwP///wDq6ur//////////////////////////////3d3d/8AAAD/AAAA/////wAxPlXA////AP///wD///8AMT5VwP///wDq6ur//////////////////////////////3Z2dv8AAAD/AAAA/////wAxPlXA////AP///wD///8AMT5VwP///wDq6ur//////////////////////////////+Li4v9TU1P/U1NT/////wAxPlXA////AP///wD///8AMT5VwP///wDq6ur/////////////////////////////////29vb/9vb2//////AMT5VwP///wD///8A////ADE+VcD///8A6urq/////////////////////////////////+rq6v/q6ur/////ADE+VcD///8A////AP///wAxPlXA////AP///wD///8A////AP///wD///8A////AP///wD///8AMT5VwP///wD///8A////ADE+VcAxPlXAMT5VwDE+VcAxPlXAMT5VwDE+VcAxPlXAMT5VwDE+VcAxPlXA////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AP///wD///8A////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==', 'base64');
-};
-
-// ICNS-Placeholder für macOS (Base64-encoded minimal ICNS)
-const createIcnsPlaceholder = () => {
-  return Buffer.from('aWNucwAAAAAAAAAbAQAAaWNzOAAAABsAAAABACJlbmRz', 'base64');
-};
-
-// PNG-Icon für Linux erstellen (minimal PNG)
-const createPngIcon = (size) => {
-  // Minimal 1x1 PNG als Placeholder
-  return Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=', 'base64');
-};
+const png2icons = require('png2icons');
 
 /**
- * Icons erstellen
+ * Icons aus rhino_tray.png erstellen
  */
 function createIcons() {
   const assetsDir = path.join(__dirname, 'assets');
-  
-  console.log('🎨 Erstelle Placeholder-Icons für ProTra Helper-App...');
+  const sourcePng = path.join(assetsDir, 'rhino_tray.png');
+
+  console.log('Erstelle Icons fuer ProTra Helper-App...');
+
+  if (!fs.existsSync(sourcePng)) {
+    console.error('Quell-Icon nicht gefunden: ' + sourcePng);
+    process.exit(1);
+  }
+
+  const sourceBuffer = fs.readFileSync(sourcePng);
 
   try {
-    // Windows ICO
-    const icoPath = path.join(assetsDir, 'icon.ico');
-    fs.writeFileSync(icoPath, createIcoPlaceholder());
-    console.log('✅ Windows Icon erstellt: icon.ico');
+    // macOS ICNS - valides Format via png2icons
+    const icnsBuffer = png2icons.createICNS(sourceBuffer, png2icons.BILINEAR, 0);
+    if (icnsBuffer) {
+      fs.writeFileSync(path.join(assetsDir, 'icon.icns'), icnsBuffer);
+      console.log('macOS Icon erstellt: icon.icns (' + icnsBuffer.length + ' bytes)');
+    } else {
+      console.error('ICNS-Erstellung fehlgeschlagen');
+      process.exit(1);
+    }
 
-    // macOS ICNS
-    const icnsPath = path.join(assetsDir, 'icon.icns');
-    fs.writeFileSync(icnsPath, createIcnsPlaceholder());
-    console.log('✅ macOS Icon erstellt: icon.icns');
+    // Windows ICO - valides Format via png2icons
+    const icoBuffer = png2icons.createICO(sourceBuffer, png2icons.BILINEAR, 0, true);
+    if (icoBuffer) {
+      fs.writeFileSync(path.join(assetsDir, 'icon.ico'), icoBuffer);
+      console.log('Windows Icon erstellt: icon.ico (' + icoBuffer.length + ' bytes)');
 
-    // Linux PNG (verschiedene Größen)
-    const pngPath = path.join(assetsDir, 'icon.png');
-    fs.writeFileSync(pngPath, createPngIcon(512));
-    console.log('✅ Linux Icon erstellt: icon.png');
+      // Tray-ICO fuer Windows (tray.js sucht nach rhino_tray.ico)
+      fs.writeFileSync(path.join(assetsDir, 'rhino_tray.ico'), icoBuffer);
+      console.log('Windows Tray-Icon erstellt: rhino_tray.ico (' + icoBuffer.length + ' bytes)');
+    } else {
+      console.error('ICO-Erstellung fehlgeschlagen');
+      process.exit(1);
+    }
 
-    // SVG-Version für Entwicklung
-    const svgPath = path.join(assetsDir, 'icon.svg');
-    fs.writeFileSync(svgPath, createSvgIcon(512));
-    console.log('✅ SVG Icon erstellt: icon.svg');
+    // Linux PNG (Kopie des Source-Icons)
+    fs.copyFileSync(sourcePng, path.join(assetsDir, 'icon.png'));
+    console.log('Linux Icon erstellt: icon.png');
 
-    console.log('\n🎉 Alle Placeholder-Icons wurden erfolgreich erstellt!');
-    console.log('💡 Tipp: Ersetze diese später durch professionelle Icons.');
+    // Fehlende Icons: icon-error.png und icon-fallback.png (Kopie von rhino_tray.png als Basis)
+    fs.copyFileSync(sourcePng, path.join(assetsDir, 'icon-error.png'));
+    console.log('Error-Icon erstellt: icon-error.png');
+
+    fs.copyFileSync(sourcePng, path.join(assetsDir, 'icon-fallback.png'));
+    console.log('Fallback-Icon erstellt: icon-fallback.png');
+
+    // macOS Template-Icon: rhino_trayTemplate.png
+    // Electron erkennt das 'Template'-Suffix automatisch fuer Dark/Light-Mode
+    fs.copyFileSync(sourcePng, path.join(assetsDir, 'rhino_trayTemplate.png'));
+    console.log('macOS Template-Icon erstellt: rhino_trayTemplate.png');
+
+    // macOS Template-Icon @2x fuer Retina-Displays
+    fs.copyFileSync(sourcePng, path.join(assetsDir, 'rhino_trayTemplate@2x.png'));
+    console.log('macOS Template-Icon @2x erstellt: rhino_trayTemplate@2x.png');
+
+    console.log('\nAlle Icons wurden erfolgreich erstellt!');
+    console.log('Tipp: Ersetze icon-error.png spaeter durch ein rotes/oranges Varianten-Icon.');
 
   } catch (error) {
-    console.error('❌ Fehler beim Erstellen der Icons:', error.message);
+    console.error('Fehler beim Erstellen der Icons:', error.message);
     process.exit(1);
   }
 }
 
-// Script ausführen wenn direkt aufgerufen
+// Script ausfuehren wenn direkt aufgerufen
 if (require.main === module) {
   createIcons();
 }

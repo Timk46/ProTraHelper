@@ -15,6 +15,8 @@
     "build:installer": "electron-builder --win --x64 --publish=never",
     "build:installer:dev": "electron-builder --win --x64 --publish=never --config.nsis.perMachine=false",
     "build:installer:admin": "electron-builder --win --x64 --publish=never --config.nsis.perMachine=true",
+    "build:mac": "electron-builder --mac --x64 --publish=never",
+    "build:mac:arm64": "electron-builder --mac --arm64 --publish=never",
     "postinstall": "electron-builder install-app-deps",
     "create-icons": "node create-icons.js"
   },
@@ -39,7 +41,8 @@
   },
   "devDependencies": {
     "electron": "^29.1.5",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "png2icons": "^2.0.1"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -53,6 +56,7 @@
     "productName": "ProTra Helfer",
     "artifactName": "${productName}-Setup-${version}.${ext}",
     "copyright": "Copyright © 2025 HEFL-Entwicklungsteam",
+    "afterPack": "./build/afterPack.js",
     "directories": {
       "output": "dist"
     },
@@ -66,7 +70,8 @@
       "!create-icons.js",
       "!*.md",
       "!.git*",
-      "!installer/"
+      "!installer/",
+      "!build/"
     ],
     "extraResources": [
       {
@@ -90,9 +95,30 @@
       "sign": null
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        {
+          "target": "pkg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
       "category": "public.app-category.utilities",
-      "icon": "assets/icon.icns"
+      "icon": "assets/icon.icns",
+      "identity": null,
+      "gatekeeperAssess": false,
+      "extendInfo": {
+        "LSUIElement": true,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "ProTra Helper Protocol",
+            "CFBundleURLSchemes": ["rhinogh"]
+          }
+        ]
+      }
+    },
+    "pkg": {
+      "installLocation": "/Applications",
+      "license": "LICENSE",
+      "scripts": "installer/mac-scripts"
     },
     "linux": {
       "target": [

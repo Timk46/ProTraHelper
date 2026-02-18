@@ -1,0 +1,35 @@
+#!/bin/bash
+# ProTra Helfer - Pre-Install Script
+# Beendet laufende Instanz und entfernt alten LaunchAgent
+
+APP_NAME="ProTra Helfer"
+BUNDLE_ID="com.hefl.protra.helperapp"
+LAUNCH_AGENT_LABEL="${BUNDLE_ID}"
+
+# PKG-Skripte laufen als root - $HOME zeigt auf /var/root statt User-Home
+# Daher den echten Console-User ermitteln
+CONSOLE_USER=$(stat -f "%Su" /dev/console 2>/dev/null || echo "$USER")
+USER_HOME=$(dscl . read /Users/"${CONSOLE_USER}" NFSHomeDirectory 2>/dev/null | sed 's/NFSHomeDirectory: //')
+if [ -z "${USER_HOME}" ]; then
+    USER_HOME="/Users/${CONSOLE_USER}"
+fi
+LAUNCH_AGENT_PLIST="${USER_HOME}/Library/LaunchAgents/${LAUNCH_AGENT_LABEL}.plist"
+
+echo "ProTra Helfer Pre-Install: Bereinige vorherige Installation..."
+
+# Laufende Instanz beenden
+if pgrep -f "${APP_NAME}" > /dev/null 2>&1; then
+    echo "Beende laufende Instanz von ${APP_NAME}..."
+    pkill -f "${APP_NAME}" 2>/dev/null || true
+    sleep 1
+fi
+
+# Alten LaunchAgent entfernen (falls vorhanden)
+if [ -f "${LAUNCH_AGENT_PLIST}" ]; then
+    echo "Entferne alten LaunchAgent..."
+    launchctl unload "${LAUNCH_AGENT_PLIST}" 2>/dev/null || true
+    rm -f "${LAUNCH_AGENT_PLIST}"
+fi
+
+echo "Pre-Install abgeschlossen."
+exit 0
