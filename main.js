@@ -5,6 +5,7 @@ const logger = require('./src/utils/logger'); // Wird später erstellt
 const AppServer = require('./src/server/express-server'); // Wird später erstellt
 const TrayManager = require('./src/tray-manager/tray'); // Wird später erstellt
 const RhinoPathManager = require('./src/rhino-automator/rhino-path-manager'); // Wird später erstellt
+const MacOSSetup = require('./src/platform/macos-setup');
 
 let trayManager = null;
 let expressServer = null;
@@ -288,6 +289,15 @@ app.whenReady().then(async () => {
     appMenu = createAppMenu();
     Menu.setApplicationMenu(appMenu);
     logger.info('macOS Anwendungsmenü erstellt und gesetzt.');
+  }
+
+  // macOS: LaunchAgent fuer Auto-Start bei Login einrichten
+  if (process.platform === 'darwin') {
+    const macSetup = new MacOSSetup(logger);
+    const appBundlePath = macSetup.getAppBundlePath();
+    if (appBundlePath) {
+      macSetup.ensureLaunchAgent(appBundlePath);
+    }
   }
 
   // Initialisiere Rhino Path Manager
