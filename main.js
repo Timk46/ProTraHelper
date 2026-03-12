@@ -241,10 +241,9 @@ function createAppMenu() {
 
 /**
  * Zeigt ein Setup-/Willkommensfenster beim ersten App-Start
- * @param {string} apiToken - Das API-Token zur Anzeige
  * @returns {Promise<void>} Resolved wenn das Fenster geschlossen wird
  */
-async function showSetupWindow(apiToken) {
+async function showSetupWindow() {
   // Auf macOS: Dock-Icon temporaer einblenden, damit das Fenster sichtbar ist
   // app.dock.show() gibt ein Promise zurueck
   if (process.platform === 'darwin') {
@@ -265,11 +264,8 @@ async function showSetupWindow(apiToken) {
     },
   });
 
-  // Token als URL-Parameter uebergeben (sicher, da lokale Datei)
   const setupPath = path.join(__dirname, 'setup.html');
-  setupWindow.loadFile(setupPath, {
-    query: { token: apiToken }
-  });
+  setupWindow.loadFile(setupPath);
 
   // Warte bis das Fenster geschlossen wird, bevor wir zurueckkehren.
   // So wird setupCompleted erst gesetzt, wenn der User das Fenster tatsaechlich gesehen und geschlossen hat.
@@ -357,7 +353,7 @@ app.whenReady().then(async () => {
       setupWindow.focus();
       return;
     }
-    showSetupWindow(apiSecretToken);
+    showSetupWindow();
   };
   trayManager = new TrayManager(app, logger, shell, dialog, RhinoPathManager, expressServer, { onShowSetup });
   trayManager.createTray();
@@ -396,7 +392,7 @@ app.whenReady().then(async () => {
   const isFirstRun = !store.get('setupCompleted');
   if (isFirstRun) {
     logger.info('Erststart erkannt - Setup-Fenster wird angezeigt.');
-    await showSetupWindow(apiSecretToken);
+    await showSetupWindow();
     store.set('setupCompleted', true);
     logger.info('Setup abgeschlossen - setupCompleted Flag gesetzt.');
   }
