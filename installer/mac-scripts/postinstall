@@ -1,8 +1,4 @@
 #!/bin/bash
-# DEPRECATED: Diese Scripts wurden mit dem PKG-Installer-Target verwendet.
-# Seit der Umstellung auf DMG wird das LaunchAgent-Setup zur Laufzeit
-# von src/platform/macos-setup.js erledigt. Dateien bleiben als Referenz.
-#
 # ProTra Helfer - Post-Install Script
 # Erstellt LaunchAgent fuer Auto-Start, registriert App, startet App
 
