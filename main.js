@@ -242,6 +242,7 @@ function createAppMenu() {
 /**
  * Zeigt ein Setup-/Willkommensfenster beim ersten App-Start
  * @param {string} apiToken - Das API-Token zur Anzeige
+ * @returns {Promise<void>} Resolved wenn das Fenster geschlossen wird
  */
 async function showSetupWindow(apiToken) {
   // Auf macOS: Dock-Icon temporaer einblenden, damit das Fenster sichtbar ist
@@ -252,7 +253,7 @@ async function showSetupWindow(apiToken) {
 
   setupWindow = new BrowserWindow({
     width: 520,
-    height: 560,
+    height: 680,
     resizable: false,
     minimizable: false,
     maximizable: false,
@@ -270,12 +271,16 @@ async function showSetupWindow(apiToken) {
     query: { token: apiToken }
   });
 
-  setupWindow.on('closed', () => {
-    setupWindow = null;
-    // Auf macOS: Dock-Icon wieder ausblenden (reine Tray-App)
-    if (process.platform === 'darwin') {
-      app.dock.hide();
-    }
+  // Warte bis das Fenster geschlossen wird, bevor wir zurueckkehren.
+  // So wird setupCompleted erst gesetzt, wenn der User das Fenster tatsaechlich gesehen und geschlossen hat.
+  return new Promise((resolve) => {
+    setupWindow.on('closed', () => {
+      setupWindow = null;
+      if (process.platform === 'darwin') {
+        app.dock.hide();
+      }
+      resolve();
+    });
   });
 }
 
@@ -347,17 +352,16 @@ app.whenReady().then(async () => {
   }
 
   // Erstelle das Tray-Icon und Menue
-  trayManager = new TrayManager(app, logger, shell, dialog, RhinoPathManager, expressServer);
+  const onShowSetup = () => {
+    if (setupWindow !== null) {
+      setupWindow.focus();
+      return;
+    }
+    showSetupWindow(apiSecretToken);
+  };
+  trayManager = new TrayManager(app, logger, shell, dialog, RhinoPathManager, expressServer, { onShowSetup });
   trayManager.createTray();
   logger.info('Tray-Manager initialisiert und Tray-Icon erstellt.');
-
-  // Erststart-Feedback: Setup-Fenster beim ersten Start anzeigen
-  const isFirstRun = !store.get('setupCompleted');
-  if (isFirstRun) {
-    showSetupWindow(apiSecretToken);
-    store.set('setupCompleted', true);
-    logger.info('Erststart erkannt - Setup-Fenster wird angezeigt.');
-  }
 
   app.on('activate', () => {
     // Unter macOS ist es üblich, ein Fenster in der App wiederherzustellen,
@@ -387,6 +391,15 @@ app.whenReady().then(async () => {
       logger.warn(`Fehler beim Bereinigen des Temp-Verzeichnisses: ${error.message}`);
     }
   });
+
+  // Erststart-Feedback: Setup-Fenster beim ersten Start anzeigen
+  const isFirstRun = !store.get('setupCompleted');
+  if (isFirstRun) {
+    logger.info('Erststart erkannt - Setup-Fenster wird angezeigt.');
+    await showSetupWindow(apiSecretToken);
+    store.set('setupCompleted', true);
+    logger.info('Setup abgeschlossen - setupCompleted Flag gesetzt.');
+  }
 
 });
 

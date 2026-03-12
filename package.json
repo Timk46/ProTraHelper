@@ -56,6 +56,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "electron-log": "^5.1.5",
+    "electron-updater": "^6.1.7",
     "electron-store": "^8.2.0",
     "express": "^4.19.2",
     "express-rate-limit": "^8.2.1"
@@ -135,6 +136,7 @@
       "scripts": "installer/mac-scripts"
     },
     "dmg": {
+      "background": "assets/dmg-background.png",
       "contents": [
         {
           "x": 130,
@@ -169,6 +171,8 @@
       }
     },
     "nsis": {
+      "installerHeader": "assets/installer-header.bmp",
+      "installerSidebar": "assets/installer-sidebar.bmp",
       "oneClick": false,
       "allowElevation": true,
       "allowToChangeInstallationDirectory": true,

@@ -39,11 +39,27 @@
       font-weight: 600;
       margin-bottom: 8px;
       color: #2E7D32;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .info-card p {
       font-size: 13px;
       line-height: 1.5;
       color: #555;
+    }
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #2E7D32;
+      color: white;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
     }
     .platform-note {
       display: flex;
@@ -56,6 +72,49 @@
     }
     .platform-note .icon { font-size: 18px; flex-shrink: 0; }
     .platform-note p { font-size: 12px; color: #2E7D32; }
+    .tip-card {
+      background: #E8F5E9;
+      border-left: 3px solid #2E7D32;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .tip-card strong {
+      font-size: 12px;
+      color: #2E7D32;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tip-card p {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #555;
+      margin-top: 4px;
+    }
+    .security-card {
+      background: #FFF8E1;
+      border-left: 3px solid #F9A825;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .security-card strong {
+      font-size: 12px;
+      color: #E65100;
+    }
+    .security-card p {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #555;
+      margin-top: 4px;
+    }
+    .security-card em {
+      background: #f0f0f0;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-style: normal;
+      font-weight: 500;
+    }
     .token-display {
       background: #f0f0f0;
       border: 1px solid #ddd;
@@ -100,9 +159,15 @@
     <h1>ProTra Helfer ist bereit!</h1>
     <p class="subtitle">Die Helferanwendung fuer Rhino/Grasshopper-Integration</p>
 
+    <div class="tip-card">
+      <strong>Tipp</strong>
+      <p>Die Verbindung mit der ProTra-Webanwendung erfolgt automatisch per Auto-Pairing.
+         Das unten angezeigte Token ist nur als Backup gedacht, falls die automatische Verbindung nicht funktioniert.</p>
+    </div>
+
     <div class="info-card">
-      <h2>Wo finde ich die App?</h2>
-      <p>Die App laeuft im Hintergrund. Sie finden das Rhino-Symbol in der <strong id="tray-location">Taskleiste</strong>.
+      <h2><span class="step-number">1</span> Wo finde ich die App?</h2>
+      <p>Die App laeuft im Hintergrund. Sie finden das Rhino-Symbol in der <strong id="tray-location">Taskleiste</strong> (unten rechts, ggf. im Ueberlaufbereich).
          Per Rechtsklick darauf oeffnen Sie das Menue.</p>
       <div class="platform-note" id="mac-note" style="display:none;">
         <span class="icon">&#x2139;&#xFE0F;</span>
@@ -111,15 +176,27 @@
     </div>
 
     <div class="info-card">
-      <h2>API Token</h2>
-      <p>Dieses Token benoetigen Sie in der ProTra-Webanwendung:</p>
+      <h2><span class="step-number">2</span> API Token (Backup)</h2>
+      <p>Dieses Token wird nur benoetigt, falls das automatische Pairing nicht funktioniert:</p>
       <div class="token-display" id="api-token" onclick="copyToken()">Wird geladen...</div>
     </div>
 
     <div class="info-card">
-      <h2>Rhino 8 Pfad</h2>
+      <h2><span class="step-number">3</span> Rhino 8 Pfad</h2>
       <p>Konfigurieren Sie den Pfad zu Ihrer Rhino 8 Installation ueber das Tray-Menue
          (<strong>Rechtsklick &rarr; Rhino 8 Pfad konfigurieren...</strong>).</p>
+    </div>
+
+    <div class="security-card" id="security-hint-windows">
+      <strong>Sicherheitshinweis bei der Installation</strong>
+      <p>Da die App noch nicht digital signiert ist, zeigt Windows moeglicherweise eine Warnung an.
+         Klicken Sie auf <em>Weitere Informationen</em> und dann auf <em>Trotzdem ausfuehren</em>.</p>
+    </div>
+
+    <div class="security-card" id="security-hint-mac" style="display:none;">
+      <strong>Sicherheitshinweis bei der Installation</strong>
+      <p>Da die App noch nicht digital signiert ist, zeigt macOS moeglicherweise eine Warnung an.
+         <em>Rechtsklick</em> auf die App, dann <em>Oeffnen</em> waehlen und im Dialog mit <em>Oeffnen</em> bestaetigen.</p>
     </div>
 
     <button class="btn-close" onclick="closeSetup()">Verstanden, Fenster schliessen</button>
@@ -131,6 +208,8 @@
     if (platform.includes('mac')) {
       document.getElementById('tray-location').textContent = 'Menuleiste';
       document.getElementById('mac-note').style.display = 'flex';
+      document.getElementById('security-hint-windows').style.display = 'none';
+      document.getElementById('security-hint-mac').style.display = 'block';
     }
 
     // API Token wird via URL-Parameter uebergeben

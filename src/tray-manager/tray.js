@@ -3,13 +3,14 @@ const path = require('node:path');
 const fs = require('node:fs'); // fs hinzugefügt für Existenzprüfung
 
 class TrayManager {
-  constructor(app, logger, shell, dialog, rhinoPathManager, expressServer) {
+  constructor(app, logger, shell, dialog, rhinoPathManager, expressServer, options = {}) {
     this.app = app;
     this.logger = logger;
     this.shell = shell;
     this.dialog = dialog;
     this.rhinoPathManager = rhinoPathManager;
     this.expressServer = expressServer; // Um z.B. den Server-Status anzuzeigen
+    this.onShowSetup = options.onShowSetup || null;
     this.tray = null;
     this.isMac = process.platform === 'darwin';
     this.isWindows = process.platform === 'win32';
@@ -134,6 +135,15 @@ class TrayManager {
         },
       },
       {
+        label: 'Einrichtung erneut anzeigen',
+        enabled: !!this.onShowSetup,
+        click: () => {
+          if (this.onShowSetup) {
+            this.onShowSetup();
+          }
+        },
+      },
+      {
         label: 'Logs öffnen',
         click: () => {
           const logFilePath = this.logger.transports.file.getFile().path;
@@ -171,6 +181,52 @@ class TrayManager {
         },
       },
       { type: 'separator' },
+      {
+        label: 'Updates prüfen...',
+        click: () => {
+          this.logger.info('Manuelle Update-Prüfung angefordert.');
+          try {
+            const { autoUpdater } = require('electron-updater');
+            autoUpdater.autoDownload = false;
+            autoUpdater.checkForUpdates().then((result) => {
+              if (result && result.updateInfo && result.updateInfo.version !== this.app.getVersion()) {
+                this.dialog.showMessageBox({
+                  type: 'info',
+                  title: 'Update verfügbar',
+                  message: `Eine neue Version (${result.updateInfo.version}) ist verfügbar.`,
+                  detail: `Aktuelle Version: ${this.app.getVersion()}\nNeue Version: ${result.updateInfo.version}\n\nBitte laden Sie die neue Version von der ProTra-Webseite herunter.`,
+                  buttons: ['OK']
+                });
+              } else {
+                this.dialog.showMessageBox({
+                  type: 'info',
+                  title: 'Kein Update verfügbar',
+                  message: 'Sie verwenden die neueste Version.',
+                  detail: `Aktuelle Version: ${this.app.getVersion()}`,
+                  buttons: ['OK']
+                });
+              }
+            }).catch((err) => {
+              this.logger.error('Update-Prüfung fehlgeschlagen:', err);
+              this.dialog.showMessageBox({
+                type: 'warning',
+                title: 'Update-Prüfung fehlgeschlagen',
+                message: 'Die Update-Prüfung konnte nicht durchgeführt werden.',
+                detail: 'Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es später erneut.',
+                buttons: ['OK']
+              });
+            });
+          } catch (err) {
+            this.logger.error('electron-updater nicht verfügbar:', err);
+            this.dialog.showMessageBox({
+              type: 'warning',
+              title: 'Update-Prüfung nicht verfügbar',
+              message: 'Die Update-Funktion ist in dieser Version nicht verfügbar.',
+              buttons: ['OK']
+            });
+          }
+        },
+      },
       {
         label: 'Beenden',
         click: () => {

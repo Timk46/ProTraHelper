@@ -100,7 +100,7 @@ Function .onInstSuccess
     ${If} $IsUpgrade == "true"
         MessageBox MB_OK|MB_ICONINFORMATION "ProTra Helfer wurde erfolgreich auf Version ${VERSION} aktualisiert!"
     ${Else}
-        MessageBox MB_OK|MB_ICONINFORMATION "ProTra Helfer wurde erfolgreich installiert!$\n$\nDie Anwendung ist nun bereit für die Rhino/Grasshopper-Integration."
+        MessageBox MB_OK|MB_ICONINFORMATION "ProTra Helfer wurde erfolgreich installiert!$\n$\nDie Anwendung startet jetzt — Sie finden das Rhino-Symbol in der Taskleiste (unten rechts, ggf. im Überlaufbereich).$\n$\nBeim ersten Start erscheint ein Einrichtungsfenster."
     ${EndIf}
 FunctionEnd
 
