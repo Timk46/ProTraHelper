@@ -91,30 +91,6 @@
       color: #555;
       margin-top: 4px;
     }
-    .security-card {
-      background: #FFF8E1;
-      border-left: 3px solid #F9A825;
-      border-radius: 6px;
-      padding: 12px 14px;
-      margin-bottom: 12px;
-    }
-    .security-card strong {
-      font-size: 12px;
-      color: #E65100;
-    }
-    .security-card p {
-      font-size: 12px;
-      line-height: 1.5;
-      color: #555;
-      margin-top: 4px;
-    }
-    .security-card em {
-      background: #f0f0f0;
-      padding: 1px 4px;
-      border-radius: 3px;
-      font-style: normal;
-      font-weight: 500;
-    }
     .btn-close {
       display: block;
       width: 100%;
@@ -158,18 +134,6 @@
          (<strong>Rechtsklick &rarr; Rhino 8 Pfad konfigurieren...</strong>).</p>
     </div>
 
-    <div class="security-card" id="security-hint-windows">
-      <strong>Sicherheitshinweis bei der Installation</strong>
-      <p>Da die App noch nicht digital signiert ist, zeigt Windows moeglicherweise eine Warnung an.
-         Klicken Sie auf <em>Weitere Informationen</em> und dann auf <em>Trotzdem ausfuehren</em>.</p>
-    </div>
-
-    <div class="security-card" id="security-hint-mac" style="display:none;">
-      <strong>Sicherheitshinweis bei der Installation</strong>
-      <p>Da die App noch nicht digital signiert ist, zeigt macOS moeglicherweise eine Warnung an.
-         <em>Rechtsklick</em> auf die App, dann <em>Oeffnen</em> waehlen und im Dialog mit <em>Oeffnen</em> bestaetigen.</p>
-    </div>
-
     <button class="btn-close" onclick="closeSetup()">Verstanden, Fenster schliessen</button>
   </div>
 
@@ -179,8 +143,6 @@
     if (platform.includes('mac')) {
       document.getElementById('tray-location').textContent = 'Menuleiste';
       document.getElementById('mac-note').style.display = 'flex';
-      document.getElementById('security-hint-windows').style.display = 'none';
-      document.getElementById('security-hint-mac').style.display = 'block';
     }
 
     function closeSetup() {

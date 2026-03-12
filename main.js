@@ -388,13 +388,14 @@ app.whenReady().then(async () => {
     }
   });
 
-  // Erststart-Feedback: Setup-Fenster beim ersten Start anzeigen
-  const isFirstRun = !store.get('setupCompleted');
-  if (isFirstRun) {
-    logger.info('Erststart erkannt - Setup-Fenster wird angezeigt.');
+  // Setup-Fenster anzeigen wenn Version sich geaendert hat (oder Erststart)
+  const currentVersion = app.getVersion();
+  const setupCompletedVersion = store.get('setupCompletedVersion');
+  if (setupCompletedVersion !== currentVersion) {
+    logger.info(`Setup-Fenster wird angezeigt (Version: ${currentVersion}, zuletzt: ${setupCompletedVersion || 'nie'}).`);
     await showSetupWindow();
-    store.set('setupCompleted', true);
-    logger.info('Setup abgeschlossen - setupCompleted Flag gesetzt.');
+    store.set('setupCompletedVersion', currentVersion);
+    logger.info('Setup abgeschlossen - setupCompletedVersion aktualisiert.');
   }
 
 });
