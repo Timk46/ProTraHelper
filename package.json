@@ -188,8 +188,9 @@
       "uninstallDisplayName": "${productName} ${version}"
     },
     "publish": {
-      "provider": "generic",
-      "url": "https://downloads.hefl.de/protra-helper/"
+      "provider": "github",
+      "owner": "hefl",
+      "repo": "protra-helper-app"
     }
   }
 }
