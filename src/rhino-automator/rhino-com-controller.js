@@ -419,6 +419,14 @@ class RhinoCOMController {
       this.logger.info(`GH-LOAD: Starting Grasshopper file load process`);
       this.logger.info(`GH-LOAD: File path: ${filePath}`);
 
+      // SECURITY FIX: Validate file path to prevent command injection
+      const normalizedPath = require('node:path').resolve(filePath);
+      if (normalizedPath.includes('..') || (!normalizedPath.toLowerCase().endsWith('.gh') && !normalizedPath.toLowerCase().endsWith('.ghx'))) {
+        throw new Error('SECURITY: Invalid file path — only .gh/.ghx files allowed, no path traversal');
+      }
+      // Replace filePath with normalized version for the rest of the method
+      filePath = normalizedPath;
+
       // Stelle sicher, dass Grasshopper läuft
       this.logger.info(`GH-LOAD: [Step 1/5] Ensuring Grasshopper is running...`);
       await this.startGrasshopper();
@@ -654,6 +662,13 @@ class RhinoCOMController {
    * @returns {Promise<Object>} - Ergebnis {success, message}
    */
   async executeRegistrySequence(filePath) {
+    // SECURITY FIX: Validate file path to prevent command injection
+    const nodePath = require('node:path');
+    const normalizedPath = nodePath.resolve(filePath);
+    if (normalizedPath.includes('..') || (!normalizedPath.toLowerCase().endsWith('.gh') && !normalizedPath.toLowerCase().endsWith('.ghx'))) {
+      throw new Error('SECURITY: Invalid file path — only .gh/.ghx files allowed, no path traversal');
+    }
+    filePath = normalizedPath;
     try {
       this.logger.info(`COM: Executing registry sequence for: ${filePath}`);
       

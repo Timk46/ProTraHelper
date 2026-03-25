@@ -86,9 +86,10 @@ describe('Express Server - Auth Middleware', () => {
       expect(res.status).toBe(200);
     });
 
-    test('POST /unpair does not require auth', async () => {
+    test('POST /unpair requires auth', async () => {
+      // SECURITY FIX: /unpair now requires authentication
       const res = await request(app).post('/unpair');
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(401);
     });
   });
 

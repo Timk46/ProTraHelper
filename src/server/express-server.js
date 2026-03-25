@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('node:path');
 const fs = require('node:fs');
+const crypto = require('node:crypto');
 const rateLimit = require('express-rate-limit');
 const RhinoLauncher = require('../rhino-automator/rhino-launcher');
 const FileDownloader = require('./file-downloader');
@@ -12,7 +13,8 @@ class AppServer {
     this.logger = logger;
     this.rhinoPathManager = rhinoPathManager;
     this.tempDir = tempDir; // Für temporäre Skriptdateien
-    this.allowedOrigins = allowedOrigins || ['https://protra.bshefl2.bs.informatik.uni-siegen.de']; // Fallback for production frontend
+    // SECURITY FIX: No hardcoded production URL — must be configured via electron-store or env
+    this.allowedOrigins = allowedOrigins || [];
     this.apiSecretToken = apiSecretToken;
     this.app = express();
     this.server = null;
@@ -83,7 +85,10 @@ class AppServer {
         return res.status(401).json({ success: false, message: 'Authentifizierungstoken fehlt.' });
       }
 
-      if (receivedToken !== this.apiSecretToken) {
+      // SECURITY FIX: Use timing-safe comparison to prevent timing attacks
+      const tokenBuf = Buffer.from(receivedToken);
+      const secretBuf = Buffer.from(this.apiSecretToken);
+      if (tokenBuf.length !== secretBuf.length || !crypto.timingSafeEqual(tokenBuf, secretBuf)) {
         this.logger.warn(`Authentifizierungs-Middleware: Ungültiges Token empfangen. Zugriff verweigert für ${req.method} ${req.originalUrl}`);
         return res.status(403).json({ success: false, message: 'Ungültiges Authentifizierungstoken.' });
       }
@@ -116,8 +121,13 @@ class AppServer {
             callback(new Error('Not allowed by CORS'));
           }
         } else {
-          // Development: Allow all origins
-          callback(null, true);
+          // Development: Allow localhost origins only
+          if (!origin || origin.startsWith('http://localhost') || origin.startsWith('https://localhost')) {
+            callback(null, true);
+          } else {
+            this.logger.warn(`CORS blocked non-localhost origin in dev mode: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+          }
         }
       },
       methods: "GET,POST,OPTIONS",
@@ -139,8 +149,19 @@ class AppServer {
     if (isProduction) {
       this.logger.info(`CORS-Middleware konfiguriert (PRODUCTION MODE - Allowed origins: ${this.allowedOrigins.join(', ')})`);
     } else {
-      this.logger.info('CORS-Middleware konfiguriert (DEVELOPMENT MODE - Alle Origins erlaubt)');
+      this.logger.info('CORS-Middleware konfiguriert (DEVELOPMENT MODE - nur localhost Origins erlaubt)');
     }
+
+    // SECURITY FIX: DNS Rebinding protection — only allow localhost Host headers
+    this.app.use((req, res, next) => {
+      const host = req.headers.host || '';
+      const hostname = host.split(':')[0];
+      if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
+        this.logger.warn(`SECURITY: DNS rebinding attempt blocked — Host: ${host}`);
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+      next();
+    });
 
     // JSON Body Parser
     this.app.use(express.json({ limit: '1mb' })); // Limit für Request-Body-Größe
@@ -183,12 +204,12 @@ class AppServer {
     this.app.get('/status', async (req, res) => {
       this.logger.info('GET /status aufgerufen.');
       const rhinoPath = await this.rhinoPathManager.getRhinoPath();
+      // SECURITY FIX: Don't expose rhinoPath (filesystem info leak)
       res.status(200).json({
         status: 'running',
-        version: require('../../package.json').version, // Holt Version aus package.json
+        version: require('../../package.json').version,
         serverTime: new Date().toISOString(),
         rhinoPathConfigured: !!rhinoPath,
-        rhinoPath: rhinoPath || 'Nicht konfiguriert',
       });
     });
 
@@ -302,8 +323,8 @@ class AppServer {
       res.status(200).json(status);
     });
 
-    // PHASE 2: POST /unpair - Pairing aufheben
-    this.app.post('/unpair', (req, res) => {
+    // PHASE 2: POST /unpair - Pairing aufheben (SECURITY FIX: requires auth)
+    this.app.post('/unpair', authMiddleware, (req, res) => {
       this.logger.info('POST /unpair aufgerufen');
       this.pairingManager.unpair();
       res.status(200).json({
@@ -443,8 +464,9 @@ class AppServer {
     }
 
     return new Promise((resolve, reject) => {
-      this.server = this.app.listen(this.port, () => {
-        this.logger.info(`Express-Server lauscht auf Port ${this.port}`);
+      // SECURITY FIX: Bind to localhost only — prevent network exposure
+      this.server = this.app.listen(this.port, '127.0.0.1', () => {
+        this.logger.info(`Express-Server lauscht auf 127.0.0.1:${this.port}`);
         this._isRunning = true;
         resolve();
       }).on('error', (err) => {

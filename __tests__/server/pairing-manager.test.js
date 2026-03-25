@@ -83,9 +83,22 @@ describe('PairingManager', () => {
       expect(result.message).toContain('fehlgeschlagen');
     });
 
-    test('updates backendUrl via auto-discovery and stores it', async () => {
+    test('rejects auto-discovery URL not in allowed hosts', async () => {
       const pm = new PairingManager(logger, store);
       pm.backendUrl = backendUrl; // Initial URL pointing to mock
+
+      const newUrl = 'https://new-backend.example.com';
+      await pm.pair('valid-jwt', null, null, newUrl);
+
+      // SECURITY: URL should NOT be updated — not in allowed hosts
+      expect(pm.backendUrl).toBe(backendUrl);
+      expect(store.get('backendUrl')).toBeUndefined();
+    });
+
+    test('accepts auto-discovery URL in allowed hosts', async () => {
+      const pm = new PairingManager(logger, store);
+      pm.backendUrl = backendUrl;
+      pm.allowedHosts = [...pm.allowedHosts, 'new-backend.example.com'];
 
       const newUrl = 'https://new-backend.example.com';
       await pm.pair('valid-jwt', null, null, newUrl);
@@ -184,7 +197,8 @@ describe('PairingManager', () => {
 
       expect(status.isPaired).toBe(true);
       expect(status.userId).toBe('user-42');
-      expect(status.email).toBe('student@uni.de');
+      // SECURITY FIX: email no longer returned from backend
+      expect(status.email).toBeUndefined();
       expect(status.name).toBe('Max Mustermann');
       expect(status.pairedAt).toBeInstanceOf(Date);
     });

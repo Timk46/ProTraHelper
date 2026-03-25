@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, nativeTheme, Tray, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, nativeTheme, Tray, Menu, shell, dialog, safeStorage } = require('electron');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const logger = require('./src/utils/logger'); // Wird später erstellt
@@ -309,22 +309,54 @@ app.whenReady().then(async () => {
 
   const store = RhinoPathManager.store; // Greife auf den Store vom RhinoPathManager zu
 
-  // API Secret Token generieren/laden
-  let apiSecretToken = store.get('apiSecretToken');
+  // SECURITY FIX: API Secret Token generieren/laden mit Electron safeStorage encryption
+  let apiSecretToken;
+  const encryptedToken = store.get('apiSecretTokenEncrypted');
+
+  if (safeStorage.isEncryptionAvailable() && encryptedToken) {
+    // Decrypt stored token
+    try {
+      apiSecretToken = safeStorage.decryptString(Buffer.from(encryptedToken, 'base64'));
+      logger.info('API Secret Token aus verschlüsseltem Store geladen.');
+    } catch (error) {
+      logger.warn(`Failed to decrypt API token, generating new one: ${error.message}`);
+      apiSecretToken = null;
+    }
+  } else {
+    // Fallback: try plaintext store (migration from old version)
+    apiSecretToken = store.get('apiSecretToken');
+    if (apiSecretToken) {
+      logger.info('API Secret Token aus unverschlüsseltem Store migriert.');
+      // Migrate to encrypted storage
+      if (safeStorage.isEncryptionAvailable()) {
+        const encrypted = safeStorage.encryptString(apiSecretToken).toString('base64');
+        store.set('apiSecretTokenEncrypted', encrypted);
+        store.delete('apiSecretToken'); // Remove plaintext
+        logger.info('API Secret Token zu verschlüsseltem Store migriert.');
+      }
+    }
+  }
+
   if (!apiSecretToken) {
     apiSecretToken = crypto.randomBytes(32).toString('hex');
-    store.set('apiSecretToken', apiSecretToken);
+    if (safeStorage.isEncryptionAvailable()) {
+      const encrypted = safeStorage.encryptString(apiSecretToken).toString('base64');
+      store.set('apiSecretTokenEncrypted', encrypted);
+    } else {
+      store.set('apiSecretToken', apiSecretToken);
+      logger.warn('safeStorage not available — API token stored in plaintext.');
+    }
     logger.info('Neues API Secret Token generiert und gespeichert.');
-  } else {
-    logger.info('API Secret Token aus Store geladen.');
   }
-  // Das Token sollte idealerweise nicht komplett geloggt werden, aber für Debugging-Zwecke hier ein Hinweis.
-  // logger.debug(`Verwendetes API Secret Token: ${apiSecretToken}`); // In Produktion auskommentieren oder entfernen
 
   // Lade Konfiguration für CORS allowedOrigins
-  let allowedOrigins = store.get('corsAllowedOrigins', ['https://protra.bshefl2.bs.informatik.uni-siegen.de']);
-  if (!Array.isArray(allowedOrigins) || allowedOrigins.length === 0) {
-    allowedOrigins = ['https://protra.bshefl2.bs.informatik.uni-siegen.de']; // Fallback for production
+  // SECURITY FIX: No hardcoded production URLs — configure via electron-store or HEFL_CORS_ORIGINS env var
+  const envOrigins = process.env.HEFL_CORS_ORIGINS
+    ? process.env.HEFL_CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+    : [];
+  let allowedOrigins = store.get('corsAllowedOrigins', envOrigins);
+  if (!Array.isArray(allowedOrigins)) {
+    allowedOrigins = envOrigins;
     store.set('corsAllowedOrigins', allowedOrigins);
   }
   logger.info(`CORS allowedOrigins geladen: ${allowedOrigins.join(', ')}`);

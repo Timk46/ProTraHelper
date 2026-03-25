@@ -70,12 +70,13 @@ describe('Express Server - CORS', () => {
       expect(res.headers['access-control-allow-origin']).toBeDefined();
     });
 
-    test('allows unknown origin in dev mode', async () => {
+    test('blocks non-localhost origin in dev mode', async () => {
       const res = await request(app)
         .get('/status')
         .set('Origin', 'https://evil.example.com');
 
-      expect(res.status).toBe(200);
+      // SECURITY FIX: Dev mode now only allows localhost origins
+      expect(res.status).toBe(500);
     });
   });
 

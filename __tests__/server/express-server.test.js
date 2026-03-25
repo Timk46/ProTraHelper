@@ -69,7 +69,8 @@ describe('Express Server - HTTP Endpoints', () => {
       expect(res.body).toHaveProperty('version');
       expect(res.body).toHaveProperty('serverTime');
       expect(res.body).toHaveProperty('rhinoPathConfigured', true);
-      expect(res.body).toHaveProperty('rhinoPath', '/usr/bin/rhino');
+      // SECURITY FIX: rhinoPath no longer exposed in response
+      expect(res.body).not.toHaveProperty('rhinoPath');
     });
 
     test('reports rhinoPathConfigured=false when no path', async () => {
@@ -79,7 +80,8 @@ describe('Express Server - HTTP Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.rhinoPathConfigured).toBe(false);
-      expect(res.body.rhinoPath).toBe('Nicht konfiguriert');
+      // SECURITY FIX: rhinoPath no longer exposed in response
+      expect(res.body.rhinoPath).toBeUndefined();
     });
 
     test('does not require authentication', async () => {
@@ -185,12 +187,20 @@ describe('Express Server - HTTP Endpoints', () => {
 
   // ─── POST /unpair ─────────────────────────────────────────────
   describe('POST /unpair', () => {
-    test('returns 200 and calls unpair()', async () => {
-      const res = await request(app).post('/unpair');
+    test('returns 200 and calls unpair() with valid auth', async () => {
+      // SECURITY FIX: /unpair now requires authentication
+      const res = await request(app)
+        .post('/unpair')
+        .set('x-protra-helper-token', 'test-secret-token');
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(server.pairingManager.unpair).toHaveBeenCalled();
+    });
+
+    test('returns 401 without auth', async () => {
+      const res = await request(app).post('/unpair');
+      expect(res.status).toBe(401);
     });
   });
 

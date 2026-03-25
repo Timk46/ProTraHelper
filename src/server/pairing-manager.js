@@ -6,17 +6,78 @@ const http = require('node:http');
  * PairingManager handles auto-pairing between web app and Helper-App
  * Validates user JWT tokens and generates session tokens
  */
+/**
+ * SECURITY: Allowed backend hostnames for URL validation.
+ * Prevents MITM attacks by rejecting arbitrary backend URLs.
+ * Configure additional hosts via HEFL_ALLOWED_HOSTS environment variable (comma-separated).
+ */
+const DEFAULT_ALLOWED_HOSTS = [
+  'localhost',
+  '127.0.0.1',
+];
+
 class PairingManager {
   constructor(logger, store) {
     this.logger = logger;
     this.store = store; // electron-store for persistent config
-    // Try to load backend URL from store, fallback to env var, then production URL
-    this.backendUrl = this.store?.get('backendUrl') || process.env.HEFL_BACKEND_URL || 'https://api-protra.bshefl2.bs.informatik.uni-siegen.de';
+
+    // SECURITY: Build allowed hosts list from defaults + env var
+    const envHosts = process.env.HEFL_ALLOWED_HOSTS
+      ? process.env.HEFL_ALLOWED_HOSTS.split(',').map(h => h.trim()).filter(Boolean)
+      : [];
+    this.allowedHosts = [...DEFAULT_ALLOWED_HOSTS, ...envHosts];
+
+    // Try to load backend URL from store, fallback to env var, then localhost
+    // SECURITY FIX: No hardcoded production URL — must be configured via env or auto-discovery
+    const storedUrl = this.store?.get('backendUrl');
+    const envUrl = process.env.HEFL_BACKEND_URL;
+    const candidateUrl = storedUrl || envUrl || 'http://localhost:3000';
+
+    // Validate stored/env URL before using it
+    if (this._validateBackendUrl(candidateUrl)) {
+      this.backendUrl = candidateUrl;
+    } else {
+      this.logger.warn(`SECURITY: Stored/env backend URL rejected: ${candidateUrl}. Falling back to localhost.`);
+      this.backendUrl = 'http://localhost:3000';
+    }
+
     this.pairedUser = null;
     this.sessionToken = null;
     this.sessionExpiry = null;
 
     this.logger.info(`PairingManager initialized with backend URL: ${this.backendUrl}`);
+  }
+
+  /**
+   * SECURITY: Validates a backend URL against the allowed hosts whitelist.
+   * Enforces HTTPS for non-localhost URLs to prevent MITM attacks.
+   *
+   * @param {string} url - URL to validate
+   * @returns {boolean} - true if URL is allowed
+   * @private
+   */
+  _validateBackendUrl(url) {
+    try {
+      const parsed = new URL(url);
+
+      // SECURITY: Enforce HTTPS for non-localhost URLs
+      const isLocalhost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
+      if (!isLocalhost && parsed.protocol !== 'https:') {
+        this.logger.warn(`SECURITY: Rejected non-HTTPS URL for non-localhost host: ${url}`);
+        return false;
+      }
+
+      // Check against allowed hosts whitelist
+      if (!this.allowedHosts.includes(parsed.hostname)) {
+        this.logger.warn(`SECURITY: Host '${parsed.hostname}' not in allowed hosts list: [${this.allowedHosts.join(', ')}]`);
+        return false;
+      }
+
+      return true;
+    } catch {
+      this.logger.warn(`SECURITY: Invalid URL format: ${url}`);
+      return false;
+    }
   }
 
   /**
@@ -46,13 +107,17 @@ class PairingManager {
       // SECURITY FIX: Redact JWT token in logs
       this.logger.info(`Auto-Pairing gestartet (deviceId: ${deviceId || 'N/A'}, JWT: ${this._redactJWT(userJWT)})`);
 
-      // Auto-discovery: If backend URL is provided, store it
+      // Auto-discovery: If backend URL is provided, validate and store it
       if (backendUrl && backendUrl !== this.backendUrl) {
-        this.logger.info(`Auto-discovery: Updating backend URL from ${this.backendUrl} to ${backendUrl}`);
-        this.backendUrl = backendUrl;
-        if (this.store) {
-          this.store.set('backendUrl', backendUrl);
-          this.logger.info(`Backend URL saved to config: ${backendUrl}`);
+        if (this._validateBackendUrl(backendUrl)) {
+          this.logger.info(`Auto-discovery: Updating backend URL from ${this.backendUrl} to ${backendUrl}`);
+          this.backendUrl = backendUrl;
+          if (this.store) {
+            this.store.set('backendUrl', backendUrl);
+            this.logger.info(`Backend URL saved to config: ${backendUrl}`);
+          }
+        } else {
+          this.logger.warn(`SECURITY: Rejected auto-discovery backend URL: ${backendUrl}`);
         }
       }
 
@@ -73,12 +138,10 @@ class PairingManager {
       const expiresIn = 24 * 60 * 60; // 24 hours in seconds
       const expiryDate = new Date(Date.now() + expiresIn * 1000);
 
-      // Store pairing information
+      // Store pairing information (SECURITY: backend no longer returns email/roles)
       this.pairedUser = {
         userId: validationResult.userId,
-        email: validationResult.email,
         name: validationResult.name,
-        roles: validationResult.roles,
         deviceId,
         userAgent,
         pairedAt: new Date(),
@@ -86,7 +149,7 @@ class PairingManager {
       this.sessionToken = sessionToken;
       this.sessionExpiry = expiryDate;
 
-      this.logger.info(`Auto-Pairing erfolgreich: User ${validationResult.userId} (${validationResult.email})`);
+      this.logger.info(`Auto-Pairing erfolgreich: User ${validationResult.userId} (${validationResult.name})`);
 
       return {
         success: true,
@@ -183,8 +246,10 @@ class PairingManager {
       return false;
     }
 
-    // Check if token matches
-    if (token !== this.sessionToken) {
+    // SECURITY FIX: Use timing-safe comparison to prevent timing attacks
+    const tokenBuf = Buffer.from(token);
+    const sessionBuf = Buffer.from(this.sessionToken);
+    if (tokenBuf.length !== sessionBuf.length || !crypto.timingSafeEqual(tokenBuf, sessionBuf)) {
       return false;
     }
 
@@ -203,7 +268,7 @@ class PairingManager {
    */
   unpair() {
     if (this.pairedUser) {
-      this.logger.info(`Unpaired user ${this.pairedUser.userId} (${this.pairedUser.email})`);
+      this.logger.info(`Unpaired user ${this.pairedUser.userId} (${this.pairedUser.name})`);
     }
     this.pairedUser = null;
     this.sessionToken = null;
@@ -223,7 +288,6 @@ class PairingManager {
     return {
       isPaired: true,
       userId: this.pairedUser.userId,
-      email: this.pairedUser.email,
       name: this.pairedUser.name,
       pairedAt: this.pairedUser.pairedAt,
     };

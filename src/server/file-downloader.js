@@ -12,8 +12,9 @@ class FileDownloader {
     this.logger = logger;
     this.tempDir = tempDir;
     this.store = store; // electron-store for persistent config
-    // Try to load backend URL from store, fallback to env var, then production URL
-    this.backendUrl = this.store?.get('backendUrl') || process.env.HEFL_BACKEND_URL || 'https://api-protra.bshefl2.bs.informatik.uni-siegen.de';
+    // Try to load backend URL from store, fallback to env var, then localhost
+    // SECURITY FIX: No hardcoded production URL — must be configured via env or auto-discovery
+    this.backendUrl = this.store?.get('backendUrl') || process.env.HEFL_BACKEND_URL || 'http://localhost:3000';
 
     this.logger.info(`FileDownloader initialized with backend URL: ${this.backendUrl}`);
 
@@ -60,11 +61,20 @@ class FileDownloader {
       // Make HTTP request with JWT authentication
       const fileData = await this._makeRequest(downloadUrl, userJWT);
 
-      // Extract filename from headers (if available)
-      const fileName = fileData.fileName || `${fileId}.gh`;
+      // SECURITY FIX: Sanitize filename to prevent path traversal attacks
+      // Use path.basename() to strip directory components, then remove unsafe characters
+      const rawFileName = fileData.fileName || `${fileId}.gh`;
+      const fileName = path.basename(rawFileName).replace(/[^a-zA-Z0-9._-]/g, '_');
 
       // Save to temp directory
       const tempFilePath = path.join(this.tempDir, fileName);
+
+      // SECURITY: Verify the resolved path is still within tempDir
+      const resolvedPath = path.resolve(tempFilePath);
+      const resolvedTempDir = path.resolve(this.tempDir);
+      if (!resolvedPath.startsWith(resolvedTempDir)) {
+        throw new Error('SECURITY: Path traversal detected in filename');
+      }
       await fs.promises.writeFile(tempFilePath, fileData.buffer);
 
       const downloadTimeMs = Date.now() - startTime;
@@ -115,8 +125,16 @@ class FileDownloader {
         }
 
         const chunks = [];
+        let totalSize = 0;
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
 
         res.on('data', (chunk) => {
+          totalSize += chunk.length;
+          if (totalSize > MAX_FILE_SIZE) {
+            req.destroy();
+            reject(new Error(`SECURITY: Download exceeds maximum file size (${MAX_FILE_SIZE} bytes)`));
+            return;
+          }
           chunks.push(chunk);
         });
 
