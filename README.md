@@ -27,6 +27,8 @@ Aktuelle Installer gibt es unter [Releases](../../releases):
 - **Windows**: Falls SmartScreen eine Warnung zeigt, auf "Weitere Informationen" > "Trotzdem ausfuehren" klicken. Signierte Releases zeigen keine Warnung.
 - **macOS**: Rechtsklick auf die .pkg-Datei > "Oeffnen" > "Oeffnen" bestaetigen (Gatekeeper-Workaround fuer unsignierte Builds).
 
+Siehe [Code Signing Policy](CODE_SIGNING_POLICY.md) fuer Details zur Signierung und Datenschutz.
+
 ## Entwicklung
 
 ```bash
