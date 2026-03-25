@@ -255,6 +255,11 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          body: |
+            See [Code Signing Policy](https://github.com/Timk46/ProTraHelper/blob/main/CODE_SIGNING_POLICY.md) for details on signing and privacy.
+
+            **macOS:** Right-click the `.pkg` file → "Open" → confirm "Open" (required for unsigned builds).
+          append_body: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -24,10 +24,7 @@ Aktuelle Installer gibt es unter [Releases](../../releases):
 
 ### Hinweise
 
-- **Windows**: Falls SmartScreen eine Warnung zeigt, auf "Weitere Informationen" > "Trotzdem ausfuehren" klicken. Signierte Releases zeigen keine Warnung.
-- **macOS**: Rechtsklick auf die .pkg-Datei > "Oeffnen" > "Oeffnen" bestaetigen (Gatekeeper-Workaround fuer unsignierte Builds).
-
-Siehe [Code Signing Policy](CODE_SIGNING_POLICY.md) fuer Details zur Signierung und Datenschutz.
+Siehe [Installationshinweise](docs/code-signing-setup.md) fuer plattformspezifische Details und [Code Signing Policy](CODE_SIGNING_POLICY.md) fuer Signierung und Datenschutz.
 
 ## Entwicklung
 

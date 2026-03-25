@@ -62,9 +62,13 @@ The application communicates with a university backend server (HEFL) solely for:
 - **User authentication:** Validating JWT tokens provided by the user during the pairing process initiated by the user
 - **File downloads:** Downloading Grasshopper files explicitly requested by the user
 
-No telemetry, analytics, tracking data, or personal information is collected or transmitted by this application. The university backend server's data handling is governed by the university's own privacy policy (University of Siegen, Department of Computer Science).
+No telemetry, analytics, tracking data, or personal information is collected or transmitted by this application. The university backend server's data handling is governed by the [University of Siegen's privacy policy](https://www.uni-siegen.de/start/datenschutz/).
 
 This software does not include any features designed to identify or exploit security vulnerabilities or circumvent security measures.
+
+## Compliance
+
+The project team accepts all technical constraints of the SignPath.io OSS subscription and will cooperate with SignPath Foundation in the verification, investigation, and root cause analysis of any reported Code of Conduct violations.
 
 ## Contact
 
