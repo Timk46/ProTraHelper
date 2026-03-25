@@ -30,8 +30,8 @@ describe('Express Server - CORS', () => {
     let app;
 
     beforeEach(() => {
-      // Ensure we're NOT in production
-      delete process.env.NODE_ENV;
+      // SECURITY FIX: CORS now defaults to production mode, so explicitly set development
+      process.env.NODE_ENV = 'development';
       // Clear require cache to get fresh AppServer instance with current NODE_ENV
       jest.resetModules();
       // Re-setup mocks after resetModules
@@ -141,7 +141,8 @@ describe('Express Server - CORS', () => {
     let app;
 
     beforeEach(() => {
-      delete process.env.NODE_ENV;
+      // SECURITY FIX: CORS now defaults to production mode, so explicitly set development
+      process.env.NODE_ENV = 'development';
       jest.resetModules();
       jest.mock('../../src/rhino-automator/rhino-launcher', () => {
         return jest.fn().mockImplementation(() => ({

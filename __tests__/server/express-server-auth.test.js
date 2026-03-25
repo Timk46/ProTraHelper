@@ -72,13 +72,19 @@ describe('Express Server - Auth Middleware', () => {
       expect(res.status).toBe(200);
     });
 
-    test('POST /pair does not require x-protra-helper-token', async () => {
-      const res = await request(app)
+    test('POST /pair requires x-protra-helper-token', async () => {
+      // SECURITY FIX: /pair now requires authMiddleware
+      const resWithout = await request(app)
         .post('/pair')
         .send({ userJWT: 'some-jwt' });
+      expect(resWithout.status).toBe(401);
 
-      expect(res.status).not.toBe(401);
-      expect(res.status).not.toBe(403);
+      const resWith = await request(app)
+        .post('/pair')
+        .set('x-protra-helper-token', apiSecretToken)
+        .send({ userJWT: 'some-jwt' });
+      expect(resWith.status).not.toBe(401);
+      expect(resWith.status).not.toBe(403);
     });
 
     test('GET /pairing-status does not require auth', async () => {

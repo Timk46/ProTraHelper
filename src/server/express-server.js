@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const path = require('node:path');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
@@ -99,8 +100,11 @@ class AppServer {
   }
 
   _configureMiddleware() {
-    // SECURITY FIX: CORS-Konfiguration mit Environment-Check
-    const isProduction = process.env.NODE_ENV === 'production';
+    // SECURITY FIX: helmet for security headers
+    this.app.use(helmet());
+
+    // SECURITY FIX: Default to production mode unless explicitly in development
+    const isProduction = process.env.NODE_ENV !== 'development';
 
     const corsOptions = {
       origin: (origin, callback) => {
@@ -279,12 +283,13 @@ class AppServer {
         }
       } catch (error) {
         this.logger.error(`/launch-rhino: Kritischer Fehler beim Versuch, Rhino zu starten: ${error.message}`, error);
-        return res.status(500).json({ success: false, message: `Interner Serverfehler: ${error.message}` });
+        return res.status(500).json({ success: false, message: 'Interner Serverfehler beim Starten von Rhino.' });
       }
     });
 
     // PHASE 2: POST /pair - Auto-Pairing Endpoint + Strict Rate Limiting
-    this.app.post('/pair', this.pairingLimiter, async (req, res) => {
+    // SECURITY FIX: Added authMiddleware to prevent unauthorized pairing
+    this.app.post('/pair', this.pairingLimiter, authMiddleware, async (req, res) => {
       this.logger.info('POST /pair aufgerufen (Auto-Pairing)');
       const { userJWT, deviceId, userAgent, backendUrl } = req.body;
 
@@ -311,16 +316,17 @@ class AppServer {
         this.logger.error(`/pair: Kritischer Fehler: ${error.message}`);
         return res.status(500).json({
           success: false,
-          message: `Interner Serverfehler: ${error.message}`
+          message: 'Interner Serverfehler beim Pairing.'
         });
       }
     });
 
     // PHASE 2: GET /pairing-status - Pairing Status abfragen
+    // SECURITY FIX: Only return isPaired boolean without auth, full status requires auth
     this.app.get('/pairing-status', (req, res) => {
       this.logger.info('GET /pairing-status aufgerufen');
       const status = this.pairingManager.getPairingStatus();
-      res.status(200).json(status);
+      res.status(200).json({ isPaired: status.isPaired });
     });
 
     // PHASE 2: POST /unpair - Pairing aufheben (SECURITY FIX: requires auth)
@@ -334,9 +340,11 @@ class AppServer {
     });
 
     // PHASE 2: POST /launch-rhino-with-download - Launch Rhino mit Server-Download + Rate Limiting
-    this.app.post('/launch-rhino-with-download', this.apiLimiter, async (req, res) => {
+    // SECURITY FIX: Added authMiddleware to prevent unauthorized access
+    this.app.post('/launch-rhino-with-download', this.apiLimiter, authMiddleware, async (req, res) => {
       this.logger.info('POST /launch-rhino-with-download aufgerufen (Server-Download + Auto-Pairing)');
-      const { fileId, userJWT, sessionToken, rhinoPath, showViewport, batchMode } = req.body;
+      // SECURITY FIX: rhinoPath removed from destructuring — always use rhinoPathManager
+      const { fileId, userJWT, sessionToken, showViewport, batchMode } = req.body;
 
       // SECURITY FIX: Validate fileId format (alphanumeric, hyphens, underscores only)
       const FILE_ID_PATTERN = /^[a-zA-Z0-9-_]{1,64}$/;
@@ -401,8 +409,8 @@ class AppServer {
         const localFilePath = downloadResult.filePath;
         this.logger.info(`Datei erfolgreich heruntergeladen: ${localFilePath}`);
 
-        // Step 2: Get Rhino path
-        const rhinoExecutablePath = rhinoPath || await this.rhinoPathManager.getRhinoPath();
+        // Step 2: Get Rhino path (SECURITY FIX: always from rhinoPathManager, never from request)
+        const rhinoExecutablePath = await this.rhinoPathManager.getRhinoPath();
         if (!rhinoExecutablePath) {
           this.logger.error('/launch-rhino-with-download: Rhino 8 Installationspfad nicht konfiguriert');
           return res.status(500).json({
@@ -422,13 +430,11 @@ class AppServer {
         if (launchResult.success) {
           this.logger.info(`/launch-rhino-with-download erfolgreich für: ${downloadResult.fileName}`);
 
+          // SECURITY FIX: Don't expose localFilePath (filesystem info leak)
           return res.status(200).json({
             success: true,
             message: launchResult.message || 'Rhino/Grasshopper mit Server-Datei gestartet.',
-            commandUsed: launchResult.commandUsed,
-            processId: launchResult.processId,
             fileName: downloadResult.fileName,
-            localFilePath: localFilePath,
             downloadTimeMs: downloadResult.downloadTimeMs,
             fileSizeBytes: downloadResult.fileSize,
             executionType: launchResult.executionType || 'unknown'
@@ -444,9 +450,15 @@ class AppServer {
         this.logger.error(`/launch-rhino-with-download: Kritischer Fehler: ${error.message}`, error);
         return res.status(500).json({
           success: false,
-          message: `Interner Serverfehler: ${error.message}`
+          message: 'Interner Serverfehler beim Starten von Rhino mit Download.'
         });
       }
+    });
+
+    // SECURITY FIX: Global error handler — prevents stack trace leaks
+    this.app.use((err, req, res, next) => {
+      this.logger.error(`Unhandled error on ${req.method} ${req.originalUrl}: ${err.message}`);
+      res.status(500).json({ success: false, message: 'Internal server error' });
     });
 
     this.logger.info('API-Routen konfiguriert (inkl. PHASE 2: Server-Download & Auto-Pairing).');

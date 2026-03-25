@@ -95,6 +95,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('returns 200 with sessionToken on success', async () => {
       const res = await request(app)
         .post('/pair')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ userJWT: 'valid-jwt-token', deviceId: 'dev-1' });
 
       expect(res.status).toBe(200);
@@ -105,6 +106,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('returns 400 when userJWT is missing', async () => {
       const res = await request(app)
         .post('/pair')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ deviceId: 'dev-1' });
 
       expect(res.status).toBe(400);
@@ -114,6 +116,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('returns 400 when userJWT is not a string', async () => {
       const res = await request(app)
         .post('/pair')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ userJWT: 12345 });
 
       expect(res.status).toBe(400);
@@ -128,6 +131,7 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/pair')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ userJWT: 'invalid-jwt' });
 
       expect(res.status).toBe(401);
@@ -139,6 +143,7 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/pair')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ userJWT: 'valid-jwt' });
 
       expect(res.status).toBe(500);
@@ -148,6 +153,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('passes backendUrl for auto-discovery', async () => {
       await request(app)
         .post('/pair')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ userJWT: 'valid-jwt', backendUrl: 'https://custom-backend.example.com' });
 
       expect(server.pairingManager.pair).toHaveBeenCalledWith(
@@ -181,7 +187,8 @@ describe('Express Server - HTTP Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.isPaired).toBe(true);
-      expect(res.body.userId).toBe('user-123');
+      // SECURITY FIX: /pairing-status only returns { isPaired: true/false } without userId/name
+      expect(res.body.userId).toBeUndefined();
     });
   });
 
@@ -261,6 +268,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('returns 400 when fileId is missing', async () => {
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ sessionToken: 'abc' });
 
       expect(res.status).toBe(400);
@@ -270,6 +278,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('returns 400 when fileId has invalid format', async () => {
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ fileId: '../../../etc/passwd', sessionToken: 'abc' });
 
       expect(res.status).toBe(400);
@@ -279,6 +288,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('rejects fileId injection with special chars', async () => {
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ fileId: 'file;rm -rf /', sessionToken: 'abc' });
 
       expect(res.status).toBe(400);
@@ -287,6 +297,7 @@ describe('Express Server - HTTP Endpoints', () => {
     test('returns 401 without auth (no sessionToken nor userJWT)', async () => {
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ fileId: 'valid-file-id' });
 
       expect(res.status).toBe(401);
@@ -297,10 +308,12 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({ fileId: 'valid-file-id', sessionToken: 'expired-token' });
 
       expect(res.status).toBe(401);
-      expect(res.body.message).toContain('sessionToken');
+      // SECURITY FIX: error responses no longer include specific error details
+      expect(res.body.success).toBe(false);
     });
 
     test('returns 200 on success with valid sessionToken + userJWT', async () => {
@@ -308,6 +321,7 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({
           fileId: 'abc123',
           sessionToken: 'valid-session',
@@ -328,6 +342,7 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({
           fileId: 'abc123',
           sessionToken: 'valid-session',
@@ -347,6 +362,7 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({
           fileId: 'abc123',
           sessionToken: 'valid-session',
@@ -362,6 +378,7 @@ describe('Express Server - HTTP Endpoints', () => {
 
       const res = await request(app)
         .post('/launch-rhino-with-download')
+        .set('x-protra-helper-token', 'test-secret-token')
         .send({
           fileId: 'abc123',
           sessionToken: 'valid-session',
